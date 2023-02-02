@@ -3,10 +3,13 @@ plugins {
     id 'application'
     id 'org.openjfx.javafxplugin' version '0.0.13'
     id 'org.beryx.jlink' version '2.26.0'
+//    id "io.freefair.lombok" version "6.6.1"
 }
 
 group 'ir.darkdeveloper'
 version '0.1.0'
+sourceCompatibility = '19'
+targetCompatibility = '19'
 
 repositories {
     mavenCentral()
@@ -24,12 +27,13 @@ application {
 
 javafx {
     version = '19.0.2.1'
-    modules = ['javafx.controls', 'javafx.fxml']
+    modules = ['javafx.controls', 'javafx.fxml', 'javafx.base']
 }
 
 dependencies {
     implementation 'org.controlsfx:controlsfx:11.1.0'
     implementation 'org.kordamp.ikonli:ikonli-javafx:12.3.1'
+    implementation 'org.instancio:instancio-core:2.6.0'
     implementation 'org.kordamp.ikonli:ikonli-fontawesome5-pack:12.3.1'
     implementation 'org.kordamp.bootstrapfx:bootstrapfx-core:0.4.0'
     implementation 'org.projectlombok:lombok:1.18.24'

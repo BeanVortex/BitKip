@@ -6,8 +6,11 @@ module ir.darkdeveloper.bitkip {
     requires org.kordamp.ikonli.javafx;
     requires org.kordamp.bootstrapfx.core;
     requires java.logging;
+    requires lombok;
+    requires org.instancio.core;
 
     opens ir.darkdeveloper.bitkip to javafx.fxml;
-    opens ir.darkdeveloper.bitkip.controllers to javafx.fxml;
+    opens ir.darkdeveloper.bitkip.controllers to javafx.fxml, javafx.base;
+    opens ir.darkdeveloper.bitkip.models to javafx.fxml, javafx.base;
     exports ir.darkdeveloper.bitkip;
 }

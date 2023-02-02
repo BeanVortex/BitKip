@@ -1,17 +1,49 @@
 package ir.darkdeveloper.bitkip.controllers;
 
+import ir.darkdeveloper.bitkip.models.DownloadModel;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.control.Button;
+import javafx.scene.control.SelectionMode;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableView;
+import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.MouseButton;
 import javafx.scene.layout.HBox;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
+import org.instancio.Instancio;
 import org.kordamp.ikonli.javafx.FontIcon;
+
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.UUID;
 
 public class MainController implements FXMLController {
 
+    // Todo: download dto
+    public static final String DATE_FORMAT = "EE MMM dd yyyy HH:mm:ss";
+    public static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern(DATE_FORMAT);
+
+    @FXML
+    private TableView<DownloadModel> contentTable;
+    @FXML
+    private TableColumn<DownloadModel, String> nameColumn;
+    @FXML
+    private TableColumn<DownloadModel, Double> progressColumn;
+    @FXML
+    private TableColumn<DownloadModel, String> sizeColumn;
+    @FXML
+    private TableColumn<DownloadModel, Integer> remainingColumn;
+    @FXML
+    private TableColumn<DownloadModel, Integer> chunksColumn;
+    @FXML
+    private TableColumn<DownloadModel, String> addDateColumn;
+    @FXML
+    private TableColumn<DownloadModel, String> lastTryColumn;
+    @FXML
+    private TableColumn<DownloadModel, String> completeColumn;
     @FXML
     private HBox mainBox;
     @FXML
@@ -32,6 +64,7 @@ public class MainController implements FXMLController {
     @Override
     public void setStage(Stage stage) {
         this.stage = stage;
+        initAfterStage();
     }
 
     @Override
@@ -48,6 +81,44 @@ public class MainController implements FXMLController {
         bounds = screen.getVisualBounds();
         mainBox.setPrefHeight(bounds.getHeight());
         toolbarInits();
+        tableInits();
+    }
+
+    private void tableInits() {
+        nameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
+        progressColumn.setCellValueFactory(new PropertyValueFactory<>("progress"));
+        sizeColumn.setCellValueFactory(new PropertyValueFactory<>("size"));
+        remainingColumn.setCellValueFactory(new PropertyValueFactory<>("remainingTime"));
+        chunksColumn.setCellValueFactory(new PropertyValueFactory<>("chunks"));
+        addDateColumn.setCellValueFactory(new PropertyValueFactory<>("addDate"));
+        lastTryColumn.setCellValueFactory(new PropertyValueFactory<>("lastTryDate"));
+        completeColumn.setCellValueFactory(new PropertyValueFactory<>("completeDate"));
+        contentTable.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
+        var dow = DownloadModel.builder()
+                .id(UUID.randomUUID().toString())
+                .name("sdf")
+                .progress(156)
+                .size("16")
+                .url("adsf")
+                .filePath("sdf")
+                .remainingTime(56)
+                .addDate(LocalDateTime.now())
+                .lastTryDate(LocalDateTime.now().plusHours(1))
+                .completeDate(LocalDateTime.now().plusHours(2))
+                .chunks(3)
+                .build();
+        System.out.println(dow);
+        contentTable.getItems().add(dow);
+        contentTable.setOnMouseClicked(event -> {
+            if (event.getButton().equals(MouseButton.SECONDARY)) {
+                contentTable.getSelectionModel().getSelectedItems()
+                                .forEach(downloadModel -> System.out.println(downloadModel.getName()));
+            }
+        });
+    }
+
+    public void initAfterStage() {
+        stage.widthProperty().addListener((ob, o, n) -> contentTable.setPrefWidth(n.doubleValue() - 100));
     }
 
     private void toolbarInits() {
