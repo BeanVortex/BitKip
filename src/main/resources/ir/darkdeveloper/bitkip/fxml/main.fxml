@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox minHeight="512" prefHeight="512" prefWidth="850.0" stylesheets="@../css/main.css" xmlns="http://javafx.com/javafx/16"
+      xmlns:fx="http://javafx.com/fxml/1" fx:controller="ir.darkdeveloper.bitkip.controllers.MainController">
+
+    <HBox maxHeight="2" minHeight="2" styleClass="csm_toolbar"/>
+
+    <HBox fx:id="toolbar" alignment="BASELINE_CENTER" maxHeight="32" minHeight="32" spacing="10" styleClass="csm_toolbar">
+        <Label text="LOGO"/>
+        <Button text="File" styleClass="toolbar_menu" />
+        <Button text="Edit" styleClass="toolbar_menu"/>
+        <Button text="About" styleClass="toolbar_menu"/>
+        <Region HBox.hgrow="ALWAYS"/>
+        <Button fx:id="hideBtn" onAction="#hideWindowApp" />
+        <Button fx:id="fullWindowBtn" onAction="#toggleFullWindowApp"/>
+        <Button fx:id="closeBtn" onAction="#closeApp"/>
+    </HBox>
+
+    <HBox fx:id="mainBox" style="-fx-background-color: blue">
+        <VBox prefWidth="100" styleClass="side">
+        </VBox>
+
+    </HBox>
+</VBox>
