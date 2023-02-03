@@ -4,6 +4,7 @@ import javafx.beans.property.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 @Getter
 @Setter
@@ -32,15 +33,18 @@ public class DownloadModel {
     private StringProperty lastTryDateProperty;
     private StringProperty completeDateProperty;
 
+    public static final String DATE_FORMAT = "yyyy/MM/dd/-HH:mm:ss";
+    public static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern(DATE_FORMAT);
+
     public void fillProperties() {
         nameProperty = new SimpleStringProperty(name);
         progressProperty = new SimpleDoubleProperty(progress);
         sizeProperty = new SimpleStringProperty(size);
         remainingTimeProperty = new SimpleIntegerProperty(remainingTime);
         chunksProperty = new SimpleIntegerProperty(chunks);
-        addDateProperty = new SimpleStringProperty(addDate.toString());
-        lastTryDateProperty = new SimpleStringProperty(lastTryDate.toString());
-        completeDateProperty = new SimpleStringProperty(completeDate.toString());
+        addDateProperty = new SimpleStringProperty(DATE_FORMATTER.format(addDate));
+        lastTryDateProperty = new SimpleStringProperty(DATE_FORMATTER.format(lastTryDate));
+        completeDateProperty = new SimpleStringProperty(DATE_FORMATTER.format(completeDate));
 
     }
 }

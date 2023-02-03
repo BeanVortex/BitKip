@@ -19,15 +19,11 @@ import javafx.util.Duration;
 import org.kordamp.ikonli.javafx.FontIcon;
 
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class MainController implements FXMLController {
 
-    // Todo: download dto
-    public static final String DATE_FORMAT = "EE MMM dd yyyy HH:mm:ss";
-    public static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern(DATE_FORMAT);
 
     @FXML
     private Button actionBtn;
@@ -89,6 +85,10 @@ public class MainController implements FXMLController {
                     actionBtn.setTranslateY(0);
             }
         });
+        stage.xProperty().addListener((observable, oldValue, newValue) -> {
+            if (isOnPrimaryScreen(newValue.doubleValue()))
+                bounds = Screen.getPrimary().getBounds();
+        });
     }
 
 
@@ -128,7 +128,7 @@ public class MainController implements FXMLController {
             var screenY = stage.getY();
             if (screenY > 0 && doubleClickCondition)
                 maximizeWindow();
-            else if (screenY == 0 && doubleClickCondition)
+            else if (screenY <= 0 && doubleClickCondition)
                 minimizeWindow();
         });
     }
@@ -220,6 +220,24 @@ public class MainController implements FXMLController {
     }
 
     private void maximizeWindow() {
+        var currentX = stage.getX();
+        Screen.getScreens().forEach(screen -> {
+            if (!isOnPrimaryScreen(currentX))
+                bounds = screen.getBounds();
+            maximizeStage();
+        });
+    }
+
+    private void minimizeWindow() {
+        var currentX = stage.getX();
+        Screen.getScreens().forEach(screen -> {
+            if (!isOnPrimaryScreen(currentX))
+                bounds = screen.getBounds();
+            minimizeStage();
+        });
+    }
+
+    private void maximizeStage() {
         stage.setX(bounds.getMinX());
         stage.setY(bounds.getMinY());
         stage.setWidth(bounds.getWidth());
@@ -228,7 +246,7 @@ public class MainController implements FXMLController {
             actionBtn.setTranslateY(0);
     }
 
-    private void minimizeWindow() {
+    private void minimizeStage() {
         var width = 853;
         var height = 515;
         stage.setWidth(width);
@@ -250,8 +268,13 @@ public class MainController implements FXMLController {
         var screenY = stage.getY();
         if (screenY > 0)
             maximizeWindow();
-        else if (screenY == 0)
+        else if (screenY <= 0)
             minimizeWindow();
 
+    }
+
+    private boolean isOnPrimaryScreen(double x) {
+        var bounds = Screen.getPrimary().getBounds();
+        return x < bounds.getMaxX();
     }
 }
