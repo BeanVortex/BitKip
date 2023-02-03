@@ -1,24 +1,27 @@
 package ir.darkdeveloper.bitkip.controllers;
 
 import ir.darkdeveloper.bitkip.models.DownloadModel;
+import javafx.animation.TranslateTransition;
 import javafx.application.Platform;
+import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
+import javafx.geometry.Pos;
 import javafx.geometry.Rectangle2D;
-import javafx.scene.control.Button;
-import javafx.scene.control.SelectionMode;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableView;
-import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.control.*;
 import javafx.scene.input.MouseButton;
+import javafx.scene.input.ScrollEvent;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.StackPane;
+import javafx.scene.transform.Translate;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
-import org.instancio.Instancio;
+import javafx.util.Duration;
 import org.kordamp.ikonli.javafx.FontIcon;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class MainController implements FXMLController {
 
@@ -26,6 +29,8 @@ public class MainController implements FXMLController {
     public static final String DATE_FORMAT = "EE MMM dd yyyy HH:mm:ss";
     public static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern(DATE_FORMAT);
 
+    @FXML
+    private Button actionBtn;
     @FXML
     private TableView<DownloadModel> contentTable;
     @FXML
@@ -72,53 +77,34 @@ public class MainController implements FXMLController {
         return stage;
     }
 
+    public void initAfterStage() {
+        stage.widthProperty().addListener((ob, o, n) -> {
+            contentTable.setPrefWidth(n.doubleValue() + 90);
+            toolbar.setPrefWidth(n.longValue());
+        });
+        stage.heightProperty().addListener((observable, oldValue, newValue) -> {
+            var scrollBar = (ScrollBar) contentTable.lookup(".scroll-bar:vertical");
+            if (scrollBar != null && !scrollBar.isVisible()) {
+                if (actionBtn.getTranslateY() == 100)
+                    actionBtn.setTranslateY(0);
+            }
+        });
+    }
+
+
     @Override
     public void initialize() {
         closeBtn.setGraphic(new FontIcon());
         fullWindowBtn.setGraphic(new FontIcon());
         hideBtn.setGraphic(new FontIcon());
+        actionBtn.setGraphic(new FontIcon());
+        StackPane.setAlignment(actionBtn, Pos.BOTTOM_RIGHT);
         var screen = Screen.getPrimary();
         bounds = screen.getVisualBounds();
         mainBox.setPrefHeight(bounds.getHeight());
         toolbarInits();
         tableInits();
-    }
-
-    private void tableInits() {
-        nameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
-        progressColumn.setCellValueFactory(new PropertyValueFactory<>("progress"));
-        sizeColumn.setCellValueFactory(new PropertyValueFactory<>("size"));
-        remainingColumn.setCellValueFactory(new PropertyValueFactory<>("remainingTime"));
-        chunksColumn.setCellValueFactory(new PropertyValueFactory<>("chunks"));
-        addDateColumn.setCellValueFactory(new PropertyValueFactory<>("addDate"));
-        lastTryColumn.setCellValueFactory(new PropertyValueFactory<>("lastTryDate"));
-        completeColumn.setCellValueFactory(new PropertyValueFactory<>("completeDate"));
-        contentTable.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
-        var dow = DownloadModel.builder()
-                .id(UUID.randomUUID().toString())
-                .name("sdf")
-                .progress(156)
-                .size("16")
-                .url("adsf")
-                .filePath("sdf")
-                .remainingTime(56)
-                .addDate(LocalDateTime.now())
-                .lastTryDate(LocalDateTime.now().plusHours(1))
-                .completeDate(LocalDateTime.now().plusHours(2))
-                .chunks(3)
-                .build();
-        System.out.println(dow);
-        contentTable.getItems().add(dow);
-        contentTable.setOnMouseClicked(event -> {
-            if (event.getButton().equals(MouseButton.SECONDARY)) {
-                contentTable.getSelectionModel().getSelectedItems()
-                                .forEach(downloadModel -> System.out.println(downloadModel.getName()));
-            }
-        });
-    }
-
-    public void initAfterStage() {
-        stage.widthProperty().addListener((ob, o, n) -> contentTable.setPrefWidth(n.doubleValue() - 100));
+        actionBtnInits();
     }
 
     private void toolbarInits() {
@@ -147,16 +133,104 @@ public class MainController implements FXMLController {
         });
     }
 
+    private void tableInits() {
+        nameColumn.setCellValueFactory(p -> p.getValue().getNameProperty());
+        progressColumn.setCellValueFactory(p -> p.getValue().getProgressProperty().asObject());
+        sizeColumn.setCellValueFactory(p -> p.getValue().getSizeProperty());
+        remainingColumn.setCellValueFactory(p -> p.getValue().getRemainingTimeProperty().asObject());
+        chunksColumn.setCellValueFactory(p -> p.getValue().getChunksProperty().asObject());
+        addDateColumn.setCellValueFactory(p -> p.getValue().getAddDateProperty());
+        lastTryColumn.setCellValueFactory(p -> p.getValue().getLastTryDateProperty());
+        completeColumn.setCellValueFactory(p -> p.getValue().getCompleteDateProperty());
+        contentTable.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
+
+        var data = FXCollections.<DownloadModel>observableArrayList();
+        for (int i = 0; i < 30; i++) {
+            var dow = DownloadModel.builder()
+                    .id(UUID.randomUUID().toString())
+                    .name("ffd")
+                    .progress(45.6)
+                    .size("16")
+                    .url("adsf")
+                    .filePath("sdf")
+                    .remainingTime(56)
+                    .addDate(LocalDateTime.now())
+                    .lastTryDate(LocalDateTime.now().plusHours(1))
+                    .completeDate(LocalDateTime.now().plusHours(2))
+                    .chunks(3)
+                    .build();
+            dow.fillProperties();
+            data.add(dow);
+        }
+        contentTable.getItems().addAll(data);
+
+        contentTable.setOnMouseClicked(event -> {
+            if (event.getButton().equals(MouseButton.SECONDARY)) {
+                var selectedItems = contentTable.getSelectionModel().getSelectedItems();
+                if (selectedItems.size() > 1)
+                    selectedItems.forEach(downloadModel -> {
+                        downloadModel.getNameProperty().setValue("df");
+                        downloadModel.getProgressProperty().setValue(160.5);
+                        downloadModel.getCompleteDateProperty().setValue(LocalDateTime.now().toString());
+                    });
+            }
+        });
+        var translate = new Translate();
+        actionBtn.getTransforms().add(translate);
+        contentTable.setRowFactory(param -> {
+            var row = new TableRow<DownloadModel>();
+            var selectedItems = contentTable.getSelectionModel().getSelectedItems();
+            if (selectedItems.size() == 1) {
+                row.setOnMouseClicked(event -> {
+                    if (!row.isEmpty() && event.getButton().equals(MouseButton.SECONDARY)) {
+                        System.out.println(row.getIndex());
+                        actionBtn.setRotate(15);
+                    }
+                });
+            }
+            return row;
+        });
+    }
+
+    private void actionBtnInits() {
+        var transition = new TranslateTransition(Duration.millis(300), actionBtn);
+
+        var scrollBar = new AtomicReference<>((ScrollBar) contentTable.lookup(".scroll-bar:vertical"));
+        contentTable.addEventFilter(ScrollEvent.ANY, event -> {
+            if (scrollBar.get() == null)
+                scrollBar.set((ScrollBar) contentTable.lookup(".scroll-bar:vertical"));
+            if (!scrollBar.get().isVisible()) {
+                if (actionBtn.getTranslateY() == 100)
+                    actionBtn.setTranslateY(0);
+                return;
+            }
+
+
+            if (actionBtn.getTranslateY() == 100 && event.getDeltaY() > 0) {
+                transition.setFromY(100);
+                transition.setToY(0);
+                transition.play();
+            }
+            if (actionBtn.getTranslateY() == 0 && event.getDeltaY() < 0) {
+                transition.setFromY(0);
+                transition.setToY(100);
+                transition.play();
+            }
+        });
+    }
+
     private void maximizeWindow() {
         stage.setX(bounds.getMinX());
         stage.setY(bounds.getMinY());
         stage.setWidth(bounds.getWidth());
         stage.setHeight(bounds.getHeight());
+        if (actionBtn.getTranslateY() == 100)
+            actionBtn.setTranslateY(0);
     }
 
     private void minimizeWindow() {
-        var width = 850;
-        var height = 512;
+        var width = 853;
+        var height = 515;
         stage.setWidth(width);
         stage.setHeight(height);
         stage.setY((bounds.getMaxY() - height) / 2);

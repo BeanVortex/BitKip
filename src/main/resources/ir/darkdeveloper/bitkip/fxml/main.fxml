@@ -3,38 +3,58 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-<VBox minHeight="512" prefHeight="512" minWidth="850" prefWidth="850.0" stylesheets="@../css/main.css"
+<?import javafx.geometry.Insets?>
+<VBox minHeight="515" prefHeight="515" minWidth="853" prefWidth="853.0" stylesheets="@../css/main.css"
       xmlns="http://javafx.com/javafx/16"
       xmlns:fx="http://javafx.com/fxml/1" fx:controller="ir.darkdeveloper.bitkip.controllers.MainController">
 
     <HBox maxHeight="2" minHeight="2" styleClass="csm_toolbar"/>
 
-    <HBox fx:id="toolbar" alignment="BASELINE_CENTER" maxHeight="32" minHeight="32" spacing="10"
-          styleClass="csm_toolbar">
-        <Label text="LOGO"/>
-        <Button text="File" styleClass="toolbar_menu"/>
-        <Button text="Edit" styleClass="toolbar_menu"/>
-        <Button text="About" styleClass="toolbar_menu"/>
-        <Region HBox.hgrow="ALWAYS"/>
-        <Button fx:id="hideBtn" onAction="#hideWindowApp"/>
-        <Button fx:id="fullWindowBtn" onAction="#toggleFullWindowApp"/>
-        <Button fx:id="closeBtn" onAction="#closeApp"/>
+    <HBox styleClass="csm_toolbar">
+        <HBox maxWidth="2" minWidth="2" styleClass="csm_toolbar"/>
+        <HBox minWidth="835" prefWidth="835" fx:id="toolbar" alignment="BASELINE_CENTER" maxHeight="32" minHeight="32"
+              spacing="10">
+            <Label text="LOGO"/>
+            <Button text="File" styleClass="toolbar_menu"/>
+            <Button text="Edit" styleClass="toolbar_menu"/>
+            <Button text="About" styleClass="toolbar_menu"/>
+            <Region HBox.hgrow="ALWAYS"/>
+            <Button fx:id="hideBtn" onAction="#hideWindowApp"/>
+            <Button fx:id="fullWindowBtn" onAction="#toggleFullWindowApp"/>
+            <Button fx:id="closeBtn" onAction="#closeApp"/>
+        </HBox>
+        <HBox maxWidth="2" minWidth="2" styleClass="csm_toolbar"/>
     </HBox>
 
     <HBox fx:id="mainBox">
-        <VBox prefWidth="100" minWidth="100" styleClass="side">
-        </VBox>
-        <TableView minWidth="750" prefWidth="Infinity" fx:id="contentTable">
-            <columns>
-                <TableColumn text="name" fx:id="nameColumn"/>
-                <TableColumn text="progress" fx:id="progressColumn"/>
-                <TableColumn text="size" fx:id="sizeColumn"/>
-                <TableColumn prefWidth="100" text="remaining time" fx:id="remainingColumn"/>
-                <TableColumn text="chunks" fx:id="chunksColumn"/>
-                <TableColumn prefWidth="125" text="add date " fx:id="addDateColumn"/>
-                <TableColumn prefWidth="125" text="last try" fx:id="lastTryColumn"/>
-                <TableColumn prefWidth="125" text="complete date" fx:id="completeColumn"/>
-            </columns>
-        </TableView>
+        <StackPane>
+            <HBox>
+                <VBox prefWidth="100" minWidth="100" styleClass="side">
+                </VBox>
+                <TableView minWidth="750" prefWidth="Infinity" fx:id="contentTable">
+                    <columns>
+                        <TableColumn prefWidth="200" text="name" fx:id="nameColumn"/>
+                        <TableColumn text="progress" fx:id="progressColumn"/>
+                        <TableColumn text="size" fx:id="sizeColumn"/>
+                        <TableColumn prefWidth="100" text="remaining time" fx:id="remainingColumn"/>
+                        <TableColumn text="chunks" fx:id="chunksColumn"/>
+                        <TableColumn prefWidth="125" text="add date " fx:id="addDateColumn"/>
+                        <TableColumn prefWidth="125" text="last try" fx:id="lastTryColumn"/>
+                        <TableColumn prefWidth="125" text="complete date" fx:id="completeColumn"/>
+                    </columns>
+                </TableView>
+            </HBox>
+            <Button fx:id="actionBtn">
+                <StackPane.margin>
+                    <Insets>
+                        <bottom>25</bottom>
+                        <right>25</right>
+                    </Insets>
+                </StackPane.margin>
+            </Button>
+        </StackPane>
+        <HBox maxWidth="2" minWidth="2" styleClass="csm_toolbar"/>
     </HBox>
+    <HBox maxHeight="2" minHeight="2" styleClass="csm_toolbar"/>
 </VBox>
+

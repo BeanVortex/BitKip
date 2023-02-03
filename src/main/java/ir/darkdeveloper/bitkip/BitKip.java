@@ -17,8 +17,8 @@ public class BitKip extends Application {
     public void start(Stage stage) {
         FxUtils.switchSceneToMain(stage, "main.fxml");
         stage.initStyle(StageStyle.UNDECORATED);
-        stage.setMinWidth(850);
-        stage.setMinHeight(512);
+        stage.setMinWidth(853);
+        stage.setMinHeight(515);
         stage.setResizable(true);
         ResizeUtil.addResizeListener(stage);
 //        var logoPath = getResource("images/logo.png");

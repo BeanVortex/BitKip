@@ -1,5 +1,6 @@
 package ir.darkdeveloper.bitkip.models;
 
+import javafx.beans.property.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
@@ -17,8 +18,29 @@ public class DownloadModel {
     private String url;
     private String filePath;
     private int remainingTime;
+    private int chunks;
     private LocalDateTime addDate;
     private LocalDateTime lastTryDate;
     private LocalDateTime completeDate;
-    private int chunks;
+
+    private StringProperty nameProperty;
+    private DoubleProperty progressProperty;
+    private StringProperty sizeProperty;
+    private IntegerProperty remainingTimeProperty;
+    private IntegerProperty chunksProperty;
+    private StringProperty addDateProperty;
+    private StringProperty lastTryDateProperty;
+    private StringProperty completeDateProperty;
+
+    public void fillProperties() {
+        nameProperty = new SimpleStringProperty(name);
+        progressProperty = new SimpleDoubleProperty(progress);
+        sizeProperty = new SimpleStringProperty(size);
+        remainingTimeProperty = new SimpleIntegerProperty(remainingTime);
+        chunksProperty = new SimpleIntegerProperty(chunks);
+        addDateProperty = new SimpleStringProperty(addDate.toString());
+        lastTryDateProperty = new SimpleStringProperty(lastTryDate.toString());
+        completeDateProperty = new SimpleStringProperty(completeDate.toString());
+
+    }
 }

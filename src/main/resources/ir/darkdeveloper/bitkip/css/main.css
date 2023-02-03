@@ -4,11 +4,11 @@
     -fx-padding: 0px 5px 2px 10px;
 }
 
-.csm_toolbar Label{
+.csm_toolbar Label {
     -fx-text-fill: #FAFAFA;
 }
 
-#closeBtn, #hideBtn, #fullWindowBtn, .toolbar_menu{
+#closeBtn, #hideBtn, #fullWindowBtn, .toolbar_menu {
     -fx-border-color: transparent;
     -fx-background-color: transparent;
     -fx-cursor: hand;
@@ -16,25 +16,25 @@
 }
 
 
-#closeBtn:hover{
+#closeBtn:hover {
     -fx-background-color: #EF5350;
 }
 
-#closeBtn .ikonli-font-icon{
+#closeBtn .ikonli-font-icon {
     -fx-icon-code: "fas-times";
     -fx-icon-color: #FAFAFA;
 }
 
-#fullWindowBtn:hover, #hideBtn:hover, .toolbar_menu:hover{
+#fullWindowBtn:hover, #hideBtn:hover, .toolbar_menu:hover {
     -fx-background-color: #37474F;
 }
 
-#fullWindowBtn .ikonli-font-icon{
+#fullWindowBtn .ikonli-font-icon {
     -fx-icon-code: "far-square";
     -fx-icon-color: #FAFAFA;
 }
 
-#hideBtn .ikonli-font-icon{
+#hideBtn .ikonli-font-icon {
     -fx-icon-code: "fas-minus";
     -fx-icon-color: #FAFAFA;
 }
@@ -43,4 +43,28 @@
 .side {
     -fx-background-color: #78909C;
     -fx-background-radius: 0 0 15px 0;
+}
+
+#actionBtn {
+    -fx-min-width: 50;
+    -fx-min-height: 50;
+    -fx-border-color: transparent;
+    -fx-background-color: #4CAF50;
+    -fx-background-radius: 40px;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(one-pass-box, rgba(55, 71, 79, 0.35), 5,0,0,2);
+    -fx-padding: 10px;
+}
+
+#actionBtn:hover {
+    -fx-background-color: #388E3C;
+}
+#actionBtn:pressed{
+    -fx-effect: none;
+}
+
+#actionBtn .ikonli-font-icon {
+    -fx-icon-code: "fas-plus";
+    -fx-icon-size: 20px;
+    -fx-icon-color: #FAFAFA;
 }
