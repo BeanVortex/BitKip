@@ -1,6 +1,7 @@
 package ir.darkdeveloper.bitkip.utils;
 
 import ir.darkdeveloper.bitkip.models.DownloadModel;
+import ir.darkdeveloper.bitkip.repo.DownloadsRepo;
 import javafx.application.Platform;
 import javafx.geometry.Side;
 import javafx.scene.control.*;
@@ -27,6 +28,7 @@ public class MenuUtils {
         menuFile.setOnMouseClicked(event -> {
             var selectedItems = table.getSelectionModel().getSelectedItems();
             menuItems.get(deleteDownloads).setDisable(selectedItems.size() == 0);
+            deleteDownloads.setText("Delete selected (" + selectedItems.size() + ")");
             c.show(menuFile, Side.BOTTOM, 0, 0);
         });
         menuItems.get(addLink).setOnAction(event -> {
@@ -41,8 +43,9 @@ public class MenuUtils {
         });
         menuItems.get(deleteDownloads).setOnAction(event -> {
             var selectedItems = table.getSelectionModel().getSelectedItems();
+            var itemsToDelete = selectedItems.stream().toList();
+            itemsToDelete.forEach(DownloadsRepo::deleteDownload);
             table.getItems().removeAll(selectedItems);
-            System.out.println("deleting");
         });
         menuItems.get(settings).setOnAction(event -> {
             System.out.println("settings");

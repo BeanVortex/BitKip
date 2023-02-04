@@ -12,8 +12,8 @@ import java.time.format.DateTimeFormatter;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class DownloadModel {
-    private String id;
+public class DownloadModel implements Model {
+    private int id;
     private String name;
     private double progress;
     private int size;
@@ -51,36 +51,4 @@ public class DownloadModel {
 
     }
 
-    public String[] getDataInArr() {
-        return new String[]{
-                this.id,
-                this.name,
-                this.progress + "",
-                this.size + "",
-                this.url,
-                this.filePath,
-                this.remainingTime + "",
-                this.chunks + "",
-                this.queue,
-                this.addDate.toString(),
-                this.lastTryDate.toString(),
-                this.completeDate.toString()
-        };
-    }
-
-    public void mapDataFromArr(String[] arr) {
-        this.id = arr[0];
-        this.name = arr[1];
-        this.progress = Double.parseDouble(arr[2]);
-        this.size = Integer.parseInt(arr[3]);
-        this.url = arr[4];
-        this.filePath = arr[5];
-        this.remainingTime = Integer.parseInt(arr[6]);
-        this.chunks = Integer.parseInt(arr[7]);
-        this.queue = arr[8];
-        this.addDate = LocalDateTime.parse(arr[9]);
-        this.lastTryDate = LocalDateTime.parse(arr[10]);
-        this.completeDate = LocalDateTime.parse(arr[11]);
-
-    }
 }

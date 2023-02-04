@@ -8,7 +8,10 @@ public interface FXMLController {
     @FXML
     void initialize();
 
+    void initAfterStage();
+
     void setStage(Stage stage);
+
     Stage getStage();
 }
 

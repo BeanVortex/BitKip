@@ -1,10 +1,8 @@
 package ir.darkdeveloper.bitkip.controllers;
 
 import ir.darkdeveloper.bitkip.models.DownloadModel;
-import ir.darkdeveloper.bitkip.utils.IOUtils;
-import ir.darkdeveloper.bitkip.utils.MenuUtils;
-import ir.darkdeveloper.bitkip.utils.TableUtils;
-import ir.darkdeveloper.bitkip.utils.WindowUtils;
+import ir.darkdeveloper.bitkip.repo.DownloadsRepo;
+import ir.darkdeveloper.bitkip.utils.*;
 import javafx.animation.TranslateTransition;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
@@ -65,6 +63,7 @@ public class MainController implements FXMLController {
         return stage;
     }
 
+    @Override
     public void initAfterStage() {
         stage.widthProperty().addListener((ob, o, n) -> {
             contentTable.setPrefWidth(n.doubleValue() + 90);
@@ -148,8 +147,20 @@ public class MainController implements FXMLController {
 
     public void doAction() {
         contentTable.getSelectionModel().clearSelection();
-
-//        IOUtils.writeNewDownloadData(dow);
-//        tableUtils.addRow(dow);
+        var dow = DownloadModel.builder()
+                .name("avvv")
+                .progress(10)
+                .size(20)
+                .url("sdfads")
+                .filePath("fsdaf")
+                .addDate(LocalDateTime.now().plusSeconds(70))
+                .lastTryDate(LocalDateTime.now().plusHours(1))
+                .completeDate(LocalDateTime.now().plusHours(2))
+                .chunks(10)
+                .build();
+        dow.fillProperties();
+        DownloadsRepo.insertDownload(dow);
+//        FxUtils.newDownloadStage("newDownload.fxml", "New Download", 600, 400);
+        tableUtils.addRow(dow);
     }
 }

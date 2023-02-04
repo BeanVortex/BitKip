@@ -1,6 +1,7 @@
 package ir.darkdeveloper.bitkip.utils;
 
 import ir.darkdeveloper.bitkip.models.DownloadModel;
+import ir.darkdeveloper.bitkip.repo.DownloadsRepo;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.control.SelectionMode;
@@ -11,7 +12,6 @@ import javafx.scene.input.MouseButton;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.UUID;
 
 public class TableUtils {
 
@@ -55,7 +55,7 @@ public class TableUtils {
         completeColumn.setCellValueFactory(p -> p.getValue().getCompleteDateProperty());
 
         contentTable.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
-        data.addAll(IOUtils.readDownloadData());
+        data.addAll(DownloadsRepo.getDownloads());
         contentTable.getItems().addAll(data);
         contentTable.getSortOrder().add(addDateColumn);
 
@@ -63,11 +63,15 @@ public class TableUtils {
             if (event.getButton().equals(MouseButton.SECONDARY)) {
                 var selectedItems = contentTable.getSelectionModel().getSelectedItems();
                 if (selectedItems.size() > 1)
-                    selectedItems.forEach(downloadModel -> {
-                        downloadModel.getNameProperty().setValue("df");
-                        downloadModel.getProgressProperty().setValue(160.5);
-                        downloadModel.getCompleteDateProperty().setValue(LocalDateTime.now().toString());
-                    });
+                    for (int i = 0; i < selectedItems.size(); i++) {
+                        var d = LocalDateTime.now();
+                        selectedItems.get(i).setName("df");
+                        selectedItems.get(i).setProgress(13);
+                        selectedItems.get(i).setCompleteDate(d);
+                        selectedItems.get(i).getNameProperty().setValue("df");
+                        selectedItems.get(i).getProgressProperty().setValue(160.5);
+                        selectedItems.get(i).getCompleteDateProperty().setValue(d.toString());
+                    }
             }
         });
         contentTable.setRowFactory(param -> {

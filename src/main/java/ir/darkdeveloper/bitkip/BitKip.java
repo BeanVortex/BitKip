@@ -1,6 +1,9 @@
 package ir.darkdeveloper.bitkip;
 
 import ir.darkdeveloper.bitkip.models.DownloadModel;
+import ir.darkdeveloper.bitkip.repo.DatabaseHelper;
+import ir.darkdeveloper.bitkip.repo.DownloadsRepo;
+import ir.darkdeveloper.bitkip.repo.QueuesRepo;
 import ir.darkdeveloper.bitkip.utils.FxUtils;
 import ir.darkdeveloper.bitkip.utils.IOUtils;
 import ir.darkdeveloper.bitkip.utils.ResizeUtil;
@@ -24,6 +27,8 @@ public class BitKip extends Application {
         stage.setMinWidth(853);
         ResizeUtil.addResizeListener(stage);
         IOUtils.createSaveLocations();
+        DownloadsRepo.createTable();
+        QueuesRepo.createTable();
 //        var logoPath = getResource("images/logo.png");
 //        if (logoPath != null)
 //            stage.getIcons().add(new Image(logoPath.toExternalForm()));

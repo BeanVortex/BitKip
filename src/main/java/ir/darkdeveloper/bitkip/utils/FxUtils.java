@@ -76,7 +76,8 @@ public class FxUtils {
         }
     }
 
-    public static FXMLController newStageAndReturnController(String fxmlFilename, String stageTitle, double minWidth, double minHeight) {
+    public static FXMLController newDownloadStage(String fxmlFilename, String stageTitle,
+                                                             double minWidth, double minHeight) {
         try {
             var stage = new Stage();
             var loader = new FXMLLoader(getResource("fxml/" + fxmlFilename));

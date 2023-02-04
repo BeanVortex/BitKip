@@ -8,6 +8,8 @@ module ir.darkdeveloper.bitkip {
     requires org.kordamp.bootstrapfx.core;
     requires java.logging;
     requires static lombok;
+    requires java.sql;
+    requires org.xerial.sqlitejdbc;
 
     opens ir.darkdeveloper.bitkip to javafx.fxml;
     opens ir.darkdeveloper.bitkip.controllers to javafx.fxml, javafx.base;
