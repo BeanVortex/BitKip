@@ -18,8 +18,9 @@ public class MenuUtils {
         var batchDownload = new Label("Add batch download");
         var addLinkFromClipboard = new Label("Add download(clipboard)");
         var deleteDownloads = new Label("Delete selected");
+        var settings = new Label("Settings");
         var exit = new Label("exit");
-        var lbls = List.of(addLink, batchDownload, addLinkFromClipboard, deleteDownloads, exit);
+        var lbls = List.of(addLink, batchDownload, addLinkFromClipboard, deleteDownloads, settings, exit);
         var menuItems = createMenuItems(lbls);
         c.getItems().addAll(menuItems.values());
         menuFile.setContextMenu(c);
@@ -42,6 +43,9 @@ public class MenuUtils {
             var selectedItems = table.getSelectionModel().getSelectedItems();
             table.getItems().removeAll(selectedItems);
             System.out.println("deleting");
+        });
+        menuItems.get(settings).setOnAction(event -> {
+            System.out.println("settings");
         });
         menuItems.get(exit).setOnAction(event -> Platform.exit());
     }

@@ -26,7 +26,7 @@ public class TableUtils {
     public void tableInits() {
         var nameColumn = new TableColumn<DownloadModel, String>("Name");
         var progressColumn = new TableColumn<DownloadModel, Double>("Progress");
-        var sizeColumn = new TableColumn<DownloadModel, String>("Size");
+        var sizeColumn = new TableColumn<DownloadModel, Integer>("Size");
         var remainingColumn = new TableColumn<DownloadModel, Integer>("Remaining");
         var chunksColumn = new TableColumn<DownloadModel, Integer>("Chunks");
         var addDateColumn = new TableColumn<DownloadModel, String>("Add Date");
@@ -46,7 +46,7 @@ public class TableUtils {
         contentTable.getColumns().addAll(listOfColumns);
 
         nameColumn.setCellValueFactory(p -> p.getValue().getNameProperty());
-        sizeColumn.setCellValueFactory(p -> p.getValue().getSizeProperty());
+        sizeColumn.setCellValueFactory(p -> p.getValue().getSizeProperty().asObject());
         progressColumn.setCellValueFactory(p -> p.getValue().getProgressProperty().asObject());
         remainingColumn.setCellValueFactory(p -> p.getValue().getRemainingTimeProperty().asObject());
         chunksColumn.setCellValueFactory(p -> p.getValue().getChunksProperty().asObject());
@@ -55,24 +55,7 @@ public class TableUtils {
         completeColumn.setCellValueFactory(p -> p.getValue().getCompleteDateProperty());
 
         contentTable.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
-
-        for (int i = 0; i < 30; i++) {
-            var dow = DownloadModel.builder()
-                    .id(UUID.randomUUID().toString())
-                    .name("ffd")
-                    .progress(45.6)
-                    .size("16")
-                    .url("adsf")
-                    .filePath("sdf")
-                    .remainingTime(56)
-                    .addDate(LocalDateTime.now().plusSeconds(i+2))
-                    .lastTryDate(LocalDateTime.now().plusHours(1))
-                    .completeDate(LocalDateTime.now().plusHours(2))
-                    .chunks(3)
-                    .build();
-            dow.fillProperties();
-            data.add(dow);
-        }
+        data.addAll(IOUtils.readDownloadData());
         contentTable.getItems().addAll(data);
         contentTable.getSortOrder().add(addDateColumn);
 

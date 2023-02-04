@@ -1,6 +1,7 @@
 package ir.darkdeveloper.bitkip.controllers;
 
 import ir.darkdeveloper.bitkip.models.DownloadModel;
+import ir.darkdeveloper.bitkip.utils.IOUtils;
 import ir.darkdeveloper.bitkip.utils.MenuUtils;
 import ir.darkdeveloper.bitkip.utils.TableUtils;
 import ir.darkdeveloper.bitkip.utils.WindowUtils;
@@ -147,20 +148,8 @@ public class MainController implements FXMLController {
 
     public void doAction() {
         contentTable.getSelectionModel().clearSelection();
-        var dow = DownloadModel.builder()
-                .id(UUID.randomUUID().toString())
-                .name("avvv")
-                .progress(0)
-                .size("20")
-                .url("sdfads")
-                .filePath("fsdaf")
-                .remainingTime(100)
-                .addDate(LocalDateTime.now().plusSeconds(70))
-                .lastTryDate(LocalDateTime.now().plusHours(1))
-                .completeDate(LocalDateTime.now().plusHours(2))
-                .chunks(10)
-                .build();
-        dow.fillProperties();
-        tableUtils.addRow(dow);
+
+//        IOUtils.writeNewDownloadData(dow);
+//        tableUtils.addRow(dow);
     }
 }
