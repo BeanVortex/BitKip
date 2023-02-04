@@ -10,7 +10,10 @@ import javafx.scene.control.*;
 import javafx.scene.input.Clipboard;
 import javafx.scene.input.ClipboardContent;
 import javafx.scene.input.MouseButton;
+import javafx.scene.layout.Background;
 import javafx.scene.layout.HBox;
+import javafx.scene.paint.Color;
+import javafx.scene.paint.Paint;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
 
@@ -29,25 +32,36 @@ public class WindowUtils {
             xOffset = stage.getX() - event.getScreenX();
             yOffset = stage.getY() - event.getScreenY();
         });
+        var boundsCopy = new AtomicReference<>(bounds);
         toolbar.setOnMouseDragged(event -> {
             stage.setX(event.getScreenX() + xOffset);
             stage.setY(event.getScreenY() + yOffset);
-            if (stage.getWidth() == bounds.getWidth() && stage.getHeight() == bounds.getHeight())
-                minimizeWindow(stage, bounds);
+            Screen.getScreens().forEach(screen -> {
+                var currentX = stage.getX();
+                if (!isOnPrimaryScreen(currentX))
+                    boundsCopy.set(screen.getVisualBounds());
+                else
+                    boundsCopy.set(bounds);
+                if (stage.getWidth() == boundsCopy.get().getWidth())
+                    if (stage.getHeight() == boundsCopy.get().getHeight() || stage.getHeight() == boundsCopy.get().getHeight() + boundsCopy.get().getMinY())
+                        minimizeWindow(stage, boundsCopy.get());
+            });
         });
         toolbar.setOnMouseReleased(event -> {
             var screenY = event.getScreenY();
-            if (screenY <= 0)
-                maximizeWindow(stage, bounds, actionBtn);
+            if (screenY - boundsCopy.get().getMinY() <= 0)
+                maximizeWindow(stage, boundsCopy.get(), actionBtn);
         });
         toolbar.setOnMouseClicked(event -> {
             var doubleClickCondition = event.getButton().equals(MouseButton.PRIMARY) && event.getClickCount() == 2;
             var screenY = stage.getY();
             table.getSelectionModel().clearSelection();
-            if (screenY > 0 && doubleClickCondition)
-                maximizeWindow(stage, bounds, actionBtn);
-            else if (screenY <= 0 && doubleClickCondition)
-                minimizeWindow(stage, bounds);
+            if (doubleClickCondition) {
+                if (screenY - boundsCopy.get().getMinY() >= 0 && boundsCopy.get().getHeight() > stage.getHeight())
+                    maximizeWindow(stage, boundsCopy.get(), actionBtn);
+                else if (screenY - boundsCopy.get().getMinY() <= 0 && boundsCopy.get().getHeight() <= stage.getHeight())
+                    minimizeWindow(stage, boundsCopy.get());
+            }
         });
     }
 
@@ -132,7 +146,7 @@ public class WindowUtils {
         var boundsCopy = new AtomicReference<>(bounds);
         Screen.getScreens().forEach(screen -> {
             if (!isOnPrimaryScreen(currentX))
-                boundsCopy.set(screen.getBounds());
+                boundsCopy.set(screen.getVisualBounds());
             maximizeStage(stage, boundsCopy.get(), actionBtn);
         });
         return boundsCopy.get();
@@ -143,7 +157,7 @@ public class WindowUtils {
         var boundsCopy = new AtomicReference<>(bounds);
         Screen.getScreens().forEach(screen -> {
             if (!isOnPrimaryScreen(currentX))
-                boundsCopy.set(screen.getBounds());
+                boundsCopy.set(screen.getVisualBounds());
             minimizeStage(stage, boundsCopy.get());
         });
         return boundsCopy.get();
@@ -168,7 +182,7 @@ public class WindowUtils {
     }
 
     public static boolean isOnPrimaryScreen(double x) {
-        var bounds = Screen.getPrimary().getBounds();
+        var bounds = Screen.getPrimary().getVisualBounds();
         return x < bounds.getMaxX();
     }
 

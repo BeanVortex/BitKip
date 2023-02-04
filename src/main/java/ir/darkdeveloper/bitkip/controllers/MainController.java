@@ -16,6 +16,7 @@ import javafx.scene.input.ScrollEvent;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
 import javafx.scene.transform.Translate;
+import javafx.stage.Modality;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
 import javafx.util.Duration;
@@ -88,7 +89,7 @@ public class MainController implements FXMLController {
 
         stage.xProperty().addListener((observable, oldValue, newValue) -> {
             if (WindowUtils.isOnPrimaryScreen(newValue.doubleValue()))
-                bounds = Screen.getPrimary().getBounds();
+                bounds = Screen.getPrimary().getVisualBounds();
         });
         actionBtnInits();
         WindowUtils.toolbarInits(toolbar, stage, bounds, actionBtn, contentTable);
@@ -105,7 +106,7 @@ public class MainController implements FXMLController {
         hideBtn.setGraphic(new FontIcon());
         actionBtn.setGraphic(new FontIcon());
         StackPane.setAlignment(actionBtn, Pos.BOTTOM_RIGHT);
-        bounds = Screen.getPrimary().getBounds();
+        bounds = Screen.getPrimary().getVisualBounds();
         mainBox.setPrefHeight(bounds.getHeight());
         tableInits();
 
@@ -113,8 +114,8 @@ public class MainController implements FXMLController {
 
 
     private void tableInits() {
-        sizeColumn.setCellValueFactory(p -> p.getValue().getSizeProperty());
         nameColumn.setCellValueFactory(p -> p.getValue().getNameProperty());
+        sizeColumn.setCellValueFactory(p -> p.getValue().getSizeProperty());
         progressColumn.setCellValueFactory(p -> p.getValue().getProgressProperty().asObject());
         remainingColumn.setCellValueFactory(p -> p.getValue().getRemainingTimeProperty().asObject());
         chunksColumn.setCellValueFactory(p -> p.getValue().getChunksProperty().asObject());
@@ -209,9 +210,9 @@ public class MainController implements FXMLController {
 
     public void toggleFullWindowApp() {
         var screenY = stage.getY();
-        if (screenY > 0)
+        if (screenY - bounds.getMinY() >= 0 && bounds.getHeight() > stage.getHeight())
             bounds = WindowUtils.maximizeWindow(stage, bounds, actionBtn);
-        else if (screenY <= 0)
+       else if (screenY - bounds.getMinY() <= 0 && bounds.getHeight() <= stage.getHeight())
             bounds = WindowUtils.minimizeWindow(stage, bounds);
 
     }

@@ -6,10 +6,10 @@ import ir.darkdeveloper.bitkip.utils.ResizeUtil;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 
-import java.io.IOException;
 import java.net.URL;
 
 public class BitKip extends Application {
@@ -18,9 +18,9 @@ public class BitKip extends Application {
     public void start(Stage stage) {
         FxUtils.switchSceneToMain(stage, "main.fxml");
         stage.initStyle(StageStyle.UNDECORATED);
+        stage.setMinHeight(515);
         stage.setMinWidth(853);
         stage.setResizable(true);
-        stage.setMinHeight(515);
         ResizeUtil.addResizeListener(stage);
 //        var logoPath = getResource("images/logo.png");
 //        if (logoPath != null)
