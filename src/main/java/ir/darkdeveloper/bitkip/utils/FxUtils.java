@@ -5,15 +5,19 @@ import ir.darkdeveloper.bitkip.controllers.FXMLController;
 import ir.darkdeveloper.bitkip.controllers.MainController;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXMLLoader;
+import javafx.geometry.Rectangle2D;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.control.Button;
 import javafx.scene.image.Image;
+import javafx.stage.Screen;
 import javafx.stage.Stage;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 
 import static ir.darkdeveloper.bitkip.BitKip.getResource;
 
@@ -110,33 +114,5 @@ public class FxUtils {
         }
     }
 
-//    public static void updateButtonTheme(List<Button> buttons) {
-//        buttons.forEach(btn -> {
-//            if (Configs.getTheme().equals("dark")) {
-//                btn.getStyleClass().remove("button-dark");
-//                if (!btn.getStyleClass().contains("button-light"))
-//                    btn.getStyleClass().add("button-light");
-//            } else {
-//                if (!btn.getStyleClass().contains("button-dark"))
-//                    btn.getStyleClass().add("button-dark");
-//                btn.getStyleClass().remove("button-light");
-//            }
-//        });
-//    }
-
-//    public static void updateThemeForBooks(String theme, FlowPane booksContainer, VBox contentVbox, List<HBox> itemParents) {
-//        var labels = FxUtils.getAllNodes(booksContainer, Label.class);
-//        if (theme.equals("light")) {
-//            booksContainer.setBackground(Background.fill(Paint.valueOf("#fff")));
-//            contentVbox.setBackground(Background.fill(Paint.valueOf("#fff")));
-//            itemParents.forEach(parent -> parent.setBackground(Background.fill(Paint.valueOf("#fff"))));
-//            labels.forEach(label -> label.setTextFill(Paint.valueOf("#333")));
-//        } else {
-//            booksContainer.setBackground(Background.fill(Paint.valueOf("#333")));
-//            contentVbox.setBackground(Background.fill(Paint.valueOf("#333")));
-//            itemParents.forEach(parent -> parent.setBackground(Background.fill(Paint.valueOf("#333"))));
-//            labels.forEach(label -> label.setTextFill(Paint.valueOf("#fff")));
-//        }
-//    }
 }
 

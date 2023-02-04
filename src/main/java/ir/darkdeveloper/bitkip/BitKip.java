@@ -1,5 +1,6 @@
 package ir.darkdeveloper.bitkip;
 
+import ir.darkdeveloper.bitkip.models.DownloadModel;
 import ir.darkdeveloper.bitkip.utils.FxUtils;
 import ir.darkdeveloper.bitkip.utils.ResizeUtil;
 import javafx.application.Application;
@@ -18,8 +19,8 @@ public class BitKip extends Application {
         FxUtils.switchSceneToMain(stage, "main.fxml");
         stage.initStyle(StageStyle.UNDECORATED);
         stage.setMinWidth(853);
-        stage.setMinHeight(515);
         stage.setResizable(true);
+        stage.setMinHeight(515);
         ResizeUtil.addResizeListener(stage);
 //        var logoPath = getResource("images/logo.png");
 //        if (logoPath != null)

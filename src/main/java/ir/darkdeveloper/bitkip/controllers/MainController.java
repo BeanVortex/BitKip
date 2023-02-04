@@ -1,12 +1,15 @@
 package ir.darkdeveloper.bitkip.controllers;
 
 import ir.darkdeveloper.bitkip.models.DownloadModel;
+import ir.darkdeveloper.bitkip.utils.WindowUtils;
 import javafx.animation.TranslateTransition;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.geometry.Pos;
 import javafx.geometry.Rectangle2D;
+import javafx.geometry.Side;
 import javafx.scene.control.*;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.ScrollEvent;
@@ -25,6 +28,12 @@ import java.util.concurrent.atomic.AtomicReference;
 public class MainController implements FXMLController {
 
 
+    @FXML
+    private Button operationMenu;
+    @FXML
+    private Button aboutMenu;
+    @FXML
+    private Button menuFile;
     @FXML
     private Button actionBtn;
     @FXML
@@ -57,8 +66,6 @@ public class MainController implements FXMLController {
     private Button hideBtn;
 
     private Stage stage;
-    private static double xOffset = 0;
-    private static double yOffset = 0;
     private Rectangle2D bounds;
 
 
@@ -78,17 +85,16 @@ public class MainController implements FXMLController {
             contentTable.setPrefWidth(n.doubleValue() + 90);
             toolbar.setPrefWidth(n.longValue());
         });
-        stage.heightProperty().addListener((observable, oldValue, newValue) -> {
-            var scrollBar = (ScrollBar) contentTable.lookup(".scroll-bar:vertical");
-            if (scrollBar != null && !scrollBar.isVisible()) {
-                if (actionBtn.getTranslateY() == 100)
-                    actionBtn.setTranslateY(0);
-            }
-        });
+
         stage.xProperty().addListener((observable, oldValue, newValue) -> {
-            if (isOnPrimaryScreen(newValue.doubleValue()))
+            if (WindowUtils.isOnPrimaryScreen(newValue.doubleValue()))
                 bounds = Screen.getPrimary().getBounds();
         });
+        actionBtnInits();
+        WindowUtils.toolbarInits(toolbar, stage, bounds, actionBtn, contentTable);
+        WindowUtils.initFileMenu(menuFile, contentTable);
+        WindowUtils.initOperationMenu(operationMenu, contentTable);
+        WindowUtils.initAboutMenu(aboutMenu, contentTable);
     }
 
 
@@ -99,44 +105,17 @@ public class MainController implements FXMLController {
         hideBtn.setGraphic(new FontIcon());
         actionBtn.setGraphic(new FontIcon());
         StackPane.setAlignment(actionBtn, Pos.BOTTOM_RIGHT);
-        var screen = Screen.getPrimary();
-        bounds = screen.getVisualBounds();
+        bounds = Screen.getPrimary().getBounds();
         mainBox.setPrefHeight(bounds.getHeight());
-        toolbarInits();
         tableInits();
-        actionBtnInits();
+
     }
 
-    private void toolbarInits() {
-        toolbar.setOnMousePressed(event -> {
-            xOffset = stage.getX() - event.getScreenX();
-            yOffset = stage.getY() - event.getScreenY();
-        });
-        toolbar.setOnMouseDragged(event -> {
-            stage.setX(event.getScreenX() + xOffset);
-            stage.setY(event.getScreenY() + yOffset);
-            if (stage.getWidth() == bounds.getWidth() && stage.getHeight() == bounds.getHeight())
-                minimizeWindow();
-        });
-        toolbar.setOnMouseReleased(event -> {
-            var screenY = event.getScreenY();
-            if (screenY <= 0)
-                maximizeWindow();
-        });
-        toolbar.setOnMouseClicked(event -> {
-            var doubleClickCondition = event.getButton().equals(MouseButton.PRIMARY) && event.getClickCount() == 2;
-            var screenY = stage.getY();
-            if (screenY > 0 && doubleClickCondition)
-                maximizeWindow();
-            else if (screenY <= 0 && doubleClickCondition)
-                minimizeWindow();
-        });
-    }
 
     private void tableInits() {
+        sizeColumn.setCellValueFactory(p -> p.getValue().getSizeProperty());
         nameColumn.setCellValueFactory(p -> p.getValue().getNameProperty());
         progressColumn.setCellValueFactory(p -> p.getValue().getProgressProperty().asObject());
-        sizeColumn.setCellValueFactory(p -> p.getValue().getSizeProperty());
         remainingColumn.setCellValueFactory(p -> p.getValue().getRemainingTimeProperty().asObject());
         chunksColumn.setCellValueFactory(p -> p.getValue().getChunksProperty().asObject());
         addDateColumn.setCellValueFactory(p -> p.getValue().getAddDateProperty());
@@ -175,26 +154,21 @@ public class MainController implements FXMLController {
                     });
             }
         });
-        var translate = new Translate();
-        actionBtn.getTransforms().add(translate);
         contentTable.setRowFactory(param -> {
             var row = new TableRow<DownloadModel>();
-            var selectedItems = contentTable.getSelectionModel().getSelectedItems();
-            if (selectedItems.size() == 1) {
-                row.setOnMouseClicked(event -> {
-                    if (!row.isEmpty() && event.getButton().equals(MouseButton.SECONDARY)) {
-                        System.out.println(row.getIndex());
-                        actionBtn.setRotate(15);
-                    }
-                });
-            }
+            row.setOnMouseClicked(event -> {
+                var selectedItems = contentTable.getSelectionModel().getSelectedItems();
+                if (selectedItems.size() == 1 && !row.isEmpty()
+                        && event.getButton().equals(MouseButton.SECONDARY))
+                    System.out.println(row.getIndex());
+            });
             return row;
         });
+
     }
 
     private void actionBtnInits() {
         var transition = new TranslateTransition(Duration.millis(300), actionBtn);
-
         var scrollBar = new AtomicReference<>((ScrollBar) contentTable.lookup(".scroll-bar:vertical"));
         contentTable.addEventFilter(ScrollEvent.ANY, event -> {
             if (scrollBar.get() == null)
@@ -204,7 +178,6 @@ public class MainController implements FXMLController {
                     actionBtn.setTranslateY(0);
                 return;
             }
-
 
             if (actionBtn.getTranslateY() == 100 && event.getDeltaY() > 0) {
                 transition.setFromY(100);
@@ -217,44 +190,14 @@ public class MainController implements FXMLController {
                 transition.play();
             }
         });
-    }
-
-    private void maximizeWindow() {
-        var currentX = stage.getX();
-        Screen.getScreens().forEach(screen -> {
-            if (!isOnPrimaryScreen(currentX))
-                bounds = screen.getBounds();
-            maximizeStage();
+        stage.heightProperty().addListener((observable, oldValue, newValue) -> {
+            var sb = (ScrollBar) contentTable.lookup(".scroll-bar:vertical");
+            if (sb != null && !sb.isVisible()) {
+                if (actionBtn.getTranslateY() == 100)
+                    actionBtn.setTranslateY(0);
+            }
         });
     }
-
-    private void minimizeWindow() {
-        var currentX = stage.getX();
-        Screen.getScreens().forEach(screen -> {
-            if (!isOnPrimaryScreen(currentX))
-                bounds = screen.getBounds();
-            minimizeStage();
-        });
-    }
-
-    private void maximizeStage() {
-        stage.setX(bounds.getMinX());
-        stage.setY(bounds.getMinY());
-        stage.setWidth(bounds.getWidth());
-        stage.setHeight(bounds.getHeight());
-        if (actionBtn.getTranslateY() == 100)
-            actionBtn.setTranslateY(0);
-    }
-
-    private void minimizeStage() {
-        var width = 853;
-        var height = 515;
-        stage.setWidth(width);
-        stage.setHeight(height);
-        stage.setY((bounds.getMaxY() - height) / 2);
-        stage.setX((bounds.getMaxX() - width) / 2);
-    }
-
 
     public void closeApp() {
         Platform.exit();
@@ -267,14 +210,13 @@ public class MainController implements FXMLController {
     public void toggleFullWindowApp() {
         var screenY = stage.getY();
         if (screenY > 0)
-            maximizeWindow();
+            bounds = WindowUtils.maximizeWindow(stage, bounds, actionBtn);
         else if (screenY <= 0)
-            minimizeWindow();
+            bounds = WindowUtils.minimizeWindow(stage, bounds);
 
     }
 
-    private boolean isOnPrimaryScreen(double x) {
-        var bounds = Screen.getPrimary().getBounds();
-        return x < bounds.getMaxX();
+    public void doAction() {
+        contentTable.getSelectionModel().clearSelection();
     }
 }

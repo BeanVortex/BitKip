@@ -10,6 +10,7 @@ import java.time.format.DateTimeFormatter;
 @Setter
 @ToString
 @AllArgsConstructor
+@NoArgsConstructor
 @Builder
 public class DownloadModel {
     private String id;

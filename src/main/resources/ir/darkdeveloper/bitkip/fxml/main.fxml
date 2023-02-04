@@ -15,9 +15,9 @@
         <HBox minWidth="835" prefWidth="835" fx:id="toolbar" alignment="BASELINE_CENTER" maxHeight="32" minHeight="32"
               spacing="10">
             <Label text="LOGO"/>
-            <Button text="File" styleClass="toolbar_menu"/>
-            <Button text="Edit" styleClass="toolbar_menu"/>
-            <Button text="About" styleClass="toolbar_menu"/>
+            <Button fx:id="menuFile" text="File" styleClass="toolbar_menu"/>
+            <Button fx:id="operationMenu" text="operation" styleClass="toolbar_menu"/>
+            <Button fx:id="aboutMenu" text="About" styleClass="toolbar_menu"/>
             <Region HBox.hgrow="ALWAYS"/>
             <Button fx:id="hideBtn" onAction="#hideWindowApp"/>
             <Button fx:id="fullWindowBtn" onAction="#toggleFullWindowApp"/>
@@ -44,7 +44,7 @@
                     </columns>
                 </TableView>
             </HBox>
-            <Button fx:id="actionBtn">
+            <Button fx:id="actionBtn" onAction="#doAction">
                 <StackPane.margin>
                     <Insets>
                         <bottom>25</bottom>
