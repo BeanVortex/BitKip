@@ -2,6 +2,7 @@ package ir.darkdeveloper.bitkip.controllers;
 
 import ir.darkdeveloper.bitkip.models.DownloadModel;
 import ir.darkdeveloper.bitkip.utils.MenuUtils;
+import ir.darkdeveloper.bitkip.utils.TableUtils;
 import ir.darkdeveloper.bitkip.utils.WindowUtils;
 import javafx.animation.TranslateTransition;
 import javafx.application.Platform;
@@ -41,22 +42,6 @@ public class MainController implements FXMLController {
     @FXML
     private TableView<DownloadModel> contentTable;
     @FXML
-    private TableColumn<DownloadModel, String> nameColumn;
-    @FXML
-    private TableColumn<DownloadModel, Double> progressColumn;
-    @FXML
-    private TableColumn<DownloadModel, String> sizeColumn;
-    @FXML
-    private TableColumn<DownloadModel, Integer> remainingColumn;
-    @FXML
-    private TableColumn<DownloadModel, Integer> chunksColumn;
-    @FXML
-    private TableColumn<DownloadModel, String> addDateColumn;
-    @FXML
-    private TableColumn<DownloadModel, String> lastTryColumn;
-    @FXML
-    private TableColumn<DownloadModel, String> completeColumn;
-    @FXML
     private HBox mainBox;
     @FXML
     private HBox toolbar;
@@ -69,6 +54,7 @@ public class MainController implements FXMLController {
 
     private Stage stage;
     private Rectangle2D bounds;
+    private TableUtils tableUtils;
 
 
     @Override
@@ -109,65 +95,10 @@ public class MainController implements FXMLController {
         StackPane.setAlignment(actionBtn, Pos.BOTTOM_RIGHT);
         bounds = Screen.getPrimary().getVisualBounds();
         mainBox.setPrefHeight(bounds.getHeight());
-        tableInits();
-
+        tableUtils = new TableUtils(contentTable);
+        tableUtils.tableInits();
     }
 
-
-    private void tableInits() {
-        nameColumn.setCellValueFactory(p -> p.getValue().getNameProperty());
-        sizeColumn.setCellValueFactory(p -> p.getValue().getSizeProperty());
-        progressColumn.setCellValueFactory(p -> p.getValue().getProgressProperty().asObject());
-        remainingColumn.setCellValueFactory(p -> p.getValue().getRemainingTimeProperty().asObject());
-        chunksColumn.setCellValueFactory(p -> p.getValue().getChunksProperty().asObject());
-        addDateColumn.setCellValueFactory(p -> p.getValue().getAddDateProperty());
-        lastTryColumn.setCellValueFactory(p -> p.getValue().getLastTryDateProperty());
-        completeColumn.setCellValueFactory(p -> p.getValue().getCompleteDateProperty());
-        contentTable.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
-
-        var data = FXCollections.<DownloadModel>observableArrayList();
-        for (int i = 0; i < 30; i++) {
-            var dow = DownloadModel.builder()
-                    .id(UUID.randomUUID().toString())
-                    .name("ffd")
-                    .progress(45.6)
-                    .size("16")
-                    .url("adsf")
-                    .filePath("sdf")
-                    .remainingTime(56)
-                    .addDate(LocalDateTime.now())
-                    .lastTryDate(LocalDateTime.now().plusHours(1))
-                    .completeDate(LocalDateTime.now().plusHours(2))
-                    .chunks(3)
-                    .build();
-            dow.fillProperties();
-            data.add(dow);
-        }
-        contentTable.getItems().addAll(data);
-
-        contentTable.setOnMouseClicked(event -> {
-            if (event.getButton().equals(MouseButton.SECONDARY)) {
-                var selectedItems = contentTable.getSelectionModel().getSelectedItems();
-                if (selectedItems.size() > 1)
-                    selectedItems.forEach(downloadModel -> {
-                        downloadModel.getNameProperty().setValue("df");
-                        downloadModel.getProgressProperty().setValue(160.5);
-                        downloadModel.getCompleteDateProperty().setValue(LocalDateTime.now().toString());
-                    });
-            }
-        });
-        contentTable.setRowFactory(param -> {
-            var row = new TableRow<DownloadModel>();
-            row.setOnMouseClicked(event -> {
-                var selectedItems = contentTable.getSelectionModel().getSelectedItems();
-                if (selectedItems.size() == 1 && !row.isEmpty()
-                        && event.getButton().equals(MouseButton.SECONDARY))
-                    System.out.println(row.getIndex());
-            });
-            return row;
-        });
-
-    }
 
     private void actionBtnInits() {
         var transition = new TranslateTransition(Duration.millis(300), actionBtn);
@@ -213,12 +144,27 @@ public class MainController implements FXMLController {
         var screenY = stage.getY();
         if (screenY - bounds.getMinY() >= 0 && bounds.getHeight() > stage.getHeight())
             bounds = WindowUtils.maximizeWindow(stage, bounds, actionBtn);
-       else if (screenY - bounds.getMinY() <= 0 && bounds.getHeight() <= stage.getHeight())
+        else if (screenY - bounds.getMinY() <= 0 && bounds.getHeight() <= stage.getHeight())
             bounds = WindowUtils.minimizeWindow(stage, bounds);
 
     }
 
     public void doAction() {
         contentTable.getSelectionModel().clearSelection();
+        var dow = DownloadModel.builder()
+                .id(UUID.randomUUID().toString())
+                .name("avvv")
+                .progress(0)
+                .size("20")
+                .url("sdfads")
+                .filePath("fsdaf")
+                .remainingTime(100)
+                .addDate(LocalDateTime.now().plusSeconds(70))
+                .lastTryDate(LocalDateTime.now().plusHours(1))
+                .completeDate(LocalDateTime.now().plusHours(2))
+                .chunks(10)
+                .build();
+        dow.fillProperties();
+        tableUtils.addRow(dow);
     }
 }

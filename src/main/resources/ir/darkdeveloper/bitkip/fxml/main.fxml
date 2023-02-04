@@ -33,14 +33,7 @@
                 </VBox>
                 <TableView minWidth="750" prefWidth="Infinity" fx:id="contentTable">
                     <columns>
-                        <TableColumn prefWidth="200" text="name" fx:id="nameColumn"/>
-                        <TableColumn text="progress" fx:id="progressColumn"/>
-                        <TableColumn text="size" fx:id="sizeColumn"/>
-                        <TableColumn prefWidth="100" text="remaining time" fx:id="remainingColumn"/>
-                        <TableColumn text="chunks" fx:id="chunksColumn"/>
-                        <TableColumn prefWidth="125" text="add date " fx:id="addDateColumn"/>
-                        <TableColumn prefWidth="125" text="last try" fx:id="lastTryColumn"/>
-                        <TableColumn prefWidth="125" text="complete date" fx:id="completeColumn"/>
+
                     </columns>
                 </TableView>
             </HBox>
