@@ -6,19 +6,15 @@ import ir.darkdeveloper.bitkip.utils.TableUtils;
 import ir.darkdeveloper.bitkip.utils.WindowUtils;
 import javafx.animation.TranslateTransition;
 import javafx.application.Platform;
-import javafx.collections.FXCollections;
-import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.geometry.Pos;
 import javafx.geometry.Rectangle2D;
-import javafx.geometry.Side;
-import javafx.scene.control.*;
-import javafx.scene.input.MouseButton;
+import javafx.scene.control.Button;
+import javafx.scene.control.ScrollBar;
+import javafx.scene.control.TableView;
 import javafx.scene.input.ScrollEvent;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
-import javafx.scene.transform.Translate;
-import javafx.stage.Modality;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
 import javafx.util.Duration;
@@ -53,15 +49,15 @@ public class MainController implements FXMLController {
     private Button hideBtn;
 
     private Stage stage;
-    private Rectangle2D bounds;
     private TableUtils tableUtils;
-
+    private Rectangle2D bounds;
 
     @Override
     public void setStage(Stage stage) {
         this.stage = stage;
         initAfterStage();
     }
+
 
     @Override
     public Stage getStage() {

@@ -3,7 +3,6 @@ plugins {
     id 'application'
     id 'org.openjfx.javafxplugin' version '0.0.13'
     id 'org.beryx.jlink' version '2.26.0'
-//    id "io.freefair.lombok" version "6.6.1"
 }
 
 group 'ir.darkdeveloper'
@@ -15,19 +14,24 @@ repositories {
     mavenCentral()
 }
 
+configurations {
+    compileOnly {
+        extendsFrom annotationProcessor
+    }
+}
 
-tasks.withType(JavaCompile) {
+tasks.withType(JavaCompile).configureEach {
     options.encoding = 'UTF-8'
 }
 
 application {
-    mainModule = 'ir.darkdeveloper.bitkip'
     mainClass = 'ir.darkdeveloper.bitkip.BitKip'
+    mainModule = 'ir.darkdeveloper.bitkip'
 }
 
 javafx {
     version = '19.0.2.1'
-    modules = ['javafx.controls', 'javafx.fxml', 'javafx.base']
+    modules = ['javafx.controls', 'javafx.fxml', 'javafx.graphics']
 }
 
 dependencies {
@@ -35,7 +39,7 @@ dependencies {
     implementation 'org.kordamp.ikonli:ikonli-javafx:12.3.1'
     implementation 'org.kordamp.ikonli:ikonli-fontawesome5-pack:12.3.1'
     implementation 'org.kordamp.bootstrapfx:bootstrapfx-core:0.4.0'
-    implementation 'org.projectlombok:lombok:1.18.26'
+    compileOnly 'org.projectlombok:lombok:1.18.26'
     annotationProcessor 'org.projectlombok:lombok:1.18.26'
 }
 

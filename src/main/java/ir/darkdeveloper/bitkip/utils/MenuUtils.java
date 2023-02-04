@@ -94,11 +94,23 @@ public class MenuUtils {
         });
     }
 
-    private static void readQueueList(Menu addQueueMenu, Menu startQueueMenu, Menu stopQueueMenu) {
-        // read queue list from the file
+    public static void initAboutMenu(Button aboutMenu, TableView<DownloadModel> table) {
+        var c = new ContextMenu();
+        var checkForUpdates = new Label("Check updates");
+        var about = new Label("About");
+
+        var lbls = List.of(checkForUpdates, about);
+        var menuItems = createMenuItems(lbls);
+        c.getItems().addAll(menuItems.values());
+        aboutMenu.setContextMenu(c);
+        aboutMenu.setOnAction(event -> {
+            table.getSelectionModel().clearSelection();
+            c.show(aboutMenu, Side.BOTTOM, 0, 0);
+        });
     }
 
-    public static void initAboutMenu(Button aboutMenu, TableView<DownloadModel> contentTable) {
+    private static void readQueueList(Menu addQueueMenu, Menu startQueueMenu, Menu stopQueueMenu) {
+        // read queue list from the file
     }
 
 
