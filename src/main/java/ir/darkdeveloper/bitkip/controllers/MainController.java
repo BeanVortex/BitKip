@@ -1,6 +1,7 @@
 package ir.darkdeveloper.bitkip.controllers;
 
 import ir.darkdeveloper.bitkip.models.DownloadModel;
+import ir.darkdeveloper.bitkip.utils.MenuUtils;
 import ir.darkdeveloper.bitkip.utils.WindowUtils;
 import javafx.animation.TranslateTransition;
 import javafx.application.Platform;
@@ -93,9 +94,9 @@ public class MainController implements FXMLController {
         });
         actionBtnInits();
         WindowUtils.toolbarInits(toolbar, stage, bounds, actionBtn, contentTable);
-        WindowUtils.initFileMenu(menuFile, contentTable);
-        WindowUtils.initOperationMenu(operationMenu, contentTable);
-        WindowUtils.initAboutMenu(aboutMenu, contentTable);
+        MenuUtils.initFileMenu(menuFile, contentTable);
+        MenuUtils.initOperationMenu(operationMenu, contentTable);
+        MenuUtils.initAboutMenu(aboutMenu, contentTable);
     }
 
 
