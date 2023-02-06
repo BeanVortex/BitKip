@@ -12,7 +12,7 @@
 
     <HBox styleClass="csm_toolbar">
         <HBox maxWidth="2" minWidth="2" styleClass="csm_toolbar"/>
-        <HBox minWidth="835" prefWidth="835" fx:id="toolbar" alignment="BASELINE_CENTER" maxHeight="32" minHeight="32"
+        <HBox minWidth="835" prefWidth="835" fx:id="toolbar" alignment="CENTER" maxHeight="32" minHeight="32"
               spacing="10">
             <Label text="LOGO"/>
             <Button fx:id="menuFile" text="File" styleClass="toolbar_menu"/>

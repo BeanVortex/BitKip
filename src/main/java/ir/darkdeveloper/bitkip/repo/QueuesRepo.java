@@ -39,9 +39,9 @@ public class QueuesRepo {
     }
 
 
-    private static List<QueueModel> getQueues() {
-        var sql = "SELECT * FROM " + QUEUES_TABLE_NAME + ";";
+    public static List<QueueModel> getQueues() {
         var list = new ArrayList<QueueModel>();
+        var sql = "SELECT * FROM " + QUEUES_TABLE_NAME + ";";
         try (var con = dbHelper.openConnection();
              var stmt = con.createStatement();
              var rs = stmt.executeQuery(sql)) {

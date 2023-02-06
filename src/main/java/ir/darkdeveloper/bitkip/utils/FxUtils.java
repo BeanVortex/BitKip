@@ -3,21 +3,19 @@ package ir.darkdeveloper.bitkip.utils;
 
 import ir.darkdeveloper.bitkip.controllers.FXMLController;
 import ir.darkdeveloper.bitkip.controllers.MainController;
+import ir.darkdeveloper.bitkip.controllers.NewDownload;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXMLLoader;
-import javafx.geometry.Rectangle2D;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
 import javafx.scene.image.Image;
-import javafx.stage.Screen;
 import javafx.stage.Stage;
+import javafx.stage.StageStyle;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicReference;
 
 import static ir.darkdeveloper.bitkip.BitKip.getResource;
 
@@ -76,28 +74,29 @@ public class FxUtils {
         }
     }
 
-    public static FXMLController newDownloadStage(String fxmlFilename, String stageTitle,
-                                                             double minWidth, double minHeight) {
+    public static NewDownload newDownloadStage(String fxmlFilename, double minWidth, double minHeight) {
+        FXMLLoader loader = null;
+        Stage stage = new Stage();
+        Parent root = null;
         try {
-            var stage = new Stage();
-            var loader = new FXMLLoader(getResource("fxml/" + fxmlFilename));
-            Parent root = loader.load();
-            FXMLController controller = loader.getController();
-            controller.setStage(stage);
-            var scene = new Scene(root);
-            stage.setScene(scene);
-            var logoPath = getResource("images/logo.png");
-            if (logoPath != null)
-                stage.getIcons().add(new Image(logoPath.toExternalForm()));
-            stage.setTitle("JBookFinder - " + stageTitle);
-            stage.setMinWidth(minWidth);
-            stage.setMinHeight(minHeight);
-            stage.show();
-            return controller;
+            loader = new FXMLLoader(getResource("fxml/" + fxmlFilename));
+            root = loader.load();
         } catch (IOException e) {
             e.printStackTrace();
         }
-        return null;
+        FXMLController controller = loader.getController();
+        var scene = new Scene(root);
+        stage.setScene(scene);
+        var logoPath = getResource("images/logo.png");
+        if (logoPath != null)
+            stage.getIcons().add(new Image(logoPath.toExternalForm()));
+        stage.setMinWidth(minWidth);
+        stage.setMinHeight(minHeight);
+        stage.initStyle(StageStyle.TRANSPARENT);
+        stage.setTitle("New Download");
+        controller.setStage(stage);
+        stage.show();
+        return (NewDownload) controller;
     }
 
     public static <T> List<T> getAllNodes(Parent root, Class<T> tClass) {

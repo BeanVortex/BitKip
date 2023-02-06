@@ -1,8 +1,10 @@
 package ir.darkdeveloper.bitkip.controllers;
 
 import ir.darkdeveloper.bitkip.models.DownloadModel;
-import ir.darkdeveloper.bitkip.repo.DownloadsRepo;
-import ir.darkdeveloper.bitkip.utils.*;
+import ir.darkdeveloper.bitkip.utils.FxUtils;
+import ir.darkdeveloper.bitkip.utils.MenuUtils;
+import ir.darkdeveloper.bitkip.utils.TableUtils;
+import ir.darkdeveloper.bitkip.utils.WindowUtils;
 import javafx.animation.TranslateTransition;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
@@ -19,8 +21,6 @@ import javafx.stage.Stage;
 import javafx.util.Duration;
 import org.kordamp.ikonli.javafx.FontIcon;
 
-import java.time.LocalDateTime;
-import java.util.UUID;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class MainController implements FXMLController {
@@ -50,6 +50,8 @@ public class MainController implements FXMLController {
     private Stage stage;
     private TableUtils tableUtils;
     private Rectangle2D bounds;
+    private final int minWidth = 853, minHeight = 515;
+
 
     @Override
     public void setStage(Stage stage) {
@@ -75,7 +77,7 @@ public class MainController implements FXMLController {
                 bounds = Screen.getPrimary().getVisualBounds();
         });
         actionBtnInits();
-        WindowUtils.toolbarInits(toolbar, stage, bounds, actionBtn, contentTable);
+        WindowUtils.toolbarInits(toolbar, stage, bounds, actionBtn, contentTable, minWidth, minHeight);
         MenuUtils.initFileMenu(menuFile, contentTable);
         MenuUtils.initOperationMenu(operationMenu, contentTable);
         MenuUtils.initAboutMenu(aboutMenu, contentTable);
@@ -128,39 +130,44 @@ public class MainController implements FXMLController {
         });
     }
 
-    public void closeApp() {
+    @FXML
+    private void closeApp() {
         Platform.exit();
     }
 
-    public void hideWindowApp() {
+    @FXML
+    private void hideWindowApp() {
         stage.setIconified(true);
     }
 
-    public void toggleFullWindowApp() {
+    @FXML
+    private void toggleFullWindowApp() {
         var screenY = stage.getY();
         if (screenY - bounds.getMinY() >= 0 && bounds.getHeight() > stage.getHeight())
             bounds = WindowUtils.maximizeWindow(stage, bounds, actionBtn);
         else if (screenY - bounds.getMinY() <= 0 && bounds.getHeight() <= stage.getHeight())
-            bounds = WindowUtils.minimizeWindow(stage, bounds);
+            bounds = WindowUtils.minimizeWindow(stage, bounds, minWidth, minHeight);
 
     }
 
-    public void doAction() {
+    @FXML
+    private void doAction() {
         contentTable.getSelectionModel().clearSelection();
-        var dow = DownloadModel.builder()
-                .name("avvv")
-                .progress(10)
-                .size(20)
-                .url("sdfads")
-                .filePath("fsdaf")
-                .addDate(LocalDateTime.now().plusSeconds(70))
-                .lastTryDate(LocalDateTime.now().plusHours(1))
-                .completeDate(LocalDateTime.now().plusHours(2))
-                .chunks(10)
-                .build();
-        dow.fillProperties();
-        DownloadsRepo.insertDownload(dow);
-//        FxUtils.newDownloadStage("newDownload.fxml", "New Download", 600, 400);
-        tableUtils.addRow(dow);
+//        var dow = DownloadModel.builder()
+//                .name("avvv")
+//                .progress(10)
+//                .size(20)
+//                .url("sdfads")
+//                .filePath("fsdaf")
+//                .addDate(LocalDateTime.now().plusSeconds(70))
+//                .lastTryDate(LocalDateTime.now().plusHours(1))
+//                .completeDate(LocalDateTime.now().plusHours(2))
+//                .chunks(10)
+//                .build();
+//        dow.fillProperties();
+//        DownloadsRepo.insertDownload(dow);
+        var controller = FxUtils.newDownloadStage("newDownload.fxml", 600, 400);
+        controller.setTableUtils(tableUtils);
+//        tableUtils.addRow(dow);
     }
 }

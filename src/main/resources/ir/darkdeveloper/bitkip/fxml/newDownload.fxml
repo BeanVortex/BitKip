@@ -1,14 +1,27 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import java.lang.*?>
-<?import java.util.*?>
-<?import javafx.scene.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
+<VBox minHeight="400" prefHeight="400" minWidth="600" prefWidth="600.0" stylesheets="@../css/main.css"
+      xmlns="http://javafx.com/javafx/16"
+      xmlns:fx="http://javafx.com/fxml/1" fx:controller="ir.darkdeveloper.bitkip.controllers.NewDownload">
 
-<AnchorPane xmlns="http://javafx.com/javafx"
-            xmlns:fx="http://javafx.com/fxml"
-            fx:controller="ir.darkdeveloper.bitkip.controllers.NewDownload"
-            prefHeight="400.0" prefWidth="600.0">
+    <HBox maxHeight="2" minHeight="2" styleClass="csm_toolbar"/>
 
-</AnchorPane>
+    <HBox styleClass="csm_toolbar">
+        <HBox maxWidth="2" minWidth="2" styleClass="csm_toolbar"/>
+        <HBox minWidth="570" prefWidth="570" fx:id="toolbar" alignment="CENTER" maxHeight="32" minHeight="32"
+              spacing="10">
+            <Label text="New Download"/>
+            <Region HBox.hgrow="ALWAYS"/>
+            <Button fx:id="hideBtn" onAction="#hideWindowApp"/>
+            <Button fx:id="fullWindowBtn" onAction="#toggleFullWindowApp"/>
+            <Button fx:id="closeBtn" onAction="#closeApp"/>
+        </HBox>
+        <HBox maxWidth="2" minWidth="2" styleClass="csm_toolbar"/>
+    </HBox>
+    <TabPane>
+        <Tab text="Single" fx:id="singleTab"/>
+        <Tab text="Multiple" fx:id="multipleTab"/>
+    </TabPane>
+</VBox>

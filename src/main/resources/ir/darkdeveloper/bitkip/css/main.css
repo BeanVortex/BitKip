@@ -52,14 +52,15 @@
     -fx-background-color: #4CAF50;
     -fx-background-radius: 40px;
     -fx-cursor: hand;
-    -fx-effect: dropshadow(one-pass-box, rgba(55, 71, 79, 0.35), 5,0,0,2);
+    -fx-effect: dropshadow(one-pass-box, rgba(55, 71, 79, 0.35), 5, 0, 0, 2);
     -fx-padding: 10px;
 }
 
 #actionBtn:hover {
     -fx-background-color: #388E3C;
 }
-#actionBtn:pressed{
+
+#actionBtn:pressed {
     -fx-effect: none;
 }
 

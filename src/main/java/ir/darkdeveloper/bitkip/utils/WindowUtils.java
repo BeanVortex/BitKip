@@ -16,7 +16,9 @@ public class WindowUtils {
     private static double yOffset = 0;
 
     public static void toolbarInits(HBox toolbar, Stage stage, Rectangle2D bounds,
-                                    Button actionBtn, TableView<DownloadModel> table) {
+                                    Button actionBtn, TableView<DownloadModel> table,
+                                    int width, int height) {
+
         toolbar.setOnMousePressed(event -> {
             xOffset = stage.getX() - event.getScreenX();
             yOffset = stage.getY() - event.getScreenY();
@@ -33,7 +35,7 @@ public class WindowUtils {
                     boundsCopy.set(bounds);
                 if (stage.getWidth() == boundsCopy.get().getWidth())
                     if (stage.getHeight() == boundsCopy.get().getHeight() || stage.getHeight() == boundsCopy.get().getHeight() + boundsCopy.get().getMinY())
-                        minimizeWindow(stage, boundsCopy.get());
+                        minimizeWindow(stage, boundsCopy.get(), width, height);
             });
         });
         toolbar.setOnMouseReleased(event -> {
@@ -44,14 +46,19 @@ public class WindowUtils {
         toolbar.setOnMouseClicked(event -> {
             var doubleClickCondition = event.getButton().equals(MouseButton.PRIMARY) && event.getClickCount() == 2;
             var screenY = stage.getY();
-            table.getSelectionModel().clearSelection();
+            if (table != null)
+                table.getSelectionModel().clearSelection();
             if (doubleClickCondition) {
                 if (screenY - boundsCopy.get().getMinY() >= 0 && boundsCopy.get().getHeight() > stage.getHeight())
                     maximizeWindow(stage, boundsCopy.get(), actionBtn);
                 else if (screenY - boundsCopy.get().getMinY() <= 0 && boundsCopy.get().getHeight() <= stage.getHeight())
-                    minimizeWindow(stage, boundsCopy.get());
+                    minimizeWindow(stage, boundsCopy.get(), width, height);
             }
         });
+    }
+
+    public static void toolbarInits(HBox toolbar, Stage stage, Rectangle2D bounds, int width, int height) {
+        toolbarInits(toolbar, stage, bounds, null, null, width, height);
     }
 
     public static Rectangle2D maximizeWindow(Stage stage, Rectangle2D bounds, Button actionBtn) {
@@ -65,13 +72,13 @@ public class WindowUtils {
         return boundsCopy.get();
     }
 
-    public static Rectangle2D minimizeWindow(Stage stage, Rectangle2D bounds) {
+    public static Rectangle2D minimizeWindow(Stage stage, Rectangle2D bounds, int width, int height) {
         var currentX = stage.getX();
         var boundsCopy = new AtomicReference<>(bounds);
         Screen.getScreens().forEach(screen -> {
             if (!isOnPrimaryScreen(currentX))
                 boundsCopy.set(screen.getVisualBounds());
-            minimizeStage(stage, boundsCopy.get());
+            minimizeStage(stage, boundsCopy.get(), width, height);
         });
         return boundsCopy.get();
     }
@@ -81,13 +88,11 @@ public class WindowUtils {
         stage.setY(bounds.getMinY());
         stage.setWidth(bounds.getWidth());
         stage.setHeight(bounds.getHeight());
-        if (actionBtn.getTranslateY() == 100)
+        if (actionBtn != null && actionBtn.getTranslateY() == 100)
             actionBtn.setTranslateY(0);
     }
 
-    private static void minimizeStage(Stage stage, Rectangle2D bounds) {
-        var width = 853;
-        var height = 515;
+    private static void minimizeStage(Stage stage, Rectangle2D bounds, int width, int height) {
         stage.setWidth(width);
         stage.setHeight(height);
         stage.setY((bounds.getMaxY() - height) / 2);

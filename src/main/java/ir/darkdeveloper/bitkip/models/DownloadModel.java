@@ -50,5 +50,4 @@ public class DownloadModel implements Model {
         completeDateProperty = new SimpleStringProperty(DATE_FORMATTER.format(completeDate));
 
     }
-
 }
