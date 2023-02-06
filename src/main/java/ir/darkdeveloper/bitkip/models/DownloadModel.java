@@ -16,7 +16,7 @@ public class DownloadModel implements Model {
     private int id;
     private String name;
     private double progress;
-    private int size;
+    private long size;
     private String url;
     private String filePath;
     private int remainingTime;
@@ -29,7 +29,7 @@ public class DownloadModel implements Model {
 
     private StringProperty nameProperty;
     private DoubleProperty progressProperty;
-    private IntegerProperty sizeProperty;
+    private LongProperty sizeProperty;
     private IntegerProperty remainingTimeProperty;
     private IntegerProperty chunksProperty;
     private StringProperty addDateProperty;
@@ -42,7 +42,7 @@ public class DownloadModel implements Model {
     public void fillProperties() {
         nameProperty = new SimpleStringProperty(name);
         progressProperty = new SimpleDoubleProperty(progress);
-        sizeProperty = new SimpleIntegerProperty(size);
+        sizeProperty = new SimpleLongProperty(size);
         remainingTimeProperty = new SimpleIntegerProperty(remainingTime);
         chunksProperty = new SimpleIntegerProperty(chunks);
         addDateProperty = new SimpleStringProperty(DATE_FORMATTER.format(addDate));

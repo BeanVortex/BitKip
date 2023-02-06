@@ -26,7 +26,7 @@ public class TableUtils {
     public void tableInits() {
         var nameColumn = new TableColumn<DownloadModel, String>("Name");
         var progressColumn = new TableColumn<DownloadModel, Double>("Progress");
-        var sizeColumn = new TableColumn<DownloadModel, Integer>("Size");
+        var sizeColumn = new TableColumn<DownloadModel, Long>("Size");
         var remainingColumn = new TableColumn<DownloadModel, Integer>("Remaining");
         var chunksColumn = new TableColumn<DownloadModel, Integer>("Chunks");
         var addDateColumn = new TableColumn<DownloadModel, String>("Add Date");

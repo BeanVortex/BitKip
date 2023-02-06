@@ -122,4 +122,15 @@ public class DownloadsRepo {
         dow.fillProperties();
         return dow;
     }
+
+    public static void updateDownloadSize(DownloadModel download) {
+        var sql = "UPDATE " + DOWNLOADS_TABLE_NAME + " SET " + COL_SIZE + "=\"" + download.getSize() + "\""
+                + " WHERE " + COL_ID + "=" + download.getId() + ";";
+        try (var con = dbHelper.openConnection();
+             var stmt = con.createStatement()) {
+            stmt.executeUpdate(sql);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
 }
