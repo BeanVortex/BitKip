@@ -85,28 +85,42 @@ public class ResizeUtil {
                     if (!Cursor.W_RESIZE.equals(cursorEvent) && !Cursor.E_RESIZE.equals(cursorEvent)) {
                         double minHeight = stage.getMinHeight() > (border * 2) ? stage.getMinHeight() : (border * 2);
                         if (Cursor.NW_RESIZE.equals(cursorEvent) || Cursor.N_RESIZE.equals(cursorEvent) || Cursor.NE_RESIZE.equals(cursorEvent)) {
-                            if (stage.getHeight() > minHeight || mouseEventY < 0) {
-                                stage.setHeight(stage.getY() - mouseEvent.getScreenY() + stage.getHeight());
+                            var prefHeight = stage.getY() - mouseEvent.getScreenY() + stage.getHeight();
+                            var a = stage.getHeight() >= minHeight && prefHeight <= stage.getMaxHeight();
+                            var b = mouseEventY < 0 && prefHeight >= stage.getMinHeight() && prefHeight <= stage.getMaxHeight();
+                            if (a || b) {
+                                stage.setHeight(prefHeight);
                                 stage.setY(mouseEvent.getScreenY());
                             }
                         } else {
-                            if (stage.getHeight() > minHeight || mouseEventY + startY - stage.getHeight() > 0) {
-                                stage.setHeight(mouseEventY + startY);
-                            }
+                            var prefHeight = mouseEventY + startY;
+                            var a = stage.getHeight() > minHeight && prefHeight <= stage.getMaxHeight();
+                            var b = (prefHeight - stage.getHeight() > 0 && prefHeight <= stage.getMaxHeight());
+                            if (a || b)
+                                stage.setHeight(prefHeight);
                         }
                     }
 
                     if (!Cursor.N_RESIZE.equals(cursorEvent) && !Cursor.S_RESIZE.equals(cursorEvent)) {
                         double minWidth = stage.getMinWidth() > (border * 2) ? stage.getMinWidth() : (border * 2);
                         if (Cursor.NW_RESIZE.equals(cursorEvent) || Cursor.W_RESIZE.equals(cursorEvent) || Cursor.SW_RESIZE.equals(cursorEvent)) {
-                            if (stage.getWidth() > minWidth || mouseEventX < 0) {
-                                stage.setWidth(stage.getX() - mouseEvent.getScreenX() + stage.getWidth());
+                            var prefWidth = stage.getX() - mouseEvent.getScreenX() + stage.getWidth();
+                            if (stage.getMaxWidth() == 0)
+                                stage.setMaxWidth(prefWidth + 1);
+                            var a = stage.getWidth() > minWidth && prefWidth <= stage.getMaxWidth();
+                            var b = mouseEventX < 0 && prefWidth >= stage.getMinWidth();
+                            if (a || b) {
+                                stage.setWidth(prefWidth);
                                 stage.setX(mouseEvent.getScreenX());
                             }
                         } else {
-                            if (stage.getWidth() > minWidth || mouseEventX + startX - stage.getWidth() > 0) {
-                                stage.setWidth(mouseEventX + startX);
-                            }
+                            var prefWidth = mouseEventX + startX;
+                            if (stage.getMaxWidth() == 0)
+                                stage.setMaxWidth(prefWidth + 1);
+                            var a = stage.getWidth() >= minWidth && prefWidth <= stage.getMaxWidth();
+                            var b = prefWidth - stage.getWidth() > 0 && prefWidth >= stage.getMinHeight();
+                            if (a || b)
+                                stage.setWidth(prefWidth);
                         }
                     }
                 }
