@@ -1,0 +1,17 @@
+.header_btn{
+    /*-fx-padding: 3;*/
+    -fx-min-height: 40;
+    -fx-border-radius: 0;
+    -fx-background-radius: 0;
+    -fx-border-color: transparent;
+    -fx-border-style: none;
+    -fx-font-weight: bold;
+    -fx-text-fill: #FAFAFA;
+    -fx-background-color: #78909C;
+    -fx-border-insets: 0;
+}
+
+.header_btn:focused {
+    -fx-background-color: #4CAF50;
+    -fx-border-color: transparent;
+}

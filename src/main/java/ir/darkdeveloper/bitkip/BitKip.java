@@ -23,8 +23,8 @@ public class BitKip extends Application {
         FxUtils.switchSceneToMain(stage, "main.fxml");
         stage.initStyle(StageStyle.UNDECORATED);
         stage.setMinHeight(515);
-        stage.setResizable(true);
         stage.setMinWidth(853);
+        stage.setResizable(true);
         ResizeUtil.addResizeListener(stage);
         IOUtils.createSaveLocations();
         DownloadsRepo.createTable();

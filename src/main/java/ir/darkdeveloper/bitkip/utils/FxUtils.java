@@ -45,35 +45,6 @@ public class FxUtils {
         return null;
     }
 
-    public static <T extends FXMLController> T switchSceneAndGetController(
-            ActionEvent e, String fxmlFilename, String stageTitle, Class<T> tClass) {
-        return switchSceneAndGetController(getStageFromEvent(e), fxmlFilename, stageTitle, tClass);
-    }
-
-    public static <T extends FXMLController> T switchSceneAndGetController(Stage stage, String fxmlFilename, String stageTitle, Class<T> tClass) {
-        try {
-            var loader = new FXMLLoader(getResource("fxml/" + fxmlFilename));
-            Parent root = loader.load();
-            var width = stage.getWidth();
-            var height = stage.getHeight();
-            var prevScene = stage.getScene();
-            if (prevScene != null) {
-                width = prevScene.getWidth();
-                height = prevScene.getHeight();
-            }
-
-            var scene = new Scene(root, width, height);
-            stage.setScene(scene);
-            stage.setTitle("JBookFinder - " + stageTitle);
-            var controller = (FXMLController) loader.getController();
-            controller.setStage(stage);
-            return tClass.cast(controller);
-        } catch (Exception ex) {
-            ex.printStackTrace();
-            return null;
-        }
-    }
-
     public static NewDownload newDownloadStage(String fxmlFilename, double minWidth, double minHeight) {
         FXMLLoader loader = null;
         Stage stage = new Stage();
@@ -93,6 +64,7 @@ public class FxUtils {
         stage.setMinWidth(minWidth);
         stage.setMinHeight(minHeight);
         stage.initStyle(StageStyle.TRANSPARENT);
+        stage.setMaxHeight(600);
         stage.setTitle("New Download");
         controller.setStage(stage);
         stage.show();
