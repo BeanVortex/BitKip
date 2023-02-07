@@ -1,4 +1,4 @@
-.header_btn{
+.tab_btn {
     /*-fx-padding: 3;*/
     -fx-min-height: 40;
     -fx-border-radius: 0;
@@ -11,7 +11,55 @@
     -fx-border-insets: 0;
 }
 
-.header_btn:focused {
+.tab_btn_selected {
     -fx-background-color: #4CAF50;
-    -fx-border-color: transparent;
+}
+
+.new_down_details {
+    -fx-padding: 5;
+}
+
+#openLocation .ikonli-font-icon {
+    -fx-icon-code: "far-folder-open";
+    -fx-icon-color: #78909C;
+    -fx-icon-size: 22;
+}
+
+#questionBtnSpeed .ikonli-font-icon,
+#questionBtnChunks .ikonli-font-icon {
+    -fx-icon-code: "far-question-circle";
+    -fx-icon-color: #78909C;
+    -fx-icon-size: 22;
+}
+
+#openLocation, #questionBtnSpeed, #questionBtnChunks {
+    -fx-border-color: #78909C;
+    -fx-background-color: transparent;
+    -fx-background-radius: 5;
+    -fx-border-radius: 5;
+    -fx-cursor: hand;
+}
+
+#openLocation:hover, #questionBtnSpeed:hover, #questionBtnChunks:hover {
+    -fx-background-color: #546E7A;
+    -fx-border-color: #546E7A;
+}
+
+#openLocation:hover .ikonli-font-icon,
+#questionBtnSpeed:hover .ikonli-font-icon,
+#questionBtnChunks:hover .ikonli-font-icon{
+    -fx-icon-color: #FAFAFA;
+}
+
+#openLocation:pressed, #questionBtnSpeed:pressed, #questionBtnChunks:pressed {
+    -fx-background-color: #37474F;
+    -fx-border-color: #37474F;
+}
+
+.text-field {
+    -fx-padding: 10;
+}
+
+.field-label {
+    -fx-font-weight: bold;
 }

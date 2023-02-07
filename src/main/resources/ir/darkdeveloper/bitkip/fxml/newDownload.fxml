@@ -20,14 +20,14 @@
               spacing="10">
             <Label text="New Download"/>
             <Region HBox.hgrow="ALWAYS"/>
-            <Button fx:id="hideBtn" onAction="#hideWindowApp" focusTraversable="false"/>
-            <Button fx:id="fullWindowBtn" onAction="#toggleFullWindowApp" focusTraversable="false"/>
-            <Button fx:id="closeBtn" onAction="#closeApp" focusTraversable="false"/>
+            <Button fx:id="hideBtn" onAction="#hideWindowApp" />
+            <Button fx:id="fullWindowBtn" onAction="#toggleFullWindowApp" />
+            <Button fx:id="closeBtn" onAction="#closeApp"/>
         </HBox>
         <HBox maxWidth="2" minWidth="2" styleClass="csm_toolbar"/>
     </HBox>
     <HBox minWidth="600" alignment="CENTER">
-        <Button styleClass="header_btn" minWidth="300" text="Single" fx:id="singleButton" onAction="#showSingle"/>
-        <Button styleClass="header_btn" minWidth="300" text="Multiple" fx:id="multipleButton" onAction="#showMultiple"/>
+        <Button styleClass="tab_btn" minWidth="300" text="Single" fx:id="singleButton" onAction="#showSingle"/>
+        <Button styleClass="tab_btn" minWidth="300" text="Multiple" fx:id="multipleButton" onAction="#showMultiple"/>
     </HBox>
 </VBox>

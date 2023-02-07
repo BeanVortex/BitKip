@@ -7,8 +7,48 @@
 <?import javafx.scene.layout.*?>
 
 <VBox xmlns="http://javafx.com/javafx"
-            xmlns:fx="http://javafx.com/fxml"
-      style="-fx-background-color: red"
-            prefHeight="400.0" prefWidth="600.0">
+      xmlns:fx="http://javafx.com/fxml"
+      fx:controller="ir.darkdeveloper.bitkip.controllers.SingleDownload"
+      styleClass="new_down_details"
+      spacing="10"
+      prefHeight="400.0" prefWidth="600.0">
+    <HBox spacing="20" alignment="CENTER">
+        <Label text="URL :" minWidth="60" styleClass="field-label"/>
+        <TextField fx:id="urlField" HBox.hgrow="ALWAYS"/>
+    </HBox>
+
+    <HBox spacing="20" alignment="CENTER">
+        <Label text="Name :" minWidth="60" styleClass="field-label"/>
+        <TextField fx:id="nameField" HBox.hgrow="ALWAYS"/>
+    </HBox>
+
+    <HBox spacing="15" alignment="CENTER">
+        <Label text="Location :" minWidth="60" styleClass="field-label"/>
+        <TextField fx:id="locationField" HBox.hgrow="ALWAYS"/>
+        <Button fx:id="openLocation" onAction="#onSelectLocation"/>
+    </HBox>
+
+    <HBox alignment="BASELINE_LEFT">
+        <HBox spacing="20" alignment="CENTER">
+            <Label text="Queue :" minWidth="60" styleClass="field-label"/>
+            <ComboBox fx:id="queueCombo" onAction="#onQueueChanged"/>
+        </HBox>
+    </HBox>
+
+    <HBox alignment="BASELINE_LEFT">
+        <HBox spacing="20" alignment="CENTER">
+            <Label text="Speed limit (MB) :" minWidth="60" styleClass="field-label"/>
+            <TextField fx:id="speedField" text="0"/>
+            <Button fx:id="questionBtnSpeed" onAction="#onQuestionSpeed"/>
+        </HBox>
+    </HBox>
+
+    <HBox alignment="BASELINE_LEFT">
+        <HBox spacing="20" alignment="CENTER">
+            <Label text="chunks :" minWidth="60" styleClass="field-label"/>
+            <TextField fx:id="chunksField" text="0"/>
+            <Button fx:id="questionBtnChunks" onAction="#onQuestionChunks"/>
+        </HBox>
+    </HBox>
 
 </VBox>

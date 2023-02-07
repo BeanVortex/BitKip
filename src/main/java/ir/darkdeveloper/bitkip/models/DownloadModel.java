@@ -21,13 +21,14 @@ public class DownloadModel implements Model {
     private String filePath;
     private int remainingTime;
     private int chunks;
+//    private boolean downloadedInChunks;
+    private StringProperty nameProperty;
     @Builder.Default
     private String queue = "All Downloads";
     private LocalDateTime addDate;
     private LocalDateTime lastTryDate;
     private LocalDateTime completeDate;
 
-    private StringProperty nameProperty;
     private DoubleProperty progressProperty;
     private LongProperty sizeProperty;
     private IntegerProperty remainingTimeProperty;

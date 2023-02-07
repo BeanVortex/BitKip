@@ -37,7 +37,7 @@ public class NewDownload implements FXMLController {
     private Rectangle2D bounds;
     private final int minWidth = 600, minHeight = 400;
 
-    private boolean isSingleFocused = true;
+    private boolean isSingle = true;
 
 
     @Override
@@ -74,12 +74,10 @@ public class NewDownload implements FXMLController {
                 bounds = Screen.getPrimary().getVisualBounds();
         });
 
-        stage.focusedProperty().addListener((o, old, focused) -> {
-            if (!isSingleFocused)
-                switchToMultipleDownload();
-            else
-                switchToSingleDownload();
-        });
+        if (!isSingle)
+            switchToMultipleDownload();
+        else
+            switchToSingleDownload();
 
         WindowUtils.toolbarInits(toolbar, stage, bounds, minWidth, minHeight);
         ResizeUtil.addResizeListener(stage);
@@ -125,12 +123,16 @@ public class NewDownload implements FXMLController {
     }
 
     private void switchToSingleDownload() {
-        isSingleFocused = true;
+        isSingle = true;
+        singleButton.getStyleClass().add("tab_btn_selected");
+        multipleButton.getStyleClass().remove("tab_btn_selected");
         switchDownloadDetails("singleDownload");
     }
 
     private void switchToMultipleDownload() {
-        isSingleFocused = false;
+        isSingle = false;
+        multipleButton.getStyleClass().add("tab_btn_selected");
+        singleButton.getStyleClass().remove("tab_btn_selected");
         switchDownloadDetails("multipleDownload");
     }
 
@@ -145,9 +147,11 @@ public class NewDownload implements FXMLController {
                     return false;
                 return node.getId().equals("download_details");
             });
+            FXMLController controller = loader.getController();
             var box = new VBox();
             box.getChildren().add(details);
             box.setId("download_details");
+            controller.setStage(stage);
             rootChildren.add(box);
         } catch (IOException e) {
             throw new RuntimeException(e);

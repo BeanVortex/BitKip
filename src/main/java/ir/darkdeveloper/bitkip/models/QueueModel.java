@@ -5,10 +5,16 @@ import lombok.*;
 
 @Getter
 @Setter
-@ToString
 @NoArgsConstructor
 @AllArgsConstructor
 public class QueueModel implements Model {
     private int id;
     private String name;
+//    private boolean displayableInDownloadList;
+
+
+    @Override
+    public String toString() {
+        return name;
+    }
 }
