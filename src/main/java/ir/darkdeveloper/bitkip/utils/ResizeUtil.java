@@ -95,7 +95,7 @@ public class ResizeUtil {
                         } else {
                             var prefHeight = mouseEventY + startY;
                             var a = stage.getHeight() > minHeight && prefHeight <= stage.getMaxHeight();
-                            var b = (prefHeight - stage.getHeight() > 0 && prefHeight <= stage.getMaxHeight());
+                            var b = prefHeight - stage.getHeight() > 0 && prefHeight <= stage.getMaxHeight();
                             if (a || b)
                                 stage.setHeight(prefHeight);
                         }
@@ -105,20 +105,16 @@ public class ResizeUtil {
                         double minWidth = stage.getMinWidth() > (border * 2) ? stage.getMinWidth() : (border * 2);
                         if (Cursor.NW_RESIZE.equals(cursorEvent) || Cursor.W_RESIZE.equals(cursorEvent) || Cursor.SW_RESIZE.equals(cursorEvent)) {
                             var prefWidth = stage.getX() - mouseEvent.getScreenX() + stage.getWidth();
-                            if (stage.getMaxWidth() == 0)
-                                stage.setMaxWidth(prefWidth + 1);
                             var a = stage.getWidth() > minWidth && prefWidth <= stage.getMaxWidth();
-                            var b = mouseEventX < 0 && prefWidth >= stage.getMinWidth();
+                            var b = mouseEventX < 0 && prefWidth >= stage.getMinWidth() && prefWidth <= stage.getMaxWidth();
                             if (a || b) {
                                 stage.setWidth(prefWidth);
                                 stage.setX(mouseEvent.getScreenX());
                             }
                         } else {
                             var prefWidth = mouseEventX + startX;
-                            if (stage.getMaxWidth() == 0)
-                                stage.setMaxWidth(prefWidth + 1);
-                            var a = stage.getWidth() >= minWidth && prefWidth <= stage.getMaxWidth();
-                            var b = prefWidth - stage.getWidth() > 0 && prefWidth >= stage.getMinHeight();
+                            var a = stage.getWidth() > minWidth && prefWidth <= stage.getMaxWidth();
+                            var b = prefWidth - stage.getWidth() > 0 && prefWidth <= stage.getMaxWidth();
                             if (a || b)
                                 stage.setWidth(prefWidth);
                         }
