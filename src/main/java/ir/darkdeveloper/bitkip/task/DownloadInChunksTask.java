@@ -4,10 +4,12 @@ import ir.darkdeveloper.bitkip.models.DownloadModel;
 import javafx.concurrent.Task;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.nio.ByteBuffer;
 import java.nio.channels.Channels;
 import java.nio.channels.FileChannel;
 import java.nio.file.Files;
@@ -104,14 +106,27 @@ public class DownloadInChunksTask extends Task<Long> implements DownloadTask {
             return;
         }
 
+
         if (!completed) {
             completed = true;
             if (!file.exists())
                 file.createNewFile();
             for (int i = 0; i < chunks; i++) {
                 var name = filePath + "#" + i;
-                Files.write(Paths.get(filePath), Files.readAllBytes(Paths.get(name)), StandardOpenOption.APPEND);
-                updateProgress(1, 1);
+                try (
+                        var in = new FileInputStream(name);
+                        var out = new FileOutputStream(filePath, file.exists());
+                        var inputChannel = in.getChannel();
+                        var outputChannel = out.getChannel();
+                ) {
+                    var buffer = ByteBuffer.allocateDirect(1048576);
+                    while (inputChannel.read(buffer) != -1) {
+                        buffer.flip();
+                        outputChannel.write(buffer);
+                        buffer.clear();
+                    }
+                    updateProgress(1, 1);
+                }
             }
             for (var f : filePaths)
                 Files.deleteIfExists(f);
