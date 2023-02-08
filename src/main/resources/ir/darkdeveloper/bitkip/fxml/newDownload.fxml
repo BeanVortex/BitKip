@@ -3,13 +3,13 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 <?import java.net.URL?>
-<VBox minHeight="400" prefHeight="400" minWidth="600" prefWidth="600.0"
+<VBox minHeight="500" prefHeight="500" minWidth="600" prefWidth="600.0"
       maxHeight="600"
       xmlns="http://javafx.com/javafx/16"
       xmlns:fx="http://javafx.com/fxml/1" fx:controller="ir.darkdeveloper.bitkip.controllers.NewDownload">
     <stylesheets>
-        <URL value="@../css/newDownload.css"/>
         <URL value="@../css/main.css"/>
+        <URL value="@../css/newDownload.css"/>
     </stylesheets>
 
     <HBox maxHeight="2" minHeight="2" styleClass="csm_toolbar"/>

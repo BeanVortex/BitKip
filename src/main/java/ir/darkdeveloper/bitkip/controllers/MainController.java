@@ -166,7 +166,7 @@ public class MainController implements FXMLController {
 //                .build();
 //        dow.fillProperties();
 //        DownloadsRepo.insertDownload(dow);
-        var controller = FxUtils.newDownloadStage("newDownload.fxml", 600, 400);
+        var controller = FxUtils.newDownloadStage("newDownload.fxml", 600, 500);
         controller.setTableUtils(tableUtils);
 //        tableUtils.addRow(dow);
     }

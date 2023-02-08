@@ -4,7 +4,7 @@
     -fx-padding: 0px 5px 2px 10px;
 }
 
-.csm_toolbar Label {
+.toolbar_menu, .csm_toolbar .label  {
     -fx-text-fill: #FAFAFA;
 }
 
