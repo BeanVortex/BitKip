@@ -1,16 +1,23 @@
 package ir.darkdeveloper.bitkip.controllers;
 
+import ir.darkdeveloper.bitkip.config.AppConfigs;
 import ir.darkdeveloper.bitkip.models.DownloadModel;
 import ir.darkdeveloper.bitkip.models.QueueModel;
 import ir.darkdeveloper.bitkip.repo.QueuesRepo;
+import ir.darkdeveloper.bitkip.utils.FxUtils;
 import ir.darkdeveloper.bitkip.utils.NewDownloadUtils;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
+import javafx.stage.DirectoryChooser;
 import javafx.stage.Stage;
+import org.controlsfx.control.Notifications;
 import org.kordamp.ikonli.javafx.FontIcon;
+
+import java.io.File;
 
 public class SingleDownload implements FXMLController {
 
@@ -70,15 +77,33 @@ public class SingleDownload implements FXMLController {
         questionBtnSpeed.setGraphic(new FontIcon());
         questionBtnChunks.setGraphic(new FontIcon());
         questionBtnBytes.setGraphic(new FontIcon());
-        var queues = QueuesRepo.getQueues();
+        var queues = QueuesRepo.getQueues().stream().filter(QueueModel::isCanAddDownload).toList();
         queueCombo.getItems().addAll(queues);
         queueCombo.setValue(queues.get(0));
+        determineLocation();
         NewDownloadUtils.validInputChecks(chunksField, bytesField, speedField);
+    }
+
+    private void determineLocation() {
+        locationField.setText(AppConfigs.downloadPath);
     }
 
 
     @FXML
-    private void onSelectLocation() {
+    private void onSelectLocation(ActionEvent e) {
+        var dirChooser = new DirectoryChooser();
+        dirChooser.setTitle("Select download save location");
+        dirChooser.setInitialDirectory(new File(AppConfigs.downloadPath));
+        var selectedDir = dirChooser.showDialog(FxUtils.getStageFromEvent(e));
+        if (selectedDir != null) {
+                var path = selectedDir.getPath();
+                locationField.setText(path);
+                return;
+        }
+        Notifications.create()
+                .title("No Directory")
+                .text("Location is wrong!")
+                .showError();
     }
 
     @FXML

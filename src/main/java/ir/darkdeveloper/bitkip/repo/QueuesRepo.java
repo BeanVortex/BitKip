@@ -12,8 +12,14 @@ import static ir.darkdeveloper.bitkip.repo.DatabaseHelper.*;
 public class QueuesRepo {
     private static final DatabaseHelper dbHelper = new DatabaseHelper();
 
-    public static void createTable() {
+    public static void createTableAndDefaultRecords() {
         dbHelper.createQueuesTable();
+        insertDefaultQueues(new QueueModel("All Downloads", false, true));
+        insertDefaultQueues(new QueueModel("Compressed", false, false));
+        insertDefaultQueues(new QueueModel("Programs", false, false));
+        insertDefaultQueues(new QueueModel("Videos", false, false));
+        insertDefaultQueues(new QueueModel("Music", false, false));
+        insertDefaultQueues(new QueueModel("Docs", false, false));
     }
 
     public static void insertQueue(QueueModel queue) {
@@ -22,6 +28,19 @@ public class QueuesRepo {
                 ") VALUES(\"" +
                 queue.getName() +
                 "\");";
+        dbHelper.insert(sql, queue);
+    }
+
+    private static void insertDefaultQueues(QueueModel queue) {
+        var sql = "INSERT OR IGNORE INTO " + QUEUES_TABLE_NAME + " (" +
+                COL_NAME + "," +
+                COL_EDITABLE + "," +
+                COL_CAN_ADD_DOWN  +
+                ") VALUES(\"" +
+                queue.getName() + "\"," +
+                queue.isEditable() + "," +
+                queue.isCanAddDownload() +
+                ");";
         dbHelper.insert(sql, queue);
     }
 
@@ -68,6 +87,8 @@ public class QueuesRepo {
     private static QueueModel createQueueModel(ResultSet rs) throws SQLException {
         var id = rs.getInt(COL_ID);
         var name = rs.getString(COL_NAME);
-        return new QueueModel(id, name);
+        var editable = rs.getBoolean(COL_EDITABLE);
+        var canAddDownload = rs.getBoolean(COL_CAN_ADD_DOWN);
+        return new QueueModel(id, name, editable, canAddDownload);
     }
 }

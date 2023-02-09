@@ -1,5 +1,6 @@
 package ir.darkdeveloper.bitkip;
 
+import ir.darkdeveloper.bitkip.config.AppConfigs;
 import ir.darkdeveloper.bitkip.models.DownloadModel;
 import ir.darkdeveloper.bitkip.repo.DatabaseHelper;
 import ir.darkdeveloper.bitkip.repo.DownloadsRepo;
@@ -21,6 +22,7 @@ public class BitKip extends Application {
     @Override
     public void start(Stage stage) {
         FxUtils.switchSceneToMain(stage, "main.fxml");
+        AppConfigs.setHostServices(getHostServices());
         stage.initStyle(StageStyle.UNDECORATED);
         stage.setMinHeight(515);
         stage.setMinWidth(853);
@@ -28,7 +30,7 @@ public class BitKip extends Application {
         ResizeUtil.addResizeListener(stage);
         IOUtils.createSaveLocations();
         DownloadsRepo.createTable();
-        QueuesRepo.createTable();
+        QueuesRepo.createTableAndDefaultRecords();
 //        var logoPath = getResource("images/logo.png");
 //        if (logoPath != null)
 //            stage.getIcons().add(new Image(logoPath.toExternalForm()));

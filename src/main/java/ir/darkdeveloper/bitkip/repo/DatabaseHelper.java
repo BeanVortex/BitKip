@@ -28,6 +28,8 @@ public class DatabaseHelper {
     static final String COL_ADD_DATE = "add_Date";
     static final String COL_LAST_TRY_DATE = "last_try_date";
     static final String COL_COMPLETE_DATE = "complete_date";
+    static final String COL_EDITABLE = "editable";
+    static final String COL_CAN_ADD_DOWN = "can_add_download";
 
     private static final Logger log = Logger.getLogger(DatabaseHelper.class.getName());
 
@@ -56,7 +58,9 @@ public class DatabaseHelper {
     void createQueuesTable() {
         var sql = "CREATE TABLE IF NOT EXISTS " + QUEUES_TABLE_NAME + "("
                 + COL_ID + " INTEGER PRIMARY KEY AUTOINCREMENT,"
-                + COL_NAME + " VARCHAR" +
+                + COL_NAME + " VARCHAR UNIQUE,"
+                + COL_EDITABLE + " INTEGER,"
+                + COL_CAN_ADD_DOWN + " INTEGER" +
                 ");";
         createTable(sql);
     }
