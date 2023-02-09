@@ -1,23 +1,22 @@
 package ir.darkdeveloper.bitkip;
 
 import ir.darkdeveloper.bitkip.config.AppConfigs;
-import ir.darkdeveloper.bitkip.models.DownloadModel;
-import ir.darkdeveloper.bitkip.repo.DatabaseHelper;
 import ir.darkdeveloper.bitkip.repo.DownloadsRepo;
 import ir.darkdeveloper.bitkip.repo.QueuesRepo;
 import ir.darkdeveloper.bitkip.utils.FxUtils;
 import ir.darkdeveloper.bitkip.utils.IOUtils;
 import ir.darkdeveloper.bitkip.utils.ResizeUtil;
 import javafx.application.Application;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Scene;
-import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 
 import java.net.URL;
 
 public class BitKip extends Application {
+
+    // todo: limited download in chunks
+    // todo: remaining time
+    // todo: relation of download to query : one to many
 
     @Override
     public void start(Stage stage) {

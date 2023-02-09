@@ -25,6 +25,12 @@
     -fx-icon-size: 22;
 }
 
+#newQueue .ikonli-font-icon {
+    -fx-icon-code: "fas-plus";
+    -fx-icon-color: #78909C;
+    -fx-icon-size: 22;
+}
+
 #questionBtnSpeed .ikonli-font-icon,
 #questionBtnChunks .ikonli-font-icon,
 #questionBtnUrl .ikonli-font-icon,
@@ -38,6 +44,7 @@
 #questionBtnSpeed,
 #questionBtnChunks,
 #questionBtnUrl,
+#newQueue,
 #questionBtnBytes {
     -fx-border-color: #78909C;
     -fx-background-color: transparent;
@@ -50,6 +57,7 @@
 #questionBtnSpeed:hover,
 #questionBtnChunks:hover,
 #questionBtnUrl:hover,
+#newQueue:hover,
 #questionBtnBytes:hover {
     -fx-background-color: #546E7A;
     -fx-border-color: #546E7A;
@@ -59,6 +67,7 @@
 #questionBtnSpeed:hover .ikonli-font-icon,
 #questionBtnChunks:hover .ikonli-font-icon,
 #questionBtnUrl:hover .ikonli-font-icon,
+#newQueue:hover .ikonli-font-icon,
 #questionBtnBytes:hover .ikonli-font-icon {
     -fx-icon-color: #FAFAFA;
 }
@@ -67,6 +76,7 @@
 #questionBtnSpeed:pressed,
 #questionBtnChunks:pressed,
 #questionBtnUrl:pressed,
+#newQueue:pressed,
 #questionBtnBytes:pressed  {
     -fx-background-color: #37474F;
     -fx-border-color: #37474F;

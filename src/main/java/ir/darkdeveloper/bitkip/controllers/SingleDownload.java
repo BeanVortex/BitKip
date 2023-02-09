@@ -6,6 +6,7 @@ import ir.darkdeveloper.bitkip.models.QueueModel;
 import ir.darkdeveloper.bitkip.repo.QueuesRepo;
 import ir.darkdeveloper.bitkip.utils.FxUtils;
 import ir.darkdeveloper.bitkip.utils.NewDownloadUtils;
+import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
@@ -18,9 +19,12 @@ import org.controlsfx.control.Notifications;
 import org.kordamp.ikonli.javafx.FontIcon;
 
 import java.io.File;
+import java.util.concurrent.CompletableFuture;
 
 public class SingleDownload implements FXMLController {
 
+    @FXML
+    private Button newQueue;
     @FXML
     private Button cancelBtn;
     @FXML
@@ -53,7 +57,7 @@ public class SingleDownload implements FXMLController {
     private Button openLocation;
     private Stage stage;
 
-    private DownloadModel downloadModel;
+    private final DownloadModel downloadModel = new DownloadModel();
 
     @Override
     public void setStage(Stage stage) {
@@ -68,24 +72,38 @@ public class SingleDownload implements FXMLController {
 
     @Override
     public void initAfterStage() {
-
     }
 
     @Override
     public void initialize() {
+        var queues = QueuesRepo.getQueues().stream().filter(QueueModel::isCanAddDownload).toList();
+        queueCombo.getItems().addAll(queues);
+        queueCombo.setValue(queues.get(0));
         openLocation.setGraphic(new FontIcon());
         questionBtnSpeed.setGraphic(new FontIcon());
         questionBtnChunks.setGraphic(new FontIcon());
         questionBtnBytes.setGraphic(new FontIcon());
-        var queues = QueuesRepo.getQueues().stream().filter(QueueModel::isCanAddDownload).toList();
-        queueCombo.getItems().addAll(queues);
-        queueCombo.setValue(queues.get(0));
-        determineLocation();
+        newQueue.setGraphic(new FontIcon());
+        downloadBtn.setDisable(true);
+        addBtn.setDisable(true);
         NewDownloadUtils.validInputChecks(chunksField, bytesField, speedField);
+        NewDownloadUtils.prepareLinkFromClipboard(urlField);
+        autoFillLocationAndSizeAndName();
+        urlField.textProperty().addListener((o, oldValue, newValue) -> {
+            if (!oldValue.isBlank() && !newValue.isBlank())
+                autoFillLocationAndSizeAndName();
+        });
     }
 
-    private void determineLocation() {
-        locationField.setText(AppConfigs.downloadPath);
+    private void autoFillLocationAndSizeAndName() {
+        var fileNameLocationFuture = NewDownloadUtils.prepareFileName(urlField, nameField)
+                .thenAccept(fileName -> NewDownloadUtils.determineLocation(locationField, fileName));
+        var sizeFuture = NewDownloadUtils.prepareSize(urlField, sizeLabel, downloadModel);
+        CompletableFuture.allOf(fileNameLocationFuture, sizeFuture)
+                .whenComplete((unused, throwable) -> {
+                    downloadBtn.setDisable(false);
+                    addBtn.setDisable(false);
+                });
     }
 
 
@@ -96,9 +114,9 @@ public class SingleDownload implements FXMLController {
         dirChooser.setInitialDirectory(new File(AppConfigs.downloadPath));
         var selectedDir = dirChooser.showDialog(FxUtils.getStageFromEvent(e));
         if (selectedDir != null) {
-                var path = selectedDir.getPath();
-                locationField.setText(path);
-                return;
+            var path = selectedDir.getPath();
+            locationField.setText(path);
+            return;
         }
         Notifications.create()
                 .title("No Directory")
@@ -121,5 +139,9 @@ public class SingleDownload implements FXMLController {
 
     @FXML
     private void onQuestionBytes() {
+    }
+
+    @FXML
+    private void onNewQueue(ActionEvent actionEvent) {
     }
 }

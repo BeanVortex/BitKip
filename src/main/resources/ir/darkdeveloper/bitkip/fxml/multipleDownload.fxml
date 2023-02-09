@@ -44,6 +44,7 @@
         <HBox spacing="20" alignment="CENTER">
             <Label text="Queue :" minWidth="60" styleClass="field-label"/>
             <ComboBox fx:id="queueCombo" onAction="#onQueueChanged"/>
+            <Button fx:id="newQueue" onAction="#onNewQueue"/>
         </HBox>
     </HBox>
 

@@ -32,6 +32,16 @@
         <HBox spacing="20" alignment="CENTER">
             <Label text="Queue :" minWidth="60" styleClass="field-label"/>
             <ComboBox fx:id="queueCombo" onAction="#onQueueChanged"/>
+            <Button fx:id="newQueue" onAction="#onNewQueue"/>
+        </HBox>
+    </HBox>
+
+
+    <HBox alignment="BASELINE_LEFT">
+        <HBox spacing="20" alignment="CENTER">
+            <Label text="chunks :" minWidth="60" styleClass="field-label"/>
+            <TextField fx:id="chunksField" text="0"/>
+            <Button fx:id="questionBtnChunks" onAction="#onQuestionChunks"/>
         </HBox>
     </HBox>
 
@@ -42,15 +52,6 @@
             <Button fx:id="questionBtnSpeed" onAction="#onQuestionSpeed"/>
         </HBox>
     </HBox>
-
-    <HBox alignment="BASELINE_LEFT">
-        <HBox spacing="20" alignment="CENTER">
-            <Label text="chunks :" minWidth="60" styleClass="field-label"/>
-            <TextField fx:id="chunksField" text="0"/>
-            <Button fx:id="questionBtnChunks" onAction="#onQuestionChunks"/>
-        </HBox>
-    </HBox>
-
 
     <HBox spacing="15" alignment="BASELINE_LEFT">
         <Label text="Download till :" minWidth="60" styleClass="field-label"/>

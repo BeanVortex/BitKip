@@ -1,25 +1,20 @@
 package ir.darkdeveloper.bitkip.utils;
 
 import java.io.File;
+import java.text.DecimalFormat;
 import java.util.List;
 import java.util.logging.Logger;
 
 import static ir.darkdeveloper.bitkip.config.AppConfigs.dataPath;
-import static ir.darkdeveloper.bitkip.config.AppConfigs.downloadPath;
+import static ir.darkdeveloper.bitkip.config.AppConfigs.*;
 
 
 public class IOUtils {
     private static final Logger log = Logger.getLogger(IOUtils.class.getName());
 
-    private static final String videosPath = downloadPath + File.separator + "Videos";
-    private static final String programsPath = downloadPath + File.separator + "Programs";
-    private static final String compressedPath = downloadPath + File.separator + "Compressed";
-    private static final String musicPath = downloadPath + File.separator + "Music";
-    private static final String documentPath = downloadPath + File.separator + "Documents";
-
 
     public static void createSaveLocations() {
-        List.of(downloadPath, videosPath, programsPath, compressedPath, musicPath, documentPath, dataPath)
+        List.of(downloadPath, videosPath, programsPath, compressedPath, musicPath, othersPath, documentPath, dataPath)
                 .forEach(IOUtils::mkdir);
     }
 
@@ -32,4 +27,10 @@ public class IOUtils {
     }
 
 
+    public static String formatFileSize(long fileSize) {
+        if(fileSize <= 0) return "0";
+        final var units = new String[] { "B", "kB", "MB", "GB", "TB" };
+        var digitGroups = (int) (Math.log10(fileSize)/Math.log10(1024));
+        return new DecimalFormat("#,##0.#").format(fileSize/Math.pow(1024, digitGroups)) + " " + units[digitGroups];
+    }
 }

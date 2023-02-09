@@ -15,6 +15,8 @@ import org.kordamp.ikonli.javafx.FontIcon;
 
 public class MultipleDownload implements FXMLController {
     @FXML
+    private Button newQueue;
+    @FXML
     private TextField startField;
     @FXML
     private TextField endField;
@@ -51,7 +53,8 @@ public class MultipleDownload implements FXMLController {
         openLocation.setGraphic(new FontIcon());
         questionBtnSpeed.setGraphic(new FontIcon());
         questionBtnUrl.setGraphic(new FontIcon());
-        var queues = QueuesRepo.getQueues();
+        newQueue.setGraphic(new FontIcon());
+        var queues = QueuesRepo.getQueues().stream().filter(QueueModel::isCanAddDownload).toList();
         queueCombo.getItems().addAll(queues);
         queueCombo.setValue(queues.get(0));
         NewDownloadUtils.validInputChecks(chunksField, null, speedField);
@@ -93,7 +96,9 @@ public class MultipleDownload implements FXMLController {
     }
 
     @FXML
-
     private void onQuestionChunks(ActionEvent actionEvent) {
+    }
+    @FXML
+    private void onNewQueue(ActionEvent actionEvent) {
     }
 }

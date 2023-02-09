@@ -20,6 +20,7 @@ public class QueuesRepo {
         insertDefaultQueues(new QueueModel("Videos", false, false));
         insertDefaultQueues(new QueueModel("Music", false, false));
         insertDefaultQueues(new QueueModel("Docs", false, false));
+        insertDefaultQueues(new QueueModel("Others", false, false));
     }
 
     public static void insertQueue(QueueModel queue) {
