@@ -64,11 +64,12 @@
             <Label fx:id="sizeLabel" styleClass="field-label"/>
         </HBox>
     </HBox>
-    <HBox alignment="CENTER">
+
+    <HBox alignment="BOTTOM_CENTER" style="-fx-padding: 15 0 0 0">
         <HBox spacing="20" alignment="CENTER">
-            <Button text="Cancel" styleClass="cancel_btn"/>
-            <Button text="Add" styleClass="add_btn"/>
-            <Button text="Download Now" styleClass="download_now_btn"/>
+            <Button text="Cancel" styleClass="cancel_btn" fx:id="cancelBtn"/>
+            <Button text="Add" styleClass="add_btn" fx:id="addBtn"/>
+            <Button text="Download Now" styleClass="download_now_btn" fx:id="downloadBtn"/>
         </HBox>
     </HBox>
 </VBox>

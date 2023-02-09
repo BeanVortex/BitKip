@@ -3,9 +3,7 @@ package ir.darkdeveloper.bitkip.controllers;
 import ir.darkdeveloper.bitkip.models.DownloadModel;
 import ir.darkdeveloper.bitkip.models.QueueModel;
 import ir.darkdeveloper.bitkip.repo.QueuesRepo;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
-import javafx.event.ActionEvent;
+import ir.darkdeveloper.bitkip.utils.NewDownloadUtils;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
@@ -14,10 +12,14 @@ import javafx.scene.control.TextField;
 import javafx.stage.Stage;
 import org.kordamp.ikonli.javafx.FontIcon;
 
-import java.util.List;
-
 public class SingleDownload implements FXMLController {
 
+    @FXML
+    private Button cancelBtn;
+    @FXML
+    private Button addBtn;
+    @FXML
+    private Button downloadBtn;
     @FXML
     private Label sizeLabel;
     @FXML
@@ -71,38 +73,9 @@ public class SingleDownload implements FXMLController {
         var queues = QueuesRepo.getQueues();
         queueCombo.getItems().addAll(queues);
         queueCombo.setValue(queues.get(0));
-        validInputChecks();
+        NewDownloadUtils.validInputChecks(chunksField, bytesField, speedField);
     }
 
-    private void validInputChecks() {
-        chunksField.textProperty().addListener((o, old, newValue) -> {
-            if (!newValue.matches("\\d*"))
-                chunksField.setText(newValue.replaceAll("\\D", ""));
-            if (!chunksField.getText().isBlank()) {
-                var chunks = Integer.parseInt(chunksField.getText());
-                var cores = Runtime.getRuntime().availableProcessors();
-                if (chunks > cores * 2)
-                    chunks = cores * 2;
-                chunksField.setText(chunks + "");
-            }
-            bytesField.setDisable(!chunksField.getText().equals("0"));
-            speedField.setDisable(!chunksField.getText().equals("0"));
-        });
-        chunksField.focusedProperty().addListener((o, old, newValue) -> {
-            if (!newValue && chunksField.getText().isBlank())
-                chunksField.setText("0");
-        });
-        speedField.textProperty().addListener((o, old, newValue) -> {
-            if (!newValue.matches("\\d*"))
-                chunksField.setText(newValue.replaceAll("\\D", ""));
-        });
-
-        speedField.focusedProperty().addListener((o, old, newValue) -> {
-            if (!newValue && speedField.getText().isBlank())
-                speedField.setText("0");
-        });
-
-    }
 
     @FXML
     private void onSelectLocation() {

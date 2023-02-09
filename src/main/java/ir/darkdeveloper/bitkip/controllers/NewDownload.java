@@ -74,10 +74,7 @@ public class NewDownload implements FXMLController {
                 bounds = Screen.getPrimary().getVisualBounds();
         });
 
-        if (!isSingle)
-            switchToMultipleDownload();
-        else
-            switchToSingleDownload();
+        switchToSingleDownload();
 
         WindowUtils.toolbarInits(toolbar, stage, bounds, minWidth, minHeight);
         ResizeUtil.addResizeListener(stage);
@@ -114,12 +111,14 @@ public class NewDownload implements FXMLController {
 
     @FXML
     private void showSingle() {
-        switchToSingleDownload();
+        if (!isSingle)
+            switchToSingleDownload();
     }
 
     @FXML
     private void showMultiple() {
-        switchToMultipleDownload();
+        if (isSingle)
+            switchToMultipleDownload();
     }
 
     private void switchToSingleDownload() {
