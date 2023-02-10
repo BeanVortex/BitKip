@@ -4,7 +4,7 @@
 <?import javafx.scene.layout.*?>
 
 <?import javafx.geometry.Insets?>
-<VBox minHeight="515" prefHeight="515" minWidth="853" prefWidth="853.0" stylesheets="@../css/main.css"
+<VBox minHeight="515" prefHeight="515" minWidth="883" prefWidth="883" stylesheets="@../css/main.css"
       xmlns="http://javafx.com/javafx/16"
       xmlns:fx="http://javafx.com/fxml/1" fx:controller="ir.darkdeveloper.bitkip.controllers.MainController">
 
@@ -29,12 +29,10 @@
     <HBox fx:id="mainBox">
         <StackPane>
             <HBox>
-                <VBox prefWidth="100" minWidth="100" styleClass="side">
-                </VBox>
-                <TableView minWidth="750" prefWidth="Infinity" fx:id="contentTable">
-                    <columns>
-                    </columns>
-                </TableView>
+                <ScrollPane minWidth="130" prefWidth="100" fx:id="sideScrollPane">
+                    <VBox prefWidth="130" minWidth="100" styleClass="side" fx:id="side" alignment="TOP_CENTER"/>
+                </ScrollPane>
+                <TableView minWidth="750" prefWidth="Infinity" fx:id="contentTable"/>
             </HBox>
             <Button fx:id="actionBtn" onAction="#doAction">
                 <StackPane.margin>

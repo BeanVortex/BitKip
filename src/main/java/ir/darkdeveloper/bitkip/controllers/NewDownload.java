@@ -8,8 +8,10 @@ import javafx.fxml.FXMLLoader;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.Parent;
 import javafx.scene.control.Button;
+import javafx.scene.effect.DropShadow;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
+import javafx.scene.paint.Color;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
 import org.kordamp.ikonli.javafx.FontIcon;
@@ -59,6 +61,9 @@ public class NewDownload implements FXMLController {
 
     @Override
     public void initAfterStage() {
+        stage.getScene().getRoot().setEffect(new DropShadow());
+        stage.getScene().setFill(Color.TRANSPARENT);
+
         stage.widthProperty().addListener((ob, o, n) -> {
             var width = n.longValue();
             toolbar.setPrefWidth(width);

@@ -1,6 +1,8 @@
 package ir.darkdeveloper.bitkip.controllers;
 
 import ir.darkdeveloper.bitkip.models.DownloadModel;
+import ir.darkdeveloper.bitkip.repo.DownloadsRepo;
+import ir.darkdeveloper.bitkip.repo.QueuesRepo;
 import ir.darkdeveloper.bitkip.utils.FxUtils;
 import ir.darkdeveloper.bitkip.utils.MenuUtils;
 import ir.darkdeveloper.bitkip.utils.TableUtils;
@@ -8,24 +10,32 @@ import ir.darkdeveloper.bitkip.utils.WindowUtils;
 import javafx.animation.TranslateTransition;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
+import javafx.geometry.Insets;
+import javafx.geometry.Orientation;
 import javafx.geometry.Pos;
 import javafx.geometry.Rectangle2D;
-import javafx.scene.control.Button;
-import javafx.scene.control.ScrollBar;
-import javafx.scene.control.TableView;
+import javafx.scene.control.*;
+import javafx.scene.input.MouseButton;
 import javafx.scene.input.ScrollEvent;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
+import javafx.scene.layout.VBox;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 import org.kordamp.ikonli.javafx.FontIcon;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class MainController implements FXMLController {
 
 
+    @FXML
+    private ScrollPane sideScrollPane;
+    @FXML
+    private VBox side;
     @FXML
     private Button operationMenu;
     @FXML
@@ -95,6 +105,53 @@ public class MainController implements FXMLController {
         mainBox.setPrefHeight(bounds.getHeight());
         tableUtils = new TableUtils(contentTable);
         tableUtils.tableInits();
+        initSides();
+    }
+
+    private void initSides() {
+        var vScrollBar = new ScrollBar();
+        vScrollBar.setOrientation(Orientation.VERTICAL);
+        vScrollBar.minProperty().bind(sideScrollPane.vminProperty());
+        vScrollBar.maxProperty().bind(sideScrollPane.vmaxProperty());
+        vScrollBar.visibleAmountProperty().bind(sideScrollPane.heightProperty().divide(side.heightProperty()));
+        sideScrollPane.vvalueProperty().bindBidirectional(vScrollBar.valueProperty());
+
+        var hScrollBar = new ScrollBar();
+        hScrollBar.setOrientation(Orientation.HORIZONTAL);
+        hScrollBar.minProperty().bind(sideScrollPane.hminProperty());
+        hScrollBar.maxProperty().bind(sideScrollPane.hmaxProperty());
+        hScrollBar.visibleAmountProperty().bind(sideScrollPane.widthProperty().divide(side.heightProperty()));
+        sideScrollPane.hvalueProperty().bindBidirectional(hScrollBar.valueProperty());
+
+        sideScrollPane.setVbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
+        sideScrollPane.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
+        sideScrollPane.setPadding(Insets.EMPTY);
+        var queueButtons = new ArrayList<Button>();
+        QueuesRepo.getQueues().forEach(queueModel -> {
+            var btn = new Button(queueModel.getName());
+            btn.getStyleClass().add("side_queue");
+            if (queueModel.getName().equals("All Downloads"))
+                btn.getStyleClass().add("selected_queue");
+            btn.setPrefWidth(side.getPrefWidth());
+            btn.setPrefHeight(60);
+            btn.setOnMouseClicked(event -> {
+                if (event.getClickCount() == 2)
+                    return;
+                var downloadsData = DownloadsRepo.getDownloadsByQueue(queueModel.getId());
+                tableUtils.setDownloads(downloadsData);
+                if (!queueButtons.isEmpty()) {
+                    btn.getStyleClass().add("selected_queue");
+                    queueButtons.forEach(otherBtn -> {
+                        if (!btn.equals(otherBtn))
+                            otherBtn.getStyleClass().remove("selected_queue");
+                    });
+                }
+            });
+            queueButtons.add(btn);
+            side.getChildren().add(btn);
+        });
+
+
     }
 
 

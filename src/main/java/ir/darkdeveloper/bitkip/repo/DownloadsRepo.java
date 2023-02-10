@@ -81,7 +81,7 @@ public class DownloadsRepo {
         return fetchDownloads(sql);
     }
 
-    public static List<DownloadModel> getDownloadsByQueue(Long id) {
+    public static List<DownloadModel> getDownloadsByQueue(int id) {
         var sql = """
                 SELECT *, q.name as queue_name
                 FROM downloads d

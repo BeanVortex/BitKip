@@ -92,4 +92,10 @@ public class TableUtils {
         data.add(download);
         contentTable.sort();
     }
+
+    public void setDownloads(List<DownloadModel> downloadModels){
+        contentTable.getItems().setAll(downloadModels);
+        data.setAll(downloadModels);
+        contentTable.sort();
+    }
 }

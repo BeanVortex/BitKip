@@ -4,7 +4,7 @@
     -fx-padding: 0px 5px 2px 10px;
 }
 
-.toolbar_menu, .csm_toolbar .label  {
+.toolbar_menu, .csm_toolbar .label {
     -fx-text-fill: #FAFAFA;
 }
 
@@ -42,6 +42,25 @@
 .side {
     -fx-background-color: #78909C;
     -fx-background-radius: 0 0 15px 0;
+}
+
+.side .side_queue {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-border-radius: 0;
+    -fx-background-radius: 0;
+    -fx-cursor: hand;
+    -fx-text-fill: #fafafa;
+    -fx-font-weight: bold;
+}
+
+.side .side_queue.selected_queue{
+    -fx-background-color: #fafafa;
+    -fx-text-fill: #37474F;
+}
+
+#sideScrollPane .scroll-bar:vertical {
+    -fx-alignment: LEFT;
 }
 
 #actionBtn {

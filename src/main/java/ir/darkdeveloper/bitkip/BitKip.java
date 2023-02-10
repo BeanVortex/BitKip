@@ -16,7 +16,7 @@ public class BitKip extends Application {
 
     // todo: limited download in chunks
     // todo: remaining time
-    // todo: a download has maximum 3 queues(ALl downloads, extension queue, custom queue)
+    // todo: scrollview in new download
 
     @Override
     public void start(Stage stage) {
@@ -24,7 +24,7 @@ public class BitKip extends Application {
         AppConfigs.setHostServices(getHostServices());
         stage.initStyle(StageStyle.UNDECORATED);
         stage.setMinHeight(515);
-        stage.setMinWidth(853);
+        stage.setMinWidth(883);
         stage.setResizable(true);
         ResizeUtil.addResizeListener(stage);
         IOUtils.createSaveLocations();
