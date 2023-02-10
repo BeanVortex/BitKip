@@ -69,8 +69,13 @@ public class DownloadsRepo {
     }
 
     public static List<DownloadModel> getDownloadsByQueue(Long id) {
-        var sql = "SELECT * FROM " + DOWNLOADS_TABLE_NAME + " INNER JOIN queue_download ON " +
-                DOWNLOADS_TABLE_NAME + ".id=" + "queue_download.download_id " + " WHERE queue_download.queue_id=" + id + ";";
+        var sql = """
+                SELECT *, q.name as queue_name
+                FROM downloads d
+                         INNER JOIN queue_download qd ON d.id = qd.download_id
+                         INNER JOIN queues q ON q.id = qd.queue_id
+                WHERE qd.queue_id = %d;
+                """.formatted(id);
         return fetchDownloads(sql);
     }
 

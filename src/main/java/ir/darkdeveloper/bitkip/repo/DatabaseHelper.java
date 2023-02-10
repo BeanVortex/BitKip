@@ -32,7 +32,9 @@ public class DatabaseHelper {
 
     Connection openConnection() throws SQLException {
         var path = AppConfigs.dataPath + File.separator + "bitkip.db";
-        return DriverManager.getConnection("jdbc:sqlite:" + path);
+        var conn = DriverManager.getConnection("jdbc:sqlite:" + path);
+        conn.createStatement().execute("PRAGMA foreign_keys=ON;");
+        return conn;
     }
 
     void createDownloadsTable() {
@@ -62,7 +64,15 @@ public class DatabaseHelper {
     }
 
     void createQueueDownloadTable() {
-        var sql = "CREATE TABLE IF NOT EXISTS queue_download(download_id INTEGER, queue_id INTEGER);";
+        var sql = """
+                CREATE TABLE IF NOT EXISTS queue_download
+                (
+                    download_id INTEGER,
+                    queue_id    INTEGER,
+                    FOREIGN KEY (download_id) REFERENCES downloads(id) ON DELETE CASCADE,
+                    FOREIGN KEY (queue_id) REFERENCES queues(id) ON DELETE CASCADE
+                );
+                """;
         createTable(sql);
     }
 
