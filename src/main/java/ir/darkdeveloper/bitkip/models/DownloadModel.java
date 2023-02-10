@@ -5,6 +5,9 @@ import lombok.*;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
 
 @Getter
 @Setter
@@ -21,10 +24,9 @@ public class DownloadModel implements Model {
     private String filePath;
     private int remainingTime;
     private int chunks;
-//    private boolean downloadedInChunks;
+    //    private boolean downloadedInChunks;
     private StringProperty nameProperty;
-    @Builder.Default
-    private String queue = "All Downloads";
+    private List<QueueModel> queue;
     private LocalDateTime addDate;
     private LocalDateTime lastTryDate;
     private LocalDateTime completeDate;
@@ -49,6 +51,21 @@ public class DownloadModel implements Model {
         addDateProperty = new SimpleStringProperty(DATE_FORMATTER.format(addDate));
         lastTryDateProperty = new SimpleStringProperty(DATE_FORMATTER.format(lastTryDate));
         completeDateProperty = new SimpleStringProperty(DATE_FORMATTER.format(completeDate));
+    }
 
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        var that = (DownloadModel) o;
+        // for distinction
+        that.getQueue().addAll(queue);
+        return id == that.id;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
     }
 }

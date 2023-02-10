@@ -1,11 +1,13 @@
 package ir.darkdeveloper.bitkip.repo;
 
 import ir.darkdeveloper.bitkip.models.DownloadModel;
+import ir.darkdeveloper.bitkip.models.QueueModel;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import static ir.darkdeveloper.bitkip.repo.DatabaseHelper.*;
@@ -25,7 +27,6 @@ public class DownloadsRepo {
                 COL_URL + "," +
                 COL_PATH + "," +
                 COL_CHUNKS + "," +
-                COL_QUEUE + "," +
                 COL_ADD_DATE + "," +
                 COL_LAST_TRY_DATE + "," +
                 COL_COMPLETE_DATE + ")" +
@@ -36,7 +37,6 @@ public class DownloadsRepo {
                 download.getUrl() + "\",\"" +
                 download.getFilePath() + "\"," +
                 download.getChunks() + ",\"" +
-                download.getQueue() + "\",\"" +
                 download.getAddDate().toString() + "\",\"" +
                 download.getLastTryDate().toString() + "\",\"" +
                 download.getCompleteDate().toString() + "\"" +
@@ -58,23 +58,30 @@ public class DownloadsRepo {
     }
 
     public static List<DownloadModel> getDownloads() {
-        var sql = "SELECT * FROM " + DOWNLOADS_TABLE_NAME + ";";
+        var sql = """
+                SELECT *, q.name as queue_name
+                FROM downloads
+                         INNER JOIN queue_download ON
+                    downloads.id = queue_download.download_id
+                         INNER JOIN queues q on q.id = queue_download.queue_id;
+                                """;
         return fetchDownloads(sql);
     }
 
-    public static List<DownloadModel> getDownloadsByQueue(String queue) {
-        var sql = "SELECT * FROM " + DOWNLOADS_TABLE_NAME + " WHERE " + COL_QUEUE + "=" + queue + ";";
+    public static List<DownloadModel> getDownloadsByQueue(Long id) {
+        var sql = "SELECT * FROM " + DOWNLOADS_TABLE_NAME + " INNER JOIN queue_download ON " +
+                DOWNLOADS_TABLE_NAME + ".id=" + "queue_download.download_id " + " WHERE queue_download.queue_id=" + id + ";";
         return fetchDownloads(sql);
     }
 
-    private static ArrayList<DownloadModel> fetchDownloads(String sql) {
+    private static List<DownloadModel> fetchDownloads(String sql) {
         var list = new ArrayList<DownloadModel>();
         try (var con = dbHelper.openConnection();
              var stmt = con.createStatement();
              var rs = stmt.executeQuery(sql)) {
             while (rs.next())
                 list.add(createDownload(rs));
-            return list;
+            return list.stream().distinct().toList();
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -82,14 +89,14 @@ public class DownloadsRepo {
     }
 
     public static void updateDownloadQueue(int id, String queue) {
-        var sql = "UPDATE " + DOWNLOADS_TABLE_NAME + " SET " + COL_QUEUE + "=\"" + queue + "\""
-                + " WHERE " + COL_ID + "=" + id + ";";
-        try (var con = dbHelper.openConnection();
-             var stmt = con.createStatement()) {
-            stmt.executeUpdate(sql);
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
+//        var sql = "UPDATE " + DOWNLOADS_TABLE_NAME + " SET " + COL_QUEUE + "=\"" + queue + "\""
+//                + " WHERE " + COL_ID + "=" + id + ";";
+//        try (var con = dbHelper.openConnection();
+//             var stmt = con.createStatement()) {
+//            stmt.executeUpdate(sql);
+//        } catch (SQLException e) {
+//            e.printStackTrace();
+//        }
     }
 
     public static void deleteDownload(DownloadModel download) {
@@ -110,13 +117,17 @@ public class DownloadsRepo {
         var url = rs.getString(COL_URL);
         var filePath = rs.getString(COL_PATH);
         var chunks = rs.getInt(COL_CHUNKS);
-        var queue = rs.getString(COL_QUEUE);
+        var queueId = rs.getInt("queue_id");
+        var queueName = rs.getString("queue_name");
+        var queueEditable = rs.getBoolean(COL_EDITABLE);
+        var queueCanAddDown = rs.getBoolean(COL_CAN_ADD_DOWN);
+        var queue = new QueueModel(queueId, queueName, queueEditable, queueCanAddDown);
         var addDate = rs.getString(COL_ADD_DATE);
         var lastTryDate = rs.getString(COL_LAST_TRY_DATE);
         var completeDate = rs.getString(COL_COMPLETE_DATE);
         var dow = DownloadModel.builder()
                 .id(id).name(name).progress(progress).size(size).url(url).filePath(filePath)
-                .chunks(chunks).queue(queue).remainingTime(0).addDate(LocalDateTime.parse(addDate))
+                .chunks(chunks).queue(new ArrayList<>(List.of(queue))).remainingTime(0).addDate(LocalDateTime.parse(addDate))
                 .lastTryDate(LocalDateTime.parse(lastTryDate)).completeDate(LocalDateTime.parse(completeDate))
                 .build();
         dow.fillProperties();

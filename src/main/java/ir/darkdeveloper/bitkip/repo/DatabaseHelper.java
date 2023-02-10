@@ -1,9 +1,7 @@
 package ir.darkdeveloper.bitkip.repo;
 
 import ir.darkdeveloper.bitkip.config.AppConfigs;
-import ir.darkdeveloper.bitkip.models.DownloadModel;
 import ir.darkdeveloper.bitkip.models.Model;
-import ir.darkdeveloper.bitkip.models.QueueModel;
 
 import java.io.File;
 import java.sql.Connection;
@@ -24,7 +22,6 @@ public class DatabaseHelper {
     static final String COL_URL = "url";
     static final String COL_PATH = "path";
     static final String COL_CHUNKS = "chunks";
-    static final String COL_QUEUE = "queue";
     static final String COL_ADD_DATE = "add_Date";
     static final String COL_LAST_TRY_DATE = "last_try_date";
     static final String COL_COMPLETE_DATE = "complete_date";
@@ -47,7 +44,6 @@ public class DatabaseHelper {
                 + COL_URL + " VARCHAR,"
                 + COL_PATH + " VARCHAR,"
                 + COL_CHUNKS + " INTEGER,"
-                + COL_QUEUE + " VARCHAR,"
                 + COL_ADD_DATE + " VARCHAR,"
                 + COL_LAST_TRY_DATE + " VARCHAR,"
                 + COL_COMPLETE_DATE + " VARCHAR"
@@ -62,6 +58,11 @@ public class DatabaseHelper {
                 + COL_EDITABLE + " INTEGER,"
                 + COL_CAN_ADD_DOWN + " INTEGER" +
                 ");";
+        createTable(sql);
+    }
+
+    void createQueueDownloadTable() {
+        var sql = "CREATE TABLE IF NOT EXISTS queue_download(download_id INTEGER, queue_id INTEGER);";
         createTable(sql);
     }
 

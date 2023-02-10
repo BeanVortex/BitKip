@@ -14,6 +14,7 @@ public class QueuesRepo {
 
     public static void createTableAndDefaultRecords() {
         dbHelper.createQueuesTable();
+        dbHelper.createQueueDownloadTable();
         insertDefaultQueues(new QueueModel("All Downloads", false, true));
         insertDefaultQueues(new QueueModel("Compressed", false, false));
         insertDefaultQueues(new QueueModel("Programs", false, false));
