@@ -30,7 +30,7 @@ public class QueuesRepo {
                 ") VALUES(\"" +
                 queue.getName() +
                 "\");";
-        dbHelper.insert(sql, queue);
+        dbHelper.insertQueue(sql, queue);
     }
 
     private static void insertDefaultQueues(QueueModel queue) {
@@ -43,7 +43,7 @@ public class QueuesRepo {
                 queue.isEditable() + "," +
                 queue.isCanAddDownload() +
                 ");";
-        dbHelper.insert(sql, queue);
+        dbHelper.insertQueue(sql, queue);
     }
 
     public static QueueModel findById(int id) {

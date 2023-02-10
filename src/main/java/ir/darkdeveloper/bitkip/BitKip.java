@@ -16,7 +16,7 @@ public class BitKip extends Application {
 
     // todo: limited download in chunks
     // todo: remaining time
-    // todo: relation of download to query : one to many
+    // todo: a download has maximum 3 queues(ALl downloads, extension queue, custom queue)
 
     @Override
     public void start(Stage stage) {

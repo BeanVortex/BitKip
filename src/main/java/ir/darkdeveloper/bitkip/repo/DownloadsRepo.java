@@ -20,7 +20,7 @@ public class DownloadsRepo {
     }
 
     public static void insertDownload(DownloadModel download) {
-        var sql = "INSERT INTO " + DOWNLOADS_TABLE_NAME + " (" +
+        var downloadSql = "INSERT INTO " + DOWNLOADS_TABLE_NAME + " (" +
                 COL_NAME + "," +
                 COL_PROGRESS + "," +
                 COL_SIZE + "," +
@@ -41,7 +41,23 @@ public class DownloadsRepo {
                 download.getLastTryDate().toString() + "\",\"" +
                 download.getCompleteDate().toString() + "\"" +
                 ");";
-        dbHelper.insert(sql, download);
+        try (var con = dbHelper.openConnection();
+             var stmt = con.createStatement()) {
+            dbHelper.insertDownload(downloadSql, download, stmt);
+            download.getQueue().forEach(queue -> {
+                var queueDownloadSql = """
+                        INSERT INTO queue_download (download_id, queue_id)
+                        VALUES (%d, %d);
+                        """.formatted(download.getId(), queue.getId());
+                try {
+                    stmt.executeUpdate(queueDownloadSql);
+                } catch (SQLException e) {
+                    throw new RuntimeException(e);
+                }
+            });
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
 
     public static DownloadModel findById(int id) {
@@ -93,15 +109,50 @@ public class DownloadsRepo {
         return list;
     }
 
-    public static void updateDownloadQueue(int id, String queue) {
-//        var sql = "UPDATE " + DOWNLOADS_TABLE_NAME + " SET " + COL_QUEUE + "=\"" + queue + "\""
-//                + " WHERE " + COL_ID + "=" + id + ";";
-//        try (var con = dbHelper.openConnection();
-//             var stmt = con.createStatement()) {
-//            stmt.executeUpdate(sql);
-//        } catch (SQLException e) {
-//            e.printStackTrace();
-//        }
+    public static void updateDownloadQueue(int download_id, int queue_id) {
+        var queueCountSql = """
+                SELECT count(*) AS queue_count
+                FROM downloads
+                         INNER JOIN queue_download qd ON downloads.id = qd.download_id;
+                """;
+        var insertQueueDownloadSql = """
+                INSERT INTO queue_download (download_id, queue_id) VALUES (%d,%d);
+                """.formatted(download_id, queue_id);
+        var idOfNotDefaultQueueSql = """
+                SELECT queue_id
+                FROM queue_download qd
+                         INNER JOIN queues q ON q.id = qd.queue_id
+                WHERE q.name != 'All Downloads'
+                  AND q.name != 'Compressed'
+                  AND q.name != 'Programs'
+                  AND q.name != 'Videos'
+                  AND q.name != 'Music'
+                  AND q.name != 'Docs'
+                  AND q.name != 'Others'
+                  AND qd.download_id = %d;
+                """.formatted(download_id);
+        var updateQueueSql = """
+                UPDATE queue_download
+                SET queue_id = %d
+                WHERE queue_id = %d;
+                """;
+
+        try (var con = dbHelper.openConnection();
+             var stmt = con.createStatement()) {
+            var countRS = stmt.executeQuery(queueCountSql);
+            countRS.next();
+            var queueCount = countRS.getInt("queue_count");
+            if (queueCount == 3) {
+                var prevQueueRS = stmt.executeQuery(idOfNotDefaultQueueSql);
+                prevQueueRS.next();
+                var prevQueueId = prevQueueRS.getInt("queue_id");
+                stmt.executeUpdate(updateQueueSql.formatted(prevQueueId, queue_id));
+            } else if (queueCount == 2)
+                stmt.executeUpdate(insertQueueDownloadSql);
+            else throw new Exception("queue count for the download is not correct");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     public static void deleteDownload(DownloadModel download) {

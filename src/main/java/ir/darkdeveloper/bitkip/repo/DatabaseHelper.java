@@ -1,12 +1,15 @@
 package ir.darkdeveloper.bitkip.repo;
 
 import ir.darkdeveloper.bitkip.config.AppConfigs;
+import ir.darkdeveloper.bitkip.models.DownloadModel;
 import ir.darkdeveloper.bitkip.models.Model;
+import ir.darkdeveloper.bitkip.models.QueueModel;
 
 import java.io.File;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.logging.Logger;
 
 public class DatabaseHelper {
@@ -89,7 +92,7 @@ public class DatabaseHelper {
         }
     }
 
-    public void insert(String sql, Model queue) {
+    public void insertQueue(String sql, QueueModel queue) {
         try (var con = openConnection();
              var stmt = con.createStatement()) {
             stmt.executeUpdate(sql);
@@ -99,5 +102,13 @@ public class DatabaseHelper {
         } catch (SQLException e) {
             e.printStackTrace();
         }
+    }
+
+    public void insertDownload(String downloadSql, DownloadModel download,
+                               Statement stmt) throws SQLException {
+        stmt.executeUpdate(downloadSql);
+        var genKeys = stmt.getGeneratedKeys();
+        genKeys.next();
+        download.setId(genKeys.getInt(1));
     }
 }
