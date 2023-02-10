@@ -2,7 +2,6 @@ package ir.darkdeveloper.bitkip.repo;
 
 import ir.darkdeveloper.bitkip.config.AppConfigs;
 import ir.darkdeveloper.bitkip.models.DownloadModel;
-import ir.darkdeveloper.bitkip.models.Model;
 import ir.darkdeveloper.bitkip.models.QueueModel;
 
 import java.io.File;

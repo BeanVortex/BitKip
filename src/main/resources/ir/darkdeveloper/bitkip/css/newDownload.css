@@ -22,13 +22,13 @@
 #openLocation .ikonli-font-icon {
     -fx-icon-code: "far-folder-open";
     -fx-icon-color: #78909C;
-    -fx-icon-size: 22;
+    -fx-icon-size: 20;
 }
 
 #newQueue .ikonli-font-icon {
     -fx-icon-code: "fas-plus";
     -fx-icon-color: #78909C;
-    -fx-icon-size: 22;
+    -fx-icon-size: 20;
 }
 
 #questionBtnSpeed .ikonli-font-icon,
@@ -36,16 +36,12 @@
 #questionBtnUrl .ikonli-font-icon,
 #questionBtnBytes .ikonli-font-icon {
     -fx-icon-code: "far-question-circle";
-    -fx-icon-color: #78909C;
-    -fx-icon-size: 22;
+    -fx-icon-color: #03A9F4;
+    -fx-icon-size: 20;
 }
 
-#openLocation,
-#questionBtnSpeed,
-#questionBtnChunks,
-#questionBtnUrl,
 #newQueue,
-#questionBtnBytes {
+#openLocation {
     -fx-border-color: #78909C;
     -fx-background-color: transparent;
     -fx-background-radius: 5;
@@ -53,42 +49,33 @@
     -fx-cursor: hand;
 }
 
+#questionBtnSpeed,
+#questionBtnChunks,
+#questionBtnUrl,
+#questionBtnBytes {
+    -fx-background-color: transparent;
+    -fx-background-radius: 5;
+    -fx-border-radius: 5;
+    -fx-cursor: hand;
+}
+
 #openLocation:hover,
-#questionBtnSpeed:hover,
-#questionBtnChunks:hover,
-#questionBtnUrl:hover,
-#newQueue:hover,
-#questionBtnBytes:hover {
+#newQueue:hover {
     -fx-background-color: #546E7A;
     -fx-border-color: #546E7A;
 }
 
 #openLocation:hover .ikonli-font-icon,
-#questionBtnSpeed:hover .ikonli-font-icon,
-#questionBtnChunks:hover .ikonli-font-icon,
-#questionBtnUrl:hover .ikonli-font-icon,
-#newQueue:hover .ikonli-font-icon,
-#questionBtnBytes:hover .ikonli-font-icon {
+#newQueue:hover .ikonli-font-icon {
     -fx-icon-color: #FAFAFA;
 }
 
 #openLocation:pressed,
-#questionBtnSpeed:pressed,
-#questionBtnChunks:pressed,
-#questionBtnUrl:pressed,
-#newQueue:pressed,
-#questionBtnBytes:pressed  {
+#newQueue:pressed {
     -fx-background-color: #37474F;
     -fx-border-color: #37474F;
 }
 
-#openLocation:pressed .ikonli-font-icon,
-#questionBtnSpeed:pressed .ikonli-font-icon,
-#questionBtnChunks:pressed .ikonli-font-icon,
-#questionBtnUrl:pressed .ikonli-font-icon,
-#questionBtnBytes:pressed .ikonli-font-icon {
-    -fx-icon-color: #FAFAFA;
-}
 
 .text-field {
     -fx-padding: 10;
@@ -108,9 +95,11 @@
     -fx-font-size: 16;
     -fx-effect: dropshadow(one-pass-box, rgba(244, 67, 54, 0.35), 5, 0, 0, 1);
 }
+
 .cancel_btn:hover {
     -fx-background-color: #FFCDD2;
 }
+
 .cancel_btn:pressed {
     -fx-background-color: #F44336;
     -fx-text-fill: #fafafa;
@@ -130,6 +119,7 @@
 .add_btn:hover {
     -fx-background-color: #B3E5FC;
 }
+
 .add_btn:pressed {
     -fx-background-color: #03A9F4;
     -fx-text-fill: #fafafa;
@@ -149,6 +139,7 @@
 .download_now_btn:hover {
     -fx-background-color: #C8E6C9;
 }
+
 .download_now_btn:pressed {
     -fx-background-color: #4CAF50;
     -fx-text-fill: #fafafa;

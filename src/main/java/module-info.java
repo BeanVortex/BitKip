@@ -7,7 +7,7 @@ module ir.darkdeveloper.bitkip {
     requires org.kordamp.ikonli.javafx;
     requires org.kordamp.bootstrapfx.core;
     requires java.logging;
-    requires static lombok;
+    requires lombok;
     requires java.sql;
     requires org.xerial.sqlitejdbc;
 

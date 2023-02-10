@@ -53,7 +53,9 @@ public class NewDownload implements FXMLController {
 
     public void setTableUtils(TableUtils tableUtils) {
         this.tableUtils = tableUtils;
+        switchToSingleDownload();
     }
+
 
     @Override
     public void initAfterStage() {
@@ -73,8 +75,6 @@ public class NewDownload implements FXMLController {
             if (WindowUtils.isOnPrimaryScreen(newValue.doubleValue()))
                 bounds = Screen.getPrimary().getVisualBounds();
         });
-
-        switchToSingleDownload();
 
         WindowUtils.toolbarInits(toolbar, stage, bounds, minWidth, minHeight);
         ResizeUtil.addResizeListener(stage);
@@ -146,11 +146,12 @@ public class NewDownload implements FXMLController {
                     return false;
                 return node.getId().equals("download_details");
             });
-            FXMLController controller = loader.getController();
+            NewDownloadFxmlController controller = loader.getController();
             var box = new VBox();
             box.getChildren().add(details);
             box.setId("download_details");
             controller.setStage(stage);
+            controller.setTableUtils(tableUtils);
             rootChildren.add(box);
         } catch (IOException e) {
             throw new RuntimeException(e);

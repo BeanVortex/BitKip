@@ -3,6 +3,7 @@ package ir.darkdeveloper.bitkip.controllers;
 import ir.darkdeveloper.bitkip.models.QueueModel;
 import ir.darkdeveloper.bitkip.repo.QueuesRepo;
 import ir.darkdeveloper.bitkip.utils.NewDownloadUtils;
+import ir.darkdeveloper.bitkip.utils.TableUtils;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
@@ -13,7 +14,7 @@ import javafx.scene.text.Font;
 import javafx.stage.Stage;
 import org.kordamp.ikonli.javafx.FontIcon;
 
-public class MultipleDownload implements FXMLController {
+public class MultipleDownload implements FXMLController, NewDownloadFxmlController {
     @FXML
     private Button newQueue;
     @FXML
@@ -44,6 +45,7 @@ public class MultipleDownload implements FXMLController {
     private TextField urlField;
 
     private Stage stage;
+    private TableUtils tableUtils;
 
     @Override
     public void initialize() {
@@ -98,7 +100,13 @@ public class MultipleDownload implements FXMLController {
     @FXML
     private void onQuestionChunks(ActionEvent actionEvent) {
     }
+
     @FXML
     private void onNewQueue(ActionEvent actionEvent) {
+    }
+
+    @Override
+    public void setTableUtils(TableUtils tableUtils) {
+        this.tableUtils = tableUtils;
     }
 }

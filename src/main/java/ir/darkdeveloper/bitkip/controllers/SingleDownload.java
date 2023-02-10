@@ -3,10 +3,11 @@ package ir.darkdeveloper.bitkip.controllers;
 import ir.darkdeveloper.bitkip.config.AppConfigs;
 import ir.darkdeveloper.bitkip.models.DownloadModel;
 import ir.darkdeveloper.bitkip.models.QueueModel;
+import ir.darkdeveloper.bitkip.repo.DownloadsRepo;
 import ir.darkdeveloper.bitkip.repo.QueuesRepo;
 import ir.darkdeveloper.bitkip.utils.FxUtils;
 import ir.darkdeveloper.bitkip.utils.NewDownloadUtils;
-import javafx.application.Platform;
+import ir.darkdeveloper.bitkip.utils.TableUtils;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
@@ -19,14 +20,13 @@ import org.controlsfx.control.Notifications;
 import org.kordamp.ikonli.javafx.FontIcon;
 
 import java.io.File;
+import java.time.LocalDateTime;
 import java.util.concurrent.CompletableFuture;
 
-public class SingleDownload implements FXMLController {
+public class SingleDownload implements FXMLController, NewDownloadFxmlController {
 
     @FXML
     private Button newQueue;
-    @FXML
-    private Button cancelBtn;
     @FXML
     private Button addBtn;
     @FXML
@@ -56,8 +56,15 @@ public class SingleDownload implements FXMLController {
     @FXML
     private Button openLocation;
     private Stage stage;
+    private TableUtils tableUtils;
 
     private final DownloadModel downloadModel = new DownloadModel();
+
+
+    @Override
+    public void setTableUtils(TableUtils tableUtils) {
+        this.tableUtils = tableUtils;
+    }
 
     @Override
     public void setStage(Stage stage) {
@@ -86,18 +93,24 @@ public class SingleDownload implements FXMLController {
         newQueue.setGraphic(new FontIcon());
         downloadBtn.setDisable(true);
         addBtn.setDisable(true);
+        var questionBtns = new Button[]{questionBtnSpeed, questionBtnBytes, questionBtnChunks};
+        var contents = new String[]{
+                "You can limit downloading speed. calculated in MB. (0.8 means 800KB)",
+                "You can specify how many bytes of the file to download (Disabled in chunks downloading mode)",
+                "File is seperated into parts and will be downloaded concurrently (Needs 2* disk space in downloading process)"};
+        NewDownloadUtils.initPopOvers(questionBtns, contents);
         NewDownloadUtils.validInputChecks(chunksField, bytesField, speedField);
         NewDownloadUtils.prepareLinkFromClipboard(urlField);
         autoFillLocationAndSizeAndName();
         urlField.textProperty().addListener((o, oldValue, newValue) -> {
-            if (!oldValue.isBlank() && !newValue.isBlank())
+            if (!newValue.isBlank())
                 autoFillLocationAndSizeAndName();
         });
     }
 
     private void autoFillLocationAndSizeAndName() {
         var fileNameLocationFuture = NewDownloadUtils.prepareFileName(urlField, nameField)
-                .thenAccept(fileName -> NewDownloadUtils.determineLocation(locationField, fileName));
+                .thenAccept(fileName -> NewDownloadUtils.determineLocation(locationField, fileName, downloadModel));
         var sizeFuture = NewDownloadUtils.prepareSize(urlField, sizeLabel, downloadModel);
         CompletableFuture.allOf(fileNameLocationFuture, sizeFuture)
                 .whenComplete((unused, throwable) -> {
@@ -125,23 +138,42 @@ public class SingleDownload implements FXMLController {
     }
 
     @FXML
-    private void onQueueChanged() {
-
+    private void onNewQueue() {
     }
 
     @FXML
-    private void onQuestionSpeed() {
+    private void onCancel() {
+        stage.close();
     }
 
     @FXML
-    private void onQuestionChunks() {
+    private void onAdd() {
     }
 
     @FXML
-    private void onQuestionBytes() {
+    private void onDownload() {
+        downloadModel.setUrl(urlField.getText());
+        var fileName = nameField.getText();
+        var path = locationField.getText();
+        if (path.endsWith(File.separator))
+            downloadModel.setFilePath(path + fileName);
+        else
+            downloadModel.setFilePath(path + File.separator + fileName);
+        downloadModel.setProgress(0);
+        downloadModel.setName(fileName);
+        downloadModel.setChunks(Integer.parseInt(chunksField.getText()));
+        downloadModel.setAddDate(LocalDateTime.now());
+        downloadModel.setLastTryDate(LocalDateTime.now());
+        var selectedQueue = queueCombo.getSelectionModel().getSelectedItem();
+        var allDownloadsQueue = QueuesRepo.findByName("All Downloads");
+        downloadModel.getQueue().add(allDownloadsQueue);
+        if (selectedQueue.getId() != allDownloadsQueue.getId())
+            downloadModel.getQueue().add(selectedQueue);
+        DownloadsRepo.insertDownload(downloadModel);
+        downloadModel.fillProperties();
+        tableUtils.addRow(downloadModel);
+        stage.close();
     }
 
-    @FXML
-    private void onNewQueue(ActionEvent actionEvent) {
-    }
+
 }

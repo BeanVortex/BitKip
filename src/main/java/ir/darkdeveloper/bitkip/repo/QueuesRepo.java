@@ -12,16 +12,24 @@ import static ir.darkdeveloper.bitkip.repo.DatabaseHelper.*;
 public class QueuesRepo {
     private static final DatabaseHelper dbHelper = new DatabaseHelper();
 
+    private static final QueueModel allDownloadQueue = new QueueModel("All Downloads", false, true);
+    private static final QueueModel compressedQueue = new QueueModel("Compressed", false, false);
+    private static final QueueModel programsQueue = new QueueModel("Programs", false, false);
+    private static final QueueModel videosQueue = new QueueModel("Videos", false, false);
+    private static final QueueModel musicQueue = new QueueModel("Music", false, false);
+    private static final QueueModel docsQueue = new QueueModel("Docs", false, false);
+    private static final QueueModel othersQueue = new QueueModel("Others", false, false);
+
     public static void createTableAndDefaultRecords() {
         dbHelper.createQueuesTable();
         dbHelper.createQueueDownloadTable();
-        insertDefaultQueues(new QueueModel("All Downloads", false, true));
-        insertDefaultQueues(new QueueModel("Compressed", false, false));
-        insertDefaultQueues(new QueueModel("Programs", false, false));
-        insertDefaultQueues(new QueueModel("Videos", false, false));
-        insertDefaultQueues(new QueueModel("Music", false, false));
-        insertDefaultQueues(new QueueModel("Docs", false, false));
-        insertDefaultQueues(new QueueModel("Others", false, false));
+        insertDefaultQueues(allDownloadQueue);
+        insertDefaultQueues(compressedQueue);
+        insertDefaultQueues(programsQueue);
+        insertDefaultQueues(videosQueue);
+        insertDefaultQueues(musicQueue);
+        insertDefaultQueues(docsQueue);
+        insertDefaultQueues(othersQueue);
     }
 
     public static void insertQueue(QueueModel queue) {
@@ -37,7 +45,7 @@ public class QueuesRepo {
         var sql = "INSERT OR IGNORE INTO " + QUEUES_TABLE_NAME + " (" +
                 COL_NAME + "," +
                 COL_EDITABLE + "," +
-                COL_CAN_ADD_DOWN  +
+                COL_CAN_ADD_DOWN +
                 ") VALUES(\"" +
                 queue.getName() + "\"," +
                 queue.isEditable() + "," +
@@ -46,8 +54,8 @@ public class QueuesRepo {
         dbHelper.insertQueue(sql, queue);
     }
 
-    public static QueueModel findById(int id) {
-        var sql = "SELECT * FROM " + QUEUES_TABLE_NAME + " WHERE " + COL_ID + "=" + id + ";";
+    public static QueueModel findByName(String name) {
+        var sql = "SELECT * FROM queues WHERE name=\"" + name + "\";";
         try (var con = dbHelper.openConnection();
              var stmt = con.createStatement();
              var rs = stmt.executeQuery(sql)) {
@@ -56,7 +64,7 @@ public class QueuesRepo {
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        return null;
+        throw new RuntimeException("Queue does not exist");
     }
 
 

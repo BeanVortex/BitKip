@@ -28,8 +28,7 @@ public class DownloadsRepo {
                 COL_PATH + "," +
                 COL_CHUNKS + "," +
                 COL_ADD_DATE + "," +
-                COL_LAST_TRY_DATE + "," +
-                COL_COMPLETE_DATE + ")" +
+                COL_LAST_TRY_DATE + ")" +
                 " VALUES(\"" +
                 download.getName() + "\"," +
                 download.getProgress() + "," +
@@ -38,8 +37,7 @@ public class DownloadsRepo {
                 download.getFilePath() + "\"," +
                 download.getChunks() + ",\"" +
                 download.getAddDate().toString() + "\",\"" +
-                download.getLastTryDate().toString() + "\",\"" +
-                download.getCompleteDate().toString() + "\"" +
+                download.getLastTryDate().toString() + "\"" +
                 ");";
         try (var con = dbHelper.openConnection();
              var stmt = con.createStatement()) {
@@ -181,10 +179,11 @@ public class DownloadsRepo {
         var addDate = rs.getString(COL_ADD_DATE);
         var lastTryDate = rs.getString(COL_LAST_TRY_DATE);
         var completeDate = rs.getString(COL_COMPLETE_DATE);
+        var completeDateTime = completeDate.isBlank() ? null : LocalDateTime.parse(completeDate);
         var dow = DownloadModel.builder()
                 .id(id).name(name).progress(progress).size(size).url(url).filePath(filePath)
                 .chunks(chunks).queue(new ArrayList<>(List.of(queue))).remainingTime(0).addDate(LocalDateTime.parse(addDate))
-                .lastTryDate(LocalDateTime.parse(lastTryDate)).completeDate(LocalDateTime.parse(completeDate))
+                .lastTryDate(LocalDateTime.parse(lastTryDate)).completeDate(completeDateTime)
                 .build();
         dow.fillProperties();
         return dow;

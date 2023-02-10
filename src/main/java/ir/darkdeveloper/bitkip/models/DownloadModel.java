@@ -15,7 +15,7 @@ import java.util.Objects;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class DownloadModel implements Model {
+public class DownloadModel {
     private int id;
     private String name;
     private double progress;
@@ -23,10 +23,10 @@ public class DownloadModel implements Model {
     private String url;
     private String filePath;
     private int remainingTime;
+    private List<QueueModel> queue;
     private int chunks;
     //    private boolean downloadedInChunks;
     private StringProperty nameProperty;
-    private List<QueueModel> queue;
     private LocalDateTime addDate;
     private LocalDateTime lastTryDate;
     private LocalDateTime completeDate;
@@ -50,7 +50,10 @@ public class DownloadModel implements Model {
         chunksProperty = new SimpleIntegerProperty(chunks);
         addDateProperty = new SimpleStringProperty(DATE_FORMATTER.format(addDate));
         lastTryDateProperty = new SimpleStringProperty(DATE_FORMATTER.format(lastTryDate));
-        completeDateProperty = new SimpleStringProperty(DATE_FORMATTER.format(completeDate));
+        if (completeDate != null)
+            completeDateProperty = new SimpleStringProperty(DATE_FORMATTER.format(completeDate));
+        else
+            completeDateProperty = new SimpleStringProperty("");
     }
 
 

@@ -7,7 +7,7 @@ import lombok.*;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class QueueModel implements Model {
+public class QueueModel {
     private int id;
     private String name;
     private boolean editable;
