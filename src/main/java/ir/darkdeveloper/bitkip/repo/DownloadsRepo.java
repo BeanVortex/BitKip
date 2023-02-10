@@ -7,7 +7,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import static ir.darkdeveloper.bitkip.repo.DatabaseHelper.*;
@@ -179,7 +178,7 @@ public class DownloadsRepo {
         var addDate = rs.getString(COL_ADD_DATE);
         var lastTryDate = rs.getString(COL_LAST_TRY_DATE);
         var completeDate = rs.getString(COL_COMPLETE_DATE);
-        var completeDateTime = completeDate.isBlank() ? null : LocalDateTime.parse(completeDate);
+        var completeDateTime = completeDate == null ? null : LocalDateTime.parse(completeDate);
         var dow = DownloadModel.builder()
                 .id(id).name(name).progress(progress).size(size).url(url).filePath(filePath)
                 .chunks(chunks).queue(new ArrayList<>(List.of(queue))).remainingTime(0).addDate(LocalDateTime.parse(addDate))
