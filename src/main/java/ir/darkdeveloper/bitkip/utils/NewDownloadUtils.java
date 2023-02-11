@@ -1,7 +1,6 @@
 package ir.darkdeveloper.bitkip.utils;
 
 import ir.darkdeveloper.bitkip.config.AppConfigs;
-import ir.darkdeveloper.bitkip.controllers.NewDownload;
 import ir.darkdeveloper.bitkip.models.DownloadModel;
 import ir.darkdeveloper.bitkip.repo.QueuesRepo;
 import javafx.application.Platform;
@@ -67,7 +66,7 @@ public class NewDownloadUtils {
                     var conn = (HttpURLConnection) url.openConnection();
                     var fileSize = conn.getContentLengthLong();
                     downloadModel.setSize(fileSize);
-                    Platform.runLater(() -> sizeLabel.setText(IOUtils.formatFileSize(fileSize)));
+                    Platform.runLater(() -> sizeLabel.setText(IOUtils.formatBytes(fileSize)));
                 }
             } catch (IOException e) {
                 e.printStackTrace();

@@ -18,6 +18,7 @@ public class BitKip extends Application {
     // todo: remaining time
     // todo: scrollview in new download
     // todo: save table data on db before termination of app
+    // todo: save download in db after pause or complete (maybe in a time period during downloading)
     // todo: download status not in db
     // todo: speed status not in db
 

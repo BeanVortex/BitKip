@@ -21,7 +21,7 @@ import java.util.List;
 
 import static ir.darkdeveloper.bitkip.task.DownloadTask.*;
 
-public class DownloadInChunksTask extends DownloadTask<Long> {
+public class DownloadInChunksTask extends DownloadTask {
     private final int chunks;
     private final List<FileChannel> fileChannels = new ArrayList<>();
     private final DownloadModel downloadModel;

@@ -11,7 +11,7 @@ import java.net.HttpURLConnection;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
-public abstract class DownloadTask<T> extends Task<T> {
+public abstract class DownloadTask extends Task<Long> {
 
     long ONE_SEC = 1000;
 

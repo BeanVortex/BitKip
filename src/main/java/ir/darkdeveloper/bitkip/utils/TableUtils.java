@@ -11,7 +11,7 @@ import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.MouseButton;
 
-import java.time.LocalDateTime;
+import java.text.DecimalFormat;
 import java.util.List;
 
 public class TableUtils {
@@ -26,15 +26,17 @@ public class TableUtils {
 
     public void tableInits() {
         var nameColumn = new TableColumn<DownloadModel, String>("Name");
-        var progressColumn = new TableColumn<DownloadModel, Double>("Progress");
-        var sizeColumn = new TableColumn<DownloadModel, Long>("Size");
-        var remainingColumn = new TableColumn<DownloadModel, Integer>("Remaining");
+        var progressColumn = new TableColumn<DownloadModel, String>("Progress");
+        var speedColumn = new TableColumn<DownloadModel, String>("Speed");
+        var sizeColumn = new TableColumn<DownloadModel, String>("Size");
+        var remainingColumn = new TableColumn<DownloadModel, String>("Remaining");
         var chunksColumn = new TableColumn<DownloadModel, Integer>("Chunks");
-        var addDateColumn = new TableColumn<DownloadModel, String>("Add Date");
-        var lastTryColumn = new TableColumn<DownloadModel, String>("Last Try");
-        var completeColumn = new TableColumn<DownloadModel, String>("Complete On");
+        var addDateColumn = new TableColumn<DownloadModel, String>("Added on");
+        var lastTryColumn = new TableColumn<DownloadModel, String>("Last try");
+        var completeColumn = new TableColumn<DownloadModel, String>("Completed On");
 
         nameColumn.setPrefWidth(200);
+        speedColumn.setPrefWidth(100);
         sizeColumn.setPrefWidth(80);
         remainingColumn.setPrefWidth(80);
         addDateColumn.setPrefWidth(135);
@@ -42,17 +44,18 @@ public class TableUtils {
         completeColumn.setPrefWidth(135);
         addDateColumn.setSortType(TableColumn.SortType.DESCENDING);
 
-        List<TableColumn<DownloadModel, ?>> listOfColumns = List.of(nameColumn, progressColumn, sizeColumn,
+        List<TableColumn<DownloadModel, ?>> listOfColumns = List.of(nameColumn, progressColumn, speedColumn, sizeColumn,
                 remainingColumn, chunksColumn, addDateColumn, lastTryColumn, completeColumn);
         contentTable.getColumns().addAll(listOfColumns);
-        nameColumn.setCellValueFactory(p -> p.getValue().getNameProperty());
-        sizeColumn.setCellValueFactory(p -> p.getValue().getSizeProperty().asObject());
-        progressColumn.setCellValueFactory(new PropertyValueFactory<>("progress"));
-        remainingColumn.setCellValueFactory(p -> p.getValue().getRemainingTimeProperty().asObject());
-        chunksColumn.setCellValueFactory(p -> p.getValue().getChunksProperty().asObject());
-        addDateColumn.setCellValueFactory(p -> p.getValue().getAddDateProperty());
-        lastTryColumn.setCellValueFactory(p -> p.getValue().getLastTryDateProperty());
-        completeColumn.setCellValueFactory(p -> p.getValue().getCompleteDateProperty());
+        nameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
+        progressColumn.setCellValueFactory(new PropertyValueFactory<>("progressString"));
+        speedColumn.setCellValueFactory(new PropertyValueFactory<>("speedString"));
+        sizeColumn.setCellValueFactory(new PropertyValueFactory<>("sizeString"));
+        remainingColumn.setCellValueFactory(new PropertyValueFactory<>("remainingTime"));
+        chunksColumn.setCellValueFactory(new PropertyValueFactory<>("chunks"));
+        addDateColumn.setCellValueFactory(new PropertyValueFactory<>("addDateString"));
+        lastTryColumn.setCellValueFactory(new PropertyValueFactory<>("lastTryDateString"));
+        completeColumn.setCellValueFactory(new PropertyValueFactory<>("completeDateString"));
 
         contentTable.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
         data.addAll(DownloadsRepo.getDownloads());
@@ -72,7 +75,7 @@ public class TableUtils {
                         && event.getButton().equals(MouseButton.SECONDARY))
                     System.out.println(row.getIndex());
             });
-            row.updateSelected(true);
+//            row.updateSelected(true);
             return row;
         });
 
@@ -90,23 +93,28 @@ public class TableUtils {
         contentTable.sort();
     }
 
-    public void updateDownloadSpeed(long speed, DownloadModel downloadModel) {
-//        contentTable.getItems().set
+    public void updateDownloadSpeed(long speed, int downloadId) {
+        var i = findDownload(downloadId);
+        if (i != null) {
+            i.setSpeed(speed);
+            i.setSpeedString(IOUtils.formatBytes(speed));
+            contentTable.refresh();
+        }
     }
 
-    public void updateDownloadProgress(int progress, int downloadId) {
+    public void updateDownloadProgress(float progress, int downloadId) {
         var i = findDownload(downloadId);
-        i.setProgress(progress);
-        contentTable.refresh();
-        contentTable.sort();
+        if (i != null) {
+            i.setProgress(progress);
+            i.setProgressString(new DecimalFormat("##.#").format(progress) + " %");
+            contentTable.refresh();
+        }
     }
 
     private DownloadModel findDownload(int id) {
-        for (int i = 0; i < data.size(); i++) {
-            var d = data.get(i);
+        for (var d : data)
             if (id == d.getId())
                 return d;
-        }
         return null;
     }
 }

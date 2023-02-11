@@ -27,10 +27,10 @@ public class IOUtils {
     }
 
 
-    public static String formatFileSize(long fileSize) {
-        if(fileSize <= 0) return "0";
+    public static String formatBytes(long bytes) {
+        if(bytes <= 0) return "0";
         final var units = new String[] { "B", "kB", "MB", "GB", "TB" };
-        var digitGroups = (int) (Math.log10(fileSize)/Math.log10(1024));
-        return new DecimalFormat("#,##0.#").format(fileSize/Math.pow(1024, digitGroups)) + " " + units[digitGroups];
+        var digitGroups = (int) (Math.log10(bytes)/Math.log10(1024));
+        return new DecimalFormat("#,##0.#").format(bytes/Math.pow(1024, digitGroups)) + " " + units[digitGroups];
     }
 }

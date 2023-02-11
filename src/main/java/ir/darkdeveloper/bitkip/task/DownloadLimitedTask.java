@@ -18,7 +18,7 @@ import java.nio.channels.FileChannel;
 import static ir.darkdeveloper.bitkip.task.DownloadTask.*;
 
 
-public class DownloadLimitedTask extends DownloadTask<Long> {
+public class DownloadLimitedTask extends DownloadTask {
     private boolean paused = false;
     private boolean isCalculating = false;
     private final DownloadModel downloadModel;

@@ -165,7 +165,7 @@ public class DownloadsRepo {
     private static DownloadModel createDownload(ResultSet rs) throws SQLException {
         var id = rs.getInt(COL_ID);
         var name = rs.getString(COL_NAME);
-        var progress = rs.getInt(COL_PROGRESS);
+        var progress = rs.getFloat(COL_PROGRESS);
         var size = rs.getInt(COL_SIZE);
         var url = rs.getString(COL_URL);
         var filePath = rs.getString(COL_PATH);
@@ -179,13 +179,11 @@ public class DownloadsRepo {
         var lastTryDate = rs.getString(COL_LAST_TRY_DATE);
         var completeDate = rs.getString(COL_COMPLETE_DATE);
         var completeDateTime = completeDate == null ? null : LocalDateTime.parse(completeDate);
-        var dow = DownloadModel.builder()
+        return DownloadModel.builder()
                 .id(id).name(name).progress(progress).size(size).url(url).filePath(filePath)
-                .chunks(chunks).queue(new ArrayList<>(List.of(queue))).remainingTime(0).addDate(LocalDateTime.parse(addDate))
+                .chunks(chunks).queue(new ArrayList<>(List.of(queue))).addDate(LocalDateTime.parse(addDate))
                 .lastTryDate(LocalDateTime.parse(lastTryDate)).completeDate(completeDateTime)
                 .build();
-        dow.fillProperties();
-        return dow;
     }
 
     public static void updateDownloadSize(DownloadModel download) {

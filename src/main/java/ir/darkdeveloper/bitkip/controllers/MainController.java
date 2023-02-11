@@ -15,8 +15,10 @@ import javafx.geometry.Insets;
 import javafx.geometry.Orientation;
 import javafx.geometry.Pos;
 import javafx.geometry.Rectangle2D;
-import javafx.scene.control.*;
-import javafx.scene.input.MouseButton;
+import javafx.scene.control.Button;
+import javafx.scene.control.ScrollBar;
+import javafx.scene.control.ScrollPane;
+import javafx.scene.control.TableView;
 import javafx.scene.input.ScrollEvent;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
@@ -62,7 +64,7 @@ public class MainController implements FXMLController {
     private TableUtils tableUtils;
     private Rectangle2D bounds;
     private final int minWidth = 853, minHeight = 515;
-
+    private final List<DownloadTask> downloadTaskList = new ArrayList<>();
 
     @Override
     public void setStage(Stage stage) {
@@ -226,6 +228,7 @@ public class MainController implements FXMLController {
 //        DownloadsRepo.insertDownload(dow);
         var controller = FxUtils.newDownloadStage("newDownload.fxml", 600, 500);
         controller.setTableUtils(tableUtils);
+        controller.setDownloadTaskList(downloadTaskList);
 //        tableUtils.addRow(dow);
     }
 }

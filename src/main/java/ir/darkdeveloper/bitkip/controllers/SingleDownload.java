@@ -24,6 +24,7 @@ import org.kordamp.ikonli.javafx.FontIcon;
 
 import java.io.File;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 public class SingleDownload implements FXMLController, NewDownloadFxmlController {
@@ -62,11 +63,17 @@ public class SingleDownload implements FXMLController, NewDownloadFxmlController
     private TableUtils tableUtils;
 
     private final DownloadModel downloadModel = new DownloadModel();
+    private List<DownloadTask> downloadTaskList;
 
 
     @Override
     public void setTableUtils(TableUtils tableUtils) {
         this.tableUtils = tableUtils;
+    }
+
+    @Override
+    public void setDownloadTaskList(List<DownloadTask> downloadTaskList) {
+        this.downloadTaskList = downloadTaskList;
     }
 
     @Override
@@ -173,9 +180,8 @@ public class SingleDownload implements FXMLController, NewDownloadFxmlController
         if (selectedQueue.getId() != allDownloadsQueue.getId())
             downloadModel.getQueue().add(selectedQueue);
         DownloadsRepo.insertDownload(downloadModel);
-        downloadModel.fillProperties();
         tableUtils.addRow(downloadModel);
-        DownloadTask<Long> downloadTask;
+        DownloadTask downloadTask;
         if (downloadModel.getChunks() == 0) {
             if (!speedField.getText().equals("0")) {
                 if (bytesField.getText().equals("0"))
@@ -194,14 +200,13 @@ public class SingleDownload implements FXMLController, NewDownloadFxmlController
                 // todo :remaining time
                 if (newValue == 0)
                     speed = 0;
-
-                speed /= 1000;
-//                tableUtils.updateDownloadSpeed(speed, downloadModel);
+                tableUtils.updateDownloadSpeed(speed, downloadModel.getId());
             });
         }
         downloadTask.progressProperty().addListener((o, old, newV) -> {
-            tableUtils.updateDownloadProgress((int) (newV.floatValue() * 100), downloadModel.getId());
+            tableUtils.updateDownloadProgress(newV.floatValue() * 100, downloadModel.getId());
         });
+        downloadTaskList.add(downloadTask);
         new Thread(downloadTask).start();
         stage.close();
     }

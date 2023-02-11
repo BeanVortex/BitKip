@@ -1,5 +1,6 @@
 package ir.darkdeveloper.bitkip.controllers;
 
+import ir.darkdeveloper.bitkip.task.DownloadTask;
 import ir.darkdeveloper.bitkip.utils.ResizeUtil;
 import ir.darkdeveloper.bitkip.utils.TableUtils;
 import ir.darkdeveloper.bitkip.utils.WindowUtils;
@@ -17,10 +18,11 @@ import javafx.stage.Stage;
 import org.kordamp.ikonli.javafx.FontIcon;
 
 import java.io.IOException;
+import java.util.List;
 
 import static ir.darkdeveloper.bitkip.BitKip.getResource;
 
-public class NewDownload implements FXMLController {
+public class NewDownload implements NewDownloadFxmlController {
     @FXML
     private Button singleButton;
     @FXML
@@ -40,6 +42,7 @@ public class NewDownload implements FXMLController {
     private final int minWidth = 600, minHeight = 400;
 
     private boolean isSingle = true;
+    private List<DownloadTask> downloadTaskList;
 
 
     @Override
@@ -53,9 +56,15 @@ public class NewDownload implements FXMLController {
         initAfterStage();
     }
 
+    @Override
     public void setTableUtils(TableUtils tableUtils) {
         this.tableUtils = tableUtils;
         switchToSingleDownload();
+    }
+
+    @Override
+    public void setDownloadTaskList(List<DownloadTask> downloadTaskList) {
+        this.downloadTaskList = downloadTaskList;
     }
 
 
@@ -162,4 +171,6 @@ public class NewDownload implements FXMLController {
             throw new RuntimeException(e);
         }
     }
+
+
 }

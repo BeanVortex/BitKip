@@ -1,11 +1,11 @@
 package ir.darkdeveloper.bitkip.models;
 
-import javafx.beans.property.*;
+import ir.darkdeveloper.bitkip.utils.IOUtils;
 import lombok.*;
 
+import java.text.DecimalFormat;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -18,43 +18,29 @@ import java.util.Objects;
 public class DownloadModel {
     private int id;
     private String name;
-    private double progress;
+    private float progress;
     private long size;
     private String url;
     private String filePath;
     private int remainingTime;
     private List<QueueModel> queue;
     private int chunks;
+    private long speed;
     //    private boolean downloadedInChunks;
-    private StringProperty nameProperty;
     private LocalDateTime addDate;
     private LocalDateTime lastTryDate;
     private LocalDateTime completeDate;
 
-    private DoubleProperty progressProperty;
-    private LongProperty sizeProperty;
-    private IntegerProperty remainingTimeProperty;
-    private IntegerProperty chunksProperty;
-    private StringProperty addDateProperty;
-    private StringProperty lastTryDateProperty;
-    private StringProperty completeDateProperty;
+    private String sizeString;
+    private String progressString;
+    private String speedString;
+    private String addDateString;
+    private String lastTryDateString;
+    private String completeDateString;
 
-    public static final String DATE_FORMAT = "yyyy/MM/dd/-HH:mm:ss";
+
+    public static final String DATE_FORMAT = "yyyy/MM/dd - HH:mm:ss";
     public static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern(DATE_FORMAT);
-
-    public void fillProperties() {
-        nameProperty = new SimpleStringProperty(name);
-        progressProperty = new SimpleDoubleProperty(progress);
-        sizeProperty = new SimpleLongProperty(size);
-        remainingTimeProperty = new SimpleIntegerProperty(remainingTime);
-        chunksProperty = new SimpleIntegerProperty(chunks);
-        addDateProperty = new SimpleStringProperty(DATE_FORMATTER.format(addDate));
-        lastTryDateProperty = new SimpleStringProperty(DATE_FORMATTER.format(lastTryDate));
-        if (completeDate != null)
-            completeDateProperty = new SimpleStringProperty(DATE_FORMATTER.format(completeDate));
-        else
-            completeDateProperty = new SimpleStringProperty("");
-    }
 
 
     @Override
@@ -70,5 +56,32 @@ public class DownloadModel {
     @Override
     public int hashCode() {
         return Objects.hash(id);
+    }
+
+
+    public String getAddDateString() {
+        return DATE_FORMATTER.format(addDate);
+    }
+
+    public String getLastTryDateString() {
+        return DATE_FORMATTER.format(lastTryDate);
+    }
+
+    public String getCompleteDateString() {
+        if (completeDate == null)
+            return "";
+        return DATE_FORMATTER.format(completeDate);
+    }
+
+    public String getSizeString() {
+        return IOUtils.formatBytes(size);
+    }
+
+    public String getProgressString() {
+        return new DecimalFormat("##.#").format(progress) + " %";
+    }
+
+    public String getSpeedString() {
+            return IOUtils.formatBytes(speed);
     }
 }

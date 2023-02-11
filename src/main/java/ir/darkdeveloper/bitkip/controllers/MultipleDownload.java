@@ -2,6 +2,7 @@ package ir.darkdeveloper.bitkip.controllers;
 
 import ir.darkdeveloper.bitkip.models.QueueModel;
 import ir.darkdeveloper.bitkip.repo.QueuesRepo;
+import ir.darkdeveloper.bitkip.task.DownloadTask;
 import ir.darkdeveloper.bitkip.utils.NewDownloadUtils;
 import ir.darkdeveloper.bitkip.utils.TableUtils;
 import javafx.event.ActionEvent;
@@ -13,6 +14,8 @@ import javafx.scene.control.TextField;
 import javafx.scene.text.Font;
 import javafx.stage.Stage;
 import org.kordamp.ikonli.javafx.FontIcon;
+
+import java.util.List;
 
 public class MultipleDownload implements FXMLController, NewDownloadFxmlController {
     @FXML
@@ -46,6 +49,28 @@ public class MultipleDownload implements FXMLController, NewDownloadFxmlControll
 
     private Stage stage;
     private TableUtils tableUtils;
+    private List<DownloadTask> downloadTaskList;
+
+
+    @Override
+    public void setTableUtils(TableUtils tableUtils) {
+        this.tableUtils = tableUtils;
+    }
+
+    @Override
+    public void setDownloadTaskList(List<DownloadTask> downloadTaskList) {
+        this.downloadTaskList = downloadTaskList;
+    }
+    @Override
+    public void setStage(Stage stage) {
+        this.stage = stage;
+        initAfterStage();
+    }
+
+    @Override
+    public void initAfterStage() {
+
+    }
 
     @Override
     public void initialize() {
@@ -60,17 +85,6 @@ public class MultipleDownload implements FXMLController, NewDownloadFxmlControll
         queueCombo.getItems().addAll(queues);
         queueCombo.setValue(queues.get(0));
         NewDownloadUtils.validInputChecks(chunksField, null, speedField);
-    }
-
-    @Override
-    public void setStage(Stage stage) {
-        this.stage = stage;
-        initAfterStage();
-    }
-
-    @Override
-    public void initAfterStage() {
-
     }
 
     @Override
@@ -105,8 +119,4 @@ public class MultipleDownload implements FXMLController, NewDownloadFxmlControll
     private void onNewQueue(ActionEvent actionEvent) {
     }
 
-    @Override
-    public void setTableUtils(TableUtils tableUtils) {
-        this.tableUtils = tableUtils;
-    }
 }
