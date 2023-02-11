@@ -21,6 +21,7 @@ public class BitKip extends Application {
     // todo: save download in db after pause or complete (maybe in a time period during downloading)
     // todo: download status not in db
     // todo: speed status not in db
+    // todo: prevent adding a file that exists with the same name
 
     @Override
     public void start(Stage stage) {
