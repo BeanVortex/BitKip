@@ -200,7 +200,7 @@ public class SingleDownload implements FXMLController, NewDownloadFxmlController
             });
         }
         downloadTask.progressProperty().addListener((o, old, newV) -> {
-            tableUtils.updateDownloadProgress((int) (newV.floatValue() * 100), downloadModel);
+            tableUtils.updateDownloadProgress((int) (newV.floatValue() * 100), downloadModel.getId());
         });
         new Thread(downloadTask).start();
         stage.close();

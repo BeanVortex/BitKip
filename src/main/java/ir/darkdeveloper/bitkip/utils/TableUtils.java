@@ -8,6 +8,7 @@ import javafx.scene.control.SelectionMode;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
+import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.MouseButton;
 
 import java.time.LocalDateTime;
@@ -44,10 +45,9 @@ public class TableUtils {
         List<TableColumn<DownloadModel, ?>> listOfColumns = List.of(nameColumn, progressColumn, sizeColumn,
                 remainingColumn, chunksColumn, addDateColumn, lastTryColumn, completeColumn);
         contentTable.getColumns().addAll(listOfColumns);
-
         nameColumn.setCellValueFactory(p -> p.getValue().getNameProperty());
         sizeColumn.setCellValueFactory(p -> p.getValue().getSizeProperty().asObject());
-        progressColumn.setCellValueFactory(p -> p.getValue().getProgressProperty().asObject());
+        progressColumn.setCellValueFactory(new PropertyValueFactory<>("progress"));
         remainingColumn.setCellValueFactory(p -> p.getValue().getRemainingTimeProperty().asObject());
         chunksColumn.setCellValueFactory(p -> p.getValue().getChunksProperty().asObject());
         addDateColumn.setCellValueFactory(p -> p.getValue().getAddDateProperty());
@@ -61,17 +61,7 @@ public class TableUtils {
 
         contentTable.setOnMouseClicked(event -> {
             if (event.getButton().equals(MouseButton.SECONDARY)) {
-                var selectedItems = contentTable.getSelectionModel().getSelectedItems();
-                if (selectedItems.size() > 1)
-                    for (int i = 0; i < selectedItems.size(); i++) {
-                        var d = LocalDateTime.now();
-                        selectedItems.get(i).setName("df");
-                        selectedItems.get(i).setProgress(13);
-                        selectedItems.get(i).setCompleteDate(d);
-                        selectedItems.get(i).getNameProperty().setValue("df");
-                        selectedItems.get(i).getProgressProperty().setValue(160.5);
-                        selectedItems.get(i).getCompleteDateProperty().setValue(d.toString());
-                    }
+                System.out.println("options");
             }
         });
         contentTable.setRowFactory(param -> {
@@ -82,6 +72,7 @@ public class TableUtils {
                         && event.getButton().equals(MouseButton.SECONDARY))
                     System.out.println(row.getIndex());
             });
+            row.updateSelected(true);
             return row;
         });
 
@@ -103,17 +94,19 @@ public class TableUtils {
 //        contentTable.getItems().set
     }
 
-    public void updateDownloadProgress(int progress, DownloadModel downloadModel) {
-        downloadModel.setProgress(progress);
-        var i = findDownloadIndex(downloadModel);
-        contentTable.getItems().set(i, downloadModel);
+    public void updateDownloadProgress(int progress, int downloadId) {
+        var i = findDownload(downloadId);
+        i.setProgress(progress);
         contentTable.refresh();
+        contentTable.sort();
     }
 
-    private int findDownloadIndex(DownloadModel downloadModel) {
-        for (int i = 0; i < contentTable.getItems().size(); i++)
-            if (downloadModel.getId() == contentTable.getItems().get(i).getId())
-                return i;
-        return -1;
+    private DownloadModel findDownload(int id) {
+        for (int i = 0; i < data.size(); i++) {
+            var d = data.get(i);
+            if (id == d.getId())
+                return d;
+        }
+        return null;
     }
 }

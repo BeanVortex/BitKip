@@ -17,6 +17,9 @@ public class BitKip extends Application {
     // todo: limited download in chunks
     // todo: remaining time
     // todo: scrollview in new download
+    // todo: save table data on db before termination of app
+    // todo: download status not in db
+    // todo: speed status not in db
 
     @Override
     public void start(Stage stage) {

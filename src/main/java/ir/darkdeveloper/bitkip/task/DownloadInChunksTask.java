@@ -83,6 +83,7 @@ public class DownloadInChunksTask extends DownloadTask<Long> {
             to += bytesForEach;
             var existingFileSize = getCurrentFileSize(partFile);
             countingThread = calculateSpeedAndProgressChunks(fileChannels, filePaths, fileSize);
+            // todo: check if a part is done
             var t = new Thread(() -> {
                 try {
                     var byteChannel = Channels.newChannel(con.getInputStream());
