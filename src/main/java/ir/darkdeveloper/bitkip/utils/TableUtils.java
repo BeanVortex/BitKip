@@ -93,9 +93,27 @@ public class TableUtils {
         contentTable.sort();
     }
 
-    public void setDownloads(List<DownloadModel> downloadModels){
+    public void setDownloads(List<DownloadModel> downloadModels) {
         contentTable.getItems().setAll(downloadModels);
         data.setAll(downloadModels);
         contentTable.sort();
+    }
+
+    public void updateDownloadSpeed(long speed, DownloadModel downloadModel) {
+//        contentTable.getItems().set
+    }
+
+    public void updateDownloadProgress(int progress, DownloadModel downloadModel) {
+        downloadModel.setProgress(progress);
+        var i = findDownloadIndex(downloadModel);
+        contentTable.getItems().set(i, downloadModel);
+        contentTable.refresh();
+    }
+
+    private int findDownloadIndex(DownloadModel downloadModel) {
+        for (int i = 0; i < contentTable.getItems().size(); i++)
+            if (downloadModel.getId() == contentTable.getItems().get(i).getId())
+                return i;
+        return -1;
     }
 }

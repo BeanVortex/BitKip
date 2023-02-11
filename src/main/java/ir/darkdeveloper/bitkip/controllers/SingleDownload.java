@@ -5,6 +5,9 @@ import ir.darkdeveloper.bitkip.models.DownloadModel;
 import ir.darkdeveloper.bitkip.models.QueueModel;
 import ir.darkdeveloper.bitkip.repo.DownloadsRepo;
 import ir.darkdeveloper.bitkip.repo.QueuesRepo;
+import ir.darkdeveloper.bitkip.task.DownloadInChunksTask;
+import ir.darkdeveloper.bitkip.task.DownloadLimitedTask;
+import ir.darkdeveloper.bitkip.task.DownloadTask;
 import ir.darkdeveloper.bitkip.utils.FxUtils;
 import ir.darkdeveloper.bitkip.utils.NewDownloadUtils;
 import ir.darkdeveloper.bitkip.utils.TableUtils;
@@ -97,7 +100,7 @@ public class SingleDownload implements FXMLController, NewDownloadFxmlController
         var contents = new String[]{
                 "You can limit downloading speed. calculated in MB. (0.8 means 800KB)",
                 "You can specify how many bytes of the file to download (Disabled in chunks downloading mode)",
-                "File is seperated into parts and will be downloaded concurrently (Needs 2* disk space in downloading process)"};
+                "File is seperated into parts and will be downloaded concurrently (Needs 2* disk space after downloading complete)"};
         NewDownloadUtils.initPopOvers(questionBtns, contents);
         NewDownloadUtils.validInputChecks(chunksField, bytesField, speedField);
         NewDownloadUtils.prepareLinkFromClipboard(urlField);
@@ -172,7 +175,40 @@ public class SingleDownload implements FXMLController, NewDownloadFxmlController
         DownloadsRepo.insertDownload(downloadModel);
         downloadModel.fillProperties();
         tableUtils.addRow(downloadModel);
+        DownloadTask<Long> downloadTask;
+        if (downloadModel.getChunks() == 0) {
+            if (!speedField.getText().equals("0")) {
+                if (bytesField.getText().equals("0"))
+                    downloadTask = new DownloadLimitedTask(downloadModel, Long.MAX_VALUE, false);
+                else
+                    downloadTask = new DownloadLimitedTask(downloadModel, getBytesFromField(bytesField.getText()), false);
+            } else
+                downloadTask = new DownloadLimitedTask(downloadModel, getBytesFromField(speedField.getText()), true);
+        } else {
+            downloadTask = new DownloadInChunksTask(downloadModel);
+            downloadTask.valueProperty().addListener((observable, oldValue, newValue) -> {
+                if (oldValue == null)
+                    oldValue = 0L;
+                var speed = (newValue - oldValue) * 2;
+//            long fileSize = DownloadTask.readConfig();
+                // todo :remaining time
+                if (newValue == 0)
+                    speed = 0;
+
+                speed /= 1000;
+//                tableUtils.updateDownloadSpeed(speed, downloadModel);
+            });
+        }
+        downloadTask.progressProperty().addListener((o, old, newV) -> {
+            tableUtils.updateDownloadProgress((int) (newV.floatValue() * 100), downloadModel);
+        });
+        new Thread(downloadTask).start();
         stage.close();
+    }
+
+    private long getBytesFromField(String mb) {
+        var mbVal = Double.parseDouble(mb);
+        return (long) (mbVal * Math.pow(2, 20));
     }
 
 

@@ -3,6 +3,7 @@ package ir.darkdeveloper.bitkip.task;
 
 import ir.darkdeveloper.bitkip.models.DownloadModel;
 import ir.darkdeveloper.bitkip.repo.DownloadsRepo;
+import javafx.concurrent.Task;
 
 import java.io.File;
 import java.io.IOException;
@@ -10,11 +11,11 @@ import java.net.HttpURLConnection;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
-public interface DownloadTask {
+public abstract class DownloadTask<T> extends Task<T> {
 
     long ONE_SEC = 1000;
 
-    void pause();
+    abstract void pause();
 
 
     static long saveOrGetFileSize(HttpURLConnection connection, File file, DownloadModel download) {
