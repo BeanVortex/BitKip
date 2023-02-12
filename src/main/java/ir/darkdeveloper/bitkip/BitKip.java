@@ -21,6 +21,7 @@ public class BitKip extends Application {
     // todo: save download in db after pause or complete (maybe in a time period during downloading)
     // todo: pause and resume operations
     // todo: bugs in table view data
+    // todo: downloading stage
 
     @Override
     public void start(Stage stage) {
