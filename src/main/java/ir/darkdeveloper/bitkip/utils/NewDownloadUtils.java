@@ -20,7 +20,8 @@ import java.util.concurrent.CompletableFuture;
 
 public class NewDownloadUtils {
 
-    public static void validInputChecks(TextField chunksField, TextField bytesField, TextField speedField) {
+    public static void validInputChecks(TextField chunksField, TextField bytesField,
+                                        TextField speedField) {
         chunksField.textProperty().addListener((o, old, newValue) -> {
             if (!newValue.matches("\\d*"))
                 chunksField.setText(newValue.replaceAll("\\D", ""));
@@ -31,23 +32,22 @@ public class NewDownloadUtils {
                     chunks = cores * 2;
                 chunksField.setText(chunks + "");
             }
-            if (bytesField != null)
-                bytesField.setDisable(!chunksField.getText().equals("0"));
+            bytesField.setDisable(!chunksField.getText().equals("0"));
         });
         chunksField.focusedProperty().addListener((o, old, newValue) -> {
             if (!newValue && chunksField.getText().isBlank())
                 chunksField.setText("0");
         });
         speedField.textProperty().addListener((o, old, newValue) -> {
-            if (!newValue.matches("\\d*"))
-                chunksField.setText(newValue.replaceAll("\\D", ""));
+            if (!newValue.matches("\\d+\\.?\\d*"))
+                speedField.setText(newValue.replaceAll("[a-zA-Z`!@#$%^&*()?<>,;:'\"\\-_+=]*", ""));
+            bytesField.setDisable(!newValue.equals("0"));
         });
 
         speedField.focusedProperty().addListener((o, old, newValue) -> {
             if (!newValue && speedField.getText().isBlank())
                 speedField.setText("0");
         });
-
     }
 
     public static void prepareLinkFromClipboard(TextField urlField) {
@@ -57,8 +57,9 @@ public class NewDownloadUtils {
             urlField.setText(clipContent);
     }
 
-    public static CompletableFuture<Void> prepareSize(TextField urlField, Label sizeLabel, DownloadModel downloadModel) {
-        return CompletableFuture.runAsync(() -> {
+    public static CompletableFuture<Long> prepareSize(TextField urlField, Label sizeLabel,
+                                                      TextField bytesField, DownloadModel downloadModel) {
+        return CompletableFuture.supplyAsync(() -> {
             var link = urlField.getText();
             try {
                 if (!link.isBlank()) {
@@ -66,11 +67,16 @@ public class NewDownloadUtils {
                     var conn = (HttpURLConnection) url.openConnection();
                     var fileSize = conn.getContentLengthLong();
                     downloadModel.setSize(fileSize);
-                    Platform.runLater(() -> sizeLabel.setText(IOUtils.formatBytes(fileSize)));
+                    Platform.runLater(() -> {
+                        sizeLabel.setText(IOUtils.formatBytes(fileSize));
+                        bytesField.setText(fileSize + "");
+                    });
+                    return fileSize;
                 }
             } catch (IOException e) {
                 e.printStackTrace();
             }
+            return null;
         });
     }
 

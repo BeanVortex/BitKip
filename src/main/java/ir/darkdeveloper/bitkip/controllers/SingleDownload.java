@@ -112,6 +112,14 @@ public class SingleDownload implements FXMLController, NewDownloadFxmlController
         NewDownloadUtils.validInputChecks(chunksField, bytesField, speedField);
         NewDownloadUtils.prepareLinkFromClipboard(urlField);
         autoFillLocationAndSizeAndName(true);
+
+        bytesField.textProperty().addListener((o, old, newValue) -> {
+            if (!newValue.matches("\\d*"))
+                bytesField.setText(newValue.replaceAll("\\D", ""));
+            chunksField.setDisable(!bytesField.getText().equals(downloadModel.getSize() + ""));
+            speedField.setDisable(!bytesField.getText().equals(downloadModel.getSize() + ""));
+        });
+
         urlField.textProperty().addListener((o, oldValue, newValue) -> {
             if (!newValue.isBlank())
                 autoFillLocationAndSizeAndName(true);
@@ -120,7 +128,7 @@ public class SingleDownload implements FXMLController, NewDownloadFxmlController
             if (!newValue.isBlank())
                 autoFillLocationAndSizeAndName(false);
         });
-        locationField.textProperty().addListener((o, oldValue, newValue)  -> {
+        locationField.textProperty().addListener((o, oldValue, newValue) -> {
             if (!newValue.isBlank())
                 autoFillLocationAndSizeAndName(false);
         });
@@ -131,7 +139,7 @@ public class SingleDownload implements FXMLController, NewDownloadFxmlController
         if (prepareFileName)
             fileNameLocationFuture = NewDownloadUtils.prepareFileName(urlField, nameField)
                     .thenAccept(fileName -> NewDownloadUtils.determineLocation(locationField, fileName, downloadModel));
-        var sizeFuture = NewDownloadUtils.prepareSize(urlField, sizeLabel, downloadModel);
+        var sizeFuture = NewDownloadUtils.prepareSize(urlField, sizeLabel, bytesField, downloadModel);
         CompletableFuture.allOf(fileNameLocationFuture, sizeFuture)
                 .whenComplete((unused, throwable) -> {
                     var file = new File(locationField.getText() + nameField.getText());
@@ -200,12 +208,10 @@ public class SingleDownload implements FXMLController, NewDownloadFxmlController
         downloadModel.setDownloadStatus(DownloadStatus.Downloading);
         if (selectedQueue.getId() != allDownloadsQueue.getId())
             downloadModel.getQueue().add(selectedQueue);
-        DownloadsRepo.insertDownload(downloadModel);
-        tableUtils.addRow(downloadModel);
         DownloadTask downloadTask;
         if (downloadModel.getChunks() == 0) {
-            if (!speedField.getText().equals("0")) {
-                if (bytesField.getText().equals("0"))
+            if (speedField.getText().equals("0")) {
+                if (bytesField.getText().equals(downloadModel.getSize() + ""))
                     downloadTask = new DownloadLimitedTask(downloadModel, Long.MAX_VALUE, false);
                 else
                     downloadTask = new DownloadLimitedTask(downloadModel, getBytesFromField(bytesField.getText()), false);
@@ -217,18 +223,35 @@ public class SingleDownload implements FXMLController, NewDownloadFxmlController
                 if (oldValue == null)
                     oldValue = 0L;
                 var speed = (newValue - oldValue) * 2;
-//            long fileSize = DownloadTask.readConfig();
                 // todo :remaining time
                 if (newValue == 0)
                     speed = 0;
+                downloadModel.setDownloadStatus(DownloadStatus.Downloading);
                 tableUtils.updateDownloadSpeed(speed, downloadModel.getId());
             });
         }
+
+        downloadTask.valueProperty().addListener((observable, oldValue, newValue) -> {
+            if (oldValue == null)
+                oldValue = 0L;
+            var speed = (newValue - oldValue);
+            // todo :remaining time
+            if (newValue == 0)
+                speed = 0;
+            downloadModel.setDownloadStatus(DownloadStatus.Downloading);
+            tableUtils.updateDownloadSpeed(speed, downloadModel.getId());
+        });
         downloadTask.progressProperty().addListener((o, old, newV) -> {
+            downloadModel.setDownloadStatus(DownloadStatus.Downloading);
             tableUtils.updateDownloadProgress(newV.floatValue() * 100, downloadModel.getId());
         });
+
+        DownloadsRepo.insertDownload(downloadModel);
+        tableUtils.addRow(downloadModel);
         downloadTaskList.add(downloadTask);
-        new Thread(downloadTask).start();
+        var t = new Thread(downloadTask);
+        t.setDaemon(true);
+        t.start();
         stage.close();
     }
 

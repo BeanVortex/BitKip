@@ -1,6 +1,7 @@
 package ir.darkdeveloper.bitkip.task;
 
 import ir.darkdeveloper.bitkip.models.DownloadModel;
+import ir.darkdeveloper.bitkip.models.DownloadStatus;
 import javafx.application.Platform;
 import javafx.concurrent.Task;
 import javafx.concurrent.WorkerStateEvent;
@@ -14,6 +15,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.channels.Channels;
 import java.nio.channels.FileChannel;
+import java.time.LocalDateTime;
 
 import static ir.darkdeveloper.bitkip.task.DownloadTask.*;
 
@@ -24,6 +26,7 @@ public class DownloadLimitedTask extends DownloadTask {
     private final DownloadModel downloadModel;
     private final long limit;
     private final boolean isSpeedLimited;
+    private File file;
 
     /**
      * if not isSpeedLimited, then valueLimit
@@ -40,10 +43,10 @@ public class DownloadLimitedTask extends DownloadTask {
     protected Long call() throws Exception {
         var url = new URL(downloadModel.getUrl());
         var connection = (HttpURLConnection) url.openConnection();
-        var file = new File(downloadModel.getFilePath());
+        file = new File(downloadModel.getFilePath());
         // for resume
         configureResume(connection, file);
-        if (isCompleted(downloadModel, file))
+        if (file.exists() && isCompleted(downloadModel, file))
             return 0L;
 
         var in = connection.getInputStream();
@@ -104,6 +107,18 @@ public class DownloadLimitedTask extends DownloadTask {
         System.out.println("Lasted: " + e);
     }
 
+    @Override
+    protected void succeeded() {
+        try {
+            downloadModel.setDownloadStatus(DownloadStatus.Paused);
+            if (file.exists() && getCurrentFileSize(file) == downloadModel.getSize()) {
+                downloadModel.setCompleteDate(LocalDateTime.now());
+                downloadModel.setDownloadStatus(DownloadStatus.Completed);
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
 
     private void calculateSpeedAndProgress(File file, long fileSize) {
         if (isCalculating)

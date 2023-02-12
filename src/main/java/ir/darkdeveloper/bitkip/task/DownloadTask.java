@@ -31,32 +31,3 @@ public abstract class DownloadTask extends Task<Long> {
         return Files.size(Path.of(file.getPath()));
     }
 }
-
-//    public void onStart() throws Exception {
-//        downloadTask = new DownloadTask(field, field2);
-//        downloadTask.valueProperty().addListener((observable, oldValue, newValue) -> {
-//            if (oldValue == null)
-//                oldValue = 0L;
-//            var speed = (newValue - oldValue) * 2;
-////            long fileSize = DownloadTask.readConfig();
-//            // todo :remaining time
-//            if (newValue == 0)
-//                speed = 0;
-//
-//            speed /= 1000;
-//            remainingLabel.setText("%d kB/s%n%n".formatted(speed));
-//        });
-//        progress.progressProperty().bind(downloadTask.progressProperty());
-//        downloadTask.progressProperty().addListener((o, old, newV) -> {
-//            progressLabel.setText("" + ((int) (newV.floatValue() * 100)));
-//
-//        });
-//        var t = new Thread(downloadTask);
-//        t.setDaemon(true);
-//        t.start();
-//    }
-//
-//    public void onPause() {
-//        if (downloadTask != null)
-//            downloadTask.pause();
-//    }

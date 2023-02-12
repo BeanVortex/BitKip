@@ -19,7 +19,8 @@ public class BitKip extends Application {
     // todo: scrollview in new download
     // todo: save table data on db before termination of app
     // todo: save download in db after pause or complete (maybe in a time period during downloading)
-    // todo: speed status not in db
+    // todo: pause and resume operations
+    // todo: bugs in table view data
 
     @Override
     public void start(Stage stage) {
