@@ -196,4 +196,28 @@ public class DownloadsRepo {
             e.printStackTrace();
         }
     }
+
+    public static void updateDownloadProgress(DownloadModel dm) {
+        var sql = """
+                UPDATE downloads SET progress = %f WHERE id = %d;
+                """.formatted(dm.getProgress(), dm.getId());
+        try (var conn = dbHelper.openConnection();
+             var stmt = conn.createStatement()) {
+            stmt.executeUpdate(sql);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void updateDownloadCompleteDate(DownloadModel dm) {
+        var sql = """
+                UPDATE downloads SET complete_date = "%s" WHERE id = %d;
+                """.formatted(dm.getAddDate(), dm.getId());
+        try (var conn = dbHelper.openConnection();
+             var stmt = conn.createStatement()) {
+            stmt.executeUpdate(sql);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
 }

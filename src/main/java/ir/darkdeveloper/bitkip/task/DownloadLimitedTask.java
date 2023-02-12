@@ -2,8 +2,9 @@ package ir.darkdeveloper.bitkip.task;
 
 import ir.darkdeveloper.bitkip.models.DownloadModel;
 import ir.darkdeveloper.bitkip.models.DownloadStatus;
+import ir.darkdeveloper.bitkip.repo.DownloadsRepo;
+import ir.darkdeveloper.bitkip.utils.TableUtils;
 import javafx.application.Platform;
-import javafx.concurrent.Task;
 import javafx.concurrent.WorkerStateEvent;
 import javafx.event.EventHandler;
 
@@ -17,25 +18,24 @@ import java.nio.channels.Channels;
 import java.nio.channels.FileChannel;
 import java.time.LocalDateTime;
 
-import static ir.darkdeveloper.bitkip.task.DownloadTask.*;
-
 
 public class DownloadLimitedTask extends DownloadTask {
     private boolean paused = false;
     private boolean isCalculating = false;
-    private final DownloadModel downloadModel;
     private final long limit;
     private final boolean isSpeedLimited;
+    private final TableUtils tableUtils;
     private File file;
 
     /**
      * if not isSpeedLimited, then valueLimit
      **/
 
-    public DownloadLimitedTask(DownloadModel downloadModel, long limit, boolean isSpeedLimited) {
-        this.downloadModel = downloadModel;
+    public DownloadLimitedTask(DownloadModel downloadModel, long limit, boolean isSpeedLimited, TableUtils tableUtils) {
+        super(downloadModel);
         this.limit = limit;
         this.isSpeedLimited = isSpeedLimited;
+        this.tableUtils = tableUtils;
     }
 
 
@@ -73,8 +73,9 @@ public class DownloadLimitedTask extends DownloadTask {
 
     }
 
-    private long downloadSpeedLimited(FileChannel fileChannel, InputStream in, File file, long limit,
-                                      long fileSize, long existingFileSize) throws IOException, InterruptedException {
+    private long downloadSpeedLimited(FileChannel fileChannel, InputStream in,
+                                      File file, long limit, long fileSize,
+                                      long existingFileSize) throws IOException, InterruptedException {
         var start = System.currentTimeMillis();
         var byteChannel = Channels.newChannel(in);
         do {
@@ -98,7 +99,8 @@ public class DownloadLimitedTask extends DownloadTask {
         return existingFileSize;
     }
 
-    private void downloadValueLimited(FileChannel fileChannel, InputStream in, long limit, long existingFileSize) throws IOException {
+    private void downloadValueLimited(FileChannel fileChannel, InputStream in,
+                                      long limit, long existingFileSize) throws IOException {
         var byteChannel = Channels.newChannel(in);
         var s = System.currentTimeMillis();
         fileChannel.transferFrom(byteChannel, existingFileSize, limit);
@@ -110,14 +112,24 @@ public class DownloadLimitedTask extends DownloadTask {
     @Override
     protected void succeeded() {
         try {
-            downloadModel.setDownloadStatus(DownloadStatus.Paused);
-            if (file.exists() && getCurrentFileSize(file) == downloadModel.getSize()) {
-                downloadModel.setCompleteDate(LocalDateTime.now());
-                downloadModel.setDownloadStatus(DownloadStatus.Completed);
+            var download = tableUtils.findDownload(downloadModel.getId());
+            if (download != null) {
+                download.setDownloadStatus(DownloadStatus.Paused);
+                if (file.exists() && getCurrentFileSize(file) == downloadModel.getSize()) {
+                    download.setCompleteDate(LocalDateTime.now());
+                    download.setDownloadStatus(DownloadStatus.Completed);
+                }
+                DownloadsRepo.updateDownloadProgress(download);
+                DownloadsRepo.updateDownloadCompleteDate(download);
             }
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    @Override
+    protected void failed() {
+        succeeded();
     }
 
     private void calculateSpeedAndProgress(File file, long fileSize) {

@@ -1,6 +1,8 @@
 package ir.darkdeveloper.bitkip.controllers;
 
+import ir.darkdeveloper.bitkip.config.AppConfigs;
 import ir.darkdeveloper.bitkip.models.DownloadModel;
+import ir.darkdeveloper.bitkip.models.DownloadStatus;
 import ir.darkdeveloper.bitkip.repo.DownloadsRepo;
 import ir.darkdeveloper.bitkip.repo.QueuesRepo;
 import ir.darkdeveloper.bitkip.task.DownloadTask;
@@ -140,7 +142,12 @@ public class MainController implements FXMLController {
             btn.setOnMouseClicked(event -> {
                 if (event.getClickCount() == 2)
                     return;
-                var downloadsData = DownloadsRepo.getDownloadsByQueue(queueModel.getId());
+                var downloadsData = DownloadsRepo.getDownloadsByQueue(queueModel.getId())
+                        .stream().peek(downloadModel -> {
+                            downloadModel.setDownloadStatus(DownloadStatus.Paused);
+                            if (downloadModel.getProgress() == 100)
+                                downloadModel.setDownloadStatus(DownloadStatus.Completed);
+                        }).toList();
                 tableUtils.setDownloads(downloadsData);
                 if (!queueButtons.isEmpty()) {
                     btn.getStyleClass().add("selected_queue");

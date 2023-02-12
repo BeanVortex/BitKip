@@ -24,17 +24,15 @@ import static ir.darkdeveloper.bitkip.task.DownloadTask.*;
 public class DownloadInChunksTask extends DownloadTask {
     private final int chunks;
     private final List<FileChannel> fileChannels = new ArrayList<>();
-    private final DownloadModel downloadModel;
-
     private boolean paused;
     private boolean completed;
     private boolean isCalculating;
 
     public DownloadInChunksTask(DownloadModel downloadModel) {
+        super(downloadModel);
         if (downloadModel.getChunks() == 0)
             throw new IllegalArgumentException("To download file in chunks, chunks must not be 0");
         this.chunks = downloadModel.getChunks();
-        this.downloadModel = downloadModel;
     }
 
 

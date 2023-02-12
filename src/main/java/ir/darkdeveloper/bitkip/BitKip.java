@@ -18,10 +18,12 @@ public class BitKip extends Application {
     // todo: remaining time
     // todo: scrollview in new download
     // todo: save table data on db before termination of app
-    // todo: save download in db after pause or complete (maybe in a time period during downloading)
+    // todo: save download in db after pause
     // todo: pause and resume operations
-    // todo: bugs in table view data
     // todo: downloading stage
+    // todo: ask user if also wants to delete the file itself
+    // todo: bug in saving download in period while switching to a queue which does not have the download item
+    // todo: bug in downloading limited bytes
 
     @Override
     public void start(Stage stage) {

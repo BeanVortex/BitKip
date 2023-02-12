@@ -1,5 +1,6 @@
 package ir.darkdeveloper.bitkip.utils;
 
+import ir.darkdeveloper.bitkip.config.AppConfigs;
 import ir.darkdeveloper.bitkip.models.DownloadModel;
 import ir.darkdeveloper.bitkip.models.DownloadStatus;
 import ir.darkdeveloper.bitkip.repo.DownloadsRepo;
@@ -62,10 +63,12 @@ public class TableUtils {
         completeColumn.setCellValueFactory(new PropertyValueFactory<>("completeDateString"));
 
         contentTable.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
-       var downloadList = DownloadsRepo.getDownloads().stream().map(downloadModel -> {
-            downloadModel.setDownloadStatus(DownloadStatus.Paused);
-            return downloadModel;
-        }).toList();
+        var downloadList = DownloadsRepo.getDownloads().stream()
+                .peek(downloadModel -> {
+                    downloadModel.setDownloadStatus(DownloadStatus.Paused);
+                    if (downloadModel.getProgress() == 100)
+                        downloadModel.setDownloadStatus(DownloadStatus.Completed);
+                }).toList();
         data.addAll(downloadList);
         contentTable.getItems().addAll(data);
         contentTable.getSortOrder().add(addDateColumn);
@@ -104,6 +107,7 @@ public class TableUtils {
         var i = findDownload(downloadId);
         if (i != null) {
             i.setSpeed(speed);
+            i.setDownloadStatus(DownloadStatus.Downloading);
             i.setSpeedString(IOUtils.formatBytes(speed));
             contentTable.refresh();
         }
@@ -113,15 +117,25 @@ public class TableUtils {
         var i = findDownload(downloadId);
         if (i != null) {
             i.setProgress(progress);
+            i.setDownloadStatus(DownloadStatus.Downloading);
+            if (progress == 100)
+                i.setDownloadStatus(DownloadStatus.Completed);
             i.setProgressString(new DecimalFormat("##.#").format(progress) + " %");
             contentTable.refresh();
         }
     }
 
-    private DownloadModel findDownload(int id) {
+    public void updateDownloadStatus(int downloadId, DownloadStatus status) {
+        var i = findDownload(downloadId);
+        if (i != null)
+            i.setDownloadStatus(status);
+    }
+
+    public DownloadModel findDownload(int id) {
         for (var d : data)
             if (id == d.getId())
                 return d;
         return null;
     }
+
 }

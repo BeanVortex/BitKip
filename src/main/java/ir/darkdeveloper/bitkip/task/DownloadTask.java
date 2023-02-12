@@ -14,8 +14,13 @@ import java.nio.file.Path;
 public abstract class DownloadTask extends Task<Long> {
 
     long ONE_SEC = 1000;
+    DownloadModel downloadModel;
 
     abstract void pause();
+
+    public DownloadTask(DownloadModel downloadModel) {
+        this.downloadModel = downloadModel;
+    }
 
 
     static long saveOrGetFileSize(HttpURLConnection connection, File file, DownloadModel download) {

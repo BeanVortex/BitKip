@@ -83,6 +83,7 @@ public class DownloadModel {
     }
 
     public String getSpeedString() {
-            return IOUtils.formatBytes(speed);
+        return IOUtils.formatBytes(speed);
     }
+
 }

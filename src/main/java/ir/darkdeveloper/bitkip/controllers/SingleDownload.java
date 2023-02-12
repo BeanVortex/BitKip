@@ -6,6 +6,7 @@ import ir.darkdeveloper.bitkip.models.DownloadStatus;
 import ir.darkdeveloper.bitkip.models.QueueModel;
 import ir.darkdeveloper.bitkip.repo.DownloadsRepo;
 import ir.darkdeveloper.bitkip.repo.QueuesRepo;
+import ir.darkdeveloper.bitkip.service.DownloadProgressService;
 import ir.darkdeveloper.bitkip.task.DownloadInChunksTask;
 import ir.darkdeveloper.bitkip.task.DownloadLimitedTask;
 import ir.darkdeveloper.bitkip.task.DownloadTask;
@@ -21,6 +22,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.Stage;
+import javafx.util.Duration;
 import org.controlsfx.control.Notifications;
 import org.kordamp.ikonli.javafx.FontIcon;
 
@@ -212,11 +214,11 @@ public class SingleDownload implements FXMLController, NewDownloadFxmlController
         if (downloadModel.getChunks() == 0) {
             if (speedField.getText().equals("0")) {
                 if (bytesField.getText().equals(downloadModel.getSize() + ""))
-                    downloadTask = new DownloadLimitedTask(downloadModel, Long.MAX_VALUE, false);
+                    downloadTask = new DownloadLimitedTask(downloadModel, Long.MAX_VALUE, false, tableUtils);
                 else
-                    downloadTask = new DownloadLimitedTask(downloadModel, getBytesFromField(bytesField.getText()), false);
+                    downloadTask = new DownloadLimitedTask(downloadModel, getBytesFromField(bytesField.getText()), false, tableUtils);
             } else
-                downloadTask = new DownloadLimitedTask(downloadModel, getBytesFromField(speedField.getText()), true);
+                downloadTask = new DownloadLimitedTask(downloadModel, getBytesFromField(speedField.getText()), true, tableUtils);
         } else {
             downloadTask = new DownloadInChunksTask(downloadModel);
             downloadTask.valueProperty().addListener((observable, oldValue, newValue) -> {
@@ -226,7 +228,6 @@ public class SingleDownload implements FXMLController, NewDownloadFxmlController
                 // todo :remaining time
                 if (newValue == 0)
                     speed = 0;
-                downloadModel.setDownloadStatus(DownloadStatus.Downloading);
                 tableUtils.updateDownloadSpeed(speed, downloadModel.getId());
             });
         }
@@ -238,20 +239,23 @@ public class SingleDownload implements FXMLController, NewDownloadFxmlController
             // todo :remaining time
             if (newValue == 0)
                 speed = 0;
-            downloadModel.setDownloadStatus(DownloadStatus.Downloading);
             tableUtils.updateDownloadSpeed(speed, downloadModel.getId());
         });
         downloadTask.progressProperty().addListener((o, old, newV) -> {
-            downloadModel.setDownloadStatus(DownloadStatus.Downloading);
             tableUtils.updateDownloadProgress(newV.floatValue() * 100, downloadModel.getId());
         });
 
         DownloadsRepo.insertDownload(downloadModel);
         tableUtils.addRow(downloadModel);
         downloadTaskList.add(downloadTask);
+        var progressService = new DownloadProgressService(downloadModel, tableUtils);
+        progressService.setPeriod(Duration.seconds(5));
+        downloadTask.setOnSucceeded(event -> progressService.cancel());
+        downloadTask.setOnCancelled(event -> progressService.cancel());
         var t = new Thread(downloadTask);
         t.setDaemon(true);
         t.start();
+        progressService.start();
         stage.close();
     }
 
