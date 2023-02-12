@@ -3,7 +3,7 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 <?import java.net.URL?>
-<VBox minHeight="500" prefHeight="500" minWidth="600" prefWidth="600.0"
+<VBox minHeight="550" prefHeight="550" minWidth="600" prefWidth="600.0"
       maxHeight="600"
       xmlns="http://javafx.com/javafx/16"
       xmlns:fx="http://javafx.com/fxml/1" fx:controller="ir.darkdeveloper.bitkip.controllers.NewDownload">

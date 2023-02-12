@@ -26,6 +26,7 @@ public class DownloadModel {
     private List<QueueModel> queue;
     private int chunks;
     private long speed;
+    private DownloadStatus downloadStatus;
     //    private boolean downloadedInChunks;
     private LocalDateTime addDate;
     private LocalDateTime lastTryDate;

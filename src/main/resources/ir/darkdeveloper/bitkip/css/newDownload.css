@@ -85,6 +85,10 @@
     -fx-font-weight: bold;
 }
 
+#errorLabel {
+    -fx-text-fill: #F44336;
+}
+
 .cancel_btn {
     -fx-padding: 5 13 5 13;
     -fx-border-radius: 10;

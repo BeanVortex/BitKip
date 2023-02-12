@@ -66,6 +66,12 @@
         </HBox>
     </HBox>
 
+    <HBox alignment="BASELINE_LEFT">
+        <HBox spacing="20" alignment="CENTER">
+            <Label fx:id="errorLabel" styleClass="field-label"/>
+        </HBox>
+    </HBox>
+
     <HBox alignment="BOTTOM_CENTER" style="-fx-padding: 15 0 0 0">
         <HBox spacing="20" alignment="CENTER">
             <Button text="Cancel" styleClass="cancel_btn" onAction="#onCancel"/>

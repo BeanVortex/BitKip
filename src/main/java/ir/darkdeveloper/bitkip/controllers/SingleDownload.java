@@ -2,6 +2,7 @@ package ir.darkdeveloper.bitkip.controllers;
 
 import ir.darkdeveloper.bitkip.config.AppConfigs;
 import ir.darkdeveloper.bitkip.models.DownloadModel;
+import ir.darkdeveloper.bitkip.models.DownloadStatus;
 import ir.darkdeveloper.bitkip.models.QueueModel;
 import ir.darkdeveloper.bitkip.repo.DownloadsRepo;
 import ir.darkdeveloper.bitkip.repo.QueuesRepo;
@@ -11,6 +12,7 @@ import ir.darkdeveloper.bitkip.task.DownloadTask;
 import ir.darkdeveloper.bitkip.utils.FxUtils;
 import ir.darkdeveloper.bitkip.utils.NewDownloadUtils;
 import ir.darkdeveloper.bitkip.utils.TableUtils;
+import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
@@ -29,6 +31,8 @@ import java.util.concurrent.CompletableFuture;
 
 public class SingleDownload implements FXMLController, NewDownloadFxmlController {
 
+    @FXML
+    private Label errorLabel;
     @FXML
     private Button newQueue;
     @FXML
@@ -63,7 +67,7 @@ public class SingleDownload implements FXMLController, NewDownloadFxmlController
     private TableUtils tableUtils;
 
     private final DownloadModel downloadModel = new DownloadModel();
-    private List<DownloadTask> downloadTaskList;
+    private final List<DownloadTask> downloadTaskList = AppConfigs.downloadTaskList;
 
 
     @Override
@@ -71,10 +75,6 @@ public class SingleDownload implements FXMLController, NewDownloadFxmlController
         this.tableUtils = tableUtils;
     }
 
-    @Override
-    public void setDownloadTaskList(List<DownloadTask> downloadTaskList) {
-        this.downloadTaskList = downloadTaskList;
-    }
 
     @Override
     public void setStage(Stage stage) {
@@ -111,21 +111,41 @@ public class SingleDownload implements FXMLController, NewDownloadFxmlController
         NewDownloadUtils.initPopOvers(questionBtns, contents);
         NewDownloadUtils.validInputChecks(chunksField, bytesField, speedField);
         NewDownloadUtils.prepareLinkFromClipboard(urlField);
-        autoFillLocationAndSizeAndName();
+        autoFillLocationAndSizeAndName(true);
         urlField.textProperty().addListener((o, oldValue, newValue) -> {
             if (!newValue.isBlank())
-                autoFillLocationAndSizeAndName();
+                autoFillLocationAndSizeAndName(true);
+        });
+        nameField.textProperty().addListener((o, oldValue, newValue) -> {
+            if (!newValue.isBlank())
+                autoFillLocationAndSizeAndName(false);
+        });
+        locationField.textProperty().addListener((o, oldValue, newValue)  -> {
+            if (!newValue.isBlank())
+                autoFillLocationAndSizeAndName(false);
         });
     }
 
-    private void autoFillLocationAndSizeAndName() {
-        var fileNameLocationFuture = NewDownloadUtils.prepareFileName(urlField, nameField)
-                .thenAccept(fileName -> NewDownloadUtils.determineLocation(locationField, fileName, downloadModel));
+    private void autoFillLocationAndSizeAndName(boolean prepareFileName) {
+        CompletableFuture<Void> fileNameLocationFuture = CompletableFuture.completedFuture(null);
+        if (prepareFileName)
+            fileNameLocationFuture = NewDownloadUtils.prepareFileName(urlField, nameField)
+                    .thenAccept(fileName -> NewDownloadUtils.determineLocation(locationField, fileName, downloadModel));
         var sizeFuture = NewDownloadUtils.prepareSize(urlField, sizeLabel, downloadModel);
         CompletableFuture.allOf(fileNameLocationFuture, sizeFuture)
                 .whenComplete((unused, throwable) -> {
-                    downloadBtn.setDisable(false);
-                    addBtn.setDisable(false);
+                    var file = new File(locationField.getText() + nameField.getText());
+                    var chunkFile = new File(locationField.getText() + nameField.getText() + "#0");
+                    if (file.exists() || chunkFile.exists()) {
+                        errorLabel.setVisible(true);
+                        downloadBtn.setDisable(true);
+                        addBtn.setDisable(true);
+                        Platform.runLater(() -> errorLabel.setText("File with this name exists in this location"));
+                    } else {
+                        errorLabel.setVisible(false);
+                        downloadBtn.setDisable(false);
+                        addBtn.setDisable(false);
+                    }
                 });
     }
 
@@ -177,6 +197,7 @@ public class SingleDownload implements FXMLController, NewDownloadFxmlController
         var selectedQueue = queueCombo.getSelectionModel().getSelectedItem();
         var allDownloadsQueue = QueuesRepo.findByName("All Downloads");
         downloadModel.getQueue().add(allDownloadsQueue);
+        downloadModel.setDownloadStatus(DownloadStatus.Downloading);
         if (selectedQueue.getId() != allDownloadsQueue.getId())
             downloadModel.getQueue().add(selectedQueue);
         DownloadsRepo.insertDownload(downloadModel);

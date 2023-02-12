@@ -1,6 +1,7 @@
 package ir.darkdeveloper.bitkip.utils;
 
 import ir.darkdeveloper.bitkip.models.DownloadModel;
+import ir.darkdeveloper.bitkip.models.DownloadStatus;
 import ir.darkdeveloper.bitkip.repo.DownloadsRepo;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -29,6 +30,7 @@ public class TableUtils {
         var progressColumn = new TableColumn<DownloadModel, String>("Progress");
         var speedColumn = new TableColumn<DownloadModel, String>("Speed");
         var sizeColumn = new TableColumn<DownloadModel, String>("Size");
+        var statusColumn = new TableColumn<DownloadModel, String>("Status");
         var remainingColumn = new TableColumn<DownloadModel, String>("Remaining");
         var chunksColumn = new TableColumn<DownloadModel, Integer>("Chunks");
         var addDateColumn = new TableColumn<DownloadModel, String>("Added on");
@@ -38,6 +40,7 @@ public class TableUtils {
         nameColumn.setPrefWidth(200);
         speedColumn.setPrefWidth(100);
         sizeColumn.setPrefWidth(80);
+        statusColumn.setPrefWidth(120);
         remainingColumn.setPrefWidth(80);
         addDateColumn.setPrefWidth(135);
         lastTryColumn.setPrefWidth(135);
@@ -45,12 +48,13 @@ public class TableUtils {
         addDateColumn.setSortType(TableColumn.SortType.DESCENDING);
 
         List<TableColumn<DownloadModel, ?>> listOfColumns = List.of(nameColumn, progressColumn, speedColumn, sizeColumn,
-                remainingColumn, chunksColumn, addDateColumn, lastTryColumn, completeColumn);
+                statusColumn, remainingColumn, chunksColumn, addDateColumn, lastTryColumn, completeColumn);
         contentTable.getColumns().addAll(listOfColumns);
         nameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
         progressColumn.setCellValueFactory(new PropertyValueFactory<>("progressString"));
         speedColumn.setCellValueFactory(new PropertyValueFactory<>("speedString"));
         sizeColumn.setCellValueFactory(new PropertyValueFactory<>("sizeString"));
+        statusColumn.setCellValueFactory(new PropertyValueFactory<>("downloadStatus"));
         remainingColumn.setCellValueFactory(new PropertyValueFactory<>("remainingTime"));
         chunksColumn.setCellValueFactory(new PropertyValueFactory<>("chunks"));
         addDateColumn.setCellValueFactory(new PropertyValueFactory<>("addDateString"));
@@ -58,7 +62,11 @@ public class TableUtils {
         completeColumn.setCellValueFactory(new PropertyValueFactory<>("completeDateString"));
 
         contentTable.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
-        data.addAll(DownloadsRepo.getDownloads());
+       var downloadList = DownloadsRepo.getDownloads().stream().map(downloadModel -> {
+            downloadModel.setDownloadStatus(DownloadStatus.Paused);
+            return downloadModel;
+        }).toList();
+        data.addAll(downloadList);
         contentTable.getItems().addAll(data);
         contentTable.getSortOrder().add(addDateColumn);
 
@@ -75,7 +83,6 @@ public class TableUtils {
                         && event.getButton().equals(MouseButton.SECONDARY))
                     System.out.println(row.getIndex());
             });
-//            row.updateSelected(true);
             return row;
         });
 

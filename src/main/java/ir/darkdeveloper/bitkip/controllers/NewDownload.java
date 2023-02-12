@@ -63,12 +63,6 @@ public class NewDownload implements NewDownloadFxmlController {
     }
 
     @Override
-    public void setDownloadTaskList(List<DownloadTask> downloadTaskList) {
-        this.downloadTaskList = downloadTaskList;
-    }
-
-
-    @Override
     public void initAfterStage() {
         stage.getScene().getRoot().setEffect(new DropShadow());
         stage.getScene().setFill(Color.TRANSPARENT);

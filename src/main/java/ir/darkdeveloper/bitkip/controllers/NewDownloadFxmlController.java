@@ -8,5 +8,4 @@ import java.util.List;
 public interface NewDownloadFxmlController extends FXMLController{
     void setTableUtils(TableUtils tableUtils);
 
-    void setDownloadTaskList(List<DownloadTask> downloadTaskList);
 }

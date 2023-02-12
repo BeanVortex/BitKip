@@ -1,5 +1,6 @@
 package ir.darkdeveloper.bitkip.controllers;
 
+import ir.darkdeveloper.bitkip.config.AppConfigs;
 import ir.darkdeveloper.bitkip.models.QueueModel;
 import ir.darkdeveloper.bitkip.repo.QueuesRepo;
 import ir.darkdeveloper.bitkip.task.DownloadTask;
@@ -49,7 +50,7 @@ public class MultipleDownload implements FXMLController, NewDownloadFxmlControll
 
     private Stage stage;
     private TableUtils tableUtils;
-    private List<DownloadTask> downloadTaskList;
+    private final List<DownloadTask> downloadTaskList = AppConfigs.downloadTaskList;
 
 
     @Override
@@ -57,10 +58,6 @@ public class MultipleDownload implements FXMLController, NewDownloadFxmlControll
         this.tableUtils = tableUtils;
     }
 
-    @Override
-    public void setDownloadTaskList(List<DownloadTask> downloadTaskList) {
-        this.downloadTaskList = downloadTaskList;
-    }
     @Override
     public void setStage(Stage stage) {
         this.stage = stage;

@@ -4,6 +4,8 @@ package ir.darkdeveloper.bitkip.utils;
 import ir.darkdeveloper.bitkip.controllers.FXMLController;
 import ir.darkdeveloper.bitkip.controllers.MainController;
 import ir.darkdeveloper.bitkip.controllers.NewDownload;
+import ir.darkdeveloper.bitkip.controllers.NewDownloadFxmlController;
+import ir.darkdeveloper.bitkip.task.DownloadTask;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
@@ -45,7 +47,7 @@ public class FxUtils {
         return null;
     }
 
-    public static NewDownload newDownloadStage(String fxmlFilename, double minWidth, double minHeight) {
+    public static void newDownloadStage(String fxmlFilename, double minWidth, double minHeight, TableUtils tableUtils, List<DownloadTask> downloadTaskList) {
         FXMLLoader loader = null;
         Stage stage = new Stage();
         Parent root = null;
@@ -55,7 +57,6 @@ public class FxUtils {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        FXMLController controller = loader.getController();
         var scene = new Scene(root);
         stage.setScene(scene);
         var logoPath = getResource("images/logo.png");
@@ -66,9 +67,10 @@ public class FxUtils {
         stage.initStyle(StageStyle.TRANSPARENT);
         stage.setMaxHeight(600);
         stage.setTitle("New Download");
+        NewDownloadFxmlController controller = loader.getController();
         controller.setStage(stage);
+        controller.setTableUtils(tableUtils);
         stage.show();
-        return (NewDownload) controller;
     }
 
     public static <T> List<T> getAllNodes(Parent root, Class<T> tClass) {
