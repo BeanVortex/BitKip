@@ -1,5 +1,6 @@
 package ir.darkdeveloper.bitkip.task;
 
+import ir.darkdeveloper.bitkip.config.AppConfigs;
 import ir.darkdeveloper.bitkip.models.DownloadModel;
 import ir.darkdeveloper.bitkip.models.DownloadStatus;
 import ir.darkdeveloper.bitkip.repo.DownloadsRepo;
@@ -17,6 +18,7 @@ import java.net.URL;
 import java.nio.channels.Channels;
 import java.nio.channels.FileChannel;
 import java.time.LocalDateTime;
+import java.util.List;
 
 
 public class DownloadLimitedTask extends DownloadTask {
@@ -25,6 +27,7 @@ public class DownloadLimitedTask extends DownloadTask {
     private final long limit;
     private final boolean isSpeedLimited;
     private final TableUtils tableUtils;
+    private final List<DownloadModel> currentDownloading = AppConfigs.currentDownloading;
     private File file;
 
     /**
@@ -112,7 +115,7 @@ public class DownloadLimitedTask extends DownloadTask {
     @Override
     protected void succeeded() {
         try {
-            var download = tableUtils.findDownload(downloadModel.getId());
+            var download = currentDownloading.get(currentDownloading.indexOf(downloadModel));
             if (download != null) {
                 download.setDownloadStatus(DownloadStatus.Paused);
                 if (file.exists() && getCurrentFileSize(file) == downloadModel.getSize()) {

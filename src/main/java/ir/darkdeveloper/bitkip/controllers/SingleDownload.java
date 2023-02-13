@@ -70,6 +70,7 @@ public class SingleDownload implements FXMLController, NewDownloadFxmlController
 
     private final DownloadModel downloadModel = new DownloadModel();
     private final List<DownloadTask> downloadTaskList = AppConfigs.downloadTaskList;
+    private final List<DownloadModel> currentDownloading = AppConfigs.currentDownloading;
 
 
     @Override
@@ -242,13 +243,14 @@ public class SingleDownload implements FXMLController, NewDownloadFxmlController
             tableUtils.updateDownloadSpeed(speed, downloadModel.getId());
         });
         downloadTask.progressProperty().addListener((o, old, newV) -> {
-            tableUtils.updateDownloadProgress(newV.floatValue() * 100, downloadModel.getId());
+            tableUtils.updateDownloadProgress(newV.floatValue() * 100, downloadModel);
         });
 
         DownloadsRepo.insertDownload(downloadModel);
         tableUtils.addRow(downloadModel);
         downloadTaskList.add(downloadTask);
-        var progressService = new DownloadProgressService(downloadModel, tableUtils);
+        currentDownloading.add(downloadModel);
+        var progressService = new DownloadProgressService(downloadModel);
         progressService.setPeriod(Duration.seconds(5));
         downloadTask.setOnSucceeded(event -> progressService.cancel());
         downloadTask.setOnCancelled(event -> progressService.cancel());

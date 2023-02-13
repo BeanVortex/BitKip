@@ -22,7 +22,6 @@ public class BitKip extends Application {
     // todo: pause and resume operations
     // todo: downloading stage
     // todo: ask user if also wants to delete the file itself
-    // todo: bug in saving download in period while switching to a queue which does not have the download item
     // todo: bug in downloading limited bytes
 
     @Override

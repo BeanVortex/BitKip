@@ -21,6 +21,7 @@ public class TableUtils {
 
     private final TableView<DownloadModel> contentTable;
     private final ObservableList<DownloadModel> data = FXCollections.observableArrayList();
+    private final List<DownloadModel> currentDownloading = AppConfigs.currentDownloading;
 
     public TableUtils(TableView<DownloadModel> contentTable) {
         this.contentTable = contentTable;
@@ -113,8 +114,11 @@ public class TableUtils {
         }
     }
 
-    public void updateDownloadProgress(float progress, int downloadId) {
-        var i = findDownload(downloadId);
+    public void updateDownloadProgress(float progress, DownloadModel downloadModel) {
+        var i = findDownload(downloadModel.getId());
+        var i2 = currentDownloading.get(currentDownloading.indexOf(downloadModel));
+        if (i2 != null)
+            i2.setProgress(progress);
         if (i != null) {
             i.setProgress(progress);
             i.setDownloadStatus(DownloadStatus.Downloading);

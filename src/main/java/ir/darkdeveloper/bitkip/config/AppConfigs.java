@@ -1,5 +1,6 @@
 package ir.darkdeveloper.bitkip.config;
 
+import ir.darkdeveloper.bitkip.models.DownloadModel;
 import ir.darkdeveloper.bitkip.task.DownloadTask;
 import javafx.application.HostServices;
 
@@ -25,6 +26,7 @@ public class AppConfigs {
 
     public static HostServices hostServices;
     public static final List<DownloadTask> downloadTaskList = new ArrayList<>();
+    public static final List<DownloadModel> currentDownloading = new ArrayList<>();
 
     public static void setHostServices(HostServices hostServices) {
         AppConfigs.hostServices = hostServices;
