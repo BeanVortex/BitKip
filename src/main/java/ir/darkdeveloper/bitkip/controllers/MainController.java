@@ -1,6 +1,5 @@
 package ir.darkdeveloper.bitkip.controllers;
 
-import ir.darkdeveloper.bitkip.config.AppConfigs;
 import ir.darkdeveloper.bitkip.models.DownloadModel;
 import ir.darkdeveloper.bitkip.models.DownloadStatus;
 import ir.darkdeveloper.bitkip.repo.DownloadsRepo;
@@ -94,7 +93,7 @@ public class MainController implements FXMLController {
         actionBtnInits();
         WindowUtils.toolbarInits(toolbar, stage, bounds, actionBtn, contentTable, minWidth, minHeight);
         MenuUtils.initFileMenu(menuFile, contentTable);
-        MenuUtils.initOperationMenu(operationMenu, contentTable);
+        MenuUtils.initOperationMenu(operationMenu, contentTable, tableUtils);
         MenuUtils.initAboutMenu(aboutMenu, contentTable);
     }
 

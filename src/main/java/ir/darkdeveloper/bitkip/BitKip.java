@@ -17,9 +17,9 @@ public class BitKip extends Application {
     // todo: limited download in chunks
     // todo: remaining time
     // todo: scrollview in new download
-    // todo: save table data on db before termination of app
+    // todo: save only currently downloading data on db before termination of app
     // todo: save download in db after pause
-    // todo: pause and resume operations
+    // todo: pause operations
     // todo: downloading stage
     // todo: ask user if also wants to delete the file itself
 

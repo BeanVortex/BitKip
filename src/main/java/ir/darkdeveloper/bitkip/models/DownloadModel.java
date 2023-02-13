@@ -1,5 +1,6 @@
 package ir.darkdeveloper.bitkip.models;
 
+import ir.darkdeveloper.bitkip.task.DownloadTask;
 import ir.darkdeveloper.bitkip.utils.IOUtils;
 import lombok.*;
 
@@ -27,7 +28,7 @@ public class DownloadModel {
     private int chunks;
     private long speed;
     private DownloadStatus downloadStatus;
-    //    private boolean downloadedInChunks;
+    private DownloadTask downloadTask;
     private LocalDateTime addDate;
     private LocalDateTime lastTryDate;
     private LocalDateTime completeDate;

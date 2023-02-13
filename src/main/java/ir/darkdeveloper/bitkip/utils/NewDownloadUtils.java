@@ -2,12 +2,18 @@ package ir.darkdeveloper.bitkip.utils;
 
 import ir.darkdeveloper.bitkip.config.AppConfigs;
 import ir.darkdeveloper.bitkip.models.DownloadModel;
+import ir.darkdeveloper.bitkip.repo.DownloadsRepo;
 import ir.darkdeveloper.bitkip.repo.QueuesRepo;
+import ir.darkdeveloper.bitkip.service.DownloadProgressService;
+import ir.darkdeveloper.bitkip.task.DownloadInChunksTask;
+import ir.darkdeveloper.bitkip.task.DownloadLimitedTask;
+import ir.darkdeveloper.bitkip.task.DownloadTask;
 import javafx.application.Platform;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.input.Clipboard;
+import javafx.util.Duration;
 import org.controlsfx.control.PopOver;
 
 import java.io.IOException;
@@ -169,5 +175,70 @@ public class NewDownloadUtils {
             });
         }
     }
+
+
+    public static void startDownload(DownloadModel downloadModel, TableUtils tableUtils, String speed, String bytes, boolean resume) {
+        DownloadTask downloadTask = new DownloadLimitedTask(downloadModel, Long.MAX_VALUE, false);
+        if (downloadModel.getChunks() == 0) {
+            if (speed != null) {
+                if (speed.equals("0")) {
+                    if (bytes != null) {
+                        if (bytes.equals(downloadModel.getSize() + ""))
+                            downloadTask = new DownloadLimitedTask(downloadModel, Long.MAX_VALUE, false);
+                        else
+                            downloadTask = new DownloadLimitedTask(downloadModel, Long.parseLong(bytes), false);
+                    }
+                } else
+                    downloadTask = new DownloadLimitedTask(downloadModel, getBytesFromField(speed), true);
+            }
+        } else {
+            downloadTask = new DownloadInChunksTask(downloadModel);
+            downloadTask.valueProperty().addListener((observable, oldValue, newValue) -> {
+                if (oldValue == null)
+                    oldValue = 0L;
+                var currentSpeed = (newValue - oldValue) * 2;
+                // todo :remaining time
+                if (newValue == 0)
+                    currentSpeed = 0;
+                tableUtils.updateDownloadSpeed(currentSpeed, downloadModel.getId());
+            });
+        }
+
+        downloadTask.valueProperty().addListener((observable, oldValue, newValue) -> {
+            if (oldValue == null)
+                oldValue = 0L;
+            var currentSpeed = (newValue - oldValue);
+            // todo :remaining time
+            if (newValue == 0)
+                currentSpeed = 0;
+            tableUtils.updateDownloadSpeed(currentSpeed, downloadModel.getId());
+        });
+        downloadTask.progressProperty().addListener((o, old, newV) -> {
+            tableUtils.updateDownloadProgress(newV.floatValue() * 100, downloadModel);
+        });
+        downloadModel.setDownloadTask(downloadTask);
+        if (!resume)
+        {
+            DownloadsRepo.insertDownload(downloadModel);
+            tableUtils.addRow(downloadModel);
+        }
+        AppConfigs.downloadTaskList.add(downloadTask);
+        AppConfigs.currentDownloading.add(downloadModel);
+        var progressService = new DownloadProgressService(downloadModel);
+        progressService.setPeriod(Duration.seconds(5));
+        downloadTask.setOnSucceeded(event -> progressService.cancel());
+        downloadTask.setOnCancelled(event -> progressService.cancel());
+        var t = new Thread(downloadTask);
+        t.setDaemon(true);
+        t.start();
+        progressService.start();
+    }
+
+    private static long getBytesFromField(String mb) {
+        var mbVal = Double.parseDouble(mb);
+        return (long) (mbVal * Math.pow(2, 20));
+    }
+
+
 }
 

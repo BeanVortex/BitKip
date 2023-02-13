@@ -115,17 +115,19 @@ public class TableUtils {
     }
 
     public void updateDownloadProgress(float progress, DownloadModel downloadModel) {
-        var i = findDownload(downloadModel.getId());
-        var i2 = currentDownloading.get(currentDownloading.indexOf(downloadModel));
-        if (i2 != null)
+        var downTask = AppConfigs.downloadTaskList.get(AppConfigs.downloadTaskList.indexOf(downloadModel.getDownloadTask()));
+        if (downTask.isRunning()) {
+            var i2 = currentDownloading.get(currentDownloading.indexOf(downloadModel));
             i2.setProgress(progress);
-        if (i != null) {
-            i.setProgress(progress);
-            i.setDownloadStatus(DownloadStatus.Downloading);
-            if (progress == 100)
-                i.setDownloadStatus(DownloadStatus.Completed);
-            i.setProgressString(new DecimalFormat("##.#").format(progress) + " %");
-            contentTable.refresh();
+            var i = findDownload(downloadModel.getId());
+            if (i != null) {
+                i.setProgress(progress);
+                i.setDownloadStatus(DownloadStatus.Downloading);
+                if (progress == 100)
+                    i.setDownloadStatus(DownloadStatus.Completed);
+                i.setProgressString(new DecimalFormat("##.#").format(progress) + " %");
+                contentTable.refresh();
+            }
         }
     }
 

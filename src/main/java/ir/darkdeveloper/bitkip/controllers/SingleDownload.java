@@ -4,12 +4,7 @@ import ir.darkdeveloper.bitkip.config.AppConfigs;
 import ir.darkdeveloper.bitkip.models.DownloadModel;
 import ir.darkdeveloper.bitkip.models.DownloadStatus;
 import ir.darkdeveloper.bitkip.models.QueueModel;
-import ir.darkdeveloper.bitkip.repo.DownloadsRepo;
 import ir.darkdeveloper.bitkip.repo.QueuesRepo;
-import ir.darkdeveloper.bitkip.service.DownloadProgressService;
-import ir.darkdeveloper.bitkip.task.DownloadInChunksTask;
-import ir.darkdeveloper.bitkip.task.DownloadLimitedTask;
-import ir.darkdeveloper.bitkip.task.DownloadTask;
 import ir.darkdeveloper.bitkip.utils.FxUtils;
 import ir.darkdeveloper.bitkip.utils.NewDownloadUtils;
 import ir.darkdeveloper.bitkip.utils.TableUtils;
@@ -22,13 +17,11 @@ import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.Stage;
-import javafx.util.Duration;
 import org.controlsfx.control.Notifications;
 import org.kordamp.ikonli.javafx.FontIcon;
 
 import java.io.File;
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 public class SingleDownload implements FXMLController, NewDownloadFxmlController {
@@ -69,8 +62,6 @@ public class SingleDownload implements FXMLController, NewDownloadFxmlController
     private TableUtils tableUtils;
 
     private final DownloadModel downloadModel = new DownloadModel();
-    private final List<DownloadTask> downloadTaskList = AppConfigs.downloadTaskList;
-    private final List<DownloadModel> currentDownloading = AppConfigs.currentDownloading;
 
 
     @Override
@@ -211,59 +202,8 @@ public class SingleDownload implements FXMLController, NewDownloadFxmlController
         downloadModel.setDownloadStatus(DownloadStatus.Downloading);
         if (selectedQueue.getId() != allDownloadsQueue.getId())
             downloadModel.getQueue().add(selectedQueue);
-        DownloadTask downloadTask;
-        if (downloadModel.getChunks() == 0) {
-            if (speedField.getText().equals("0")) {
-                if (bytesField.getText().equals(downloadModel.getSize() + ""))
-                    downloadTask = new DownloadLimitedTask(downloadModel, Long.MAX_VALUE, false, tableUtils);
-                else
-                    downloadTask = new DownloadLimitedTask(downloadModel, Long.parseLong(bytesField.getText()), false, tableUtils);
-            } else
-                downloadTask = new DownloadLimitedTask(downloadModel, getBytesFromField(speedField.getText()), true, tableUtils);
-        } else {
-            downloadTask = new DownloadInChunksTask(downloadModel);
-            downloadTask.valueProperty().addListener((observable, oldValue, newValue) -> {
-                if (oldValue == null)
-                    oldValue = 0L;
-                var speed = (newValue - oldValue) * 2;
-                // todo :remaining time
-                if (newValue == 0)
-                    speed = 0;
-                tableUtils.updateDownloadSpeed(speed, downloadModel.getId());
-            });
-        }
-
-        downloadTask.valueProperty().addListener((observable, oldValue, newValue) -> {
-            if (oldValue == null)
-                oldValue = 0L;
-            var speed = (newValue - oldValue);
-            // todo :remaining time
-            if (newValue == 0)
-                speed = 0;
-            tableUtils.updateDownloadSpeed(speed, downloadModel.getId());
-        });
-        downloadTask.progressProperty().addListener((o, old, newV) -> {
-            tableUtils.updateDownloadProgress(newV.floatValue() * 100, downloadModel);
-        });
-
-        DownloadsRepo.insertDownload(downloadModel);
-        tableUtils.addRow(downloadModel);
-        downloadTaskList.add(downloadTask);
-        currentDownloading.add(downloadModel);
-        var progressService = new DownloadProgressService(downloadModel);
-        progressService.setPeriod(Duration.seconds(5));
-        downloadTask.setOnSucceeded(event -> progressService.cancel());
-        downloadTask.setOnCancelled(event -> progressService.cancel());
-        var t = new Thread(downloadTask);
-        t.setDaemon(true);
-        t.start();
-        progressService.start();
+        NewDownloadUtils.startDownload(downloadModel, tableUtils, speedField.getText(), bytesField.getText(), false);
         stage.close();
-    }
-
-    private long getBytesFromField(String mb) {
-        var mbVal = Double.parseDouble(mb);
-        return (long) (mbVal * Math.pow(2, 20));
     }
 
 

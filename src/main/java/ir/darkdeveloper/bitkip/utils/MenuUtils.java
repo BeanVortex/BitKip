@@ -54,7 +54,7 @@ public class MenuUtils {
     }
 
 
-    public static void initOperationMenu(Button operationMenu, TableView<DownloadModel> table) {
+    public static void initOperationMenu(Button operationMenu, TableView<DownloadModel> table, TableUtils tableUtils) {
         var c = new ContextMenu();
         var resume = new Label("resume");
         var stop = new Label("stop");
@@ -98,6 +98,11 @@ public class MenuUtils {
             readQueueList(addQueueMenu, startQueueMenu, stopQueueMenu);
 
             c.show(operationMenu, Side.BOTTOM, 0, 0);
+        });
+
+        menuItems.get(resume).setOnAction(event -> {
+            var selectedItems = table.getSelectionModel().getSelectedItems();
+            selectedItems.forEach(dm -> NewDownloadUtils.startDownload(dm, tableUtils, null, null, true));
         });
     }
 

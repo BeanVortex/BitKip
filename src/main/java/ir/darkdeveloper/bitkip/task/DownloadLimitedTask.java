@@ -4,7 +4,6 @@ import ir.darkdeveloper.bitkip.config.AppConfigs;
 import ir.darkdeveloper.bitkip.models.DownloadModel;
 import ir.darkdeveloper.bitkip.models.DownloadStatus;
 import ir.darkdeveloper.bitkip.repo.DownloadsRepo;
-import ir.darkdeveloper.bitkip.utils.TableUtils;
 import javafx.application.Platform;
 import javafx.concurrent.WorkerStateEvent;
 import javafx.event.EventHandler;
@@ -26,7 +25,6 @@ public class DownloadLimitedTask extends DownloadTask {
     private boolean isCalculating = false;
     private final long limit;
     private final boolean isSpeedLimited;
-    private final TableUtils tableUtils;
     private final List<DownloadModel> currentDownloading = AppConfigs.currentDownloading;
     private File file;
 
@@ -34,11 +32,10 @@ public class DownloadLimitedTask extends DownloadTask {
      * if not isSpeedLimited, then valueLimit
      **/
 
-    public DownloadLimitedTask(DownloadModel downloadModel, long limit, boolean isSpeedLimited, TableUtils tableUtils) {
+    public DownloadLimitedTask(DownloadModel downloadModel, long limit, boolean isSpeedLimited) {
         super(downloadModel);
         this.limit = limit;
         this.isSpeedLimited = isSpeedLimited;
-        this.tableUtils = tableUtils;
     }
 
 
@@ -110,21 +107,23 @@ public class DownloadLimitedTask extends DownloadTask {
         var e = System.currentTimeMillis() - s;
         paused = true;
         System.out.println("Lasted: " + e);
-        succeeded();
     }
 
     @Override
     protected void succeeded() {
         try {
-            var download = currentDownloading.get(currentDownloading.indexOf(downloadModel));
+            var index = currentDownloading.indexOf(downloadModel);
+            var download = currentDownloading.get(index);
             if (download != null) {
                 download.setDownloadStatus(DownloadStatus.Paused);
                 if (file.exists() && getCurrentFileSize(file) == downloadModel.getSize()) {
                     download.setCompleteDate(LocalDateTime.now());
                     download.setDownloadStatus(DownloadStatus.Completed);
+                    download.setProgress(100);
                 }
                 DownloadsRepo.updateDownloadProgress(download);
                 DownloadsRepo.updateDownloadCompleteDate(download);
+                currentDownloading.remove(index);
             }
         } catch (IOException e) {
             throw new RuntimeException(e);
