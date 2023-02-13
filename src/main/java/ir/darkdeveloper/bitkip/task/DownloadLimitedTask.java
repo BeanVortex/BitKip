@@ -110,6 +110,7 @@ public class DownloadLimitedTask extends DownloadTask {
         var e = System.currentTimeMillis() - s;
         paused = true;
         System.out.println("Lasted: " + e);
+        succeeded();
     }
 
     @Override

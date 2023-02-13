@@ -217,7 +217,7 @@ public class SingleDownload implements FXMLController, NewDownloadFxmlController
                 if (bytesField.getText().equals(downloadModel.getSize() + ""))
                     downloadTask = new DownloadLimitedTask(downloadModel, Long.MAX_VALUE, false, tableUtils);
                 else
-                    downloadTask = new DownloadLimitedTask(downloadModel, getBytesFromField(bytesField.getText()), false, tableUtils);
+                    downloadTask = new DownloadLimitedTask(downloadModel, Long.parseLong(bytesField.getText()), false, tableUtils);
             } else
                 downloadTask = new DownloadLimitedTask(downloadModel, getBytesFromField(speedField.getText()), true, tableUtils);
         } else {
