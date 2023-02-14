@@ -1,6 +1,7 @@
 package ir.darkdeveloper.bitkip.utils;
 
 import ir.darkdeveloper.bitkip.models.DownloadModel;
+import ir.darkdeveloper.bitkip.models.DownloadStatus;
 import ir.darkdeveloper.bitkip.repo.DownloadsRepo;
 import javafx.application.Platform;
 import javafx.geometry.Side;
@@ -57,14 +58,14 @@ public class MenuUtils {
     public static void initOperationMenu(Button operationMenu, TableView<DownloadModel> table, TableUtils tableUtils) {
         var c = new ContextMenu();
         var resume = new Label("resume");
-        var stop = new Label("stop");
+        var pause = new Label("pause");
         var restart = new Label("restart");
         var newQueue = new Label("new queue");
         var addQueue = new Label("add to queue");
         var startQueue = new Label("start queue");
         var stopQueue = new Label("stop queue");
 
-        var lbls = List.of(resume, stop, restart);
+        var lbls = List.of(resume, pause, restart);
         var split = new SeparatorMenuItem();
         var menuItems = createMenuItems(lbls);
         menuItems.put(new Label("s"), split);
@@ -92,7 +93,7 @@ public class MenuUtils {
         operationMenu.setOnMouseClicked(event -> {
             var selectedItems = table.getSelectionModel().getSelectedItems();
             menuItems.get(resume).setDisable(selectedItems.size() == 0);
-            menuItems.get(stop).setDisable(selectedItems.size() == 0);
+            menuItems.get(pause).setDisable(selectedItems.size() == 0);
             menuItems.get(restart).setDisable(selectedItems.size() == 0);
             menuItems.get(addQueue).setDisable(selectedItems.size() == 0);
             readQueueList(addQueueMenu, startQueueMenu, stopQueueMenu);
@@ -103,6 +104,15 @@ public class MenuUtils {
         menuItems.get(resume).setOnAction(event -> {
             var selectedItems = table.getSelectionModel().getSelectedItems();
             selectedItems.forEach(dm -> NewDownloadUtils.startDownload(dm, tableUtils, null, null, true));
+        });
+        menuItems.get(pause).setOnAction(event -> {
+            var selectedItems = table.getSelectionModel().getSelectedItems();
+            selectedItems.forEach(downloadModel -> {
+                if (downloadModel.getDownloadTask().isRunning())
+                    downloadModel.getDownloadTask().cancel();
+                downloadModel.setDownloadStatus(DownloadStatus.Paused);
+                DownloadsRepo.updateDownloadProgress(downloadModel);
+            });
         });
     }
 

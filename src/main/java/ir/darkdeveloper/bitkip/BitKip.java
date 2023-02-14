@@ -19,9 +19,9 @@ public class BitKip extends Application {
     // todo: scrollview in new download
     // todo: save only currently downloading data on db before termination of app
     // todo: save download in db after pause
-    // todo: pause operations
     // todo: downloading stage
     // todo: ask user if also wants to delete the file itself
+    // todo: bug in speed limited: not updating the table
 
     @Override
     public void start(Stage stage) {
