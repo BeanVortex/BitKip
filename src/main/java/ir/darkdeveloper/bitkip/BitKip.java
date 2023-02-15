@@ -7,6 +7,7 @@ import ir.darkdeveloper.bitkip.utils.FxUtils;
 import ir.darkdeveloper.bitkip.utils.IOUtils;
 import ir.darkdeveloper.bitkip.utils.ResizeUtil;
 import javafx.application.Application;
+import javafx.concurrent.Task;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 
@@ -17,11 +18,10 @@ public class BitKip extends Application {
     // todo: limited download in chunks
     // todo: remaining time
     // todo: scrollview in new download
-    // todo: save only currently downloading data on db before termination of app
-    // todo: save download in db after pause
+    // todo: sync db file size and actual file size
     // todo: downloading stage
     // todo: ask user if also wants to delete the file itself
-    // todo: bug in speed limited: not updating the table
+    // todo: complete chunks task
 
     @Override
     public void start(Stage stage) {
@@ -40,6 +40,14 @@ public class BitKip extends Application {
 //            stage.getIcons().add(new Image(logoPath.toExternalForm()));
         stage.show();
     }
+
+
+    @Override
+    public void stop() {
+        AppConfigs.downloadTaskList.forEach(Task::cancel);
+        AppConfigs.currentDownloading.forEach(DownloadsRepo::updateDownloadProgress);
+    }
+
 
     public static void main(String[] args) {
         launch();

@@ -8,6 +8,7 @@ import javafx.geometry.Side;
 import javafx.scene.control.*;
 import javafx.scene.input.Clipboard;
 
+import java.time.LocalDateTime;
 import java.util.LinkedHashMap;
 import java.util.List;
 
@@ -103,7 +104,10 @@ public class MenuUtils {
 
         menuItems.get(resume).setOnAction(event -> {
             var selectedItems = table.getSelectionModel().getSelectedItems();
-            selectedItems.forEach(dm -> NewDownloadUtils.startDownload(dm, tableUtils, null, null, true));
+            selectedItems.forEach(dm -> {
+                dm.setLastTryDate(LocalDateTime.now());
+                NewDownloadUtils.startDownload(dm, tableUtils, null, null, true);
+            });
         });
         menuItems.get(pause).setOnAction(event -> {
             var selectedItems = table.getSelectionModel().getSelectedItems();

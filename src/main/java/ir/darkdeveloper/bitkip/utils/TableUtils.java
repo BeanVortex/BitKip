@@ -131,11 +131,6 @@ public class TableUtils {
         }
     }
 
-    public void updateDownloadStatus(int downloadId, DownloadStatus status) {
-        var i = findDownload(downloadId);
-        if (i != null)
-            i.setDownloadStatus(status);
-    }
 
     public DownloadModel findDownload(int id) {
         for (var d : data)
