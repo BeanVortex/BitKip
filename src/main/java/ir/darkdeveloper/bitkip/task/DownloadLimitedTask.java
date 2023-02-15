@@ -189,5 +189,6 @@ public class DownloadLimitedTask extends DownloadTask {
     public void pause() {
         paused = true;
         succeeded();
+        cancel();
     }
 }

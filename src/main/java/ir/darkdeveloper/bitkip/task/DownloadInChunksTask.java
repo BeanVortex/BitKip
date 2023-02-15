@@ -142,6 +142,7 @@ public class DownloadInChunksTask extends DownloadTask {
                 DownloadsRepo.updateDownloadCompleteDate(download);
                 currentDownloading.remove(index);
             }
+            cancel();
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

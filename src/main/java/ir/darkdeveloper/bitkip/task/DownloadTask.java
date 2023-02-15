@@ -35,4 +35,12 @@ public abstract class DownloadTask extends Task<Long> {
     static long getCurrentFileSize(File file) throws IOException {
         return Files.size(Path.of(file.getPath()));
     }
+
+    public static long getCurrentFileSize(Path path) {
+        try {
+            return Files.size(path);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
 }

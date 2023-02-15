@@ -4,6 +4,7 @@ import ir.darkdeveloper.bitkip.config.AppConfigs;
 import ir.darkdeveloper.bitkip.models.DownloadModel;
 import ir.darkdeveloper.bitkip.models.DownloadStatus;
 import ir.darkdeveloper.bitkip.repo.DownloadsRepo;
+import ir.darkdeveloper.bitkip.task.DownloadTask;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.control.SelectionMode;
@@ -14,6 +15,7 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.MouseButton;
 import org.apache.commons.lang3.time.DurationFormatUtils;
 
+import java.nio.file.Path;
 import java.text.DecimalFormat;
 import java.util.List;
 
@@ -106,25 +108,29 @@ public class TableUtils {
     }
 
     public void updateDownloadSpeedAndRemaining(long speed, DownloadModel dm) {
-        var i = findDownload(dm.getId());
-        if (i != null) {
-            i.setSpeed(speed);
-            i.setDownloadStatus(DownloadStatus.Downloading);
-            i.setSpeedString(IOUtils.formatBytes(speed));
-            if (speed != 0){
-                var remaining = DurationFormatUtils.formatDuration(dm.getSize() / speed, "dd:HH:mm:ss");
-                i.setRemainingTime(remaining);
+        var downTask = dm.getDownloadTask();
+        if (downTask.isRunning() && currentDownloading.size() != 0) {
+            var i = findDownload(dm.getId());
+            if (i != null) {
+                i.setSpeed(speed);
+                i.setDownloadStatus(DownloadStatus.Downloading);
+                i.setSpeedString(IOUtils.formatBytes(speed));
+                if (speed != 0) {
+                    var delta = (dm.getSize() - DownloadTask.getCurrentFileSize(Path.of(dm.getFilePath())));
+                    var remaining = DurationFormatUtils.formatDuration((delta / speed) * 1000, "dd:HH:mm:ss");
+                    i.setRemainingTime(remaining);
+                }
+                contentTable.refresh();
             }
-            contentTable.refresh();
         }
     }
 
-    public void updateDownloadProgress(float progress, DownloadModel downloadModel) {
-        var downTask = AppConfigs.downloadTaskList.get(AppConfigs.downloadTaskList.indexOf(downloadModel.getDownloadTask()));
+    public void updateDownloadProgress(float progress, DownloadModel dm) {
+        var downTask = dm.getDownloadTask();
         if (downTask.isRunning() && currentDownloading.size() != 0) {
-            var i2 = currentDownloading.get(currentDownloading.indexOf(downloadModel));
+            var i2 = currentDownloading.get(currentDownloading.indexOf(dm));
             i2.setProgress(progress);
-            var i = findDownload(downloadModel.getId());
+            var i = findDownload(dm.getId());
             if (i != null) {
                 i.setProgress(progress);
                 i.setDownloadStatus(DownloadStatus.Downloading);

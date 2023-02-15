@@ -16,12 +16,10 @@ import java.net.URL;
 public class BitKip extends Application {
 
     // todo: limited download in chunks
-    // todo: remaining time
     // todo: scrollview in new download
     // todo: sync db file size and actual file size
     // todo: downloading stage
     // todo: ask user if also wants to delete the file itself
-    // todo: bug in regular downloading
 
     @Override
     public void start(Stage stage) {

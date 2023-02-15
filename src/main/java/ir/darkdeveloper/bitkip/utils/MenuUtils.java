@@ -116,6 +116,7 @@ public class MenuUtils {
                     downloadModel.getDownloadTask().pause();
                 downloadModel.setDownloadStatus(DownloadStatus.Paused);
                 DownloadsRepo.updateDownloadProgress(downloadModel);
+                table.refresh();
             });
         });
     }
