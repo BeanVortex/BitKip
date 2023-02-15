@@ -21,7 +21,7 @@ public class BitKip extends Application {
     // todo: sync db file size and actual file size
     // todo: downloading stage
     // todo: ask user if also wants to delete the file itself
-    // todo: complete chunks task
+    // todo: bug in regular downloading
 
     @Override
     public void start(Stage stage) {

@@ -10,6 +10,7 @@ module ir.darkdeveloper.bitkip {
     requires lombok;
     requires java.sql;
     requires org.xerial.sqlitejdbc;
+    requires org.apache.commons.lang3;
 
     opens ir.darkdeveloper.bitkip to javafx.fxml;
     opens ir.darkdeveloper.bitkip.controllers to javafx.fxml, javafx.base;

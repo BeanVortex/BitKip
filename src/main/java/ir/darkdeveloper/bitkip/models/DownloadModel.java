@@ -23,7 +23,7 @@ public class DownloadModel {
     private long size;
     private String url;
     private String filePath;
-    private int remainingTime;
+    private String remainingTime;
     private List<QueueModel> queue;
     private int chunks;
     private long speed;

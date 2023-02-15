@@ -219,20 +219,6 @@ public class MainController implements FXMLController {
     @FXML
     private void doAction() {
         contentTable.getSelectionModel().clearSelection();
-//        var dow = DownloadModel.builder()
-//                .name("avvv")
-//                .progress(10)
-//                .size(20)
-//                .url("sdfads")
-//                .filePath("fsdaf")
-//                .addDate(LocalDateTime.now().plusSeconds(70))
-//                .lastTryDate(LocalDateTime.now().plusHours(1))
-//                .completeDate(LocalDateTime.now().plusHours(2))
-//                .chunks(10)
-//                .build();
-//        dow.fillProperties();
-//        DownloadsRepo.insertDownload(dow);
         FxUtils.newDownloadStage("newDownload.fxml", 600, 550, tableUtils, downloadTaskList);
-//        tableUtils.addRow(dow);
     }
 }

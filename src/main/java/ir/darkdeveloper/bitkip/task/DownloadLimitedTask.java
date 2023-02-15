@@ -50,7 +50,7 @@ public class DownloadLimitedTask extends DownloadTask {
             return 0L;
 
         var in = connection.getInputStream();
-        var fileSize = saveOrGetFileSize(connection, file, downloadModel);
+        var fileSize = downloadModel.getSize();
 
         var out = new FileOutputStream(file, file.exists());
         var fileChannel = out.getChannel();
@@ -132,7 +132,7 @@ public class DownloadLimitedTask extends DownloadTask {
 
     @Override
     protected void failed() {
-        succeeded();
+        pause();
     }
 
     private void calculateSpeedAndProgress(File file, long fileSize) {
@@ -188,6 +188,6 @@ public class DownloadLimitedTask extends DownloadTask {
     @Override
     public void pause() {
         paused = true;
-        cancel();
+        succeeded();
     }
 }

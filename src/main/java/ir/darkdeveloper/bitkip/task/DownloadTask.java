@@ -16,7 +16,7 @@ public abstract class DownloadTask extends Task<Long> {
     long ONE_SEC = 1000;
     DownloadModel downloadModel;
 
-    abstract void pause();
+    public abstract void pause();
 
     public DownloadTask(DownloadModel downloadModel) {
         this.downloadModel = downloadModel;

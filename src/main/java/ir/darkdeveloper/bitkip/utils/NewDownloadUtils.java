@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class NewDownloadUtils {
 
@@ -179,6 +180,7 @@ public class NewDownloadUtils {
 
     public static void startDownload(DownloadModel downloadModel, TableUtils tableUtils, String speed, String bytes, boolean resume) {
         DownloadTask downloadTask = new DownloadLimitedTask(downloadModel, Long.MAX_VALUE, false);
+        var speedFactor = new AtomicInteger(1);
         if (downloadModel.getChunks() == 0) {
             if (speed != null) {
                 if (speed.equals("0")) {
@@ -193,32 +195,22 @@ public class NewDownloadUtils {
             }
         } else {
             downloadTask = new DownloadInChunksTask(downloadModel);
-            downloadTask.valueProperty().addListener((observable, oldValue, newValue) -> {
-                if (oldValue == null)
-                    oldValue = 0L;
-                var currentSpeed = (newValue - oldValue) * 2;
-                // todo :remaining time
-                if (newValue == 0)
-                    currentSpeed = 0;
-                tableUtils.updateDownloadSpeed(currentSpeed, downloadModel.getId());
-            });
+            speedFactor.set(2);
         }
 
         downloadTask.valueProperty().addListener((observable, oldValue, newValue) -> {
             if (oldValue == null)
                 oldValue = 0L;
-            var currentSpeed = (newValue - oldValue);
-            // todo :remaining time
+            var currentSpeed = (newValue - oldValue) * speedFactor.get();
             if (newValue == 0)
                 currentSpeed = 0;
-            tableUtils.updateDownloadSpeed(currentSpeed, downloadModel.getId());
+            tableUtils.updateDownloadSpeedAndRemaining(currentSpeed, downloadModel);
         });
         downloadTask.progressProperty().addListener((o, old, newV) -> {
             tableUtils.updateDownloadProgress(newV.floatValue() * 100, downloadModel);
         });
         downloadModel.setDownloadTask(downloadTask);
-        if (!resume)
-        {
+        if (!resume) {
             DownloadsRepo.insertDownload(downloadModel);
             tableUtils.addRow(downloadModel);
         }

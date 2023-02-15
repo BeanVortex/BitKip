@@ -113,7 +113,7 @@ public class MenuUtils {
             var selectedItems = table.getSelectionModel().getSelectedItems();
             selectedItems.forEach(downloadModel -> {
                 if (downloadModel.getDownloadTask().isRunning())
-                    downloadModel.getDownloadTask().cancel();
+                    downloadModel.getDownloadTask().pause();
                 downloadModel.setDownloadStatus(DownloadStatus.Paused);
                 DownloadsRepo.updateDownloadProgress(downloadModel);
             });

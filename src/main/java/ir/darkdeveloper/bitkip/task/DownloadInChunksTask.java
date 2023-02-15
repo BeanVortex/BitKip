@@ -1,6 +1,9 @@
 package ir.darkdeveloper.bitkip.task;
 
+import ir.darkdeveloper.bitkip.config.AppConfigs;
 import ir.darkdeveloper.bitkip.models.DownloadModel;
+import ir.darkdeveloper.bitkip.models.DownloadStatus;
+import ir.darkdeveloper.bitkip.repo.DownloadsRepo;
 import javafx.concurrent.Task;
 
 import java.io.File;
@@ -16,6 +19,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -23,10 +27,11 @@ import static ir.darkdeveloper.bitkip.task.DownloadTask.*;
 
 public class DownloadInChunksTask extends DownloadTask {
     private final int chunks;
-    private final List<FileChannel> fileChannels = new ArrayList<>();
     private boolean paused;
-    private boolean completed;
-    private boolean isCalculating;
+    private File file;
+    private final List<DownloadModel> currentDownloading = AppConfigs.currentDownloading;
+    private final List<FileChannel> fileChannels = new ArrayList<>();
+    private final List<Path> filePaths = new ArrayList<>();
 
     public DownloadInChunksTask(DownloadModel downloadModel) {
         super(downloadModel);
@@ -39,19 +44,17 @@ public class DownloadInChunksTask extends DownloadTask {
     @Override
     protected Long call() throws Exception {
         var url = new URL(downloadModel.getUrl());
-        var connection = (HttpURLConnection) url.openConnection();
-        var file = new File(downloadModel.getFilePath());
-        var fileSize = saveOrGetFileSize(connection, file, downloadModel);
-        downloadInChunks(file, url, fileSize);
+        file = new File(downloadModel.getFilePath());
+        var fileSize = downloadModel.getSize();
+        downloadInChunks(url, fileSize);
         return 0L;
     }
 
 
-    private void downloadInChunks(File file, URL url, long fileSize) throws IOException, InterruptedException {
+    private void downloadInChunks(URL url, long fileSize) throws IOException, InterruptedException {
 
         var bytesForEach = fileSize / chunks;
         var threadList = new ArrayList<Thread>();
-        var filePaths = new ArrayList<Path>();
         var to = bytesForEach;
         var from = 0L;
         var fromContinue = 0L;
@@ -80,7 +83,7 @@ public class DownloadInChunksTask extends DownloadTask {
             fromContinue = to + 1;
             to += bytesForEach;
             var existingFileSize = getCurrentFileSize(partFile);
-            countingThread = calculateSpeedAndProgressChunks(fileChannels, filePaths, fileSize);
+            countingThread = calculateSpeedAndProgressChunks(fileSize);
             // todo: check if a part is done
             var t = new Thread(() -> {
                 try {
@@ -100,45 +103,14 @@ public class DownloadInChunksTask extends DownloadTask {
         if (countingThread != null)
             countingThread.interrupt();
 
-        if (paused) {
+        if (paused)
             paused = false;
-            return;
-        }
-
-
-        if (!completed) {
-            completed = true;
-            if (!file.exists())
-                file.createNewFile();
-            for (int i = 0; i < chunks; i++) {
-                var name = filePath + "#" + i;
-                try (
-                        var in = new FileInputStream(name);
-                        var out = new FileOutputStream(filePath, file.exists());
-                        var inputChannel = in.getChannel();
-                        var outputChannel = out.getChannel();
-                ) {
-                    var buffer = ByteBuffer.allocateDirect(1048576);
-                    while (inputChannel.read(buffer) != -1) {
-                        buffer.flip();
-                        outputChannel.write(buffer);
-                        buffer.clear();
-                    }
-                    updateProgress(1, 1);
-                }
-            }
-            for (var f : filePaths)
-                Files.deleteIfExists(f);
-        }
     }
 
-    private Thread calculateSpeedAndProgressChunks(List<FileChannel> channels, List<Path> filePaths, long fileSize) {
-        if (filePaths.size() == channels.size() && channels.size() != chunks && !isCalculating)
-            return null;
+    private Thread calculateSpeedAndProgressChunks(long fileSize) {
         var t = new Thread(() -> {
             try {
                 while (!paused) {
-                    isCalculating = true;
                     var currentFileSize = 0L;
 
                     Thread.sleep(500);
@@ -148,7 +120,6 @@ public class DownloadInChunksTask extends DownloadTask {
                     updateProgress(currentFileSize, fileSize);
                     updateValue(currentFileSize);
                 }
-                isCalculating = false;
             } catch (IOException | InterruptedException e) {
                 e.printStackTrace();
             }
@@ -163,11 +134,62 @@ public class DownloadInChunksTask extends DownloadTask {
             paused = true;
             for (var channel : fileChannels)
                 channel.close();
-            cancelled();
+            var index = currentDownloading.indexOf(downloadModel);
+            var download = currentDownloading.get(index);
+            if (download != null) {
+                download.setDownloadStatus(DownloadStatus.Paused);
+                DownloadsRepo.updateDownloadProgress(download);
+                DownloadsRepo.updateDownloadCompleteDate(download);
+                currentDownloading.remove(index);
+            }
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
 
 
+    @Override
+    protected void succeeded() {
+        try {
+            var index = currentDownloading.indexOf(downloadModel);
+            var download = currentDownloading.get(index);
+            if (download != null) {
+                var currentFileSize = 0L;
+                for (int i = 0; i < chunks; i++)
+                    currentFileSize += Files.size(filePaths.get(i));
+                if (filePaths.stream().allMatch(path -> path.toFile().exists())
+                        && currentFileSize == downloadModel.getSize() && !paused) {
+                    if (!file.exists())
+                        file.createNewFile();
+                    for (int i = 0; i < chunks; i++) {
+                        var name = file.getPath() + "#" + i;
+                        try (
+                                var in = new FileInputStream(name);
+                                var out = new FileOutputStream(file.getPath(), file.exists());
+                                var inputChannel = in.getChannel();
+                                var outputChannel = out.getChannel();
+                        ) {
+                            var buffer = ByteBuffer.allocateDirect(1048576);
+                            while (inputChannel.read(buffer) != -1) {
+                                buffer.flip();
+                                outputChannel.write(buffer);
+                                buffer.clear();
+                            }
+                            updateProgress(1, 1);
+                        }
+                    }
+                    download.setCompleteDate(LocalDateTime.now());
+                    download.setDownloadStatus(DownloadStatus.Completed);
+                    download.setProgress(100);
+                    for (var f : filePaths)
+                        Files.deleteIfExists(f);
+                }
+                DownloadsRepo.updateDownloadProgress(download);
+                DownloadsRepo.updateDownloadCompleteDate(download);
+                currentDownloading.remove(index);
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
 }

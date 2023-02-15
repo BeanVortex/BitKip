@@ -12,6 +12,7 @@ import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.MouseButton;
+import org.apache.commons.lang3.time.DurationFormatUtils;
 
 import java.text.DecimalFormat;
 import java.util.List;
@@ -104,19 +105,23 @@ public class TableUtils {
         contentTable.sort();
     }
 
-    public void updateDownloadSpeed(long speed, int downloadId) {
-        var i = findDownload(downloadId);
+    public void updateDownloadSpeedAndRemaining(long speed, DownloadModel dm) {
+        var i = findDownload(dm.getId());
         if (i != null) {
             i.setSpeed(speed);
             i.setDownloadStatus(DownloadStatus.Downloading);
             i.setSpeedString(IOUtils.formatBytes(speed));
+            if (speed != 0){
+                var remaining = DurationFormatUtils.formatDuration(dm.getSize() / speed, "dd:HH:mm:ss");
+                i.setRemainingTime(remaining);
+            }
             contentTable.refresh();
         }
     }
 
     public void updateDownloadProgress(float progress, DownloadModel downloadModel) {
         var downTask = AppConfigs.downloadTaskList.get(AppConfigs.downloadTaskList.indexOf(downloadModel.getDownloadTask()));
-        if (downTask.isRunning()) {
+        if (downTask.isRunning() && currentDownloading.size() != 0) {
             var i2 = currentDownloading.get(currentDownloading.indexOf(downloadModel));
             i2.setProgress(progress);
             var i = findDownload(downloadModel.getId());
@@ -138,5 +143,4 @@ public class TableUtils {
                 return d;
         return null;
     }
-
 }
