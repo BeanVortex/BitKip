@@ -1,5 +1,6 @@
 package ir.darkdeveloper.bitkip.utils;
 
+import ir.darkdeveloper.bitkip.config.AppConfigs;
 import ir.darkdeveloper.bitkip.models.DownloadModel;
 import ir.darkdeveloper.bitkip.models.DownloadStatus;
 import ir.darkdeveloper.bitkip.repo.DownloadsRepo;
@@ -112,8 +113,16 @@ public class MenuUtils {
         menuItems.get(pause).setOnAction(event -> {
             var selectedItems = table.getSelectionModel().getSelectedItems();
             selectedItems.forEach(downloadModel -> {
-                if (downloadModel.getDownloadTask().isRunning())
-                    downloadModel.getDownloadTask().pause();
+                var downTask = downloadModel.getDownloadTask();
+                if (downTask != null && downTask.isRunning())
+                    downTask.pause();
+                else {
+                    downTask = AppConfigs.currentDownloading
+                            .get(AppConfigs.currentDownloading.indexOf(downloadModel))
+                            .getDownloadTask();
+                    if (downTask.isRunning())
+                        downTask.pause();
+                }
                 downloadModel.setDownloadStatus(DownloadStatus.Paused);
                 DownloadsRepo.updateDownloadProgress(downloadModel);
                 table.refresh();
