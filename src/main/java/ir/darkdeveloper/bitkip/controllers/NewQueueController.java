@@ -1,9 +1,9 @@
 package ir.darkdeveloper.bitkip.controllers;
 
+import ir.darkdeveloper.bitkip.controllers.interfaces.FXMLController;
 import ir.darkdeveloper.bitkip.models.QueueModel;
 import ir.darkdeveloper.bitkip.repo.QueuesRepo;
 import ir.darkdeveloper.bitkip.utils.WindowUtils;
-import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.control.Button;
@@ -26,6 +26,11 @@ public class NewQueueController implements FXMLController {
     private Rectangle2D bounds;
 
     private final QueueModel queueModel = new QueueModel();
+    private FXMLController parentController;
+
+    public void setParentController(FXMLController parentController) {
+        this.parentController = parentController;
+    }
 
     @Override
     public void setStage(Stage stage) {
@@ -39,10 +44,14 @@ public class NewQueueController implements FXMLController {
     }
 
     @Override
+    public void updateQueueList() {
+    }
+
+    @Override
     public void initAfterStage() {
         stage.widthProperty().addListener((ob, o, n) -> toolbar.setPrefWidth(n.longValue()));
         stage.xProperty().addListener((observable, oldValue, newValue) -> {
-                bounds = Screen.getPrimary().getVisualBounds();
+            bounds = Screen.getPrimary().getVisualBounds();
         });
         int minHeight = 100;
         int minWidth = 250;
@@ -68,6 +77,8 @@ public class NewQueueController implements FXMLController {
         queueModel.setEditable(true);
         queueModel.setCanAddDownload(true);
         QueuesRepo.insertQueue(queueModel);
+        parentController.updateQueueList();
         stage.close();
     }
+
 }

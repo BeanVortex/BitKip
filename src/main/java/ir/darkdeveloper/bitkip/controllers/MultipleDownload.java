@@ -1,6 +1,8 @@
 package ir.darkdeveloper.bitkip.controllers;
 
 import ir.darkdeveloper.bitkip.config.AppConfigs;
+import ir.darkdeveloper.bitkip.controllers.interfaces.FXMLController;
+import ir.darkdeveloper.bitkip.controllers.interfaces.NewDownloadFxmlController;
 import ir.darkdeveloper.bitkip.models.QueueModel;
 import ir.darkdeveloper.bitkip.repo.QueuesRepo;
 import ir.darkdeveloper.bitkip.task.DownloadTask;
@@ -9,16 +11,14 @@ import ir.darkdeveloper.bitkip.utils.TableUtils;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
-import javafx.scene.control.CheckBox;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.TextField;
-import javafx.scene.text.Font;
 import javafx.stage.Stage;
 import org.kordamp.ikonli.javafx.FontIcon;
 
 import java.util.List;
 
-public class MultipleDownload implements FXMLController, NewDownloadFxmlController {
+public class MultipleDownload implements NewDownloadFxmlController {
     @FXML
     private Button newQueue;
     @FXML
@@ -51,11 +51,26 @@ public class MultipleDownload implements FXMLController, NewDownloadFxmlControll
     private Stage stage;
     private TableUtils tableUtils;
     private final List<DownloadTask> downloadTaskList = AppConfigs.downloadTaskList;
+    private FXMLController parentController;
 
 
     @Override
     public void setTableUtils(TableUtils tableUtils) {
         this.tableUtils = tableUtils;
+    }
+
+    @Override
+    public void setParentController(FXMLController parentController) {
+        this.parentController = parentController;
+    }
+
+    @Override
+    public void updateQueueList() {
+        var queues = QueuesRepo.getQueues().stream().filter(QueueModel::isCanAddDownload).toList();
+        queueCombo.getItems().clear();
+        queueCombo.getItems().addAll(queues);
+        queueCombo.setValue(queues.get(0));
+        parentController.updateQueueList();
     }
 
     @Override

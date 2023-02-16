@@ -1,4 +1,4 @@
-package ir.darkdeveloper.bitkip.controllers;
+package ir.darkdeveloper.bitkip.controllers.interfaces;
 
 import javafx.fxml.FXML;
 import javafx.stage.Stage;
@@ -13,5 +13,8 @@ public interface FXMLController {
     void setStage(Stage stage);
 
     Stage getStage();
+
+    void updateQueueList();
+
 }
 

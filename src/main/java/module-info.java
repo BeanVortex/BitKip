@@ -16,4 +16,5 @@ module ir.darkdeveloper.bitkip {
     opens ir.darkdeveloper.bitkip.controllers to javafx.fxml, javafx.base;
     opens ir.darkdeveloper.bitkip.models to javafx.fxml, javafx.base;
     exports ir.darkdeveloper.bitkip;
+    opens ir.darkdeveloper.bitkip.controllers.interfaces to javafx.base, javafx.fxml;
 }

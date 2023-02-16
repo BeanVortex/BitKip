@@ -1,8 +1,9 @@
 package ir.darkdeveloper.bitkip.utils;
 
 
+import ir.darkdeveloper.bitkip.controllers.interfaces.FXMLController;
 import ir.darkdeveloper.bitkip.controllers.MainController;
-import ir.darkdeveloper.bitkip.controllers.NewDownloadFxmlController;
+import ir.darkdeveloper.bitkip.controllers.interfaces.NewDownloadFxmlController;
 import ir.darkdeveloper.bitkip.controllers.NewQueueController;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXMLLoader;
@@ -44,7 +45,8 @@ public class FxUtils {
     }
 
     public static void newDownloadStage(String fxmlFilename, double minWidth,
-                                        double minHeight, TableUtils tableUtils) {
+                                        double minHeight, TableUtils tableUtils,
+                                        FXMLController parentController) {
         FXMLLoader loader;
         Stage stage = new Stage();
         Parent root;
@@ -65,10 +67,11 @@ public class FxUtils {
         NewDownloadFxmlController controller = loader.getController();
         controller.setStage(stage);
         controller.setTableUtils(tableUtils);
+        controller.setParentController(parentController);
         stage.show();
     }
 
-    public static void newQueueStage() {
+    public static void newQueueStage(FXMLController parentController) {
         FXMLLoader loader;
         Stage stage = new Stage();
         VBox root;
@@ -87,6 +90,7 @@ public class FxUtils {
         stage.setTitle("New Queue");
         NewQueueController controller = loader.getController();
         controller.setStage(stage);
+        controller.setParentController(parentController);
         stage.showAndWait();
     }
 

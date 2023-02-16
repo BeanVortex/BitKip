@@ -1,6 +1,8 @@
 package ir.darkdeveloper.bitkip.controllers;
 
 import ir.darkdeveloper.bitkip.config.AppConfigs;
+import ir.darkdeveloper.bitkip.controllers.interfaces.FXMLController;
+import ir.darkdeveloper.bitkip.controllers.interfaces.NewDownloadFxmlController;
 import ir.darkdeveloper.bitkip.models.DownloadModel;
 import ir.darkdeveloper.bitkip.models.DownloadStatus;
 import ir.darkdeveloper.bitkip.models.QueueModel;
@@ -24,7 +26,7 @@ import java.io.File;
 import java.time.LocalDateTime;
 import java.util.concurrent.CompletableFuture;
 
-public class SingleDownload implements FXMLController, NewDownloadFxmlController {
+public class SingleDownload implements NewDownloadFxmlController {
 
     @FXML
     private Label errorLabel;
@@ -62,11 +64,17 @@ public class SingleDownload implements FXMLController, NewDownloadFxmlController
     private TableUtils tableUtils;
 
     private final DownloadModel downloadModel = new DownloadModel();
+    private FXMLController parentController;
 
 
     @Override
     public void setTableUtils(TableUtils tableUtils) {
         this.tableUtils = tableUtils;
+    }
+
+    @Override
+    public void setParentController(FXMLController parentController) {
+        this.parentController = parentController;
     }
 
 
@@ -151,6 +159,13 @@ public class SingleDownload implements FXMLController, NewDownloadFxmlController
                 });
     }
 
+    public void updateQueueList() {
+        var queues = QueuesRepo.getQueues().stream().filter(QueueModel::isCanAddDownload).toList();
+        queueCombo.getItems().clear();
+        queueCombo.getItems().addAll(queues);
+        queueCombo.setValue(queues.get(0));
+        parentController.updateQueueList();
+    }
 
     @FXML
     private void onSelectLocation(ActionEvent e) {
@@ -171,7 +186,7 @@ public class SingleDownload implements FXMLController, NewDownloadFxmlController
 
     @FXML
     private void onNewQueue() {
-        FxUtils.newQueueStage();
+        FxUtils.newQueueStage(this);
     }
 
     @FXML

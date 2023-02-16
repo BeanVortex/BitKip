@@ -1,5 +1,6 @@
 package ir.darkdeveloper.bitkip.controllers;
 
+import ir.darkdeveloper.bitkip.controllers.interfaces.FXMLController;
 import ir.darkdeveloper.bitkip.models.DownloadModel;
 import ir.darkdeveloper.bitkip.models.DownloadStatus;
 import ir.darkdeveloper.bitkip.repo.DownloadsRepo;
@@ -77,6 +78,11 @@ public class MainController implements FXMLController {
     }
 
     @Override
+    public void updateQueueList() {
+        initSides();
+    }
+
+    @Override
     public void initAfterStage() {
         stage.widthProperty().addListener((ob, o, n) -> {
             contentTable.setPrefWidth(n.doubleValue() + 90);
@@ -129,6 +135,7 @@ public class MainController implements FXMLController {
         sideScrollPane.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
         sideScrollPane.setPadding(Insets.EMPTY);
         var queueButtons = new ArrayList<Button>();
+        side.getChildren().clear();
         QueuesRepo.getQueues().forEach(queueModel -> {
             var btn = new Button(queueModel.getName());
             btn.getStyleClass().add("side_queue");
@@ -217,6 +224,6 @@ public class MainController implements FXMLController {
     @FXML
     private void doAction() {
         contentTable.getSelectionModel().clearSelection();
-        FxUtils.newDownloadStage("newDownload.fxml", 600, 550, tableUtils);
+        FxUtils.newDownloadStage("newDownload.fxml", 600, 550, tableUtils, this);
     }
 }

@@ -33,11 +33,9 @@ public class QueuesRepo {
     }
 
     public static void insertQueue(QueueModel queue) {
-        var sql = "INSERT INTO " + QUEUES_TABLE_NAME + " (" +
-                COL_NAME +
-                ") VALUES(\"" +
-                queue.getName() +
-                "\");";
+        var sql = """
+                INSERT INTO queues (name,editable,can_add_download) VALUES("%s",%d,%d);
+                """.formatted(queue.getName(), queue.isEditable() ? 1 : 0, queue.isCanAddDownload() ? 1 : 0);
         dbHelper.insertQueue(sql, queue);
     }
 
