@@ -25,6 +25,9 @@ public class BitKip extends Application {
 
     @Override
     public void start(Stage stage) {
+        IOUtils.createSaveLocations();
+        DownloadsRepo.createTable();
+        QueuesRepo.createTableAndDefaultRecords();
         FxUtils.switchSceneToMain(stage, "main.fxml");
         AppConfigs.setHostServices(getHostServices());
         stage.initStyle(StageStyle.UNDECORATED);
@@ -32,9 +35,6 @@ public class BitKip extends Application {
         stage.setMinWidth(883);
         stage.setResizable(true);
         ResizeUtil.addResizeListener(stage);
-        IOUtils.createSaveLocations();
-        DownloadsRepo.createTable();
-        QueuesRepo.createTableAndDefaultRecords();
         stage.show();
     }
 
