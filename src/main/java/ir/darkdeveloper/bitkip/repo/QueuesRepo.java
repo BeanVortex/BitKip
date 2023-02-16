@@ -1,6 +1,7 @@
 package ir.darkdeveloper.bitkip.repo;
 
 import ir.darkdeveloper.bitkip.models.QueueModel;
+import ir.darkdeveloper.bitkip.utils.FileExtensions;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -12,43 +13,21 @@ import static ir.darkdeveloper.bitkip.repo.DatabaseHelper.*;
 public class QueuesRepo {
     private static final DatabaseHelper dbHelper = new DatabaseHelper();
 
-    private static final QueueModel allDownloadQueue = new QueueModel("All Downloads", false, true);
-    private static final QueueModel compressedQueue = new QueueModel("Compressed", false, false);
-    private static final QueueModel programsQueue = new QueueModel("Programs", false, false);
-    private static final QueueModel videosQueue = new QueueModel("Videos", false, false);
-    private static final QueueModel musicQueue = new QueueModel("Music", false, false);
-    private static final QueueModel docsQueue = new QueueModel("Docs", false, false);
-    private static final QueueModel othersQueue = new QueueModel("Others", false, false);
-
     public static void createTableAndDefaultRecords() {
         dbHelper.createQueuesTable();
         dbHelper.createQueueDownloadTable();
-        insertDefaultQueues(allDownloadQueue);
-        insertDefaultQueues(compressedQueue);
-        insertDefaultQueues(programsQueue);
-        insertDefaultQueues(videosQueue);
-        insertDefaultQueues(musicQueue);
-        insertDefaultQueues(docsQueue);
-        insertDefaultQueues(othersQueue);
+        FileExtensions.staticQueueNames.forEach(name -> {
+            var queue = new QueueModel(name, false, false);
+            if (name.equals("All Downloads"))
+                queue.setCanAddDownload(true);
+            insertQueue(queue);
+        });
     }
 
     public static void insertQueue(QueueModel queue) {
         var sql = """
-                INSERT INTO queues (name,editable,can_add_download) VALUES("%s",%d,%d);
+                INSERT OR IGNORE INTO queues (name,editable,can_add_download) VALUES("%s",%d,%d);
                 """.formatted(queue.getName(), queue.isEditable() ? 1 : 0, queue.isCanAddDownload() ? 1 : 0);
-        dbHelper.insertQueue(sql, queue);
-    }
-
-    private static void insertDefaultQueues(QueueModel queue) {
-        var sql = "INSERT OR IGNORE INTO " + QUEUES_TABLE_NAME + " (" +
-                COL_NAME + "," +
-                COL_EDITABLE + "," +
-                COL_CAN_ADD_DOWN +
-                ") VALUES(\"" +
-                queue.getName() + "\"," +
-                queue.isEditable() + "," +
-                queue.isCanAddDownload() +
-                ");";
         dbHelper.insertQueue(sql, queue);
     }
 
@@ -84,6 +63,18 @@ public class QueuesRepo {
 
     public static void deleteQueue(int id) {
         var sql = "DELETE FROM " + QUEUES_TABLE_NAME + " WHERE " + COL_ID + "=" + id + ";";
+        try (var con = dbHelper.openConnection();
+             var stmt = con.createStatement()) {
+            stmt.executeUpdate(sql);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void deleteQueue(String name) {
+        var sql = """
+                DELETE FROM queues WHERE name = "%s";
+                """.formatted(name);
         try (var con = dbHelper.openConnection();
              var stmt = con.createStatement()) {
             stmt.executeUpdate(sql);

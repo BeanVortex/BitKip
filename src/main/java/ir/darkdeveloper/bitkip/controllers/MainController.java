@@ -3,23 +3,18 @@ package ir.darkdeveloper.bitkip.controllers;
 import ir.darkdeveloper.bitkip.controllers.interfaces.FXMLController;
 import ir.darkdeveloper.bitkip.models.DownloadModel;
 import ir.darkdeveloper.bitkip.models.DownloadStatus;
+import ir.darkdeveloper.bitkip.models.QueueModel;
 import ir.darkdeveloper.bitkip.repo.DownloadsRepo;
 import ir.darkdeveloper.bitkip.repo.QueuesRepo;
-import ir.darkdeveloper.bitkip.utils.FxUtils;
-import ir.darkdeveloper.bitkip.utils.MenuUtils;
-import ir.darkdeveloper.bitkip.utils.TableUtils;
-import ir.darkdeveloper.bitkip.utils.WindowUtils;
+import ir.darkdeveloper.bitkip.utils.*;
 import javafx.animation.TranslateTransition;
 import javafx.application.Platform;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
-import javafx.geometry.Insets;
-import javafx.geometry.Orientation;
-import javafx.geometry.Pos;
-import javafx.geometry.Rectangle2D;
-import javafx.scene.control.Button;
-import javafx.scene.control.ScrollBar;
-import javafx.scene.control.ScrollPane;
-import javafx.scene.control.TableView;
+import javafx.geometry.*;
+import javafx.scene.control.*;
+import javafx.scene.input.MouseButton;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.input.ScrollEvent;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
@@ -30,7 +25,9 @@ import javafx.util.Duration;
 import org.kordamp.ikonli.javafx.FontIcon;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
+
 
 public class MainController implements FXMLController {
 
@@ -143,9 +140,19 @@ public class MainController implements FXMLController {
                 btn.getStyleClass().add("selected_queue");
             btn.setPrefWidth(side.getPrefWidth());
             btn.setPrefHeight(60);
-            btn.setOnMouseClicked(event -> {
-                if (event.getClickCount() == 2)
-                    return;
+            btn.setOnMouseClicked(onSideQueueClicked(queueButtons, queueModel, btn));
+            queueButtons.add(btn);
+            side.getChildren().add(btn);
+        });
+
+    }
+
+    private EventHandler<MouseEvent> onSideQueueClicked(ArrayList<Button> queueButtons,
+                                                        QueueModel queueModel, Button btn) {
+        return event -> {
+            if (event.getClickCount() == 2)
+                return;
+            if (event.getButton().equals(MouseButton.PRIMARY)) {
                 var downloadsData = DownloadsRepo.getDownloadsByQueue(queueModel.getId())
                         .stream().peek(downloadModel -> {
                             downloadModel.setDownloadStatus(DownloadStatus.Paused);
@@ -160,12 +167,30 @@ public class MainController implements FXMLController {
                             otherBtn.getStyleClass().remove("selected_queue");
                     });
                 }
-            });
-            queueButtons.add(btn);
-            side.getChildren().add(btn);
-        });
+            } else if (event.getButton().equals(MouseButton.SECONDARY)) {
+                if (FileExtensions.staticQueueNames.stream().anyMatch(s -> btn.getText().equals(s)))
+                    return;
+                var cMenu = btn.getContextMenu();
+                if (cMenu == null)
+                    cMenu = new ContextMenu();
+                cMenu.getItems().clear();
+                var scheduleLbl = new Label("Change Schedule");
+                var deleteLbl = new Label("Delete");
 
-
+                var lbls = List.of(scheduleLbl, deleteLbl);
+                var menuItems = MenuUtils.createMenuItems(lbls);
+                cMenu.getItems().addAll(menuItems.values());
+                btn.setContextMenu(cMenu);
+                menuItems.get(scheduleLbl).setOnAction(e -> {
+                    System.out.println("change schedule");
+                });
+                menuItems.get(deleteLbl).setOnAction(e -> {
+                    QueuesRepo.deleteQueue(btn.getText());
+                    updateQueueList();
+                });
+                cMenu.show(btn, Side.BOTTOM, 0,0);
+            }
+        };
     }
 
 

@@ -20,6 +20,8 @@ public class BitKip extends Application {
     // todo: sync db file size and actual file size
     // todo: downloading stage
     // todo: ask user if also wants to delete the file itself
+    // todo: queue scheduler
+    // todo: menu items' actions
 
     @Override
     public void start(Stage stage) {

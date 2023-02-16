@@ -3,6 +3,9 @@ package ir.darkdeveloper.bitkip.utils;
 import java.util.List;
 
 public class FileExtensions {
+
+    public static final List<String> staticQueueNames = List.of("All Downloads", "Compressed",
+            "Music", "Videos", "Programs", "Docs", "Others");
     public static final List<String> musicEx = List.of("mp3", "ogg", "wav", "mpa",
             "cda", "aif", "mid", "midi", "wma", "wpl");
     public static final List<String> compressedEx = List.of("rar", "zip", "7z", "deb",

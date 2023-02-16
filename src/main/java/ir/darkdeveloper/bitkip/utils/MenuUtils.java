@@ -141,7 +141,7 @@ public class MenuUtils {
     }
 
 
-    private static LinkedHashMap<Label, MenuItem> createMenuItems(List<Label> lbls) {
+    public static LinkedHashMap<Label, MenuItem> createMenuItems(List<Label> lbls) {
         var menuItems = new LinkedHashMap<Label, MenuItem>();
         lbls.forEach(label -> {
             label.setPrefWidth(150);
