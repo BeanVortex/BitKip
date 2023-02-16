@@ -171,6 +171,7 @@ public class SingleDownload implements FXMLController, NewDownloadFxmlController
 
     @FXML
     private void onNewQueue() {
+        FxUtils.newQueueStage();
     }
 
     @FXML

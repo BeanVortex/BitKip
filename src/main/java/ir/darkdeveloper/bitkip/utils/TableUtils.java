@@ -7,12 +7,14 @@ import ir.darkdeveloper.bitkip.repo.DownloadsRepo;
 import ir.darkdeveloper.bitkip.task.DownloadTask;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.event.EventHandler;
 import javafx.scene.control.SelectionMode;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.MouseButton;
+import javafx.scene.input.MouseEvent;
 import org.apache.commons.lang3.time.DurationFormatUtils;
 
 import java.nio.file.Path;
@@ -77,11 +79,7 @@ public class TableUtils {
         contentTable.getItems().addAll(data);
         contentTable.getSortOrder().add(addDateColumn);
 
-        contentTable.setOnMouseClicked(event -> {
-            if (event.getButton().equals(MouseButton.SECONDARY)) {
-                System.out.println("options");
-            }
-        });
+        contentTable.setOnMouseClicked(onItemsClicked());
         contentTable.setRowFactory(param -> {
             var row = new TableRow<DownloadModel>();
             row.setOnMouseClicked(event -> {
@@ -93,6 +91,14 @@ public class TableUtils {
             return row;
         });
 
+    }
+
+    private EventHandler<? super MouseEvent> onItemsClicked() {
+        return event -> {
+            if (event.getButton().equals(MouseButton.SECONDARY)) {
+                var selectedItems = contentTable.getSelectionModel().getSelectedItems();
+            }
+        };
     }
 
     public void addRow(DownloadModel download) {

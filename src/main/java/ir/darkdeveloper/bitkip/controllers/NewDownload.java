@@ -1,6 +1,5 @@
 package ir.darkdeveloper.bitkip.controllers;
 
-import ir.darkdeveloper.bitkip.task.DownloadTask;
 import ir.darkdeveloper.bitkip.utils.ResizeUtil;
 import ir.darkdeveloper.bitkip.utils.TableUtils;
 import ir.darkdeveloper.bitkip.utils.WindowUtils;
@@ -9,16 +8,13 @@ import javafx.fxml.FXMLLoader;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.Parent;
 import javafx.scene.control.Button;
-import javafx.scene.effect.DropShadow;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
-import javafx.scene.paint.Color;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
 import org.kordamp.ikonli.javafx.FontIcon;
 
 import java.io.IOException;
-import java.util.List;
 
 import static ir.darkdeveloper.bitkip.BitKip.getResource;
 
@@ -42,8 +38,6 @@ public class NewDownload implements NewDownloadFxmlController {
     private final int minWidth = 600, minHeight = 400;
 
     private boolean isSingle = true;
-    private List<DownloadTask> downloadTaskList;
-
 
     @Override
     public Stage getStage() {
@@ -64,9 +58,6 @@ public class NewDownload implements NewDownloadFxmlController {
 
     @Override
     public void initAfterStage() {
-        stage.getScene().getRoot().setEffect(new DropShadow());
-        stage.getScene().setFill(Color.TRANSPARENT);
-
         stage.widthProperty().addListener((ob, o, n) -> {
             var width = n.longValue();
             toolbar.setPrefWidth(width);
@@ -85,6 +76,7 @@ public class NewDownload implements NewDownloadFxmlController {
         });
 
         WindowUtils.toolbarInits(toolbar, stage, bounds, minWidth, minHeight);
+        WindowUtils.onToolbarDoubleClicked(toolbar, stage, null, bounds, null, minWidth, minHeight);
         ResizeUtil.addResizeListener(stage);
 
     }
@@ -105,11 +97,7 @@ public class NewDownload implements NewDownloadFxmlController {
 
     @FXML
     private void toggleFullWindowApp() {
-        var screenY = stage.getY();
-        if (screenY - bounds.getMinY() >= 0 && bounds.getHeight() > stage.getHeight())
-            bounds = WindowUtils.maximizeWindow(stage, bounds, null);
-        else if (screenY - bounds.getMinY() <= 0 && bounds.getHeight() <= stage.getHeight())
-            bounds = WindowUtils.minimizeWindow(stage, bounds, minWidth, minHeight);
+        bounds = WindowUtils.toggleWindowSize(stage, bounds, minWidth, minHeight);
     }
 
     @FXML

@@ -4,7 +4,6 @@ import ir.darkdeveloper.bitkip.models.DownloadModel;
 import ir.darkdeveloper.bitkip.models.DownloadStatus;
 import ir.darkdeveloper.bitkip.repo.DownloadsRepo;
 import ir.darkdeveloper.bitkip.repo.QueuesRepo;
-import ir.darkdeveloper.bitkip.task.DownloadTask;
 import ir.darkdeveloper.bitkip.utils.FxUtils;
 import ir.darkdeveloper.bitkip.utils.MenuUtils;
 import ir.darkdeveloper.bitkip.utils.TableUtils;
@@ -30,7 +29,6 @@ import javafx.util.Duration;
 import org.kordamp.ikonli.javafx.FontIcon;
 
 import java.util.ArrayList;
-import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class MainController implements FXMLController {
@@ -65,7 +63,6 @@ public class MainController implements FXMLController {
     private TableUtils tableUtils;
     private Rectangle2D bounds;
     private final int minWidth = 853, minHeight = 515;
-    private final List<DownloadTask> downloadTaskList = new ArrayList<>();
 
     @Override
     public void setStage(Stage stage) {
@@ -91,7 +88,8 @@ public class MainController implements FXMLController {
                 bounds = Screen.getPrimary().getVisualBounds();
         });
         actionBtnInits();
-        WindowUtils.toolbarInits(toolbar, stage, bounds, actionBtn, contentTable, minWidth, minHeight);
+        WindowUtils.toolbarInits(toolbar, stage, bounds, actionBtn, minWidth, minHeight);
+        WindowUtils.onToolbarDoubleClicked(toolbar, stage, contentTable, bounds, actionBtn, minWidth, minHeight);
         MenuUtils.initFileMenu(menuFile, contentTable);
         MenuUtils.initOperationMenu(operationMenu, contentTable, tableUtils);
         MenuUtils.initAboutMenu(aboutMenu, contentTable);
@@ -219,6 +217,6 @@ public class MainController implements FXMLController {
     @FXML
     private void doAction() {
         contentTable.getSelectionModel().clearSelection();
-        FxUtils.newDownloadStage("newDownload.fxml", 600, 550, tableUtils, downloadTaskList);
+        FxUtils.newDownloadStage("newDownload.fxml", 600, 550, tableUtils);
     }
 }

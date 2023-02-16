@@ -124,7 +124,7 @@
     -fx-background-color: #B3E5FC;
 }
 
-.add_btn:pressed {
+.add_btn:pressed{
     -fx-background-color: #03A9F4;
     -fx-text-fill: #fafafa;
 }
@@ -148,3 +148,8 @@
     -fx-background-color: #4CAF50;
     -fx-text-fill: #fafafa;
 }
+
+.new_queue {
+    -fx-padding: 10;
+}
+

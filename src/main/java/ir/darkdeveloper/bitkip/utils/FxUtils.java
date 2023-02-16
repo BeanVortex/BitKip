@@ -1,23 +1,19 @@
 package ir.darkdeveloper.bitkip.utils;
 
 
-import ir.darkdeveloper.bitkip.controllers.FXMLController;
 import ir.darkdeveloper.bitkip.controllers.MainController;
-import ir.darkdeveloper.bitkip.controllers.NewDownload;
 import ir.darkdeveloper.bitkip.controllers.NewDownloadFxmlController;
-import ir.darkdeveloper.bitkip.task.DownloadTask;
+import ir.darkdeveloper.bitkip.controllers.NewQueueController;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.image.Image;
+import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 
 import static ir.darkdeveloper.bitkip.BitKip.getResource;
 
@@ -47,21 +43,20 @@ public class FxUtils {
         return null;
     }
 
-    public static void newDownloadStage(String fxmlFilename, double minWidth, double minHeight, TableUtils tableUtils, List<DownloadTask> downloadTaskList) {
-        FXMLLoader loader = null;
+    public static void newDownloadStage(String fxmlFilename, double minWidth,
+                                        double minHeight, TableUtils tableUtils) {
+        FXMLLoader loader;
         Stage stage = new Stage();
-        Parent root = null;
+        Parent root;
         try {
             loader = new FXMLLoader(getResource("fxml/" + fxmlFilename));
             root = loader.load();
         } catch (IOException e) {
             e.printStackTrace();
+            throw new RuntimeException(e);
         }
         var scene = new Scene(root);
         stage.setScene(scene);
-        var logoPath = getResource("images/logo.png");
-        if (logoPath != null)
-            stage.getIcons().add(new Image(logoPath.toExternalForm()));
         stage.setMinWidth(minWidth);
         stage.setMinHeight(minHeight);
         stage.initStyle(StageStyle.TRANSPARENT);
@@ -73,19 +68,26 @@ public class FxUtils {
         stage.show();
     }
 
-    public static <T> List<T> getAllNodes(Parent root, Class<T> tClass) {
-        var nodes = new ArrayList<T>();
-        addAllDescendents(root, nodes, tClass);
-        return nodes;
-    }
-
-    private static <T> void addAllDescendents(Parent root, ArrayList<T> nodes, Class<T> tClass) {
-        for (var node : root.getChildrenUnmodifiable()) {
-            if (tClass.isInstance(node))
-                nodes.add(tClass.cast(node));
-            if (node instanceof Parent p)
-                addAllDescendents(p, nodes, tClass);
+    public static void newQueueStage() {
+        FXMLLoader loader;
+        Stage stage = new Stage();
+        VBox root;
+        try {
+            loader = new FXMLLoader(getResource("fxml/newQueue.fxml"));
+            root = loader.load();
+        } catch (IOException e) {
+            e.printStackTrace();
+            throw new RuntimeException(e);
         }
+        var scene = new Scene(root);
+        stage.setScene(scene);
+        stage.setMinWidth(root.getPrefWidth());
+        stage.setMinHeight(root.getPrefHeight());
+        stage.initStyle(StageStyle.TRANSPARENT);
+        stage.setTitle("New Queue");
+        NewQueueController controller = loader.getController();
+        controller.setStage(stage);
+        stage.showAndWait();
     }
 
 }

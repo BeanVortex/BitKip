@@ -16,8 +16,7 @@ public class WindowUtils {
     private static double yOffset = 0;
 
     public static void toolbarInits(HBox toolbar, Stage stage, Rectangle2D bounds,
-                                    Button actionBtn, TableView<DownloadModel> table,
-                                    int width, int height) {
+                                    Button actionBtn, int width, int height) {
 
         toolbar.setOnMousePressed(event -> {
             xOffset = stage.getX() - event.getScreenX();
@@ -43,6 +42,16 @@ public class WindowUtils {
             if (screenY - boundsCopy.get().getMinY() <= 0)
                 maximizeWindow(stage, boundsCopy.get(), actionBtn);
         });
+    }
+
+    public static void toolbarInits(HBox toolbar, Stage stage, Rectangle2D bounds, int width, int height) {
+        toolbarInits(toolbar, stage, bounds, null, width, height);
+    }
+
+    public static void onToolbarDoubleClicked(HBox toolbar, Stage stage,
+                                              TableView<DownloadModel> table,
+                                              Rectangle2D bounds, Button actionBtn, int width, int height) {
+        var boundsCopy = new AtomicReference<>(bounds);
         toolbar.setOnMouseClicked(event -> {
             var doubleClickCondition = event.getButton().equals(MouseButton.PRIMARY) && event.getClickCount() == 2;
             var screenY = stage.getY();
@@ -55,10 +64,6 @@ public class WindowUtils {
                     minimizeWindow(stage, boundsCopy.get(), width, height);
             }
         });
-    }
-
-    public static void toolbarInits(HBox toolbar, Stage stage, Rectangle2D bounds, int width, int height) {
-        toolbarInits(toolbar, stage, bounds, null, null, width, height);
     }
 
     public static Rectangle2D maximizeWindow(Stage stage, Rectangle2D bounds, Button actionBtn) {
@@ -104,5 +109,13 @@ public class WindowUtils {
         return x < bounds.getMaxX();
     }
 
+    public static Rectangle2D toggleWindowSize(Stage stage, Rectangle2D bounds, int minWidth, int minHeight) {
+        var screenY = stage.getY();
+        if (screenY - bounds.getMinY() >= 0 && bounds.getHeight() > stage.getHeight())
+            bounds = WindowUtils.maximizeWindow(stage, bounds, null);
+        else if (screenY - bounds.getMinY() <= 0 && bounds.getHeight() <= stage.getHeight())
+            bounds = WindowUtils.minimizeWindow(stage, bounds, minWidth, minHeight);
+        return bounds;
+    }
 
 }
