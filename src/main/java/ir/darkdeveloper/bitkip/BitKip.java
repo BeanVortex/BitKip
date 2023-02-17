@@ -19,6 +19,7 @@ public class BitKip extends Application {
     // todo: scrollview in new download
     // todo: sync db file size and actual file size
     // todo: downloading stage
+    // todo: double click a download in table and open Downloading stage
     // todo: ask user if also wants to delete the file itself
     // todo: queue scheduler
     // todo: menu items' actions

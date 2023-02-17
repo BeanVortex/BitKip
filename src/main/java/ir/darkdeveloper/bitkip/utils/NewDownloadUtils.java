@@ -206,9 +206,8 @@ public class NewDownloadUtils {
                 currentSpeed = 0;
             tableUtils.updateDownloadSpeedAndRemaining(currentSpeed, downloadModel, newValue);
         });
-        downloadTask.progressProperty().addListener((o, old, newV) -> {
-            tableUtils.updateDownloadProgress(newV.floatValue() * 100, downloadModel);
-        });
+        downloadTask.progressProperty().addListener((o, old, newV) ->
+                tableUtils.updateDownloadProgress(newV.floatValue() * 100, downloadModel));
         downloadModel.setDownloadTask(downloadTask);
         if (!resume) {
             DownloadsRepo.insertDownload(downloadModel);
