@@ -22,7 +22,7 @@ public class BitKip extends Application {
     // todo: ask user if also wants to delete the file itself
     // todo: queue scheduler
     // todo: menu items' actions
-    // todo: remaining time in chunks mode
+    // todo: menu for right click table items
 
     @Override
     public void start(Stage stage) {

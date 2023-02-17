@@ -204,7 +204,7 @@ public class NewDownloadUtils {
             var currentSpeed = (newValue - oldValue) * speedFactor.get();
             if (newValue == 0)
                 currentSpeed = 0;
-            tableUtils.updateDownloadSpeedAndRemaining(currentSpeed, downloadModel);
+            tableUtils.updateDownloadSpeedAndRemaining(currentSpeed, downloadModel, newValue);
         });
         downloadTask.progressProperty().addListener((o, old, newV) -> {
             tableUtils.updateDownloadProgress(newV.floatValue() * 100, downloadModel);

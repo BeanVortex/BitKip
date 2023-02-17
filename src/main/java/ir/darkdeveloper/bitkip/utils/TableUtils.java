@@ -113,7 +113,7 @@ public class TableUtils {
         contentTable.sort();
     }
 
-    public void updateDownloadSpeedAndRemaining(long speed, DownloadModel dm) {
+    public void updateDownloadSpeedAndRemaining(long speed, DownloadModel dm, Long bytesDownloaded) {
         var downTask = dm.getDownloadTask();
         if (downTask.isRunning() && currentDownloading.size() != 0) {
             var i = findDownload(dm.getId());
@@ -122,7 +122,7 @@ public class TableUtils {
                 i.setDownloadStatus(DownloadStatus.Downloading);
                 i.setSpeedString(IOUtils.formatBytes(speed));
                 if (speed != 0) {
-                    var delta = (dm.getSize() - DownloadTask.getCurrentFileSize(Path.of(dm.getFilePath())));
+                    long delta = dm.getSize() - bytesDownloaded;
                     var remaining = DurationFormatUtils.formatDuration((delta / speed) * 1000, "dd:HH:mm:ss");
                     i.setRemainingTime(remaining);
                 }
