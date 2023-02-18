@@ -59,7 +59,7 @@ public class DownloadInChunksTask extends DownloadTask {
         var from = 0L;
         var fromContinue = 0L;
         var filePath = downloadModel.getFilePath();
-        Thread countingThread = null;
+        var countingThread = calculateSpeedAndProgressChunks(fileSize);
         for (int i = 0; i < chunks; i++) {
             var name = filePath + "#" + i;
             filePaths.add(Paths.get(name));
@@ -83,7 +83,6 @@ public class DownloadInChunksTask extends DownloadTask {
             fromContinue = to + 1;
             to += bytesForEach;
             var existingFileSize = getCurrentFileSize(partFile);
-            countingThread = calculateSpeedAndProgressChunks(fileSize);
             // todo: check if a part is done
             var t = new Thread(() -> {
                 try {
@@ -100,8 +99,7 @@ public class DownloadInChunksTask extends DownloadTask {
 
         for (var thread : threadList)
             thread.join();
-        if (countingThread != null)
-            countingThread.interrupt();
+        countingThread.interrupt();
 
         if (paused)
             paused = false;
@@ -113,7 +111,7 @@ public class DownloadInChunksTask extends DownloadTask {
                 while (!paused) {
                     var currentFileSize = 0L;
 
-                    Thread.sleep(500);
+                    Thread.sleep(1000);
                     for (int i = 0; i < chunks; i++)
                         currentFileSize += Files.size(filePaths.get(i));
 

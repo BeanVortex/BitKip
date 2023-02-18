@@ -180,7 +180,6 @@ public class NewDownloadUtils {
 
     public static void startDownload(DownloadModel downloadModel, TableUtils tableUtils, String speed, String bytes, boolean resume) {
         DownloadTask downloadTask = new DownloadLimitedTask(downloadModel, Long.MAX_VALUE, false);
-        var speedFactor = new AtomicInteger(1);
         if (downloadModel.getChunks() == 0) {
             if (speed != null) {
                 if (speed.equals("0")) {
@@ -193,15 +192,13 @@ public class NewDownloadUtils {
                 } else
                     downloadTask = new DownloadLimitedTask(downloadModel, getBytesFromField(speed), true);
             }
-        } else {
+        } else
             downloadTask = new DownloadInChunksTask(downloadModel);
-            speedFactor.set(2);
-        }
 
         downloadTask.valueProperty().addListener((observable, oldValue, newValue) -> {
             if (oldValue == null)
                 oldValue = 0L;
-            var currentSpeed = (newValue - oldValue) * speedFactor.get();
+            var currentSpeed = (newValue - oldValue);
             if (newValue == 0)
                 currentSpeed = 0;
             tableUtils.updateDownloadSpeedAndRemaining(currentSpeed, downloadModel, newValue);

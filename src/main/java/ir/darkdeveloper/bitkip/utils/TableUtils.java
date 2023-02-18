@@ -123,6 +123,7 @@ public class TableUtils {
                 i.setSpeedString(IOUtils.formatBytes(speed));
                 if (speed != 0) {
                     long delta = dm.getSize() - bytesDownloaded;
+                    // todo bug chunks
                     var remaining = DurationFormatUtils.formatDuration((delta / speed) * 1000, "dd:HH:mm:ss");
                     i.setRemainingTime(remaining);
                 }
