@@ -4,22 +4,23 @@ import ir.darkdeveloper.bitkip.config.AppConfigs;
 import ir.darkdeveloper.bitkip.models.DownloadModel;
 import ir.darkdeveloper.bitkip.models.DownloadStatus;
 import ir.darkdeveloper.bitkip.repo.DownloadsRepo;
-import ir.darkdeveloper.bitkip.task.DownloadTask;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.EventHandler;
-import javafx.scene.control.SelectionMode;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableRow;
-import javafx.scene.control.TableView;
+import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
+import javafx.util.Callback;
 import org.apache.commons.lang3.time.DurationFormatUtils;
 
+import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.text.DecimalFormat;
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 
 public class TableUtils {
 
@@ -80,17 +81,98 @@ public class TableUtils {
         contentTable.getSortOrder().add(addDateColumn);
 
         contentTable.setOnMouseClicked(onItemsClicked());
-        contentTable.setRowFactory(param -> {
+        contentTable.setRowFactory(getTableViewTableRowCallback());
+
+    }
+
+    private Callback<TableView<DownloadModel>, TableRow<DownloadModel>> getTableViewTableRowCallback() {
+        return param -> {
             var row = new TableRow<DownloadModel>();
             row.setOnMouseClicked(event -> {
                 var selectedItems = contentTable.getSelectionModel().getSelectedItems();
-                if (selectedItems.size() == 1 && !row.isEmpty()
-                        && event.getButton().equals(MouseButton.SECONDARY))
-                    System.out.println(row.getIndex());
+                if (!row.isEmpty() && event.getButton().equals(MouseButton.SECONDARY)) {
+                    var cMenu = new ContextMenu();
+                    var resumeLbl = new Label("resume");
+                    var pauseLbl = new Label("pause");
+                    var deleteLbl = new Label("delete");
+                    var deleteWithFileLbl = new Label("delete with file");
+                    if (selectedItems.size() == 1) {
+                        var dm = selectedItems.get(0);
+                        var lbls = List.of(resumeLbl, pauseLbl, deleteLbl, deleteWithFileLbl);
+                        var menuItems = MenuUtils.createMenuItems(lbls);
+                        switch (dm.getDownloadStatus()){
+                            case Downloading -> {
+                                menuItems.get(0).setDisable(true);
+                            }
+                            case Paused -> {
+                                menuItems.get(1).setDisable(true);
+                            }
+                            case Completed -> {
+                                menuItems.get(0).setDisable(true);
+                                menuItems.get(1).setDisable(true);
+                            }
+                        }
+
+                        cMenu.getItems().addAll(menuItems);
+                        row.setContextMenu(cMenu);
+                        menuItemOperations(dm, menuItems);
+                    }
+                    cMenu.show(row, event.getX(), event.getY());
+                }
             });
             return row;
+        };
+    }
+
+    // sequence is important where labels defined
+    private void menuItemOperations(DownloadModel dm, List<MenuItem> menuItems) {
+        // resume
+        menuItems.get(0).setOnAction(event -> {
+            dm.setLastTryDate(LocalDateTime.now());
+            NewDownloadUtils.startDownload(dm, this, null, null, true);
         });
 
+        // pause
+        menuItems.get(1).setOnAction(event -> {
+            var download = AppConfigs.currentDownloading.get(AppConfigs.currentDownloading.indexOf(dm));
+            download.getDownloadTask().pause();
+        });
+
+        // delete
+        menuItems.get(2).setOnAction(event -> {
+            var index = AppConfigs.currentDownloading.indexOf(dm);
+            var download = dm;
+            if (index != -1)
+                download = AppConfigs.currentDownloading.get(index);
+            if (download.getDownloadTask() != null && download.getDownloadTask().isRunning())
+                download.getDownloadTask().pause();
+            DownloadsRepo.deleteDownload(dm);
+            contentTable.getItems().remove(dm);
+        });
+
+
+        // delete with file
+        menuItems.get(3).setOnAction(event -> {
+            try {
+                var index = AppConfigs.currentDownloading.indexOf(dm);
+                var download = dm;
+                if (index != -1)
+                    download = AppConfigs.currentDownloading.get(index);
+                if (download.getDownloadTask() != null && download.getDownloadTask().isRunning())
+                    download.getDownloadTask().pause();
+                if (download.getChunks() == 0)
+                    Files.deleteIfExists(Path.of(download.getFilePath()));
+                else
+                    for (int i = 0; i < download.getChunks(); i++)
+                        Files.deleteIfExists(Path.of(download.getFilePath() + "#" + i));
+
+                DownloadsRepo.deleteDownload(dm);
+                contentTable.getItems().remove(dm);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+
+        });
     }
 
     private EventHandler<? super MouseEvent> onItemsClicked() {

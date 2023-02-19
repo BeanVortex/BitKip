@@ -24,7 +24,6 @@ public class BitKip extends Application {
     // todo: queue scheduler
     // todo: menu items' actions
     // todo: menu for right click table items
-    // todo: bug in chunks update status
     // todo: bug in chunks download(large file)
     // todo: heap space error while more than one download
 

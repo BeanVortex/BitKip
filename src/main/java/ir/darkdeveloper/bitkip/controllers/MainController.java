@@ -178,7 +178,7 @@ public class MainController implements FXMLController {
                 var deleteLbl = new Label("Delete");
 
                 var lbls = List.of(scheduleLbl, deleteLbl);
-                var menuItems = MenuUtils.createMenuItems(lbls);
+                var menuItems = MenuUtils.createMapMenuItems(lbls);
                 cMenu.getItems().addAll(menuItems.values());
                 btn.setContextMenu(cMenu);
                 menuItems.get(scheduleLbl).setOnAction(e -> {

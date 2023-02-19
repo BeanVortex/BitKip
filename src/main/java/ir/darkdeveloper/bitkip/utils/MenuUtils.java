@@ -10,6 +10,7 @@ import javafx.scene.control.*;
 import javafx.scene.input.Clipboard;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 
@@ -25,7 +26,7 @@ public class MenuUtils {
         var settings = new Label("Settings");
         var exit = new Label("exit");
         var lbls = List.of(addLink, batchDownload, addLinkFromClipboard, deleteDownloads, settings, exit);
-        var menuItems = createMenuItems(lbls);
+        var menuItems = createMapMenuItems(lbls);
         c.getItems().addAll(menuItems.values());
         menuFile.setContextMenu(c);
         menuFile.setOnMouseClicked(event -> {
@@ -69,7 +70,7 @@ public class MenuUtils {
 
         var lbls = List.of(resume, pause, restart);
         var split = new SeparatorMenuItem();
-        var menuItems = createMenuItems(lbls);
+        var menuItems = createMapMenuItems(lbls);
         menuItems.put(new Label("s"), split);
 
         var newQueueMenu = new MenuItem();
@@ -136,7 +137,7 @@ public class MenuUtils {
         var about = new Label("About");
 
         var lbls = List.of(checkForUpdates, about);
-        var menuItems = createMenuItems(lbls);
+        var menuItems = createMapMenuItems(lbls);
         c.getItems().addAll(menuItems.values());
         aboutMenu.setContextMenu(c);
         aboutMenu.setOnAction(event -> {
@@ -150,13 +151,24 @@ public class MenuUtils {
     }
 
 
-    public static LinkedHashMap<Label, MenuItem> createMenuItems(List<Label> lbls) {
+    public static LinkedHashMap<Label, MenuItem> createMapMenuItems(List<Label> lbls) {
         var menuItems = new LinkedHashMap<Label, MenuItem>();
         lbls.forEach(label -> {
             label.setPrefWidth(150);
             var menuItem = new MenuItem();
             menuItem.setGraphic(label);
             menuItems.put(label, menuItem);
+        });
+        return menuItems;
+    }
+
+    public static List<MenuItem> createMenuItems(List<Label> lbls) {
+        var menuItems = new ArrayList<MenuItem>();
+        lbls.forEach(label -> {
+            label.setPrefWidth(150);
+            var menuItem = new MenuItem();
+            menuItem.setGraphic(label);
+            menuItems.add(menuItem);
         });
         return menuItems;
     }
