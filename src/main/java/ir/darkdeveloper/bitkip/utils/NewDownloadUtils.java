@@ -60,6 +60,8 @@ public class NewDownloadUtils {
     public static void prepareLinkFromClipboard(TextField urlField) {
         var clip = Clipboard.getSystemClipboard();
         var clipContent = clip.getString();
+        if (clipContent == null)
+            return;
         if (clipContent.startsWith("http") || clipContent.startsWith("https"))
             urlField.setText(clipContent);
     }

@@ -26,6 +26,8 @@ public class BitKip extends Application {
     // todo: menu for right click table items
     // todo: bug in chunks download(large file)
     // todo: heap space error while more than one download
+    // todo: pause when connection lost
+    // todo: update table by currently downloading objects
 
     @Override
     public void start(Stage stage) {
