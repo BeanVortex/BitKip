@@ -113,6 +113,7 @@ public class DownloadLimitedTask extends DownloadTask {
     protected void succeeded() {
         try {
             var index = currentDownloading.indexOf(downloadModel);
+            if (index != -1){
             var download = currentDownloading.get(index);
             if (download != null) {
                 download.setDownloadStatus(DownloadStatus.Paused);
@@ -125,6 +126,8 @@ public class DownloadLimitedTask extends DownloadTask {
                 DownloadsRepo.updateDownloadCompleteDate(download);
                 currentDownloading.remove(index);
             }
+            }
+
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

@@ -3,6 +3,7 @@ package ir.darkdeveloper.bitkip;
 import ir.darkdeveloper.bitkip.config.AppConfigs;
 import ir.darkdeveloper.bitkip.repo.DownloadsRepo;
 import ir.darkdeveloper.bitkip.repo.QueuesRepo;
+import ir.darkdeveloper.bitkip.task.DownloadTask;
 import ir.darkdeveloper.bitkip.utils.FxUtils;
 import ir.darkdeveloper.bitkip.utils.IOUtils;
 import ir.darkdeveloper.bitkip.utils.ResizeUtil;
@@ -47,7 +48,7 @@ public class BitKip extends Application {
 
     @Override
     public void stop() {
-        AppConfigs.downloadTaskList.forEach(Task::cancel);
+        AppConfigs.downloadTaskList.forEach(DownloadTask::pause);
         AppConfigs.currentDownloading.forEach(DownloadsRepo::updateDownloadProgress);
     }
 
