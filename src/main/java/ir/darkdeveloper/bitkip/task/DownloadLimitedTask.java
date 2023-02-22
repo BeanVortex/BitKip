@@ -33,7 +33,6 @@ public class DownloadLimitedTask extends DownloadTask {
     /**
      * if not isSpeedLimited, then valueLimit
      **/
-
     public DownloadLimitedTask(DownloadModel downloadModel, long limit, boolean isSpeedLimited, TableUtils tableUtils) {
         super(downloadModel);
         this.limit = limit;

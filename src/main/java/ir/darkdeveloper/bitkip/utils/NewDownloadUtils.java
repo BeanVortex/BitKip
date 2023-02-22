@@ -213,13 +213,8 @@ public class NewDownloadUtils {
         }
         AppConfigs.downloadTaskList.add(downloadTask);
         AppConfigs.currentDownloading.add(downloadModel);
-        var progressService = new DownloadProgressService(downloadModel);
-        progressService.setPeriod(Duration.seconds(5));
-        downloadTask.setOnSucceeded(event -> progressService.cancel());
-        downloadTask.setOnCancelled(event -> progressService.cancel());
         var t = new Thread(downloadTask);
         t.start();
-        progressService.start();
     }
 
     private static long getBytesFromField(String mb) {

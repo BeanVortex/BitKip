@@ -8,7 +8,6 @@ import ir.darkdeveloper.bitkip.utils.FxUtils;
 import ir.darkdeveloper.bitkip.utils.IOUtils;
 import ir.darkdeveloper.bitkip.utils.ResizeUtil;
 import javafx.application.Application;
-import javafx.concurrent.Task;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 
@@ -26,9 +25,8 @@ public class BitKip extends Application {
     // todo: menu items' actions
     // todo: menu for right click table items
     // todo: bug in chunks download(large file)
-    // todo: heap space error while more than one download
-    // todo: pause when connection lost
-    // todo: update table by currently downloading objects
+    // todo: heap space error while more than one download (threads wont shut down in case of lost connection)
+    // todo: gc when connection lost
     // todo: retry if connection is lost in a period
 
     @Override
