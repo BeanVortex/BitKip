@@ -100,7 +100,7 @@ public class TableUtils {
                         var dm = selectedItems.get(0);
                         var lbls = List.of(resumeLbl, pauseLbl, deleteLbl, deleteWithFileLbl);
                         var menuItems = MenuUtils.createMenuItems(lbls);
-                        switch (dm.getDownloadStatus()){
+                        switch (dm.getDownloadStatus()) {
                             case Downloading -> {
                                 menuItems.get(0).setDisable(true);
                             }
@@ -226,9 +226,10 @@ public class TableUtils {
                 if (progress == 100)
                     i.setDownloadStatus(DownloadStatus.Completed);
                 i.setProgressString(new DecimalFormat("##.#").format(progress) + " %");
-                contentTable.refresh();
             }
         }
+        contentTable.refresh();
+
     }
 
 
@@ -237,5 +238,9 @@ public class TableUtils {
             if (id == d.getId())
                 return d;
         return null;
+    }
+
+    public void refreshTable() {
+        contentTable.refresh();
     }
 }

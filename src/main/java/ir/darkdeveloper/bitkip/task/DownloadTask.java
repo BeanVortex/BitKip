@@ -22,25 +22,8 @@ public abstract class DownloadTask extends Task<Long> {
         this.downloadModel = downloadModel;
     }
 
-
-    static long saveOrGetFileSize(HttpURLConnection connection, File file, DownloadModel download) {
-        if (!file.exists() && download.getSize() == 0) {
-            long fileSize = connection.getContentLengthLong();
-            download.setSize(fileSize);
-            DownloadsRepo.updateDownloadSize(download);
-        }
-        return download.getSize();
-    }
-
     static long getCurrentFileSize(File file) throws IOException {
         return Files.size(Path.of(file.getPath()));
     }
 
-    public static long getCurrentFileSize(Path path) {
-        try {
-            return Files.size(path);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
 }

@@ -23,7 +23,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.atomic.AtomicInteger;
 
 public class NewDownloadUtils {
 
@@ -181,18 +180,18 @@ public class NewDownloadUtils {
 
 
     public static void startDownload(DownloadModel downloadModel, TableUtils tableUtils, String speed, String bytes, boolean resume) {
-        DownloadTask downloadTask = new DownloadLimitedTask(downloadModel, Long.MAX_VALUE, false);
+        DownloadTask downloadTask = new DownloadLimitedTask(downloadModel, Long.MAX_VALUE, false, tableUtils);
         if (downloadModel.getChunks() == 0) {
             if (speed != null) {
                 if (speed.equals("0")) {
                     if (bytes != null) {
                         if (bytes.equals(downloadModel.getSize() + ""))
-                            downloadTask = new DownloadLimitedTask(downloadModel, Long.MAX_VALUE, false);
+                            downloadTask = new DownloadLimitedTask(downloadModel, Long.MAX_VALUE, false, tableUtils);
                         else
-                            downloadTask = new DownloadLimitedTask(downloadModel, Long.parseLong(bytes), false);
+                            downloadTask = new DownloadLimitedTask(downloadModel, Long.parseLong(bytes), false, tableUtils);
                     }
                 } else
-                    downloadTask = new DownloadLimitedTask(downloadModel, getBytesFromField(speed), true);
+                    downloadTask = new DownloadLimitedTask(downloadModel, getBytesFromField(speed), true, tableUtils);
             }
         } else
             downloadTask = new DownloadInChunksTask(downloadModel);
@@ -219,7 +218,6 @@ public class NewDownloadUtils {
         downloadTask.setOnSucceeded(event -> progressService.cancel());
         downloadTask.setOnCancelled(event -> progressService.cancel());
         var t = new Thread(downloadTask);
-        t.setDaemon(true);
         t.start();
         progressService.start();
     }

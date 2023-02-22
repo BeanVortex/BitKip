@@ -4,6 +4,7 @@ import ir.darkdeveloper.bitkip.config.AppConfigs;
 import ir.darkdeveloper.bitkip.models.DownloadModel;
 import ir.darkdeveloper.bitkip.models.DownloadStatus;
 import ir.darkdeveloper.bitkip.repo.DownloadsRepo;
+import ir.darkdeveloper.bitkip.utils.TableUtils;
 import javafx.application.Platform;
 import javafx.concurrent.WorkerStateEvent;
 import javafx.event.EventHandler;
@@ -25,6 +26,7 @@ public class DownloadLimitedTask extends DownloadTask {
     private boolean isCalculating = false;
     private final long limit;
     private final boolean isSpeedLimited;
+    private final TableUtils tableUtils;
     private final List<DownloadModel> currentDownloading = AppConfigs.currentDownloading;
     private File file;
 
@@ -32,10 +34,11 @@ public class DownloadLimitedTask extends DownloadTask {
      * if not isSpeedLimited, then valueLimit
      **/
 
-    public DownloadLimitedTask(DownloadModel downloadModel, long limit, boolean isSpeedLimited) {
+    public DownloadLimitedTask(DownloadModel downloadModel, long limit, boolean isSpeedLimited, TableUtils tableUtils) {
         super(downloadModel);
         this.limit = limit;
         this.isSpeedLimited = isSpeedLimited;
+        this.tableUtils = tableUtils;
     }
 
 
@@ -43,6 +46,7 @@ public class DownloadLimitedTask extends DownloadTask {
     protected Long call() throws Exception {
         var url = new URL(downloadModel.getUrl());
         var connection = (HttpURLConnection) url.openConnection();
+        connection.setReadTimeout(3000);
         file = new File(downloadModel.getFilePath());
         // for resume
         configureResume(connection, file);
@@ -113,9 +117,8 @@ public class DownloadLimitedTask extends DownloadTask {
     protected void succeeded() {
         try {
             var index = currentDownloading.indexOf(downloadModel);
-            if (index != -1){
-            var download = currentDownloading.get(index);
-            if (download != null) {
+            if (index != -1) {
+                var download = currentDownloading.get(index);
                 download.setDownloadStatus(DownloadStatus.Paused);
                 if (file.exists() && getCurrentFileSize(file) == downloadModel.getSize()) {
                     download.setCompleteDate(LocalDateTime.now());
@@ -125,7 +128,7 @@ public class DownloadLimitedTask extends DownloadTask {
                 DownloadsRepo.updateDownloadProgress(download);
                 DownloadsRepo.updateDownloadCompleteDate(download);
                 currentDownloading.remove(index);
-            }
+                tableUtils.refreshTable();
             }
 
         } catch (IOException e) {

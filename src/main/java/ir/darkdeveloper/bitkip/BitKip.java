@@ -29,6 +29,7 @@ public class BitKip extends Application {
     // todo: heap space error while more than one download
     // todo: pause when connection lost
     // todo: update table by currently downloading objects
+    // todo: retry if connection is lost in a period
 
     @Override
     public void start(Stage stage) {
