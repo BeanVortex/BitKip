@@ -25,7 +25,6 @@ public class AppConfigs {
     public static final String othersPath = downloadPath + File.separator + "Others" + File.separator;
 
     public static HostServices hostServices;
-    public static final List<DownloadTask> downloadTaskList = new ArrayList<>();
     public static final List<DownloadModel> currentDownloading = new ArrayList<>();
 
     public static void setHostServices(HostServices hostServices) {

@@ -4,7 +4,6 @@ import ir.darkdeveloper.bitkip.config.AppConfigs;
 import ir.darkdeveloper.bitkip.models.DownloadModel;
 import ir.darkdeveloper.bitkip.models.DownloadStatus;
 import ir.darkdeveloper.bitkip.repo.DownloadsRepo;
-import javafx.concurrent.Task;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -18,13 +17,11 @@ import java.nio.channels.FileChannel;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.nio.file.StandardOpenOption;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
-
-import static ir.darkdeveloper.bitkip.task.DownloadTask.*;
+import java.util.concurrent.Executors;
 
 public class DownloadInChunksTask extends DownloadTask {
     private final int chunks;
@@ -61,7 +58,7 @@ public class DownloadInChunksTask extends DownloadTask {
         var from = 0L;
         var fromContinue = 0L;
         var filePath = downloadModel.getFilePath();
-        var countingThread = calculateSpeedAndProgressChunks(fileSize);
+        var statusExecutor = calculateSpeedAndProgressChunks(fileSize);
         for (int i = 0; i < chunks; i++) {
             var name = filePath + "#" + i;
             filePaths.add(Paths.get(name));
@@ -101,14 +98,15 @@ public class DownloadInChunksTask extends DownloadTask {
 
         for (var thread : threadList)
             thread.join();
-        countingThread.interrupt();
+        statusExecutor.shutdown();
 
         if (paused)
             paused = false;
     }
 
-    private Thread calculateSpeedAndProgressChunks(long fileSize) {
-        var t = new Thread(() -> {
+    private ExecutorService calculateSpeedAndProgressChunks(long fileSize) {
+        var statusExecutor = Executors.newCachedThreadPool();
+        executor.submit(() -> {
             try {
                 while (!paused) {
                     var currentFileSize = 0L;
@@ -124,8 +122,7 @@ public class DownloadInChunksTask extends DownloadTask {
                 e.printStackTrace();
             }
         });
-        t.start();
-        return t;
+        return statusExecutor;
     }
 
     @Override

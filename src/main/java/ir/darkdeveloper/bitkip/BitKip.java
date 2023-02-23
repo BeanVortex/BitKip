@@ -1,6 +1,7 @@
 package ir.darkdeveloper.bitkip;
 
 import ir.darkdeveloper.bitkip.config.AppConfigs;
+import ir.darkdeveloper.bitkip.models.DownloadModel;
 import ir.darkdeveloper.bitkip.repo.DownloadsRepo;
 import ir.darkdeveloper.bitkip.repo.QueuesRepo;
 import ir.darkdeveloper.bitkip.task.DownloadTask;
@@ -20,12 +21,11 @@ public class BitKip extends Application {
     // todo: sync db file size and actual file size
     // todo: downloading stage
     // todo: double click a download in table and open Downloading stage
-    // todo: ask user if also wants to delete the file itself
     // todo: queue scheduler
     // todo: menu items' actions
     // todo: bug in chunks download(large file)
     // todo: retry if connection is lost in a period
-    // todo: bug in side clicks
+    // todo: downloaded column
 
     @Override
     public void start(Stage stage) {
@@ -45,7 +45,7 @@ public class BitKip extends Application {
 
     @Override
     public void stop() {
-        AppConfigs.downloadTaskList.forEach(DownloadTask::pause);
+        AppConfigs.currentDownloading.forEach(dm -> dm.getDownloadTask().pause());
         AppConfigs.currentDownloading.forEach(DownloadsRepo::updateDownloadProgress);
     }
 

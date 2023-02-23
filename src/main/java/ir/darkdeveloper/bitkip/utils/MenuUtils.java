@@ -110,25 +110,28 @@ public class MenuUtils {
                     .filtered(dm -> !AppConfigs.currentDownloading.contains(dm))
                     .forEach(dm -> {
                         dm.setLastTryDate(LocalDateTime.now());
+                        dm.setDownloadStatus(DownloadStatus.Trying);
                         NewDownloadUtils.startDownload(dm, tableUtils, null, null, true);
                     });
         });
         menuItems.get(pause).setOnAction(event -> {
             var selectedItems = table.getSelectionModel().getSelectedItems();
-            selectedItems.forEach(downloadModel -> {
-                var downTask = downloadModel.getDownloadTask();
-                if (downTask != null && downTask.isRunning())
-                    downTask.pause();
-                else {
-                    downTask = AppConfigs.currentDownloading
-                            .get(AppConfigs.currentDownloading.indexOf(downloadModel))
-                            .getDownloadTask();
-                    if (downTask.isRunning())
+            selectedItems.forEach(dm -> {
+                if (dm.getDownloadStatus().equals(DownloadStatus.Downloading)) {
+                    var downTask = dm.getDownloadTask();
+                    if (downTask != null && downTask.isRunning())
                         downTask.pause();
+                    else {
+                        downTask = AppConfigs.currentDownloading
+                                .get(AppConfigs.currentDownloading.indexOf(dm))
+                                .getDownloadTask();
+                        if (downTask.isRunning())
+                            downTask.pause();
+                    }
+                    dm.setDownloadStatus(DownloadStatus.Paused);
+                    DownloadsRepo.updateDownloadProgress(dm);
+                    table.refresh();
                 }
-                downloadModel.setDownloadStatus(DownloadStatus.Paused);
-                DownloadsRepo.updateDownloadProgress(downloadModel);
-                table.refresh();
             });
         });
     }

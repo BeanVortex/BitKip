@@ -21,6 +21,7 @@ public class DownloadModel {
     private String name;
     private float progress;
     private long size;
+    private long downloaded;
     private String url;
     private String filePath;
     private String remainingTime;
@@ -34,6 +35,7 @@ public class DownloadModel {
     private LocalDateTime completeDate;
 
     private String sizeString;
+    private String downloadedString;
     private String progressString;
     private String speedString;
     private String addDateString;
@@ -75,6 +77,10 @@ public class DownloadModel {
 
     public String getSizeString() {
         return IOUtils.formatBytes(size);
+    }
+
+    public String getDownloadedString() {
+        return IOUtils.formatBytes(downloaded);
     }
 
     public String getProgressString() {

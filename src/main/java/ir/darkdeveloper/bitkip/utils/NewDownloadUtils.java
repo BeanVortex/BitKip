@@ -185,22 +185,22 @@ public class NewDownloadUtils {
     }
 
 
-    public static void startDownload(DownloadModel downloadModel, TableUtils tableUtils, String speed, String bytes, boolean resume) {
-        DownloadTask downloadTask = new DownloadLimitedTask(downloadModel, Long.MAX_VALUE, false, tableUtils);
-        if (downloadModel.getChunks() == 0) {
+    public static void startDownload(DownloadModel dm, TableUtils tableUtils, String speed, String bytes, boolean resume) {
+        DownloadTask downloadTask = new DownloadLimitedTask(dm, Long.MAX_VALUE, false, tableUtils);
+        if (dm.getChunks() == 0) {
             if (speed != null) {
                 if (speed.equals("0")) {
                     if (bytes != null) {
-                        if (bytes.equals(downloadModel.getSize() + ""))
-                            downloadTask = new DownloadLimitedTask(downloadModel, Long.MAX_VALUE, false, tableUtils);
+                        if (bytes.equals(dm.getSize() + ""))
+                            downloadTask = new DownloadLimitedTask(dm, Long.MAX_VALUE, false, tableUtils);
                         else
-                            downloadTask = new DownloadLimitedTask(downloadModel, Long.parseLong(bytes), false, tableUtils);
+                            downloadTask = new DownloadLimitedTask(dm, Long.parseLong(bytes), false, tableUtils);
                     }
                 } else
-                    downloadTask = new DownloadLimitedTask(downloadModel, getBytesFromField(speed), true, tableUtils);
+                    downloadTask = new DownloadLimitedTask(dm, getBytesFromField(speed), true, tableUtils);
             }
         } else
-            downloadTask = new DownloadInChunksTask(downloadModel);
+            downloadTask = new DownloadInChunksTask(dm);
 
         downloadTask.valueProperty().addListener((observable, oldValue, newValue) -> {
             if (oldValue == null)
@@ -208,17 +208,16 @@ public class NewDownloadUtils {
             var currentSpeed = (newValue - oldValue);
             if (newValue == 0)
                 currentSpeed = 0;
-            tableUtils.updateDownloadSpeedAndRemaining(currentSpeed, downloadModel, newValue);
+            tableUtils.updateDownloadSpeedAndRemaining(currentSpeed, dm, newValue);
         });
         downloadTask.progressProperty().addListener((o, old, newV) ->
-                tableUtils.updateDownloadProgress(newV.floatValue() * 100, downloadModel));
-        downloadModel.setDownloadTask(downloadTask);
+                tableUtils.updateDownloadProgress(newV.floatValue() * 100, dm));
+        dm.setDownloadTask(downloadTask);
         if (!resume) {
-            DownloadsRepo.insertDownload(downloadModel);
-            tableUtils.addRow(downloadModel);
+            DownloadsRepo.insertDownload(dm);
+            tableUtils.addRow(dm);
         }
-        AppConfigs.downloadTaskList.add(downloadTask);
-        AppConfigs.currentDownloading.add(downloadModel);
+        AppConfigs.currentDownloading.add(dm);
         var executor = Executors.newCachedThreadPool();
         downloadTask.setExecutor(executor);
         executor.submit(downloadTask);

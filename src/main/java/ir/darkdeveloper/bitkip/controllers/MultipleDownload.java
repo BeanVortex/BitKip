@@ -1,11 +1,9 @@
 package ir.darkdeveloper.bitkip.controllers;
 
-import ir.darkdeveloper.bitkip.config.AppConfigs;
 import ir.darkdeveloper.bitkip.controllers.interfaces.FXMLController;
 import ir.darkdeveloper.bitkip.controllers.interfaces.NewDownloadFxmlController;
 import ir.darkdeveloper.bitkip.models.QueueModel;
 import ir.darkdeveloper.bitkip.repo.QueuesRepo;
-import ir.darkdeveloper.bitkip.task.DownloadTask;
 import ir.darkdeveloper.bitkip.utils.NewDownloadUtils;
 import ir.darkdeveloper.bitkip.utils.TableUtils;
 import javafx.event.ActionEvent;
@@ -15,8 +13,6 @@ import javafx.scene.control.ComboBox;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
 import org.kordamp.ikonli.javafx.FontIcon;
-
-import java.util.List;
 
 public class MultipleDownload implements NewDownloadFxmlController {
     @FXML
@@ -50,7 +46,6 @@ public class MultipleDownload implements NewDownloadFxmlController {
 
     private Stage stage;
     private TableUtils tableUtils;
-    private final List<DownloadTask> downloadTaskList = AppConfigs.downloadTaskList;
     private FXMLController parentController;
 
 

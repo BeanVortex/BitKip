@@ -37,6 +37,7 @@ public class TableUtils {
         var nameColumn = new TableColumn<DownloadModel, String>("Name");
         var progressColumn = new TableColumn<DownloadModel, String>("Progress");
         var speedColumn = new TableColumn<DownloadModel, String>("Speed");
+        var downloadedColumn = new TableColumn<DownloadModel, String>("Downloaded");
         var sizeColumn = new TableColumn<DownloadModel, String>("Size");
         var statusColumn = new TableColumn<DownloadModel, String>("Status");
         var remainingColumn = new TableColumn<DownloadModel, String>("Remaining");
@@ -47,7 +48,8 @@ public class TableUtils {
 
         nameColumn.setPrefWidth(200);
         speedColumn.setPrefWidth(100);
-        sizeColumn.setPrefWidth(80);
+        downloadedColumn.setPrefWidth(90);
+        sizeColumn.setPrefWidth(90);
         statusColumn.setPrefWidth(120);
         remainingColumn.setPrefWidth(80);
         addDateColumn.setPrefWidth(135);
@@ -55,12 +57,14 @@ public class TableUtils {
         completeColumn.setPrefWidth(135);
         addDateColumn.setSortType(TableColumn.SortType.DESCENDING);
 
-        List<TableColumn<DownloadModel, ?>> listOfColumns = List.of(nameColumn, progressColumn, speedColumn, sizeColumn,
-                statusColumn, remainingColumn, chunksColumn, addDateColumn, lastTryColumn, completeColumn);
+        List<TableColumn<DownloadModel, ?>> listOfColumns = List.of(nameColumn, progressColumn, speedColumn,
+                downloadedColumn, sizeColumn, statusColumn, remainingColumn, chunksColumn, addDateColumn,
+                lastTryColumn, completeColumn);
         contentTable.getColumns().addAll(listOfColumns);
         nameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
         progressColumn.setCellValueFactory(new PropertyValueFactory<>("progressString"));
         speedColumn.setCellValueFactory(new PropertyValueFactory<>("speedString"));
+        downloadedColumn.setCellValueFactory(new PropertyValueFactory<>("downloadedString"));
         sizeColumn.setCellValueFactory(new PropertyValueFactory<>("sizeString"));
         statusColumn.setCellValueFactory(new PropertyValueFactory<>("downloadStatus"));
         remainingColumn.setCellValueFactory(new PropertyValueFactory<>("remainingTime"));
