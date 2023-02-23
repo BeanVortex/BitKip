@@ -160,7 +160,7 @@ public class MainController implements FXMLController {
                                 downloadModel.setDownloadStatus(DownloadStatus.Completed);
                         }).toList();
                 tableUtils.setDownloads(downloadsData);
-                if (!queueButtons.isEmpty()) {
+                if (!queueButtons.isEmpty() && !btn.getStyleClass().contains("selected_queue")) {
                     btn.getStyleClass().add("selected_queue");
                     queueButtons.forEach(otherBtn -> {
                         if (!btn.equals(otherBtn))

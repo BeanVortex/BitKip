@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.concurrent.ExecutorService;
 
 public abstract class DownloadTask extends Task<Long> {
 
@@ -25,5 +26,7 @@ public abstract class DownloadTask extends Task<Long> {
     static long getCurrentFileSize(File file) throws IOException {
         return Files.size(Path.of(file.getPath()));
     }
+
+    public abstract void setExecutor(ExecutorService executor);
 
 }

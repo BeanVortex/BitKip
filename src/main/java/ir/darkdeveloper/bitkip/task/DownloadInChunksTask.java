@@ -22,6 +22,7 @@ import java.nio.file.StandardOpenOption;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
 
 import static ir.darkdeveloper.bitkip.task.DownloadTask.*;
 
@@ -32,6 +33,7 @@ public class DownloadInChunksTask extends DownloadTask {
     private final List<DownloadModel> currentDownloading = AppConfigs.currentDownloading;
     private final List<FileChannel> fileChannels = new ArrayList<>();
     private final List<Path> filePaths = new ArrayList<>();
+    private ExecutorService executor;
 
     public DownloadInChunksTask(DownloadModel downloadModel) {
         super(downloadModel);
@@ -187,8 +189,14 @@ public class DownloadInChunksTask extends DownloadTask {
                 DownloadsRepo.updateDownloadCompleteDate(download);
                 currentDownloading.remove(index);
             }
+            executor.shutdown();
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    @Override
+    public void setExecutor(ExecutorService executor) {
+        this.executor = executor;
     }
 }

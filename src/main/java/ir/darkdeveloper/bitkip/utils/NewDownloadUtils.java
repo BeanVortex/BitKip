@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 
 public class NewDownloadUtils {
 
@@ -218,9 +219,9 @@ public class NewDownloadUtils {
         }
         AppConfigs.downloadTaskList.add(downloadTask);
         AppConfigs.currentDownloading.add(downloadModel);
-        var t = new Thread(downloadTask);
-        t.setName("download thread: " + UUID.randomUUID().toString().substring(5, 10));
-        t.start();
+        var executor = Executors.newCachedThreadPool();
+        downloadTask.setExecutor(executor);
+        executor.submit(downloadTask);
     }
 
     private static long getBytesFromField(String mb) {

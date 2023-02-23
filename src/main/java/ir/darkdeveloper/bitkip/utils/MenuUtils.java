@@ -49,7 +49,7 @@ public class MenuUtils {
             var selectedItems = tableUtils.getSelected();
             selectedItems.forEach(DownloadsRepo::deleteDownload);
             tableUtils.remove(selectedItems);
-           // todo: delete files
+            // todo: delete files
         });
         menuItems.get(settings).setOnAction(event -> {
             System.out.println("settings");
@@ -106,10 +106,12 @@ public class MenuUtils {
 
         menuItems.get(resume).setOnAction(event -> {
             var selectedItems = table.getSelectionModel().getSelectedItems();
-            selectedItems.forEach(dm -> {
-                dm.setLastTryDate(LocalDateTime.now());
-                NewDownloadUtils.startDownload(dm, tableUtils, null, null, true);
-            });
+            selectedItems
+                    .filtered(dm -> !AppConfigs.currentDownloading.contains(dm))
+                    .forEach(dm -> {
+                        dm.setLastTryDate(LocalDateTime.now());
+                        NewDownloadUtils.startDownload(dm, tableUtils, null, null, true);
+                    });
         });
         menuItems.get(pause).setOnAction(event -> {
             var selectedItems = table.getSelectionModel().getSelectedItems();
