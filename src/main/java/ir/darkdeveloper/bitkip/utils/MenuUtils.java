@@ -58,7 +58,7 @@ public class MenuUtils {
     }
 
 
-    public static void initOperationMenu(Button operationMenu, TableView<DownloadModel> table, TableUtils tableUtils) {
+    public static void initOperationMenu(Button operationMenu, TableUtils tableUtils) {
         var c = new ContextMenu();
         var resume = new Label("resume");
         var pause = new Label("pause");
@@ -94,7 +94,7 @@ public class MenuUtils {
 
         operationMenu.setContextMenu(c);
         operationMenu.setOnMouseClicked(event -> {
-            var selectedItems = table.getSelectionModel().getSelectedItems();
+            var selectedItems = tableUtils.getSelected();
             menuItems.get(resume).setDisable(selectedItems.size() == 0);
             menuItems.get(pause).setDisable(selectedItems.size() == 0);
             menuItems.get(restart).setDisable(selectedItems.size() == 0);
@@ -105,7 +105,7 @@ public class MenuUtils {
         });
 
         menuItems.get(resume).setOnAction(event -> {
-            var selectedItems = table.getSelectionModel().getSelectedItems();
+            var selectedItems = tableUtils.getSelected();
             selectedItems
                     .filtered(dm -> !AppConfigs.currentDownloading.contains(dm))
                     .forEach(dm -> {
@@ -115,7 +115,7 @@ public class MenuUtils {
                     });
         });
         menuItems.get(pause).setOnAction(event -> {
-            var selectedItems = table.getSelectionModel().getSelectedItems();
+            var selectedItems = tableUtils.getSelected();
             selectedItems.forEach(dm -> {
                 if (dm.getDownloadStatus().equals(DownloadStatus.Downloading)) {
                     var downTask = dm.getDownloadTask();
@@ -128,9 +128,7 @@ public class MenuUtils {
                         if (downTask.isRunning())
                             downTask.pause();
                     }
-                    dm.setDownloadStatus(DownloadStatus.Paused);
-                    DownloadsRepo.updateDownloadProgress(dm);
-                    table.refresh();
+                    tableUtils.refreshTable();
                 }
             });
         });

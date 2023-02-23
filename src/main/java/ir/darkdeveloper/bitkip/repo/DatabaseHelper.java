@@ -45,6 +45,7 @@ public class DatabaseHelper {
                 + COL_NAME + " VARCHAR,"
                 + COL_PROGRESS + " REAL,"
                 + COL_SIZE + " INTEGER,"
+                + "downloaded INTEGER,"
                 + COL_URL + " VARCHAR,"
                 + COL_PATH + " VARCHAR,"
                 + COL_CHUNKS + " INTEGER,"

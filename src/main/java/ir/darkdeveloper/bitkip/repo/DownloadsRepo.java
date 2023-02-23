@@ -18,34 +18,29 @@ public class DownloadsRepo {
         dbHelper.createDownloadsTable();
     }
 
-    public static void insertDownload(DownloadModel download) {
-        var downloadSql = "INSERT INTO " + DOWNLOADS_TABLE_NAME + " (" +
-                COL_NAME + "," +
-                COL_PROGRESS + "," +
-                COL_SIZE + "," +
-                COL_URL + "," +
-                COL_PATH + "," +
-                COL_CHUNKS + "," +
-                COL_ADD_DATE + "," +
-                COL_LAST_TRY_DATE + ")" +
-                " VALUES(\"" +
-                download.getName() + "\"," +
-                download.getProgress() + "," +
-                download.getSize() + ",\"" +
-                download.getUrl() + "\",\"" +
-                download.getFilePath() + "\"," +
-                download.getChunks() + ",\"" +
-                download.getAddDate().toString() + "\",\"" +
-                download.getLastTryDate().toString() + "\"" +
-                ");";
+    public static void insertDownload(DownloadModel dm) {
+        var downloadSql = """
+                INSERT INTO downloads (name, progress, downloaded, size, url, path, chunks, add_date, last_try_date)
+                VALUES ("%s", %f, %d, %d, "%s", "%s", %d, "%s", "%s")
+                """.formatted(
+                dm.getName(),
+                dm.getProgress(),
+                dm.getDownloaded(),
+                dm.getSize(),
+                dm.getUrl(),
+                dm.getFilePath(),
+                dm.getChunks(),
+                dm.getAddDate().toString(),
+                dm.getLastTryDate().toString());
+
         try (var con = dbHelper.openConnection();
              var stmt = con.createStatement()) {
-            dbHelper.insertDownload(downloadSql, download, stmt);
-            download.getQueue().forEach(queue -> {
+            dbHelper.insertDownload(downloadSql, dm, stmt);
+            dm.getQueue().forEach(queue -> {
                 var queueDownloadSql = """
                         INSERT INTO queue_download (download_id, queue_id)
                         VALUES (%d, %d);
-                        """.formatted(download.getId(), queue.getId());
+                        """.formatted(dm.getId(), queue.getId());
                 try {
                     stmt.executeUpdate(queueDownloadSql);
                 } catch (SQLException e) {
@@ -166,7 +161,8 @@ public class DownloadsRepo {
         var id = rs.getInt(COL_ID);
         var name = rs.getString(COL_NAME);
         var progress = rs.getFloat(COL_PROGRESS);
-        var size = rs.getInt(COL_SIZE);
+        var downloaded = rs.getLong("downloaded");
+        var size = rs.getLong(COL_SIZE);
         var url = rs.getString(COL_URL);
         var filePath = rs.getString(COL_PATH);
         var chunks = rs.getInt(COL_CHUNKS);
@@ -180,7 +176,7 @@ public class DownloadsRepo {
         var completeDate = rs.getString(COL_COMPLETE_DATE);
         var completeDateTime = completeDate == null ? null : LocalDateTime.parse(completeDate);
         return DownloadModel.builder()
-                .id(id).name(name).progress(progress).size(size).url(url).filePath(filePath)
+                .id(id).name(name).progress(progress).downloaded(downloaded).size(size).url(url).filePath(filePath)
                 .chunks(chunks).queue(new ArrayList<>(List.of(queue))).addDate(LocalDateTime.parse(addDate))
                 .lastTryDate(LocalDateTime.parse(lastTryDate)).completeDate(completeDateTime)
                 .build();
@@ -199,8 +195,8 @@ public class DownloadsRepo {
 
     public static void updateDownloadProgress(DownloadModel dm) {
         var sql = """
-                UPDATE downloads SET progress = %f WHERE id = %d;
-                """.formatted(dm.getProgress(), dm.getId());
+                UPDATE downloads SET progress = %f, downloaded = %d WHERE id = %d;
+                """.formatted(dm.getProgress(),dm.getDownloaded(), dm.getId());
         try (var conn = dbHelper.openConnection();
              var stmt = conn.createStatement()) {
             stmt.executeUpdate(sql);

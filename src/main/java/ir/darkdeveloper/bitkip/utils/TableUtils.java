@@ -211,6 +211,7 @@ public class TableUtils {
                 i.setSpeed(speed);
                 i.setDownloadStatus(DownloadStatus.Downloading);
                 i.setSpeedString(IOUtils.formatBytes(speed));
+                i.setDownloaded(bytesDownloaded);
                 if (speed != 0) {
                     long delta = dm.getSize() - bytesDownloaded;
                     // todo bug chunks

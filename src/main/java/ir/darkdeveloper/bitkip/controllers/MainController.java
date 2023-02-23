@@ -94,7 +94,7 @@ public class MainController implements FXMLController {
         WindowUtils.toolbarInits(toolbar, stage, bounds, actionBtn, minWidth, minHeight);
         WindowUtils.onToolbarDoubleClicked(toolbar, stage, contentTable, bounds, actionBtn, minWidth, minHeight);
         MenuUtils.initFileMenu(menuFile, tableUtils);
-        MenuUtils.initOperationMenu(operationMenu, contentTable, tableUtils);
+        MenuUtils.initOperationMenu(operationMenu, tableUtils);
         MenuUtils.initAboutMenu(aboutMenu, contentTable);
     }
 
