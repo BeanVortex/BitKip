@@ -25,6 +25,7 @@ import org.kordamp.ikonli.javafx.FontIcon;
 import java.io.File;
 import java.time.LocalDateTime;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executors;
 
 public class SingleDownload implements NewDownloadFxmlController {
 
@@ -113,15 +114,6 @@ public class SingleDownload implements NewDownloadFxmlController {
         NewDownloadUtils.initPopOvers(questionBtns, contents);
         NewDownloadUtils.validInputChecks(chunksField, bytesField, speedField);
         NewDownloadUtils.prepareLinkFromClipboard(urlField);
-        autoFillLocationAndSizeAndName(true);
-
-        bytesField.textProperty().addListener((o, old, newValue) -> {
-            if (!newValue.matches("\\d*"))
-                bytesField.setText(newValue.replaceAll("\\D", ""));
-            chunksField.setDisable(!bytesField.getText().equals(downloadModel.getSize() + ""));
-            speedField.setDisable(!bytesField.getText().equals(downloadModel.getSize() + ""));
-        });
-
         urlField.textProperty().addListener((o, oldValue, newValue) -> {
             if (!newValue.isBlank())
                 autoFillLocationAndSizeAndName(true);
@@ -134,14 +126,24 @@ public class SingleDownload implements NewDownloadFxmlController {
             if (!newValue.isBlank())
                 autoFillLocationAndSizeAndName(false);
         });
+        autoFillLocationAndSizeAndName(true);
+
+        bytesField.textProperty().addListener((o, old, newValue) -> {
+            if (!newValue.matches("\\d*"))
+                bytesField.setText(newValue.replaceAll("\\D", ""));
+            chunksField.setDisable(!bytesField.getText().equals(downloadModel.getSize() + ""));
+            speedField.setDisable(!bytesField.getText().equals(downloadModel.getSize() + ""));
+        });
+
     }
 
     private void autoFillLocationAndSizeAndName(boolean prepareFileName) {
+        var executor = Executors.newFixedThreadPool(2);
         CompletableFuture<Void> fileNameLocationFuture = CompletableFuture.completedFuture(null);
         if (prepareFileName)
-            fileNameLocationFuture = NewDownloadUtils.prepareFileName(urlField, nameField)
+            fileNameLocationFuture = NewDownloadUtils.prepareFileName(urlField, nameField, executor)
                     .thenAccept(fileName -> NewDownloadUtils.determineLocation(locationField, fileName, downloadModel));
-        var sizeFuture = NewDownloadUtils.prepareSize(urlField, sizeLabel, bytesField, downloadModel);
+        var sizeFuture = NewDownloadUtils.prepareSize(urlField, sizeLabel, bytesField, downloadModel, executor);
         CompletableFuture.allOf(fileNameLocationFuture, sizeFuture)
                 .whenComplete((unused, throwable) -> {
                     var file = new File(locationField.getText() + nameField.getText());
@@ -156,8 +158,20 @@ public class SingleDownload implements NewDownloadFxmlController {
                         downloadBtn.setDisable(false);
                         addBtn.setDisable(false);
                     }
+                    executor.shutdown();
+                })
+                .exceptionally(throwable -> {
+                    if (!executor.isShutdown())
+                        executor.shutdown();
+                    errorLabel.setVisible(true);
+                    downloadBtn.setDisable(true);
+                    addBtn.setDisable(true);
+                    String errorStr = throwable.getCause().getLocalizedMessage();
+                    Platform.runLater(() -> errorLabel.setText(errorStr));
+                    return null;
                 });
     }
+
 
     public void updateQueueList() {
         var queues = QueuesRepo.getQueues().stream().filter(QueueModel::isCanAddDownload).toList();

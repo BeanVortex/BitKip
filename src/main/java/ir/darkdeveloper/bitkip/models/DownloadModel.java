@@ -50,8 +50,6 @@ public class DownloadModel {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         var that = (DownloadModel) o;
-        // for distinction
-        that.getQueue().addAll(queue);
         return id == that.id;
     }
 

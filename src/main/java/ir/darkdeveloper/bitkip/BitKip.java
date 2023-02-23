@@ -23,11 +23,9 @@ public class BitKip extends Application {
     // todo: ask user if also wants to delete the file itself
     // todo: queue scheduler
     // todo: menu items' actions
-    // todo: menu for right click table items
     // todo: bug in chunks download(large file)
-    // todo: heap space error while more than one download (threads wont shut down in case of lost connection)
-    // todo: gc when connection lost
     // todo: retry if connection is lost in a period
+    // todo: bug in side clicks
 
     @Override
     public void start(Stage stage) {

@@ -7,7 +7,6 @@ import ir.darkdeveloper.bitkip.repo.DownloadsRepo;
 import javafx.application.Platform;
 import javafx.geometry.Side;
 import javafx.scene.control.*;
-import javafx.scene.input.Clipboard;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -17,39 +16,40 @@ import java.util.List;
 public class MenuUtils {
 
 
-    public static void initFileMenu(Button menuFile, TableView<DownloadModel> table) {
+    public static void initFileMenu(Button menuFile, TableUtils tableUtils) {
         var c = new ContextMenu();
-        var addLink = new Label("Add download");
-        var batchDownload = new Label("Add batch download");
-        var addLinkFromClipboard = new Label("Add download(clipboard)");
+        var addLink = new Label("New download");
+        var batchDownload = new Label("New batch download");
         var deleteDownloads = new Label("Delete selected");
+        var deleteDownloadsWithFile = new Label("Delete selected with file");
         var settings = new Label("Settings");
         var exit = new Label("exit");
-        var lbls = List.of(addLink, batchDownload, addLinkFromClipboard, deleteDownloads, settings, exit);
+        var lbls = List.of(addLink, batchDownload, deleteDownloads, deleteDownloadsWithFile, settings, exit);
         var menuItems = createMapMenuItems(lbls);
         c.getItems().addAll(menuItems.values());
         menuFile.setContextMenu(c);
         menuFile.setOnMouseClicked(event -> {
-            var selectedItems = table.getSelectionModel().getSelectedItems();
+            var selectedItems = tableUtils.getSelected();
             menuItems.get(deleteDownloads).setDisable(selectedItems.size() == 0);
             deleteDownloads.setText("Delete selected (" + selectedItems.size() + ")");
             c.show(menuFile, Side.BOTTOM, 0, 0);
         });
         menuItems.get(addLink).setOnAction(event -> {
-            System.out.println("new link");
+            System.out.println("new Download");
         });
         menuItems.get(batchDownload).setOnAction(event -> {
             System.out.println("new batch download");
         });
-        menuItems.get(addLinkFromClipboard).setOnAction(event -> {
-            var clipboard = Clipboard.getSystemClipboard();
-            System.out.println("new Clipboard download " + clipboard.getString());
-        });
         menuItems.get(deleteDownloads).setOnAction(event -> {
-            var selectedItems = table.getSelectionModel().getSelectedItems();
-            var itemsToDelete = selectedItems.stream().toList();
-            itemsToDelete.forEach(DownloadsRepo::deleteDownload);
-            table.getItems().removeAll(selectedItems);
+            var selectedItems = tableUtils.getSelected();
+            selectedItems.forEach(DownloadsRepo::deleteDownload);
+            tableUtils.remove(selectedItems);
+        });
+        menuItems.get(deleteDownloadsWithFile).setOnAction(event -> {
+            var selectedItems = tableUtils.getSelected();
+            selectedItems.forEach(DownloadsRepo::deleteDownload);
+            tableUtils.remove(selectedItems);
+           // todo: delete files
         });
         menuItems.get(settings).setOnAction(event -> {
             System.out.println("settings");

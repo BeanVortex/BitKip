@@ -4,6 +4,7 @@ import ir.darkdeveloper.bitkip.config.AppConfigs;
 import ir.darkdeveloper.bitkip.models.DownloadModel;
 import ir.darkdeveloper.bitkip.models.DownloadStatus;
 import ir.darkdeveloper.bitkip.repo.DownloadsRepo;
+import ir.darkdeveloper.bitkip.repo.QueuesRepo;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.EventHandler;
@@ -20,7 +21,6 @@ import java.nio.file.Path;
 import java.text.DecimalFormat;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Map;
 
 public class TableUtils {
 
@@ -70,13 +70,17 @@ public class TableUtils {
         completeColumn.setCellValueFactory(new PropertyValueFactory<>("completeDateString"));
 
         contentTable.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
+        var allDownloadsQueue = QueuesRepo.findByName("All Downloads");
         var downloadList = DownloadsRepo.getDownloads().stream()
-                .peek(downloadModel -> {
-                    downloadModel.setDownloadStatus(DownloadStatus.Paused);
-                    if (downloadModel.getProgress() == 100)
-                        downloadModel.setDownloadStatus(DownloadStatus.Completed);
-                }).toList();
+                .peek(dm -> {
+                    dm.setDownloadStatus(DownloadStatus.Paused);
+                    if (dm.getProgress() == 100)
+                        dm.setDownloadStatus(DownloadStatus.Completed);
+                })
+                .filter(dm -> dm.getQueue().contains(allDownloadsQueue))
+                .toList();
         data.addAll(downloadList);
+        contentTable.getItems().clear();
         contentTable.getItems().addAll(data);
         contentTable.getSortOrder().add(addDateColumn);
 
@@ -242,5 +246,13 @@ public class TableUtils {
 
     public void refreshTable() {
         contentTable.refresh();
+    }
+
+    public ObservableList<DownloadModel> getSelected() {
+        return contentTable.getSelectionModel().getSelectedItems();
+    }
+
+    public void remove(ObservableList<DownloadModel> selectedItems) {
+        contentTable.getItems().removeAll(selectedItems);
     }
 }

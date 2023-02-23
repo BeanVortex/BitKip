@@ -4,7 +4,6 @@ import ir.darkdeveloper.bitkip.config.AppConfigs;
 import ir.darkdeveloper.bitkip.models.DownloadModel;
 import ir.darkdeveloper.bitkip.repo.DownloadsRepo;
 import ir.darkdeveloper.bitkip.repo.QueuesRepo;
-import ir.darkdeveloper.bitkip.service.DownloadProgressService;
 import ir.darkdeveloper.bitkip.task.DownloadInChunksTask;
 import ir.darkdeveloper.bitkip.task.DownloadLimitedTask;
 import ir.darkdeveloper.bitkip.task.DownloadTask;
@@ -13,7 +12,6 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.input.Clipboard;
-import javafx.util.Duration;
 import org.controlsfx.control.PopOver;
 
 import java.io.IOException;
@@ -23,6 +21,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executor;
 
 public class NewDownloadUtils {
 
@@ -66,62 +65,68 @@ public class NewDownloadUtils {
     }
 
     public static CompletableFuture<Long> prepareSize(TextField urlField, Label sizeLabel,
-                                                      TextField bytesField, DownloadModel downloadModel) {
-        return CompletableFuture.supplyAsync(() -> {
-            var link = urlField.getText();
-            try {
-                if (!link.isBlank()) {
-                    var url = new URL(urlField.getText());
-                    var conn = (HttpURLConnection) url.openConnection();
-                    var fileSize = conn.getContentLengthLong();
-                    downloadModel.setSize(fileSize);
-                    Platform.runLater(() -> {
-                        sizeLabel.setText(IOUtils.formatBytes(fileSize));
-                        bytesField.setText(fileSize + "");
-                    });
-                    return fileSize;
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            return null;
-        });
-    }
-
-
-    public static CompletableFuture<String> prepareFileName(TextField urlField, TextField nameField) {
+                                                      TextField bytesField, DownloadModel downloadModel,
+                                                      Executor executor) {
         return CompletableFuture.supplyAsync(() -> {
             try {
                 var link = urlField.getText();
-                if (!link.isBlank()) {
-                    var url = new URL(urlField.getText());
-                    var conn = (HttpURLConnection) url.openConnection();
-                    var raw = conn.getHeaderField("Content-Disposition");
-                    if (raw != null && raw.contains("=")) {
-                        var fileName = raw.split("=")[1].replaceAll("\"", "");
-                        Platform.runLater(() -> nameField.setText(fileName));
-                        return fileName;
-                    }
-                    var hasParameter = link.lastIndexOf('?') != -1;
-                    var extractedFileName = "";
-                    if (hasParameter)
-                        extractedFileName = link.substring(link.lastIndexOf('/') + 1, link.lastIndexOf('?'));
-                    else
-                        extractedFileName = link.substring(link.lastIndexOf('/') + 1);
-                    if (!extractedFileName.isBlank()) {
-                        var finalExtractedFileName = extractedFileName;
-                        Platform.runLater(() -> nameField.setText(finalExtractedFileName));
-                        return extractedFileName;
-                    }
-                    var randomName = UUID.randomUUID().toString();
-                    Platform.runLater(() -> nameField.setText(randomName));
-                    return randomName;
-                }
+                if (link.isBlank())
+                    throw new IllegalArgumentException("Link is blank");
+                var url = new URL(urlField.getText());
+                var conn = (HttpURLConnection) url.openConnection();
+                conn.setConnectTimeout(3000);
+                conn.setReadTimeout(3000);
+                var fileSize = conn.getContentLengthLong();
+                if (fileSize == -1)
+                    throw new IOException("Connection failed");
+                downloadModel.setSize(fileSize);
+                Platform.runLater(() -> {
+                    sizeLabel.setText(IOUtils.formatBytes(fileSize));
+                    bytesField.setText(fileSize + "");
+                });
+                return fileSize;
+
             } catch (IOException e) {
-                e.printStackTrace();
+                throw new RuntimeException("Connection or read timeout. Connect to the internet");
             }
-            return "";
-        });
+        }, executor);
+    }
+
+
+    public static CompletableFuture<String> prepareFileName(TextField urlField, TextField nameField, Executor executor) {
+        return CompletableFuture.supplyAsync(() -> {
+            try {
+                var link = urlField.getText();
+                if (link.isBlank())
+                    throw new IllegalArgumentException("Link is blank");
+                var url = new URL(urlField.getText());
+                var conn = (HttpURLConnection) url.openConnection();
+                conn.setConnectTimeout(3000);
+                conn.setReadTimeout(3000);
+                var raw = conn.getHeaderField("Content-Disposition");
+                if (raw != null && raw.contains("=")) {
+                    var fileName = raw.split("=")[1].replaceAll("\"", "");
+                    Platform.runLater(() -> nameField.setText(fileName));
+                    return fileName;
+                }
+                var hasParameter = link.lastIndexOf('?') != -1;
+                var extractedFileName = "";
+                if (hasParameter)
+                    extractedFileName = link.substring(link.lastIndexOf('/') + 1, link.lastIndexOf('?'));
+                else
+                    extractedFileName = link.substring(link.lastIndexOf('/') + 1);
+                if (!extractedFileName.isBlank()) {
+                    var finalExtractedFileName = extractedFileName;
+                    Platform.runLater(() -> nameField.setText(finalExtractedFileName));
+                    return extractedFileName;
+                }
+                var randomName = UUID.randomUUID().toString();
+                Platform.runLater(() -> nameField.setText(randomName));
+                return randomName;
+            } catch (IOException e) {
+                throw new RuntimeException("Connection or read timeout. Connect to the internet");
+            }
+        }, executor);
     }
 
     public static void determineLocation(TextField locationField, String fileName, DownloadModel downloadModel) {
@@ -214,6 +219,7 @@ public class NewDownloadUtils {
         AppConfigs.downloadTaskList.add(downloadTask);
         AppConfigs.currentDownloading.add(downloadModel);
         var t = new Thread(downloadTask);
+        t.setName("download thread: " + UUID.randomUUID().toString().substring(5, 10));
         t.start();
     }
 

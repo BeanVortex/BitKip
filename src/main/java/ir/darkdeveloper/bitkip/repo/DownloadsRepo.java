@@ -99,7 +99,7 @@ public class DownloadsRepo {
              var rs = stmt.executeQuery(sql)) {
             while (rs.next())
                 list.add(createDownload(rs));
-            return list.stream().distinct().toList();
+            return list;
         } catch (SQLException e) {
             e.printStackTrace();
         }
