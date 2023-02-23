@@ -204,7 +204,7 @@ public class NewDownloadUtils {
 
         downloadTask.valueProperty().addListener((observable, oldValue, newValue) -> {
             if (oldValue == null)
-                oldValue = 0L;
+                oldValue = newValue;
             var currentSpeed = (newValue - oldValue);
             if (newValue == 0)
                 currentSpeed = 0;
