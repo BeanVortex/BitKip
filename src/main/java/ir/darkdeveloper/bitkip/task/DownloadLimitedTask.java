@@ -115,9 +115,7 @@ public class DownloadLimitedTask extends DownloadTask {
         fileChannel.transferFrom(byteChannel, existingFileSize, limit);
         var e = System.currentTimeMillis() - s;
         paused = true;
-        if (!statusExecutor.isShutdown())
-            statusExecutor.shutdown();
-
+        statusExecutor.shutdown();
         System.out.println("Lasted: " + e);
     }
 
@@ -160,7 +158,7 @@ public class DownloadLimitedTask extends DownloadTask {
             try {
                 isCalculating = true;
                 while (!paused) {
-                    Thread.sleep(1000);
+                    Thread.sleep(ONE_SEC);
                     var currentFileSize = getCurrentFileSize(file);
                     updateProgress(currentFileSize, fileSize);
                     updateValue(currentFileSize);

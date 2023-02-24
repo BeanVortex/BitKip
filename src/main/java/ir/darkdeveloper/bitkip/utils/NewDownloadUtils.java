@@ -200,7 +200,7 @@ public class NewDownloadUtils {
                     downloadTask = new DownloadLimitedTask(dm, getBytesFromField(speed), true, tableUtils);
             }
         } else
-            downloadTask = new DownloadInChunksTask(dm);
+            downloadTask = new DownloadInChunksTask(dm,tableUtils);
 
         downloadTask.valueProperty().addListener((observable, oldValue, newValue) -> {
             if (oldValue == null)

@@ -131,6 +131,8 @@ public class TableUtils {
         // resume
         menuItems.get(0).setOnAction(e -> dms.forEach(dm -> {
             dm.setLastTryDate(LocalDateTime.now());
+            dm.setDownloadStatus(DownloadStatus.Trying);
+            refreshTable();
             NewDownloadUtils.startDownload(dm, this, null, null, true);
         }));
 

@@ -21,7 +21,7 @@ public class BitKip extends Application {
     // todo: double click a download in table and open Downloading stage
     // todo: queue scheduler
     // todo: menu items' actions
-    // todo: bug in chunks download(large file)
+    // todo: delete files with chunks
     // todo: retry if connection is lost in a period
     // todo: refactor db codes
 
