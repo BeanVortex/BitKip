@@ -97,34 +97,28 @@ public class TableUtils {
         return param -> {
             var row = new TableRow<DownloadModel>();
             row.setOnMouseClicked(event -> {
-                var selectedItems = contentTable.getSelectionModel().getSelectedItems();
+                var selectedItems = getSelected();
                 if (!row.isEmpty() && event.getButton().equals(MouseButton.SECONDARY)) {
                     var cMenu = new ContextMenu();
                     var resumeLbl = new Label("resume");
                     var pauseLbl = new Label("pause");
                     var deleteLbl = new Label("delete");
                     var deleteWithFileLbl = new Label("delete with file");
-                    if (selectedItems.size() == 1) {
-                        var dm = selectedItems.get(0);
-                        var lbls = List.of(resumeLbl, pauseLbl, deleteLbl, deleteWithFileLbl);
-                        var menuItems = MenuUtils.createMenuItems(lbls);
+                    var lbls = List.of(resumeLbl, pauseLbl, deleteLbl, deleteWithFileLbl);
+                    var menuItems = MenuUtils.createMenuItems(lbls);
+                    selectedItems.forEach(dm -> {
                         switch (dm.getDownloadStatus()) {
-                            case Downloading -> {
-                                menuItems.get(0).setDisable(true);
-                            }
-                            case Paused -> {
-                                menuItems.get(1).setDisable(true);
-                            }
+                            case Downloading -> menuItems.get(0).setDisable(true);
+                            case Paused -> menuItems.get(1).setDisable(true);
                             case Completed -> {
                                 menuItems.get(0).setDisable(true);
                                 menuItems.get(1).setDisable(true);
                             }
                         }
-
-                        cMenu.getItems().addAll(menuItems);
-                        row.setContextMenu(cMenu);
-                        menuItemOperations(dm, menuItems);
-                    }
+                    });
+                    cMenu.getItems().addAll(menuItems);
+                    menuItemOperations(selectedItems, menuItems);
+                    row.setContextMenu(cMenu);
                     cMenu.show(row, event.getX(), event.getY());
                 }
             });
@@ -133,21 +127,21 @@ public class TableUtils {
     }
 
     // sequence is important where labels defined
-    private void menuItemOperations(DownloadModel dm, List<MenuItem> menuItems) {
+    private void menuItemOperations(List<DownloadModel> dms, List<MenuItem> menuItems) {
         // resume
-        menuItems.get(0).setOnAction(event -> {
+        menuItems.get(0).setOnAction(e -> dms.forEach(dm -> {
             dm.setLastTryDate(LocalDateTime.now());
             NewDownloadUtils.startDownload(dm, this, null, null, true);
-        });
+        }));
 
         // pause
-        menuItems.get(1).setOnAction(event -> {
+        menuItems.get(1).setOnAction(e -> dms.forEach(dm -> {
             var download = AppConfigs.currentDownloading.get(AppConfigs.currentDownloading.indexOf(dm));
             download.getDownloadTask().pause();
-        });
+        }));
 
         // delete
-        menuItems.get(2).setOnAction(event -> {
+        menuItems.get(2).setOnAction(e -> dms.forEach(dm -> {
             var index = AppConfigs.currentDownloading.indexOf(dm);
             var download = dm;
             if (index != -1)
@@ -156,11 +150,11 @@ public class TableUtils {
                 download.getDownloadTask().pause();
             DownloadsRepo.deleteDownload(dm);
             contentTable.getItems().remove(dm);
-        });
+        }));
 
 
         // delete with file
-        menuItems.get(3).setOnAction(event -> {
+        menuItems.get(3).setOnAction(ev -> dms.forEach(dm -> {
             try {
                 var index = AppConfigs.currentDownloading.indexOf(dm);
                 var download = dm;
@@ -179,14 +173,13 @@ public class TableUtils {
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
-
-        });
+        }));
     }
 
     private EventHandler<? super MouseEvent> onItemsClicked() {
         return event -> {
-            if (event.getButton().equals(MouseButton.SECONDARY)) {
-                var selectedItems = contentTable.getSelectionModel().getSelectedItems();
+            if (event.getButton().equals(MouseButton.PRIMARY)) {
+                // todo: open downloading stage
             }
         };
     }
