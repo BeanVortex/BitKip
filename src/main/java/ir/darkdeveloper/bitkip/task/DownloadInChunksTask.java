@@ -187,6 +187,7 @@ public class DownloadInChunksTask extends DownloadTask {
                 currentDownloading.remove(index);
             }
             executor.shutdown();
+            System.gc();
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

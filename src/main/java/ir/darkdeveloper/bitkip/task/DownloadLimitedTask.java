@@ -140,7 +140,7 @@ public class DownloadLimitedTask extends DownloadTask {
                 tableUtils.refreshTable();
             }
             executor.shutdown();
-
+            System.gc();
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
