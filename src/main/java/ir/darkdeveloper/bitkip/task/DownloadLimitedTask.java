@@ -132,6 +132,7 @@ public class DownloadLimitedTask extends DownloadTask {
                     download.setProgress(100);
                     download.setDownloaded(downloadModel.getSize());
                 }
+                download.setDownloaded(getCurrentFileSize(file));
                 DownloadsRepo.updateDownloadProgress(download);
                 DownloadsRepo.updateDownloadCompleteDate(download);
                 currentDownloading.remove(index);

@@ -21,8 +21,10 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
-import java.util.concurrent.Callable;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -76,24 +78,30 @@ public class DownloadInChunksTask extends DownloadTask {
         return false;
     }
 
-    private void downloadInChunks(URL url, long fileSize) throws IOException, InterruptedException {
-        partsExecutor = Executors.newFixedThreadPool(chunks);
-        var bytesForEach = fileSize / chunks;
+    private void downloadInChunks(URL url, long fileSize) throws IOException, InterruptedException, ExecutionException {
+        partsExecutor = Executors.newCachedThreadPool();
         statusExecutor = calculateSpeedAndProgressChunks(fileSize);
-        var callables = prepareParts(url, fileSize, bytesForEach);
-        partsExecutor.invokeAll(callables);
+        var futures = prepareParts(url, fileSize, partsExecutor);
+        if (!futures.isEmpty()) {
+            isCalculating = true;
+            var futureArr = new CompletableFuture[futures.size()];
+            futures.toArray(futureArr);
+            CompletableFuture.allOf(futureArr).get();
+        }
         statusExecutor.shutdown();
         if (paused)
             paused = false;
     }
 
-    private List<Callable<String>> prepareParts(URL url, long fileSize, long bytesForEach) throws IOException {
-        var callables = new ArrayList<Callable<String>>();
+    private List<CompletableFuture<Void>> prepareParts(URL url, long fileSize, ExecutorService partsExecutor) throws IOException {
+        var bytesForEach = fileSize / chunks;
+        var futures = new ArrayList<CompletableFuture<Void>>();
         var to = bytesForEach;
         var from = 0L;
         var fromContinue = 0L;
         var filePath = downloadModel.getFilePath();
-        for (int i = 0; i < chunks; i++) {
+        var lastPartSize = fileSize - ((chunks - 1) * bytesForEach);
+        for (int i = 0; i < chunks; i++, fromContinue = to, to += bytesForEach) {
             var name = filePath + "#" + i;
             filePaths.add(Paths.get(name));
             var partFile = new File(name);
@@ -103,40 +111,58 @@ public class DownloadInChunksTask extends DownloadTask {
                 from = fromContinue;
             } else {
                 existingFileSize = getCurrentFileSize(partFile);
-                if (existingFileSize == bytesForEach)
+                if (i + 1 != chunks && existingFileSize == bytesForEach)
                     continue;
-                if (from == 0)
-                    from = existingFileSize;
-                else
+
+                if (i + 1 == chunks && existingFileSize == lastPartSize)
+                    continue;
+
+                if (fromContinue == 0) {
+                    if (i == 0) {
+                        if (fromContinue >= to)
+                            continue;
+                        if (existingFileSize != 0)
+                            from = existingFileSize + 1;
+                    } else
+                        from = fromContinue + existingFileSize;
+                } else
                     from = fromContinue + existingFileSize;
             }
-            isCalculating = true;
-            var out = new FileOutputStream(partFile, partFile.exists());
-            var fileChannel = out.getChannel();
-            fileChannels.add(fileChannel);
-            var con = (HttpURLConnection) url.openConnection();
-            con.setReadTimeout(3000);
-            if (i + 1 == chunks && to != fileSize)
+
+            if (i + 1 == chunks && to != fileSize) {
                 to = fileSize;
-            con.addRequestProperty("Range", "bytes=" + from + "-" + to);
-            fromContinue = to + 1;
-            to += bytesForEach;
-            // todo: check if a part is done
-            var finalExistingFileSize = existingFileSize;
-            var c = (Callable<String>) () -> {
+                if (from == to)
+                    break;
+            }
+            long finalExistingFileSize = existingFileSize;
+            long finalTo = to - 1;
+            if (from != 0 && i == 0)
+                from--;
+            long finalFrom = from;
+
+            var c = CompletableFuture.runAsync(() -> {
                 try {
+                    var con = (HttpURLConnection) url.openConnection();
+                    con.setReadTimeout(3000);
+                    con.setConnectTimeout(3000);
+                    con.addRequestProperty("Range", "bytes=" + finalFrom + "-" + finalTo);
+                    var out = new FileOutputStream(partFile, partFile.exists());
+                    var fileChannel = out.getChannel();
+                    fileChannels.add(fileChannel);
                     var byteChannel = Channels.newChannel(con.getInputStream());
                     fileChannel.transferFrom(byteChannel, finalExistingFileSize, Long.MAX_VALUE);
                     fileChannel.close();
                 } catch (IOException e) {
+                    e.printStackTrace();
+                    this.pause();
                     throw new RuntimeException(e);
                 }
-                return "Success";
-            };
-            callables.add(c);
+            }, partsExecutor);
+            futures.add(c);
         }
-        return callables;
+        return futures;
     }
+
 
     private ExecutorService calculateSpeedAndProgressChunks(long fileSize) {
         var statusExecutor = Executors.newCachedThreadPool();
@@ -149,6 +175,7 @@ public class DownloadInChunksTask extends DownloadTask {
                     Thread.sleep(ONE_SEC);
                     for (int i = 0; i < chunks; i++)
                         currentFileSize += Files.size(filePaths.get(i));
+
 
                     updateProgress(currentFileSize, fileSize);
                     updateValue(currentFileSize);
@@ -188,6 +215,7 @@ public class DownloadInChunksTask extends DownloadTask {
     }
 
 
+    // todo bug
     @Override
     protected void succeeded() {
         try {
@@ -200,6 +228,8 @@ public class DownloadInChunksTask extends DownloadTask {
                 var currentFileSize = 0L;
                 for (int i = 0; i < chunks; i++)
                     currentFileSize += Files.size(filePaths.get(i));
+                if (download.getDownloaded() == 0)
+                    download.setDownloaded(currentFileSize);
                 if (filePaths.stream().allMatch(path -> path.toFile().exists())
                         && currentFileSize == downloadModel.getSize()) {
                     if (!file.exists())
@@ -228,6 +258,7 @@ public class DownloadInChunksTask extends DownloadTask {
                     for (var f : filePaths)
                         Files.deleteIfExists(f);
                 }
+
                 DownloadsRepo.updateDownloadProgress(download);
                 DownloadsRepo.updateDownloadCompleteDate(download);
                 currentDownloading.remove(index);
