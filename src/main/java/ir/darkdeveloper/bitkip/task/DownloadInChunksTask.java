@@ -21,7 +21,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
@@ -88,9 +87,9 @@ public class DownloadInChunksTask extends DownloadTask {
             futures.toArray(futureArr);
             CompletableFuture.allOf(futureArr).get();
         }
-        statusExecutor.shutdown();
         if (paused)
             paused = false;
+        statusExecutor.shutdown();
     }
 
     private List<CompletableFuture<Void>> prepareParts(URL url, long fileSize, ExecutorService partsExecutor) throws IOException {
@@ -215,7 +214,6 @@ public class DownloadInChunksTask extends DownloadTask {
     }
 
 
-    // todo bug
     @Override
     protected void succeeded() {
         try {

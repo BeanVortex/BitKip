@@ -102,8 +102,8 @@ public class NewDownloadUtils {
                     throw new IllegalArgumentException("Link is blank");
                 var url = new URL(urlField.getText());
                 var conn = (HttpURLConnection) url.openConnection();
-                conn.setConnectTimeout(3000);
-                conn.setReadTimeout(3000);
+                conn.setConnectTimeout(1000);
+                conn.setReadTimeout(1000);
                 var raw = conn.getHeaderField("Content-Disposition");
                 if (raw != null && raw.contains("=")) {
                     var fileName = raw.split("=")[1].replaceAll("\"", "");
