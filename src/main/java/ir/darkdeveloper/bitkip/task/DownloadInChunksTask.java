@@ -151,6 +151,7 @@ public class DownloadInChunksTask extends DownloadTask {
                     var byteChannel = Channels.newChannel(con.getInputStream());
                     fileChannel.transferFrom(byteChannel, finalExistingFileSize, Long.MAX_VALUE);
                     fileChannel.close();
+                    con.disconnect();
                 } catch (IOException e) {
                     e.printStackTrace();
                     this.pause();
