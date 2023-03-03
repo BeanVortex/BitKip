@@ -25,6 +25,7 @@ public class BitKip extends Application {
     // todo: retry if connection is lost in a period
     // todo: refactor db codes
     // todo: chunk download more than one
+    // todo: bug in dates in table
 
     @Override
     public void start(Stage stage) {

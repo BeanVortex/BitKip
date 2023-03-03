@@ -68,10 +68,9 @@ public class DownloadsRepo {
     public static List<DownloadModel> getDownloads() {
         var sql = """
                 SELECT *, q.name as queue_name
-                FROM downloads
-                         INNER JOIN queue_download ON
-                    downloads.id = queue_download.download_id
-                         INNER JOIN queues q on q.id = queue_download.queue_id;
+                FROM downloads d
+                         INNER JOIN queue_download qd ON d.id = qd.download_id
+                         INNER JOIN queues q on q.id = qd.queue_id;
                                 """;
         return fetchDownloads(sql);
     }
