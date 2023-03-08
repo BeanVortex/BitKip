@@ -3,6 +3,7 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 <?import java.net.URL?>
+<?import javafx.scene.image.ImageView?>
 <VBox minHeight="550" prefHeight="550" minWidth="600" prefWidth="600.0"
       maxHeight="600"
       xmlns="http://javafx.com/javafx/16"
@@ -18,7 +19,8 @@
         <HBox maxWidth="2" minWidth="2" styleClass="csm_toolbar"/>
         <HBox minWidth="570" prefWidth="570" fx:id="toolbar" alignment="CENTER" maxHeight="32" minHeight="32"
               spacing="10">
-            <Label text="New Download"/>
+            <ImageView fx:id="logoImg" fitWidth="30" fitHeight="30"/>
+            <Label text="New Download" styleClass="bold"/>
             <Region HBox.hgrow="ALWAYS"/>
             <Button fx:id="hideBtn" onAction="#hideWindowApp" />
             <Button fx:id="fullWindowBtn" onAction="#toggleFullWindowApp" />

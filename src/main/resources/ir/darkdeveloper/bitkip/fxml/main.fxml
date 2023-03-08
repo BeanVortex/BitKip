@@ -4,6 +4,7 @@
 <?import javafx.scene.layout.*?>
 
 <?import javafx.geometry.Insets?>
+<?import javafx.scene.image.ImageView?>
 <VBox minHeight="515" prefHeight="515" minWidth="883" prefWidth="883" stylesheets="@../css/main.css"
       xmlns="http://javafx.com/javafx/16"
       xmlns:fx="http://javafx.com/fxml/1" fx:controller="ir.darkdeveloper.bitkip.controllers.MainController">
@@ -14,10 +15,10 @@
         <HBox maxWidth="2" minWidth="2" styleClass="csm_toolbar"/>
         <HBox minWidth="835" prefWidth="835" fx:id="toolbar" alignment="CENTER" maxHeight="32" minHeight="32"
               spacing="10">
-            <Label text="LOGO"/>
-            <Button fx:id="menuFile" text="File" styleClass="toolbar_menu"/>
-            <Button fx:id="operationMenu" text="operation" styleClass="toolbar_menu"/>
-            <Button fx:id="aboutMenu" text="About" styleClass="toolbar_menu"/>
+            <ImageView fx:id="logoImg" fitWidth="30" fitHeight="30"/>
+            <Button fx:id="menuFile" text="File" styleClass="toolbar_menu,bold"/>
+            <Button fx:id="operationMenu" text="Operation" styleClass="toolbar_menu,bold"/>
+            <Button fx:id="aboutMenu" text="About" styleClass="toolbar_menu,bold"/>
             <Region HBox.hgrow="ALWAYS"/>
             <Button fx:id="hideBtn" onAction="#hideWindowApp"/>
             <Button fx:id="fullWindowBtn" onAction="#toggleFullWindowApp"/>

@@ -14,6 +14,8 @@ import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.geometry.*;
 import javafx.scene.control.*;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.ScrollEvent;
@@ -29,10 +31,14 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
+import static ir.darkdeveloper.bitkip.BitKip.getResource;
+
 
 public class MainController implements FXMLController {
 
 
+    @FXML
+    private ImageView logoImg;
     @FXML
     private ScrollPane sideScrollPane;
     @FXML
@@ -92,6 +98,12 @@ public class MainController implements FXMLController {
                 bounds = Screen.getPrimary().getVisualBounds();
         });
         actionBtnInits();
+        var logoPath = getResource("icons/logo.png");
+        if (logoPath != null){
+            var img = new Image(logoPath.toExternalForm());
+            logoImg.setImage(img);
+            stage.getIcons().add(img);
+        }
         WindowUtils.toolbarInits(toolbar, stage, bounds, actionBtn, minWidth, minHeight);
         WindowUtils.onToolbarDoubleClicked(toolbar, stage, contentTable, bounds, actionBtn, minWidth, minHeight);
         MenuUtils.initFileMenu(menuFile, tableUtils);
@@ -190,7 +202,7 @@ public class MainController implements FXMLController {
                     QueuesRepo.deleteQueue(btn.getText());
                     updateQueueList();
                 });
-                cMenu.show(btn, Side.BOTTOM, 0,0);
+                cMenu.show(btn, Side.BOTTOM, 0, 0);
             }
         };
     }

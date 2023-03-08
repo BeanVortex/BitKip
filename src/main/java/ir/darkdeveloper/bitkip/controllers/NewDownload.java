@@ -10,6 +10,8 @@ import javafx.fxml.FXMLLoader;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.Parent;
 import javafx.scene.control.Button;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Screen;
@@ -21,6 +23,8 @@ import java.io.IOException;
 import static ir.darkdeveloper.bitkip.BitKip.getResource;
 
 public class NewDownload implements NewDownloadFxmlController {
+    @FXML
+    private ImageView logoImg;
     @FXML
     private Button singleButton;
     @FXML
@@ -78,6 +82,13 @@ public class NewDownload implements NewDownloadFxmlController {
             multipleButton.setPrefWidth(buttonWidth);
             singleButton.setPrefWidth(buttonWidth);
         });
+
+        var logoPath = getResource("icons/logo.png");
+        if (logoPath != null){
+            var img = new Image(logoPath.toExternalForm());
+            logoImg.setImage(img);
+            stage.getIcons().add(img);
+        }
 
         var buttonWidth = stage.getWidth() / 2;
         singleButton.setPrefWidth(buttonWidth);
