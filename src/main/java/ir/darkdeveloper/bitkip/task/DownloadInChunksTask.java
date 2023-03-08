@@ -4,15 +4,14 @@ import ir.darkdeveloper.bitkip.config.AppConfigs;
 import ir.darkdeveloper.bitkip.models.DownloadModel;
 import ir.darkdeveloper.bitkip.models.DownloadStatus;
 import ir.darkdeveloper.bitkip.repo.DownloadsRepo;
+import ir.darkdeveloper.bitkip.utils.IOUtils;
 import ir.darkdeveloper.bitkip.utils.TableUtils;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.nio.ByteBuffer;
 import java.nio.channels.Channels;
 import java.nio.channels.FileChannel;
 import java.nio.file.Files;
@@ -30,7 +29,6 @@ import java.util.concurrent.Executors;
 public class DownloadInChunksTask extends DownloadTask {
     private final int chunks;
     private final TableUtils tableUtils;
-    private File file;
     private final List<DownloadModel> currentDownloading = AppConfigs.currentDownloading;
     private final List<FileChannel> fileChannels = new ArrayList<>();
     private final List<Path> filePaths = new ArrayList<>();
@@ -52,7 +50,7 @@ public class DownloadInChunksTask extends DownloadTask {
     @Override
     protected Long call() throws Exception {
         var url = new URL(downloadModel.getUrl());
-        file = new File(downloadModel.getFilePath());
+        var file = new File(downloadModel.getFilePath());
         var fileSize = downloadModel.getSize();
         if (file.exists() && isCompleted(downloadModel, file))
             return 0L;
@@ -224,40 +222,13 @@ public class DownloadInChunksTask extends DownloadTask {
                 statusExecutor.shutdown();
                 var download = currentDownloading.get(index);
                 download.setDownloadStatus(DownloadStatus.Paused);
-                var currentFileSize = 0L;
-                for (int i = 0; i < chunks; i++)
-                    currentFileSize += Files.size(filePaths.get(i));
-                if (download.getDownloaded() == 0)
-                    download.setDownloaded(currentFileSize);
-                if (filePaths.stream().allMatch(path -> path.toFile().exists())
-                        && currentFileSize == downloadModel.getSize()) {
-                    if (!file.exists())
-                        file.createNewFile();
-                    for (int i = 0; i < chunks; i++) {
-                        var name = file.getPath() + "#" + i;
-                        try (
-                                var in = new FileInputStream(name);
-                                var out = new FileOutputStream(file.getPath(), file.exists());
-                                var inputChannel = in.getChannel();
-                                var outputChannel = out.getChannel()
-                        ) {
-                            var buffer = ByteBuffer.allocateDirect(1048576);
-                            while (inputChannel.read(buffer) != -1) {
-                                buffer.flip();
-                                outputChannel.write(buffer);
-                                buffer.clear();
-                            }
-                            updateProgress(1, 1);
-                        }
-                    }
+                if (IOUtils.mergeFiles(download, chunks, filePaths)) {
                     download.setCompleteDate(LocalDateTime.now());
                     download.setDownloadStatus(DownloadStatus.Completed);
                     download.setDownloaded(download.getSize());
                     download.setProgress(100);
-                    for (var f : filePaths)
-                        Files.deleteIfExists(f);
+                    updateProgress(1, 1);
                 }
-
                 DownloadsRepo.updateDownloadProgress(download);
                 DownloadsRepo.updateDownloadCompleteDate(download);
                 currentDownloading.remove(index);

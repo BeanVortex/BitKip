@@ -26,9 +26,7 @@ public class BitKip extends Application {
     // todo: refactor db codes
     // todo: chunk download more than one
     // todo: bug in dates in table
-    // todo: download in chunks: main download thread waits, use it for one part
     // todo: download in chunks: check if host supports range byte
-    // todo: download in chunks: extend the first file for joining the parts instead of creating a part or when one part wrote, delete it
 
     @Override
     public void start(Stage stage) {
