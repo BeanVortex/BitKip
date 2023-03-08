@@ -14,6 +14,9 @@ import javafx.scene.control.TextField;
 import javafx.stage.Stage;
 import org.kordamp.ikonli.javafx.FontIcon;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class BatchDownload implements NewDownloadFxmlController {
     @FXML
     private Button newQueue;
@@ -95,8 +98,8 @@ public class BatchDownload implements NewDownloadFxmlController {
         var questionBtns = new Button[]{questionBtnSpeed, questionBtnUrl, questionBtnChunks};
         var contents = new String[]{
                 "You can limit downloading speed. calculated in MB. (0.8 means 800KB)",
-                "You want to download several files, clarify where urls are different by % sign." +
-                        " (for example 'https://www.url.com/file00.zip', change 00 to %%)",
+                "You want to download several files, clarify where urls are different by $ sign." +
+                        " (for example 'https://www.url.com/file00.zip', change 00 to $$)",
                 "Every single file is seperated into parts and will be downloaded concurrently"
         };
         NewDownloadUtils.initPopOvers(questionBtns, contents);
@@ -134,4 +137,66 @@ public class BatchDownload implements NewDownloadFxmlController {
     private void onNewQueue(ActionEvent actionEvent) {
     }
 
+
+    public List<String> generateLinks(String url, int start, int end) {
+        if (start > end)
+            throw new IllegalArgumentException("Start value cannot be greater than end value");
+
+        var signsIndex = new ArrayList<Integer>();
+        for (int i = 0; i < url.length(); i++)
+            if (url.charAt(i) == '$')
+                signsIndex.add(i);
+
+
+        var links = new ArrayList<String>();
+        for (int i = start; i < end + 1; i++) {
+            var x = i / 10;
+            if (x == 0) {
+                String link = url;
+                for (int j = 0; j < signsIndex.size(); j++) {
+                    if (j == signsIndex.size() - 1)
+                        link = replaceDollarOnce(link, (char) (i + 48));
+                    else
+                        link = replaceDollarOnce(link, '0');
+                }
+                links.add(link);
+            } else {
+                StringBuilder link = new StringBuilder(url);
+                var digitsToFill = signsIndex.size();
+                var iDigits = digits(i);
+                var diff = digitsToFill - iDigits;
+                for (int j = 0; j < diff; j++)
+                    link.setCharAt(signsIndex.get(j), '0');
+
+                var cpI = i;
+                for (int j = 0; j < signsIndex.size() - diff; j++) {
+                    link.setCharAt(link.lastIndexOf("$"), (char) (cpI % 10 + 48));
+                    cpI /= 10;
+                }
+
+                links.add(String.valueOf(link));
+            }
+        }
+
+        return links;
+    }
+
+    private String replaceDollarOnce(String str, char replace) {
+        var chars = str.toCharArray();
+        for (int i = 0; i < str.length(); i++)
+            if ('$' == chars[i]) {
+                chars[i] = replace;
+                break;
+            }
+        return String.copyValueOf(chars);
+    }
+
+    private int digits(int num) {
+        var count = 0;
+        while (num != 0) {
+            count++;
+            num /= 10;
+        }
+        return count;
+    }
 }
