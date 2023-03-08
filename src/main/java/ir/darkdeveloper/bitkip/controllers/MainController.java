@@ -1,5 +1,6 @@
 package ir.darkdeveloper.bitkip.controllers;
 
+import ir.darkdeveloper.bitkip.config.AppConfigs;
 import ir.darkdeveloper.bitkip.controllers.interfaces.FXMLController;
 import ir.darkdeveloper.bitkip.models.DownloadModel;
 import ir.darkdeveloper.bitkip.models.DownloadStatus;
@@ -153,6 +154,7 @@ public class MainController implements FXMLController {
             if (event.getClickCount() == 2)
                 return;
             if (event.getButton().equals(MouseButton.PRIMARY)) {
+                AppConfigs.currentDownloading.forEach(DownloadsRepo::updateTableStatus);
                 var downloadsData = DownloadsRepo.getDownloadsByQueue(queueModel.getId())
                         .stream().peek(downloadModel -> {
                             downloadModel.setDownloadStatus(DownloadStatus.Paused);

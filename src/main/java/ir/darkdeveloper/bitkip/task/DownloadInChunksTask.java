@@ -198,7 +198,7 @@ public class DownloadInChunksTask extends DownloadTask {
                 var download = currentDownloading.get(index);
                 download.setDownloadStatus(DownloadStatus.Paused);
                 DownloadsRepo.updateDownloadProgress(download);
-                DownloadsRepo.updateDownloadCompleteDate(download);
+                DownloadsRepo.updateDownloadLastTryDate(download);
                 currentDownloading.remove(index);
                 tableUtils.refreshTable();
             }
@@ -227,10 +227,12 @@ public class DownloadInChunksTask extends DownloadTask {
                     download.setDownloadStatus(DownloadStatus.Completed);
                     download.setDownloaded(download.getSize());
                     download.setProgress(100);
+                    tableUtils.refreshTable();
                     updateProgress(1, 1);
                 }
                 DownloadsRepo.updateDownloadProgress(download);
                 DownloadsRepo.updateDownloadCompleteDate(download);
+                DownloadsRepo.updateDownloadLastTryDate(download);
                 currentDownloading.remove(index);
                 tableUtils.refreshTable();
             }

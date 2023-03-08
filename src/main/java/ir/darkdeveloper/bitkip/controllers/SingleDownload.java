@@ -64,7 +64,7 @@ public class SingleDownload implements NewDownloadFxmlController {
     private Stage stage;
     private TableUtils tableUtils;
 
-    private final DownloadModel downloadModel = new DownloadModel();
+    private final DownloadModel dm = new DownloadModel();
     private FXMLController parentController;
 
 
@@ -131,8 +131,8 @@ public class SingleDownload implements NewDownloadFxmlController {
         bytesField.textProperty().addListener((o, old, newValue) -> {
             if (!newValue.matches("\\d*"))
                 bytesField.setText(newValue.replaceAll("\\D", ""));
-            chunksField.setDisable(!bytesField.getText().equals(downloadModel.getSize() + ""));
-            speedField.setDisable(!bytesField.getText().equals(downloadModel.getSize() + ""));
+            chunksField.setDisable(!bytesField.getText().equals(dm.getSize() + ""));
+            speedField.setDisable(!bytesField.getText().equals(dm.getSize() + ""));
         });
 
     }
@@ -142,8 +142,8 @@ public class SingleDownload implements NewDownloadFxmlController {
         CompletableFuture<Void> fileNameLocationFuture = CompletableFuture.completedFuture(null);
         if (prepareFileName)
             fileNameLocationFuture = NewDownloadUtils.prepareFileName(urlField, nameField, executor)
-                    .thenAccept(fileName -> NewDownloadUtils.determineLocation(locationField, fileName, downloadModel));
-        var sizeFuture = NewDownloadUtils.prepareSize(urlField, sizeLabel,chunksField, bytesField, downloadModel, executor);
+                    .thenAccept(fileName -> NewDownloadUtils.determineLocation(locationField, fileName, dm));
+        var sizeFuture = NewDownloadUtils.prepareSize(urlField, sizeLabel,chunksField, bytesField, dm, executor);
         CompletableFuture.allOf(fileNameLocationFuture, sizeFuture)
                 .whenComplete((unused, throwable) -> {
                     var file = new File(locationField.getText() + nameField.getText());
@@ -214,25 +214,25 @@ public class SingleDownload implements NewDownloadFxmlController {
 
     @FXML
     private void onDownload() {
-        downloadModel.setUrl(urlField.getText());
+        dm.setUrl(urlField.getText());
         var fileName = nameField.getText();
         var path = locationField.getText();
         if (path.endsWith(File.separator))
-            downloadModel.setFilePath(path + fileName);
+            dm.setFilePath(path + fileName);
         else
-            downloadModel.setFilePath(path + File.separator + fileName);
-        downloadModel.setProgress(0);
-        downloadModel.setName(fileName);
-        downloadModel.setChunks(Integer.parseInt(chunksField.getText()));
-        downloadModel.setAddDate(LocalDateTime.now());
-        downloadModel.setLastTryDate(LocalDateTime.now());
+            dm.setFilePath(path + File.separator + fileName);
+        dm.setProgress(0);
+        dm.setName(fileName);
+        dm.setChunks(Integer.parseInt(chunksField.getText()));
+        dm.setAddDate(LocalDateTime.now());
+        dm.setLastTryDate(LocalDateTime.now());
         var selectedQueue = queueCombo.getSelectionModel().getSelectedItem();
         var allDownloadsQueue = QueuesRepo.findByName("All Downloads");
-        downloadModel.getQueue().add(allDownloadsQueue);
-        downloadModel.setDownloadStatus(DownloadStatus.Downloading);
+        dm.getQueue().add(allDownloadsQueue);
+        dm.setDownloadStatus(DownloadStatus.Trying);
         if (selectedQueue.getId() != allDownloadsQueue.getId())
-            downloadModel.getQueue().add(selectedQueue);
-        NewDownloadUtils.startDownload(downloadModel, tableUtils, speedField.getText(), bytesField.getText(), false);
+            dm.getQueue().add(selectedQueue);
+        NewDownloadUtils.startDownload(dm, tableUtils, speedField.getText(), bytesField.getText(), false);
         stage.close();
     }
 

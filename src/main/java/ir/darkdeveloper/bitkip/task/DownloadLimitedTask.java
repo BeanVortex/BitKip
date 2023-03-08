@@ -131,10 +131,11 @@ public class DownloadLimitedTask extends DownloadTask {
                     download.setDownloadStatus(DownloadStatus.Completed);
                     download.setProgress(100);
                     download.setDownloaded(downloadModel.getSize());
+                    DownloadsRepo.updateDownloadCompleteDate(download);
                 }
                 download.setDownloaded(getCurrentFileSize(file));
                 DownloadsRepo.updateDownloadProgress(download);
-                DownloadsRepo.updateDownloadCompleteDate(download);
+                DownloadsRepo.updateDownloadLastTryDate(download);
                 currentDownloading.remove(index);
                 tableUtils.refreshTable();
             }

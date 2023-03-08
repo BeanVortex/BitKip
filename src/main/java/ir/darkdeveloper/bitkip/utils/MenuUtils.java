@@ -111,6 +111,7 @@ public class MenuUtils {
                     .forEach(dm -> {
                         dm.setLastTryDate(LocalDateTime.now());
                         dm.setDownloadStatus(DownloadStatus.Trying);
+                        DownloadsRepo.updateDownloadLastTryDate(dm);
                         tableUtils.refreshTable();
                         NewDownloadUtils.startDownload(dm, tableUtils, null, null, true);
                     });

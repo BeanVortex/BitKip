@@ -148,12 +148,7 @@ public class DownloadsRepo {
 
     public static void deleteDownload(DownloadModel download) {
         var sql = "DELETE FROM " + DOWNLOADS_TABLE_NAME + " WHERE " + COL_ID + "=" + download.getId() + ";";
-        try (var con = dbHelper.openConnection();
-             var stmt = con.createStatement()) {
-            stmt.executeUpdate(sql);
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
+        executeSql(sql);
     }
 
     private static DownloadModel createDownload(ResultSet rs) throws SQLException {
@@ -181,33 +176,38 @@ public class DownloadsRepo {
                 .build();
     }
 
-    public static void updateDownloadSize(DownloadModel download) {
-        var sql = "UPDATE " + DOWNLOADS_TABLE_NAME + " SET " + COL_SIZE + "=\"" + download.getSize() + "\""
-                + " WHERE " + COL_ID + "=" + download.getId() + ";";
-        try (var con = dbHelper.openConnection();
-             var stmt = con.createStatement()) {
-            stmt.executeUpdate(sql);
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-    }
 
     public static void updateDownloadProgress(DownloadModel dm) {
         var sql = """
                 UPDATE downloads SET progress = %f, downloaded = %d WHERE id = %d;
-                """.formatted(dm.getProgress(),dm.getDownloaded(), dm.getId());
-        try (var conn = dbHelper.openConnection();
-             var stmt = conn.createStatement()) {
-            stmt.executeUpdate(sql);
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
+                """.formatted(dm.getProgress(), dm.getDownloaded(), dm.getId());
+        executeSql(sql);
     }
 
     public static void updateDownloadCompleteDate(DownloadModel dm) {
         var sql = """
                 UPDATE downloads SET complete_date = "%s" WHERE id = %d;
-                """.formatted(dm.getAddDate(), dm.getId());
+                """.formatted(dm.getCompleteDate(), dm.getId());
+        executeSql(sql);
+    }
+
+    public static void updateDownloadLastTryDate(DownloadModel dm) {
+        var sql = """
+                UPDATE downloads SET last_try_date = "%s" WHERE id = %d;
+                """.formatted(dm.getLastTryDate(), dm.getId());
+        executeSql(sql);
+    }
+
+    public static void updateTableStatus(DownloadModel dm) {
+        var sql = """
+                UPDATE downloads SET progress = %f, downloaded = %d, complete_date = "%s",
+                    last_try_date = "%s" WHERE id = %d
+                """.formatted(dm.getProgress(), dm.getDownloaded(),
+                dm.getCompleteDate(), dm.getLastTryDate(), dm.getId());
+        executeSql(sql);
+    }
+
+    private static void executeSql(String sql) {
         try (var conn = dbHelper.openConnection();
              var stmt = conn.createStatement()) {
             stmt.executeUpdate(sql);
