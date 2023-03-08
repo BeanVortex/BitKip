@@ -66,7 +66,7 @@ public class NewDownloadUtils {
     }
 
     public static CompletableFuture<Long> prepareSize(TextField urlField, Label sizeLabel,
-                                                      TextField bytesField, DownloadModel downloadModel,
+                                                      TextField chunksField, TextField bytesField, DownloadModel downloadModel,
                                                       Executor executor) {
         return CompletableFuture.supplyAsync(() -> {
             try {
@@ -80,6 +80,13 @@ public class NewDownloadUtils {
                 var fileSize = conn.getContentLengthLong();
                 if (fileSize == -1)
                     throw new IOException("Connection failed");
+                var rangeSupport = conn.getHeaderField("Accept-Ranges");
+                if (rangeSupport.equals("none")) {
+                    chunksField.setText("0");
+                    chunksField.setDisable(true);
+                } else
+                    chunksField.setDisable(false);
+
                 downloadModel.setSize(fileSize);
                 Platform.runLater(() -> {
                     sizeLabel.setText(IOUtils.formatBytes(fileSize));
@@ -200,7 +207,7 @@ public class NewDownloadUtils {
                     downloadTask = new DownloadLimitedTask(dm, getBytesFromField(speed), true, tableUtils);
             }
         } else
-            downloadTask = new DownloadInChunksTask(dm,tableUtils);
+            downloadTask = new DownloadInChunksTask(dm, tableUtils);
 
         downloadTask.valueProperty().addListener((observable, oldValue, newValue) -> {
             if (oldValue == null)

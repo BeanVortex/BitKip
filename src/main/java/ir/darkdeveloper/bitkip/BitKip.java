@@ -26,7 +26,6 @@ public class BitKip extends Application {
     // todo: refactor db codes
     // todo: chunk download more than one
     // todo: bug in dates in table
-    // todo: download in chunks: check if host supports range byte
 
     @Override
     public void start(Stage stage) {

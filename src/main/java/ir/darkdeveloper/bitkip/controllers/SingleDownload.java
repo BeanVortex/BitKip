@@ -143,7 +143,7 @@ public class SingleDownload implements NewDownloadFxmlController {
         if (prepareFileName)
             fileNameLocationFuture = NewDownloadUtils.prepareFileName(urlField, nameField, executor)
                     .thenAccept(fileName -> NewDownloadUtils.determineLocation(locationField, fileName, downloadModel));
-        var sizeFuture = NewDownloadUtils.prepareSize(urlField, sizeLabel, bytesField, downloadModel, executor);
+        var sizeFuture = NewDownloadUtils.prepareSize(urlField, sizeLabel,chunksField, bytesField, downloadModel, executor);
         CompletableFuture.allOf(fileNameLocationFuture, sizeFuture)
                 .whenComplete((unused, throwable) -> {
                     var file = new File(locationField.getText() + nameField.getText());
