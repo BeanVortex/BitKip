@@ -19,9 +19,13 @@ public class DownloadsRepo {
     }
 
     public static void insertDownload(DownloadModel dm) {
+        String lastTryDate = "NULL";
+        if (dm.getLastTryDate() != null)
+            lastTryDate =  "\"" + dm.getLastTryDate() + "\"";
+
         var downloadSql = """
                 INSERT INTO downloads (name, progress, downloaded, size, url, path, chunks, add_date, last_try_date)
-                VALUES ("%s", %f, %d, %d, "%s", "%s", %d, "%s", "%s")
+                VALUES ("%s", %f, %d, %d, "%s", "%s", %d, "%s", %s)
                 """.formatted(
                 dm.getName(),
                 dm.getProgress(),
@@ -31,7 +35,7 @@ public class DownloadsRepo {
                 dm.getFilePath(),
                 dm.getChunks(),
                 dm.getAddDate().toString(),
-                dm.getLastTryDate().toString());
+                lastTryDate);
 
         try (var con = dbHelper.openConnection();
              var stmt = con.createStatement()) {
@@ -167,12 +171,13 @@ public class DownloadsRepo {
         var queue = new QueueModel(queueId, queueName, queueEditable, queueCanAddDown);
         var addDate = rs.getString(COL_ADD_DATE);
         var lastTryDate = rs.getString(COL_LAST_TRY_DATE);
+        var lastTryDateStr = lastTryDate == null ? null : LocalDateTime.parse(lastTryDate);
         var completeDate = rs.getString(COL_COMPLETE_DATE);
-        var completeDateTime = completeDate == null ? null : LocalDateTime.parse(completeDate);
+        var completeDateStr = completeDate == null ? null : LocalDateTime.parse(completeDate);
         return DownloadModel.builder()
                 .id(id).name(name).progress(progress).downloaded(downloaded).size(size).url(url).filePath(filePath)
                 .chunks(chunks).queue(new ArrayList<>(List.of(queue))).addDate(LocalDateTime.parse(addDate))
-                .lastTryDate(LocalDateTime.parse(lastTryDate)).completeDate(completeDateTime)
+                .lastTryDate(lastTryDateStr).completeDate(completeDateStr)
                 .build();
     }
 

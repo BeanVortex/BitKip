@@ -66,6 +66,8 @@ public class DownloadModel {
     }
 
     public String getLastTryDateString() {
+        if (lastTryDate == null)
+            return "";
         return DATE_FORMATTER.format(lastTryDate);
     }
 

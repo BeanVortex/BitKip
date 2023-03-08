@@ -6,6 +6,7 @@ import ir.darkdeveloper.bitkip.controllers.interfaces.NewDownloadFxmlController;
 import ir.darkdeveloper.bitkip.models.DownloadModel;
 import ir.darkdeveloper.bitkip.models.DownloadStatus;
 import ir.darkdeveloper.bitkip.models.QueueModel;
+import ir.darkdeveloper.bitkip.repo.DownloadsRepo;
 import ir.darkdeveloper.bitkip.repo.QueuesRepo;
 import ir.darkdeveloper.bitkip.utils.FxUtils;
 import ir.darkdeveloper.bitkip.utils.NewDownloadUtils;
@@ -143,7 +144,7 @@ public class SingleDownload implements NewDownloadFxmlController {
         if (prepareFileName)
             fileNameLocationFuture = NewDownloadUtils.prepareFileName(urlField, nameField, executor)
                     .thenAccept(fileName -> NewDownloadUtils.determineLocation(locationField, fileName, dm));
-        var sizeFuture = NewDownloadUtils.prepareSize(urlField, sizeLabel,chunksField, bytesField, dm, executor);
+        var sizeFuture = NewDownloadUtils.prepareSize(urlField, sizeLabel, chunksField, bytesField, dm, executor);
         CompletableFuture.allOf(fileNameLocationFuture, sizeFuture)
                 .whenComplete((unused, throwable) -> {
                     var file = new File(locationField.getText() + nameField.getText());
@@ -210,10 +211,22 @@ public class SingleDownload implements NewDownloadFxmlController {
 
     @FXML
     private void onAdd() {
+        prepareDownload();
+        dm.setDownloadStatus(DownloadStatus.Paused);
+        DownloadsRepo.insertDownload(dm);
+        tableUtils.addRow(dm);
+        stage.close();
     }
 
     @FXML
     private void onDownload() {
+        prepareDownload();
+        dm.setLastTryDate(LocalDateTime.now());
+        NewDownloadUtils.startDownload(dm, tableUtils, speedField.getText(), bytesField.getText(), false);
+        stage.close();
+    }
+
+    private void prepareDownload() {
         dm.setUrl(urlField.getText());
         var fileName = nameField.getText();
         var path = locationField.getText();
@@ -225,15 +238,12 @@ public class SingleDownload implements NewDownloadFxmlController {
         dm.setName(fileName);
         dm.setChunks(Integer.parseInt(chunksField.getText()));
         dm.setAddDate(LocalDateTime.now());
-        dm.setLastTryDate(LocalDateTime.now());
         var selectedQueue = queueCombo.getSelectionModel().getSelectedItem();
         var allDownloadsQueue = QueuesRepo.findByName("All Downloads");
         dm.getQueue().add(allDownloadsQueue);
         dm.setDownloadStatus(DownloadStatus.Trying);
         if (selectedQueue.getId() != allDownloadsQueue.getId())
             dm.getQueue().add(selectedQueue);
-        NewDownloadUtils.startDownload(dm, tableUtils, speedField.getText(), bytesField.getText(), false);
-        stage.close();
     }
 
 

@@ -14,19 +14,6 @@ import java.net.URL;
 
 public class BitKip extends Application {
 
-    // todo: limited download in chunks
-    // todo: scrollview in new download
-    // todo: sync db file size and actual file size
-    // todo: downloading stage
-    // todo: double click a download in table and open Downloading stage
-    // todo: queue scheduler
-    // todo: menu items' actions
-    // todo: delete files with chunks
-    // todo: retry if connection is lost in a period
-    // todo: refactor db codes
-    // todo: chunk download more than one
-    // todo: warning: files which cannot be resumed
-
     @Override
     public void start(Stage stage) {
         IOUtils.createSaveLocations();
