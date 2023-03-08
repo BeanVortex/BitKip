@@ -28,7 +28,7 @@ public class NewDownload implements NewDownloadFxmlController {
     @FXML
     private Button singleButton;
     @FXML
-    private Button multipleButton;
+    private Button batchButton;
     @FXML
     private HBox toolbar;
     @FXML
@@ -79,7 +79,7 @@ public class NewDownload implements NewDownloadFxmlController {
             var width = n.longValue();
             toolbar.setPrefWidth(width);
             var buttonWidth = width / 2;
-            multipleButton.setPrefWidth(buttonWidth);
+            batchButton.setPrefWidth(buttonWidth);
             singleButton.setPrefWidth(buttonWidth);
         });
 
@@ -92,7 +92,7 @@ public class NewDownload implements NewDownloadFxmlController {
 
         var buttonWidth = stage.getWidth() / 2;
         singleButton.setPrefWidth(buttonWidth);
-        multipleButton.setPrefWidth(buttonWidth);
+        batchButton.setPrefWidth(buttonWidth);
 
         stage.xProperty().addListener((observable, oldValue, newValue) -> {
             if (WindowUtils.isOnPrimaryScreen(newValue.doubleValue()))
@@ -136,7 +136,7 @@ public class NewDownload implements NewDownloadFxmlController {
     }
 
     @FXML
-    private void showMultiple() {
+    private void showBatch() {
         if (isSingle)
             switchToMultipleDownload();
     }
@@ -144,15 +144,15 @@ public class NewDownload implements NewDownloadFxmlController {
     private void switchToSingleDownload() {
         isSingle = true;
         singleButton.getStyleClass().add("tab_btn_selected");
-        multipleButton.getStyleClass().remove("tab_btn_selected");
+        batchButton.getStyleClass().remove("tab_btn_selected");
         switchDownloadDetails("singleDownload");
     }
 
     private void switchToMultipleDownload() {
         isSingle = false;
-        multipleButton.getStyleClass().add("tab_btn_selected");
+        batchButton.getStyleClass().add("tab_btn_selected");
         singleButton.getStyleClass().remove("tab_btn_selected");
-        switchDownloadDetails("multipleDownload");
+        switchDownloadDetails("batchDownload");
     }
 
     private void switchDownloadDetails(String fxmlName) {

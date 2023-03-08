@@ -5,6 +5,7 @@
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.*?>
 <?import java.net.URL?>
+<?import javafx.scene.image.ImageView?>
 <VBox xmlns="http://javafx.com/javafx"
       xmlns:fx="http://javafx.com/fxml"
       fx:controller="ir.darkdeveloper.bitkip.controllers.NewQueueController"
@@ -20,7 +21,8 @@
         <HBox maxWidth="2" minWidth="2" styleClass="csm_toolbar"/>
         <HBox minWidth="250" prefWidth="250" fx:id="toolbar" alignment="CENTER" maxHeight="32" minHeight="32"
               spacing="10">
-            <Label text="New Queue"/>
+            <ImageView fx:id="logoImg" fitWidth="30" fitHeight="30"/>
+            <Label text="New Queue" styleClass="bold"/>
             <Region HBox.hgrow="ALWAYS"/>
             <Button fx:id="closeBtn" onAction="#closeApp"/>
         </HBox>

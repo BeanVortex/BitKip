@@ -111,7 +111,8 @@ public class SingleDownload implements NewDownloadFxmlController {
         var contents = new String[]{
                 "You can limit downloading speed. calculated in MB. (0.8 means 800KB)",
                 "You can specify how many bytes of the file to download (Disabled in chunks downloading mode)",
-                "File is seperated into parts and will be downloaded concurrently (Needs 2* disk space after downloading complete)"};
+                "File is seperated into parts and will be downloaded concurrently"
+        };
         NewDownloadUtils.initPopOvers(questionBtns, contents);
         NewDownloadUtils.validInputChecks(chunksField, bytesField, speedField);
         NewDownloadUtils.prepareLinkFromClipboard(urlField);

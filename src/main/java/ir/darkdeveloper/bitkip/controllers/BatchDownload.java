@@ -14,7 +14,7 @@ import javafx.scene.control.TextField;
 import javafx.stage.Stage;
 import org.kordamp.ikonli.javafx.FontIcon;
 
-public class MultipleDownload implements NewDownloadFxmlController {
+public class BatchDownload implements NewDownloadFxmlController {
     @FXML
     private Button newQueue;
     @FXML
@@ -92,6 +92,14 @@ public class MultipleDownload implements NewDownloadFxmlController {
         queueCombo.getItems().addAll(queues);
         queueCombo.setValue(queues.get(0));
         NewDownloadUtils.validInputChecks(chunksField, null, speedField);
+        var questionBtns = new Button[]{questionBtnSpeed, questionBtnUrl, questionBtnChunks};
+        var contents = new String[]{
+                "You can limit downloading speed. calculated in MB. (0.8 means 800KB)",
+                "You want to download several files, clarify where urls are different by % sign." +
+                        " (for example 'https://www.url.com/file00.zip', change 00 to %%)",
+                "Every single file is seperated into parts and will be downloaded concurrently"
+        };
+        NewDownloadUtils.initPopOvers(questionBtns, contents);
     }
 
     @Override

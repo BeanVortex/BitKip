@@ -30,6 +30,6 @@
     </HBox>
     <HBox minWidth="600" alignment="CENTER">
         <Button styleClass="tab_btn" minWidth="300" text="Single" fx:id="singleButton" onAction="#showSingle"/>
-        <Button styleClass="tab_btn" minWidth="300" text="Multiple" fx:id="multipleButton" onAction="#showMultiple"/>
+        <Button styleClass="tab_btn" minWidth="300" text="Batch" fx:id="batchButton" onAction="#showBatch"/>
     </HBox>
 </VBox>

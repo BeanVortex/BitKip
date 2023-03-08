@@ -8,13 +8,19 @@ import javafx.fxml.FXML;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.control.Button;
 import javafx.scene.control.TextField;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
 import org.kordamp.ikonli.javafx.FontIcon;
 
+import static ir.darkdeveloper.bitkip.BitKip.getResource;
+
 public class NewQueueController implements FXMLController {
 
+    @FXML
+    private ImageView logoImg;
     @FXML
     private HBox toolbar;
     @FXML
@@ -53,6 +59,12 @@ public class NewQueueController implements FXMLController {
         stage.xProperty().addListener((observable, oldValue, newValue) -> {
             bounds = Screen.getPrimary().getVisualBounds();
         });
+        var logoPath = getResource("icons/logo.png");
+        if (logoPath != null) {
+            var img = new Image(logoPath.toExternalForm());
+            logoImg.setImage(img);
+            stage.getIcons().add(img);
+        }
         int minHeight = 100;
         int minWidth = 250;
         WindowUtils.toolbarInits(toolbar, stage, bounds, minWidth, minHeight);
