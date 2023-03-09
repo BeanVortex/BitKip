@@ -1,6 +1,5 @@
 package ir.darkdeveloper.bitkip.controllers;
 
-import ir.darkdeveloper.bitkip.config.AppConfigs;
 import ir.darkdeveloper.bitkip.controllers.interfaces.FXMLController;
 import ir.darkdeveloper.bitkip.controllers.interfaces.NewDownloadFxmlController;
 import ir.darkdeveloper.bitkip.models.DownloadModel;
@@ -18,9 +17,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
-import javafx.stage.DirectoryChooser;
 import javafx.stage.Stage;
-import org.controlsfx.control.Notifications;
 import org.kordamp.ikonli.javafx.FontIcon;
 
 import java.io.File;
@@ -142,9 +139,10 @@ public class SingleDownload implements NewDownloadFxmlController {
     private void autoFillLocationAndSizeAndName(boolean prepareFileName) {
         var executor = Executors.newFixedThreadPool(2);
         CompletableFuture<Void> fileNameLocationFuture = CompletableFuture.completedFuture(null);
+        var link = urlField.getText();
         if (prepareFileName)
-            fileNameLocationFuture = NewDownloadUtils.prepareFileName(urlField, nameField, executor)
-                    .thenAccept(fileName -> NewDownloadUtils.determineLocation(locationField, fileName, dm));
+            fileNameLocationFuture = NewDownloadUtils.prepareFileName(link, nameField, executor)
+                    .thenAccept(fileName -> NewDownloadUtils.determineLocationAndQueue(locationField, fileName, dm));
         var sizeFuture = NewDownloadUtils.prepareSize(urlField, sizeLabel, chunksField, bytesField, dm, executor);
         CompletableFuture.allOf(fileNameLocationFuture, sizeFuture)
                 .whenComplete((unused, throwable) -> {
@@ -168,8 +166,8 @@ public class SingleDownload implements NewDownloadFxmlController {
                     errorLabel.setVisible(true);
                     downloadBtn.setDisable(true);
                     addBtn.setDisable(true);
-                    String errorStr = throwable.getCause().getLocalizedMessage();
-                    Platform.runLater(() -> errorLabel.setText(errorStr));
+                    var errorMsg = throwable.getCause().getLocalizedMessage();
+                    Platform.runLater(() -> errorLabel.setText(errorMsg));
                     return null;
                 });
     }
@@ -185,19 +183,7 @@ public class SingleDownload implements NewDownloadFxmlController {
 
     @FXML
     private void onSelectLocation(ActionEvent e) {
-        var dirChooser = new DirectoryChooser();
-        dirChooser.setTitle("Select download save location");
-        dirChooser.setInitialDirectory(new File(AppConfigs.downloadPath));
-        var selectedDir = dirChooser.showDialog(FxUtils.getStageFromEvent(e));
-        if (selectedDir != null) {
-            var path = selectedDir.getPath();
-            locationField.setText(path);
-            return;
-        }
-        Notifications.create()
-                .title("No Directory")
-                .text("Location is wrong!")
-                .showError();
+        NewDownloadUtils.selectLocation(e, locationField);
     }
 
     @FXML

@@ -8,16 +8,19 @@ import ir.darkdeveloper.bitkip.task.DownloadInChunksTask;
 import ir.darkdeveloper.bitkip.task.DownloadLimitedTask;
 import ir.darkdeveloper.bitkip.task.DownloadTask;
 import javafx.application.Platform;
+import javafx.event.ActionEvent;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.input.Clipboard;
+import javafx.stage.DirectoryChooser;
+import org.controlsfx.control.Notifications;
 import org.controlsfx.control.PopOver;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -29,6 +32,34 @@ public class NewDownloadUtils {
 
     public static void validInputChecks(TextField chunksField, TextField bytesField,
                                         TextField speedField) {
+        validChunksInputChecks(chunksField);
+        validSpeedInputChecks(speedField);
+        validBytesInputChecks(bytesField, chunksField, speedField);
+    }
+
+    private static void validBytesInputChecks(TextField bytesField, TextField chunksField, TextField speedField) {
+        if (bytesField == null || chunksField == null || speedField == null)
+            return;
+        speedField.textProperty().addListener((o, old, newValue) -> bytesField.setDisable(!newValue.equals("0")));
+        chunksField.textProperty().addListener((o, old, newValue) -> bytesField.setDisable(!newValue.equals("0")));
+    }
+
+    private static void validSpeedInputChecks(TextField speedField) {
+        if (speedField == null)
+            return;
+        speedField.textProperty().addListener((o, old, newValue) -> {
+            if (!newValue.matches("\\d+\\.?\\d*"))
+                speedField.setText(newValue.replaceAll("[a-zA-Z`!@#$%^&*()?<>,;:'\"\\-_+=]*", ""));
+        });
+        speedField.focusedProperty().addListener((o, old, newValue) -> {
+            if (!newValue && speedField.getText().isBlank())
+                speedField.setText("0");
+        });
+    }
+
+    public static void validChunksInputChecks(TextField chunksField) {
+        if (chunksField == null)
+            return;
         chunksField.textProperty().addListener((o, old, newValue) -> {
             if (!newValue.matches("\\d*"))
                 chunksField.setText(newValue.replaceAll("\\D", ""));
@@ -39,21 +70,10 @@ public class NewDownloadUtils {
                     chunks = cores * 2;
                 chunksField.setText(chunks + "");
             }
-            bytesField.setDisable(!chunksField.getText().equals("0"));
         });
         chunksField.focusedProperty().addListener((o, old, newValue) -> {
             if (!newValue && chunksField.getText().isBlank())
                 chunksField.setText("0");
-        });
-        speedField.textProperty().addListener((o, old, newValue) -> {
-            if (!newValue.matches("\\d+\\.?\\d*"))
-                speedField.setText(newValue.replaceAll("[a-zA-Z`!@#$%^&*()?<>,;:'\"\\-_+=]*", ""));
-            bytesField.setDisable(!newValue.equals("0"));
-        });
-
-        speedField.focusedProperty().addListener((o, old, newValue) -> {
-            if (!newValue && speedField.getText().isBlank())
-                speedField.setText("0");
         });
     }
 
@@ -82,7 +102,7 @@ public class NewDownloadUtils {
                 if (fileSize == -1)
                     throw new IOException("Connection failed");
                 var rangeSupport = conn.getHeaderField("Accept-Ranges");
-                if (rangeSupport.equals("none")) {
+                if (rangeSupport == null || rangeSupport.equals("none")) {
                     chunksField.setText("0");
                     chunksField.setDisable(true);
                 } else
@@ -102,20 +122,20 @@ public class NewDownloadUtils {
     }
 
 
-    public static CompletableFuture<String> prepareFileName(TextField urlField, TextField nameField, Executor executor) {
+    public static CompletableFuture<String> prepareFileName(String link, TextField nameField, Executor executor) {
         return CompletableFuture.supplyAsync(() -> {
             try {
-                var link = urlField.getText();
                 if (link.isBlank())
                     throw new IllegalArgumentException("Link is blank");
-                var url = new URL(urlField.getText());
+                var url = new URL(link);
                 var conn = (HttpURLConnection) url.openConnection();
                 conn.setConnectTimeout(1000);
                 conn.setReadTimeout(1000);
                 var raw = conn.getHeaderField("Content-Disposition");
                 if (raw != null && raw.contains("=")) {
                     var fileName = raw.split("=")[1].replaceAll("\"", "");
-                    Platform.runLater(() -> nameField.setText(fileName));
+                    if (nameField != null)
+                        Platform.runLater(() -> nameField.setText(fileName));
                     return fileName;
                 }
                 var hasParameter = link.lastIndexOf('?') != -1;
@@ -126,11 +146,13 @@ public class NewDownloadUtils {
                     extractedFileName = link.substring(link.lastIndexOf('/') + 1);
                 if (!extractedFileName.isBlank()) {
                     var finalExtractedFileName = extractedFileName;
-                    Platform.runLater(() -> nameField.setText(finalExtractedFileName));
+                    if (nameField != null)
+                        Platform.runLater(() -> nameField.setText(finalExtractedFileName));
                     return extractedFileName;
                 }
                 var randomName = UUID.randomUUID().toString();
-                Platform.runLater(() -> nameField.setText(randomName));
+                if (nameField != null)
+                    Platform.runLater(() -> nameField.setText(randomName));
                 return randomName;
             } catch (IOException e) {
                 throw new RuntimeException("Connection or read timeout. Connect to the internet");
@@ -138,7 +160,7 @@ public class NewDownloadUtils {
         }, executor);
     }
 
-    public static void determineLocation(TextField locationField, String fileName, DownloadModel downloadModel) {
+    public static void determineLocationAndQueue(TextField locationField, String fileName, DownloadModel downloadModel) {
         Platform.runLater(() -> {
             if (fileName.isBlank())
                 return;
@@ -237,5 +259,20 @@ public class NewDownloadUtils {
     }
 
 
+    public static void selectLocation(ActionEvent e, TextField locationField) {
+        var dirChooser = new DirectoryChooser();
+        dirChooser.setTitle("Select download save location");
+        dirChooser.setInitialDirectory(new File(AppConfigs.downloadPath));
+        var selectedDir = dirChooser.showDialog(FxUtils.getStageFromEvent(e));
+        if (selectedDir != null) {
+            var path = selectedDir.getPath();
+            locationField.setText(path);
+            return;
+        }
+        Notifications.create()
+                .title("No Directory")
+                .text("Location is wrong!")
+                .showError();
+    }
 }
 
