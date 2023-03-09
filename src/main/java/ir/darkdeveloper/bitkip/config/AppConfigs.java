@@ -1,7 +1,7 @@
 package ir.darkdeveloper.bitkip.config;
 
 import ir.darkdeveloper.bitkip.models.DownloadModel;
-import ir.darkdeveloper.bitkip.task.DownloadTask;
+import ir.darkdeveloper.bitkip.models.QueueModel;
 import javafx.application.HostServices;
 
 import java.io.File;
@@ -29,5 +29,31 @@ public class AppConfigs {
 
     public static void setHostServices(HostServices hostServices) {
         AppConfigs.hostServices = hostServices;
+    }
+
+
+    private static final QueueSubject queueSubject = new QueueSubject();
+    private static List<QueueModel> queues = new ArrayList<>();
+    public static void addQueue(QueueModel queue){
+        queues.add(queue);
+        queueSubject.notifyAllObservers();
+    }
+
+    public static void deleteQueue(String name) {
+        getQueues().removeIf(qm -> qm.getName().equals(name));
+        queueSubject.notifyAllObservers();
+    }
+
+    public static List<QueueModel> getQueues() {
+        return queues;
+    }
+
+    public static void setQueues(List<QueueModel> queues) {
+        AppConfigs.queues = queues;
+        queueSubject.notifyAllObservers();
+    }
+
+    public static QueueSubject getQueueSubject() {
+        return queueSubject;
     }
 }

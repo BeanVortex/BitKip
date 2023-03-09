@@ -1,5 +1,7 @@
 package ir.darkdeveloper.bitkip.controllers;
 
+import ir.darkdeveloper.bitkip.config.AppConfigs;
+import ir.darkdeveloper.bitkip.config.QueueObserver;
 import ir.darkdeveloper.bitkip.controllers.interfaces.FXMLController;
 import ir.darkdeveloper.bitkip.models.QueueModel;
 import ir.darkdeveloper.bitkip.repo.QueuesRepo;
@@ -17,7 +19,7 @@ import org.kordamp.ikonli.javafx.FontIcon;
 
 import static ir.darkdeveloper.bitkip.BitKip.getResource;
 
-public class NewQueueController implements FXMLController {
+public class NewQueueController implements FXMLController, QueueObserver {
 
     @FXML
     private ImageView logoImg;
@@ -32,11 +34,6 @@ public class NewQueueController implements FXMLController {
     private Rectangle2D bounds;
 
     private final QueueModel queueModel = new QueueModel();
-    private FXMLController parentController;
-
-    public void setParentController(FXMLController parentController) {
-        this.parentController = parentController;
-    }
 
     @Override
     public void setStage(Stage stage) {
@@ -49,16 +46,12 @@ public class NewQueueController implements FXMLController {
         return stage;
     }
 
-    @Override
-    public void updateQueueList() {
-    }
+
 
     @Override
     public void initAfterStage() {
         stage.widthProperty().addListener((ob, o, n) -> toolbar.setPrefWidth(n.longValue()));
-        stage.xProperty().addListener((observable, oldValue, newValue) -> {
-            bounds = Screen.getPrimary().getVisualBounds();
-        });
+        stage.xProperty().addListener((o) -> bounds = Screen.getPrimary().getVisualBounds());
         var logoPath = getResource("icons/logo.png");
         if (logoPath != null) {
             var img = new Image(logoPath.toExternalForm());
@@ -89,8 +82,11 @@ public class NewQueueController implements FXMLController {
         queueModel.setEditable(true);
         queueModel.setCanAddDownload(true);
         QueuesRepo.insertQueue(queueModel);
-        parentController.updateQueueList();
+        AppConfigs.addQueue(queueModel);
         stage.close();
     }
 
+    @Override
+    public void updateQueue() {
+    }
 }

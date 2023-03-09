@@ -3,12 +3,16 @@ package ir.darkdeveloper.bitkip.controllers;
 import ir.darkdeveloper.bitkip.controllers.interfaces.FXMLController;
 import javafx.stage.Stage;
 
-public class DownloadingController implements FXMLController {
-
+public class BatchList implements FXMLController {
     private Stage stage;
 
     @Override
     public void initAfterStage() {
+
+    }
+
+    @Override
+    public void initialize() {
 
     }
 
@@ -23,9 +27,4 @@ public class DownloadingController implements FXMLController {
         return stage;
     }
 
-
-    @Override
-    public void initialize() {
-
-    }
 }

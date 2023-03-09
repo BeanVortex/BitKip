@@ -19,6 +19,7 @@ public class BitKip extends Application {
         IOUtils.createSaveLocations();
         DownloadsRepo.createTable();
         QueuesRepo.createTableAndDefaultRecords();
+        AppConfigs.setQueues(QueuesRepo.getQueues());
         FxUtils.switchSceneToMain(stage, "main.fxml");
         AppConfigs.setHostServices(getHostServices());
         stage.initStyle(StageStyle.UNDECORATED);

@@ -1,6 +1,6 @@
 package ir.darkdeveloper.bitkip.controllers;
 
-import ir.darkdeveloper.bitkip.controllers.interfaces.FXMLController;
+import ir.darkdeveloper.bitkip.config.AppConfigs;
 import ir.darkdeveloper.bitkip.controllers.interfaces.NewDownloadFxmlController;
 import ir.darkdeveloper.bitkip.models.DownloadModel;
 import ir.darkdeveloper.bitkip.models.DownloadStatus;
@@ -63,17 +63,11 @@ public class SingleDownload implements NewDownloadFxmlController {
     private TableUtils tableUtils;
 
     private final DownloadModel dm = new DownloadModel();
-    private FXMLController parentController;
 
 
     @Override
     public void setTableUtils(TableUtils tableUtils) {
         this.tableUtils = tableUtils;
-    }
-
-    @Override
-    public void setParentController(FXMLController parentController) {
-        this.parentController = parentController;
     }
 
 
@@ -173,14 +167,6 @@ public class SingleDownload implements NewDownloadFxmlController {
     }
 
 
-    public void updateQueueList() {
-        var queues = QueuesRepo.getQueues().stream().filter(QueueModel::isCanAddDownload).toList();
-        queueCombo.getItems().clear();
-        queueCombo.getItems().addAll(queues);
-        queueCombo.setValue(queues.get(0));
-        parentController.updateQueueList();
-    }
-
     @FXML
     private void onSelectLocation(ActionEvent e) {
         NewDownloadUtils.selectLocation(e, locationField);
@@ -188,7 +174,7 @@ public class SingleDownload implements NewDownloadFxmlController {
 
     @FXML
     private void onNewQueue() {
-        FxUtils.newQueueStage(this);
+        FxUtils.newQueueStage();
     }
 
     @FXML
@@ -234,4 +220,14 @@ public class SingleDownload implements NewDownloadFxmlController {
     }
 
 
+    @Override
+    public void updateQueue() {
+        var queues = AppConfigs.getQueues();
+        if (queues.isEmpty())
+            queues = QueuesRepo.getQueues();
+        queues = queues.stream().filter(QueueModel::isCanAddDownload).toList();
+        queueCombo.getItems().clear();
+        queueCombo.getItems().addAll(queues);
+        queueCombo.setValue(queues.get(0));
+    }
 }

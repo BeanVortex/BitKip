@@ -1,6 +1,7 @@
 package ir.darkdeveloper.bitkip.controllers;
 
-import ir.darkdeveloper.bitkip.controllers.interfaces.FXMLController;
+import ir.darkdeveloper.bitkip.config.AppConfigs;
+import ir.darkdeveloper.bitkip.config.QueueObserver;
 import ir.darkdeveloper.bitkip.controllers.interfaces.NewDownloadFxmlController;
 import ir.darkdeveloper.bitkip.models.DownloadModel;
 import ir.darkdeveloper.bitkip.models.QueueModel;
@@ -18,12 +19,11 @@ import javafx.scene.control.TextField;
 import javafx.stage.Stage;
 import org.kordamp.ikonli.javafx.FontIcon;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Executors;
 
-public class BatchDownload implements NewDownloadFxmlController {
+public class BatchDownload implements NewDownloadFxmlController, QueueObserver {
     @FXML
     private Label errorLabel;
     @FXML
@@ -53,7 +53,6 @@ public class BatchDownload implements NewDownloadFxmlController {
 
     private Stage stage;
     private TableUtils tableUtils;
-    private FXMLController parentController;
 
 
     @Override
@@ -61,19 +60,6 @@ public class BatchDownload implements NewDownloadFxmlController {
         this.tableUtils = tableUtils;
     }
 
-    @Override
-    public void setParentController(FXMLController parentController) {
-        this.parentController = parentController;
-    }
-
-    @Override
-    public void updateQueueList() {
-        var queues = QueuesRepo.getQueues().stream().filter(QueueModel::isCanAddDownload).toList();
-        queueCombo.getItems().clear();
-        queueCombo.getItems().addAll(queues);
-        queueCombo.setValue(queues.get(0));
-        parentController.updateQueueList();
-    }
 
     @Override
     public void setStage(Stage stage) {
@@ -250,11 +236,22 @@ public class BatchDownload implements NewDownloadFxmlController {
 
     @FXML
     private void onNewQueue() {
-        FxUtils.newQueueStage(this);
+        FxUtils.newQueueStage();
     }
 
     @FXML
     private void onCancel() {
         stage.close();
+    }
+
+    @Override
+    public void updateQueue() {
+        var queues = AppConfigs.getQueues();
+        if (queues.isEmpty())
+            queues = QueuesRepo.getQueues();
+        queues = queues.stream().filter(QueueModel::isCanAddDownload).toList();
+        queueCombo.getItems().clear();
+        queueCombo.getItems().addAll(queues);
+        queueCombo.setValue(queues.get(0));
     }
 }

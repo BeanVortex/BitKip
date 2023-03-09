@@ -1,10 +1,10 @@
 package ir.darkdeveloper.bitkip.utils;
 
 
-import ir.darkdeveloper.bitkip.controllers.interfaces.FXMLController;
+import ir.darkdeveloper.bitkip.config.AppConfigs;
 import ir.darkdeveloper.bitkip.controllers.MainController;
-import ir.darkdeveloper.bitkip.controllers.interfaces.NewDownloadFxmlController;
 import ir.darkdeveloper.bitkip.controllers.NewQueueController;
+import ir.darkdeveloper.bitkip.controllers.interfaces.NewDownloadFxmlController;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
@@ -27,6 +27,7 @@ public class FxUtils {
             Parent root = loader.load();
             var scene = new Scene(root, stage.getWidth(), stage.getHeight());
             MainController controller = loader.getController();
+            AppConfigs.getQueueSubject().addObserver(controller);
             controller.setStage(stage);
             stage.setScene(scene);
             stage.setTitle("BitKip");
@@ -45,8 +46,7 @@ public class FxUtils {
     }
 
     public static void newDownloadStage(String fxmlFilename, double minWidth,
-                                        double minHeight, TableUtils tableUtils,
-                                        FXMLController parentController) {
+                                        double minHeight, TableUtils tableUtils) {
         FXMLLoader loader;
         Stage stage = new Stage();
         Parent root;
@@ -67,11 +67,11 @@ public class FxUtils {
         NewDownloadFxmlController controller = loader.getController();
         controller.setStage(stage);
         controller.setTableUtils(tableUtils);
-        controller.setParentController(parentController);
+        AppConfigs.getQueueSubject().addObserver(controller);
         stage.show();
     }
 
-    public static void newQueueStage(FXMLController parentController) {
+    public static void newQueueStage() {
         FXMLLoader loader;
         Stage stage = new Stage();
         VBox root;
@@ -90,7 +90,7 @@ public class FxUtils {
         stage.setTitle("New Queue");
         NewQueueController controller = loader.getController();
         controller.setStage(stage);
-        controller.setParentController(parentController);
+        AppConfigs.getQueueSubject().addObserver(controller);
         stage.showAndWait();
     }
 

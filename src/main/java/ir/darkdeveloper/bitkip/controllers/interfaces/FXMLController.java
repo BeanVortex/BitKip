@@ -14,7 +14,5 @@ public interface FXMLController {
 
     Stage getStage();
 
-    void updateQueueList();
-
 }
 

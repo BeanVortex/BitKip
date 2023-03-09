@@ -1,6 +1,7 @@
 package ir.darkdeveloper.bitkip.controllers;
 
 import ir.darkdeveloper.bitkip.config.AppConfigs;
+import ir.darkdeveloper.bitkip.config.QueueObserver;
 import ir.darkdeveloper.bitkip.controllers.interfaces.FXMLController;
 import ir.darkdeveloper.bitkip.models.DownloadModel;
 import ir.darkdeveloper.bitkip.models.DownloadStatus;
@@ -34,8 +35,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import static ir.darkdeveloper.bitkip.BitKip.getResource;
 
 
-public class MainController implements FXMLController {
-
+public class MainController implements FXMLController, QueueObserver {
 
     @FXML
     private ImageView logoImg;
@@ -81,10 +81,6 @@ public class MainController implements FXMLController {
         return stage;
     }
 
-    @Override
-    public void updateQueueList() {
-        initSides();
-    }
 
     @Override
     public void initAfterStage() {
@@ -99,7 +95,7 @@ public class MainController implements FXMLController {
         });
         actionBtnInits();
         var logoPath = getResource("icons/logo.png");
-        if (logoPath != null){
+        if (logoPath != null) {
             var img = new Image(logoPath.toExternalForm());
             logoImg.setImage(img);
             stage.getIcons().add(img);
@@ -146,7 +142,10 @@ public class MainController implements FXMLController {
         sideScrollPane.setPadding(Insets.EMPTY);
         var queueButtons = new ArrayList<Button>();
         side.getChildren().clear();
-        QueuesRepo.getQueues().forEach(queueModel -> {
+        var queues = AppConfigs.getQueues();
+        if (queues.isEmpty())
+            queues = QueuesRepo.getQueues();
+        queues.forEach(queueModel -> {
             var btn = new Button(queueModel.getName());
             btn.getStyleClass().add("side_queue");
             if (queueModel.getName().equals("All Downloads"))
@@ -200,7 +199,8 @@ public class MainController implements FXMLController {
                 });
                 menuItems.get(deleteLbl).setOnAction(e -> {
                     QueuesRepo.deleteQueue(btn.getText());
-                    updateQueueList();
+                    AppConfigs.deleteQueue(btn.getText());
+                    initialize();
                 });
                 cMenu.show(btn, Side.BOTTOM, 0, 0);
             }
@@ -263,6 +263,11 @@ public class MainController implements FXMLController {
     @FXML
     private void doAction() {
         contentTable.getSelectionModel().clearSelection();
-        FxUtils.newDownloadStage("newDownload.fxml", 600, 550, tableUtils, this);
+        FxUtils.newDownloadStage("newDownload.fxml", 600, 550, tableUtils);
+    }
+
+    @Override
+    public void updateQueue() {
+        initSides();
     }
 }
