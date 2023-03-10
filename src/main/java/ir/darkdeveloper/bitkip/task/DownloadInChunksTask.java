@@ -5,7 +5,7 @@ import ir.darkdeveloper.bitkip.models.DownloadModel;
 import ir.darkdeveloper.bitkip.models.DownloadStatus;
 import ir.darkdeveloper.bitkip.repo.DownloadsRepo;
 import ir.darkdeveloper.bitkip.utils.IOUtils;
-import ir.darkdeveloper.bitkip.utils.TableUtils;
+import ir.darkdeveloper.bitkip.utils.MainTableUtils;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -28,7 +28,7 @@ import java.util.concurrent.Executors;
 
 public class DownloadInChunksTask extends DownloadTask {
     private final int chunks;
-    private final TableUtils tableUtils;
+    private final MainTableUtils mainTableUtils;
     private final List<DownloadModel> currentDownloading = AppConfigs.currentDownloading;
     private final List<FileChannel> fileChannels = new ArrayList<>();
     private final List<Path> filePaths = new ArrayList<>();
@@ -38,12 +38,12 @@ public class DownloadInChunksTask extends DownloadTask {
     private ExecutorService partsExecutor;
     private ExecutorService statusExecutor;
 
-    public DownloadInChunksTask(DownloadModel downloadModel, TableUtils tableUtils) {
+    public DownloadInChunksTask(DownloadModel downloadModel, MainTableUtils mainTableUtils) {
         super(downloadModel);
         if (downloadModel.getChunks() == 0)
             throw new IllegalArgumentException("To download file in chunks, chunks must not be 0");
         this.chunks = downloadModel.getChunks();
-        this.tableUtils = tableUtils;
+        this.mainTableUtils = mainTableUtils;
     }
 
 
@@ -64,7 +64,7 @@ public class DownloadInChunksTask extends DownloadTask {
             var existingFileSize = getCurrentFileSize(file);
             if (fs != 0 && existingFileSize == fs) {
                 download.setDownloadStatus(DownloadStatus.Completed);
-                tableUtils.refreshTable();
+                mainTableUtils.refreshTable();
                 currentDownloading.remove(downloadModel);
                 System.out.println("already downloaded");
                 return true;
@@ -200,7 +200,7 @@ public class DownloadInChunksTask extends DownloadTask {
                 DownloadsRepo.updateDownloadProgress(download);
                 DownloadsRepo.updateDownloadLastTryDate(download);
                 currentDownloading.remove(index);
-                tableUtils.refreshTable();
+                mainTableUtils.refreshTable();
             }
             partsExecutor.shutdown();
             statusExecutor.shutdown();
@@ -227,14 +227,14 @@ public class DownloadInChunksTask extends DownloadTask {
                     download.setDownloadStatus(DownloadStatus.Completed);
                     download.setDownloaded(download.getSize());
                     download.setProgress(100);
-                    tableUtils.refreshTable();
+                    mainTableUtils.refreshTable();
                     updateProgress(1, 1);
                 }
                 DownloadsRepo.updateDownloadProgress(download);
                 DownloadsRepo.updateDownloadCompleteDate(download);
                 DownloadsRepo.updateDownloadLastTryDate(download);
                 currentDownloading.remove(index);
-                tableUtils.refreshTable();
+                mainTableUtils.refreshTable();
             }
             if (partsExecutor != null)
                 partsExecutor.shutdown();

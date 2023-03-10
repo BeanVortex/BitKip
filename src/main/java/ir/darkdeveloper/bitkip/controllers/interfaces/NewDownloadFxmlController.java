@@ -1,8 +1,8 @@
 package ir.darkdeveloper.bitkip.controllers.interfaces;
 
 import ir.darkdeveloper.bitkip.config.QueueObserver;
-import ir.darkdeveloper.bitkip.utils.TableUtils;
+import ir.darkdeveloper.bitkip.utils.MainTableUtils;
 
 public interface NewDownloadFxmlController extends QueueObserver {
-    void setTableUtils(TableUtils tableUtils);
+    void setTableUtils(MainTableUtils mainTableUtils);
 }

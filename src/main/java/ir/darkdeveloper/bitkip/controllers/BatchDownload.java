@@ -4,11 +4,12 @@ import ir.darkdeveloper.bitkip.config.AppConfigs;
 import ir.darkdeveloper.bitkip.config.QueueObserver;
 import ir.darkdeveloper.bitkip.controllers.interfaces.NewDownloadFxmlController;
 import ir.darkdeveloper.bitkip.models.DownloadModel;
+import ir.darkdeveloper.bitkip.models.LinkModel;
 import ir.darkdeveloper.bitkip.models.QueueModel;
 import ir.darkdeveloper.bitkip.repo.QueuesRepo;
 import ir.darkdeveloper.bitkip.utils.FxUtils;
 import ir.darkdeveloper.bitkip.utils.NewDownloadUtils;
-import ir.darkdeveloper.bitkip.utils.TableUtils;
+import ir.darkdeveloper.bitkip.utils.MainTableUtils;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -23,7 +24,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Executors;
 
-public class BatchDownload implements NewDownloadFxmlController, QueueObserver {
+public class BatchDownload implements QueueObserver {
     @FXML
     private Label errorLabel;
     @FXML
@@ -52,13 +53,6 @@ public class BatchDownload implements NewDownloadFxmlController, QueueObserver {
     private TextField urlField;
 
     private Stage stage;
-    private TableUtils tableUtils;
-
-
-    @Override
-    public void setTableUtils(TableUtils tableUtils) {
-        this.tableUtils = tableUtils;
-    }
 
 
     @Override
@@ -99,14 +93,14 @@ public class BatchDownload implements NewDownloadFxmlController, QueueObserver {
     }
 
     @FXML
-    private void onAdd() {
+    private void onCheck() {
         try {
             var url = urlField.getText();
             var start = Integer.parseInt(startField.getText());
             var end = Integer.parseInt(endField.getText());
             var links = generateLinks(url, start, end, false);
-            System.out.println(links.size());
-            // todo: new link check stage :: check their size and existence in system
+            FxUtils.newBatchListStage(links);
+//             todo: new link check stage :: check their size and existence in system
         } catch (IllegalArgumentException e) {
             errorLabel.setVisible(true);
             addBtn.setDisable(true);
@@ -122,7 +116,7 @@ public class BatchDownload implements NewDownloadFxmlController, QueueObserver {
         var url = urlField.getText();
         var start = Integer.parseInt(startField.getText());
         var end = Integer.parseInt(endField.getText());
-        String link;
+        LinkModel link;
         try {
             var links = generateLinks(url, start, end, true);
             link = links.get(0);
@@ -136,7 +130,7 @@ public class BatchDownload implements NewDownloadFxmlController, QueueObserver {
             errorLabel.setText(errorMsg);
             return;
         }
-        var fileNameLocationFuture = NewDownloadUtils.prepareFileName(link, null, executor)
+        var fileNameLocationFuture = NewDownloadUtils.prepareFileName(link.getLink(), null, executor)
                 .thenAccept(fileName -> NewDownloadUtils.determineLocationAndQueue(locationField, fileName, dm));
         fileNameLocationFuture.whenComplete((unused, throwable) -> {
             errorLabel.setVisible(false);
@@ -153,7 +147,7 @@ public class BatchDownload implements NewDownloadFxmlController, QueueObserver {
         });
     }
 
-    public List<String> generateLinks(String url, int start, int end, boolean oneLink) {
+    public List<LinkModel> generateLinks(String url, int start, int end, boolean oneLink) {
         if (start > end)
             throw new IllegalArgumentException("Start value cannot be greater than end value");
 
@@ -169,7 +163,7 @@ public class BatchDownload implements NewDownloadFxmlController, QueueObserver {
             throw new IllegalArgumentException("Not enough pattern to cover the range");
 
 
-        var links = new ArrayList<String>();
+        var links = new ArrayList<LinkModel>();
         for (int i = start; i < end + 1; i++) {
             var x = i / 10;
             if (x == 0) {
@@ -180,7 +174,7 @@ public class BatchDownload implements NewDownloadFxmlController, QueueObserver {
                     else
                         link = replaceDollarOnce(link, '0');
                 }
-                links.add(link);
+                links.add(new LinkModel(link));
                 if (oneLink)
                     break;
             } else {
@@ -196,7 +190,7 @@ public class BatchDownload implements NewDownloadFxmlController, QueueObserver {
                     link.setCharAt(link.lastIndexOf("$"), (char) (cpI % 10 + 48));
                     cpI /= 10;
                 }
-                links.add(String.valueOf(link));
+                links.add(new LinkModel(link.toString()));
                 if (oneLink)
                     break;
             }
@@ -254,4 +248,5 @@ public class BatchDownload implements NewDownloadFxmlController, QueueObserver {
         queueCombo.getItems().addAll(queues);
         queueCombo.setValue(queues.get(0));
     }
+
 }

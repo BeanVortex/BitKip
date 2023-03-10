@@ -22,14 +22,14 @@ import java.text.DecimalFormat;
 import java.time.LocalDateTime;
 import java.util.List;
 
-public class TableUtils {
+public class MainTableUtils {
 
 
     private final TableView<DownloadModel> contentTable;
     private final ObservableList<DownloadModel> data = FXCollections.observableArrayList();
     private final List<DownloadModel> currentDownloading = AppConfigs.currentDownloading;
 
-    public TableUtils(TableView<DownloadModel> contentTable) {
+    public MainTableUtils(TableView<DownloadModel> contentTable) {
         this.contentTable = contentTable;
     }
 
@@ -256,4 +256,5 @@ public class TableUtils {
     public void remove(ObservableList<DownloadModel> selectedItems) {
         contentTable.getItems().removeAll(selectedItems);
     }
+
 }

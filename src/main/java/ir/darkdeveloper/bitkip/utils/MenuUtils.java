@@ -16,7 +16,7 @@ import java.util.List;
 public class MenuUtils {
 
 
-    public static void initFileMenu(Button menuFile, TableUtils tableUtils) {
+    public static void initFileMenu(Button menuFile, MainTableUtils mainTableUtils) {
         var c = new ContextMenu();
         var addLink = new Label("New download");
         var batchDownload = new Label("New batch download");
@@ -29,7 +29,7 @@ public class MenuUtils {
         c.getItems().addAll(menuItems.values());
         menuFile.setContextMenu(c);
         menuFile.setOnMouseClicked(event -> {
-            var selectedItems = tableUtils.getSelected();
+            var selectedItems = mainTableUtils.getSelected();
             menuItems.get(deleteDownloads).setDisable(selectedItems.size() == 0);
             deleteDownloads.setText("Delete selected (" + selectedItems.size() + ")");
             c.show(menuFile, Side.BOTTOM, 0, 0);
@@ -41,14 +41,14 @@ public class MenuUtils {
             System.out.println("new batch download");
         });
         menuItems.get(deleteDownloads).setOnAction(event -> {
-            var selectedItems = tableUtils.getSelected();
+            var selectedItems = mainTableUtils.getSelected();
             selectedItems.forEach(DownloadsRepo::deleteDownload);
-            tableUtils.remove(selectedItems);
+            mainTableUtils.remove(selectedItems);
         });
         menuItems.get(deleteDownloadsWithFile).setOnAction(event -> {
-            var selectedItems = tableUtils.getSelected();
+            var selectedItems = mainTableUtils.getSelected();
             selectedItems.forEach(DownloadsRepo::deleteDownload);
-            tableUtils.remove(selectedItems);
+            mainTableUtils.remove(selectedItems);
             // todo: delete files
         });
         menuItems.get(settings).setOnAction(event -> {
@@ -58,7 +58,7 @@ public class MenuUtils {
     }
 
 
-    public static void initOperationMenu(Button operationMenu, TableUtils tableUtils) {
+    public static void initOperationMenu(Button operationMenu, MainTableUtils mainTableUtils) {
         var c = new ContextMenu();
         var resume = new Label("resume");
         var pause = new Label("pause");
@@ -94,7 +94,7 @@ public class MenuUtils {
 
         operationMenu.setContextMenu(c);
         operationMenu.setOnMouseClicked(event -> {
-            var selectedItems = tableUtils.getSelected();
+            var selectedItems = mainTableUtils.getSelected();
             menuItems.get(resume).setDisable(selectedItems.size() == 0);
             menuItems.get(pause).setDisable(selectedItems.size() == 0);
             menuItems.get(restart).setDisable(selectedItems.size() == 0);
@@ -105,19 +105,19 @@ public class MenuUtils {
         });
 
         menuItems.get(resume).setOnAction(event -> {
-            var selectedItems = tableUtils.getSelected();
+            var selectedItems = mainTableUtils.getSelected();
             selectedItems
                     .filtered(dm -> !AppConfigs.currentDownloading.contains(dm))
                     .forEach(dm -> {
                         dm.setLastTryDate(LocalDateTime.now());
                         dm.setDownloadStatus(DownloadStatus.Trying);
                         DownloadsRepo.updateDownloadLastTryDate(dm);
-                        tableUtils.refreshTable();
-                        NewDownloadUtils.startDownload(dm, tableUtils, null, null, true);
+                        mainTableUtils.refreshTable();
+                        NewDownloadUtils.startDownload(dm, mainTableUtils, null, null, true);
                     });
         });
         menuItems.get(pause).setOnAction(event -> {
-            var selectedItems = tableUtils.getSelected();
+            var selectedItems = mainTableUtils.getSelected();
             selectedItems.forEach(dm -> {
                 if (dm.getDownloadStatus().equals(DownloadStatus.Downloading)) {
                     var downTask = dm.getDownloadTask();
@@ -130,7 +130,7 @@ public class MenuUtils {
                         if (downTask.isRunning())
                             downTask.pause();
                     }
-                    tableUtils.refreshTable();
+                    mainTableUtils.refreshTable();
                 }
             });
         });

@@ -4,7 +4,7 @@ import ir.darkdeveloper.bitkip.config.AppConfigs;
 import ir.darkdeveloper.bitkip.models.DownloadModel;
 import ir.darkdeveloper.bitkip.models.DownloadStatus;
 import ir.darkdeveloper.bitkip.repo.DownloadsRepo;
-import ir.darkdeveloper.bitkip.utils.TableUtils;
+import ir.darkdeveloper.bitkip.utils.MainTableUtils;
 import javafx.application.Platform;
 import javafx.concurrent.WorkerStateEvent;
 import javafx.event.EventHandler;
@@ -28,7 +28,7 @@ public class DownloadLimitedTask extends DownloadTask {
     private boolean isCalculating = false;
     private final long limit;
     private final boolean isSpeedLimited;
-    private final TableUtils tableUtils;
+    private final MainTableUtils mainTableUtils;
     private final List<DownloadModel> currentDownloading = AppConfigs.currentDownloading;
     private File file;
     private ExecutorService executor;
@@ -37,11 +37,11 @@ public class DownloadLimitedTask extends DownloadTask {
     /**
      * if not isSpeedLimited, then valueLimit
      **/
-    public DownloadLimitedTask(DownloadModel downloadModel, long limit, boolean isSpeedLimited, TableUtils tableUtils) {
+    public DownloadLimitedTask(DownloadModel downloadModel, long limit, boolean isSpeedLimited, MainTableUtils mainTableUtils) {
         super(downloadModel);
         this.limit = limit;
         this.isSpeedLimited = isSpeedLimited;
-        this.tableUtils = tableUtils;
+        this.mainTableUtils = mainTableUtils;
     }
 
 
@@ -137,7 +137,7 @@ public class DownloadLimitedTask extends DownloadTask {
                 DownloadsRepo.updateDownloadProgress(download);
                 DownloadsRepo.updateDownloadLastTryDate(download);
                 currentDownloading.remove(index);
-                tableUtils.refreshTable();
+                mainTableUtils.refreshTable();
             }
             executor.shutdown();
             System.gc();

@@ -2,9 +2,11 @@ package ir.darkdeveloper.bitkip.utils;
 
 
 import ir.darkdeveloper.bitkip.config.AppConfigs;
+import ir.darkdeveloper.bitkip.controllers.BatchList;
 import ir.darkdeveloper.bitkip.controllers.MainController;
 import ir.darkdeveloper.bitkip.controllers.NewQueueController;
 import ir.darkdeveloper.bitkip.controllers.interfaces.NewDownloadFxmlController;
+import ir.darkdeveloper.bitkip.models.LinkModel;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
@@ -15,6 +17,7 @@ import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 
 import java.io.IOException;
+import java.util.List;
 
 import static ir.darkdeveloper.bitkip.BitKip.getResource;
 
@@ -46,7 +49,7 @@ public class FxUtils {
     }
 
     public static void newDownloadStage(String fxmlFilename, double minWidth,
-                                        double minHeight, TableUtils tableUtils) {
+                                        double minHeight, MainTableUtils mainTableUtils) {
         FXMLLoader loader;
         Stage stage = new Stage();
         Parent root;
@@ -66,7 +69,7 @@ public class FxUtils {
         stage.setTitle("New Download");
         NewDownloadFxmlController controller = loader.getController();
         controller.setStage(stage);
-        controller.setTableUtils(tableUtils);
+        controller.setTableUtils(mainTableUtils);
         AppConfigs.getQueueSubject().addObserver(controller);
         stage.show();
     }
@@ -92,6 +95,29 @@ public class FxUtils {
         controller.setStage(stage);
         AppConfigs.getQueueSubject().addObserver(controller);
         stage.showAndWait();
+    }
+
+    public static void newBatchListStage(List<LinkModel> links) {
+        FXMLLoader loader;
+        Stage stage = new Stage();
+        VBox root;
+        try {
+            loader = new FXMLLoader(getResource("fxml/batchList.fxml"));
+            root = loader.load();
+        } catch (IOException e) {
+            e.printStackTrace();
+            throw new RuntimeException(e);
+        }
+        var scene = new Scene(root);
+        stage.setScene(scene);
+        stage.setMinWidth(root.getPrefWidth());
+        stage.setMinHeight(root.getPrefHeight());
+        stage.initStyle(StageStyle.TRANSPARENT);
+        stage.setTitle("Links");
+        BatchList controller = loader.getController();
+        controller.setStage(stage);
+        controller.setData(links);
+        stage.show();
     }
 
 }

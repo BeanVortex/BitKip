@@ -9,7 +9,7 @@ import ir.darkdeveloper.bitkip.repo.DownloadsRepo;
 import ir.darkdeveloper.bitkip.repo.QueuesRepo;
 import ir.darkdeveloper.bitkip.utils.FxUtils;
 import ir.darkdeveloper.bitkip.utils.NewDownloadUtils;
-import ir.darkdeveloper.bitkip.utils.TableUtils;
+import ir.darkdeveloper.bitkip.utils.MainTableUtils;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -60,14 +60,14 @@ public class SingleDownload implements NewDownloadFxmlController {
     @FXML
     private Button openLocation;
     private Stage stage;
-    private TableUtils tableUtils;
+    private MainTableUtils mainTableUtils;
 
     private final DownloadModel dm = new DownloadModel();
 
 
     @Override
-    public void setTableUtils(TableUtils tableUtils) {
-        this.tableUtils = tableUtils;
+    public void setTableUtils(MainTableUtils mainTableUtils) {
+        this.mainTableUtils = mainTableUtils;
     }
 
 
@@ -187,7 +187,7 @@ public class SingleDownload implements NewDownloadFxmlController {
         prepareDownload();
         dm.setDownloadStatus(DownloadStatus.Paused);
         DownloadsRepo.insertDownload(dm);
-        tableUtils.addRow(dm);
+        mainTableUtils.addRow(dm);
         stage.close();
     }
 
@@ -195,7 +195,7 @@ public class SingleDownload implements NewDownloadFxmlController {
     private void onDownload() {
         prepareDownload();
         dm.setLastTryDate(LocalDateTime.now());
-        NewDownloadUtils.startDownload(dm, tableUtils, speedField.getText(), bytesField.getText(), false);
+        NewDownloadUtils.startDownload(dm, mainTableUtils, speedField.getText(), bytesField.getText(), false);
         stage.close();
     }
 

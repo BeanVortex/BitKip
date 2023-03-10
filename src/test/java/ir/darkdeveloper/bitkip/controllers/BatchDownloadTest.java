@@ -13,7 +13,7 @@ class BatchDownloadTest {
         int end = 9;
         var l = batchDown.generateLinks("https://www.file.com/file$$$$.so", start, end, false);
         for (int i = 0, j = 0; i < end; i++, j++)
-            assertEquals(l.get(j), "https://www.file.com/file%d%d%d%d.so".formatted(0, 0, 0, i + 1));
+            assertEquals(l.get(j).getLink(), "https://www.file.com/file%d%d%d%d.so".formatted(0, 0, 0, i + 1));
 
     }
 
@@ -25,9 +25,9 @@ class BatchDownloadTest {
         var l = batchDown.generateLinks("https://www.file.com/file$$$$.so", start, end, false);
         for (int i = start - 1, j = 0; i < end; i++, j++) {
             if ((i + 1) / 10 > 0)
-                assertEquals(l.get(j), "https://www.file.com/file%d%d%d.so".formatted(0, 0, i + 1));
+                assertEquals(l.get(j).getLink(), "https://www.file.com/file%d%d%d.so".formatted(0, 0, i + 1));
             else
-                assertEquals(l.get(j), "https://www.file.com/file%d%d%d%d.so".formatted(0, 0, 0, i + 1));
+                assertEquals(l.get(j).getLink(), "https://www.file.com/file%d%d%d%d.so".formatted(0, 0, 0, i + 1));
         }
     }
 
@@ -39,9 +39,9 @@ class BatchDownloadTest {
         var l = batchDown.generateLinks("https://www.file.com/file$$$.so", start, end, false);
         for (int i = start - 1, j = 0; i < end; i++, j++) {
             if ((i + 1) / 100 > 0)
-                assertEquals(l.get(j), "https://www.file.com/file%d.so".formatted(i + 1));
+                assertEquals(l.get(j).getLink(), "https://www.file.com/file%d.so".formatted(i + 1));
             else
-                assertEquals(l.get(j), "https://www.file.com/file%d%d.so".formatted(0, i + 1));
+                assertEquals(l.get(j).getLink(), "https://www.file.com/file%d%d.so".formatted(0, i + 1));
         }
     }
 
@@ -53,9 +53,9 @@ class BatchDownloadTest {
         var l = batchDown.generateLinks("https://www.file.com/file$$$$.so", start, end, false);
         for (int i = start - 1, j = 0; i < end; i++, j++) {
             if ((i + 1) / 1000 > 0)
-                assertEquals(l.get(j), "https://www.file.com/file%d.so".formatted(i + 1));
+                assertEquals(l.get(j).getLink(), "https://www.file.com/file%d.so".formatted(i + 1));
             else
-                assertEquals(l.get(j), "https://www.file.com/file%d%d.so".formatted(0, i + 1));
+                assertEquals(l.get(j).getLink(), "https://www.file.com/file%d%d.so".formatted(0, i + 1));
         }
     }
 

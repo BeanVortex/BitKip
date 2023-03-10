@@ -1,14 +1,44 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import java.lang.*?>
-<?import java.util.*?>
-<?import javafx.scene.*?>
+
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
+<?import javafx.scene.image.ImageView?>
+<?import java.net.URL?>
+<VBox minHeight="400" prefHeight="400" minWidth="700" prefWidth="700"
+      xmlns="http://javafx.com/javafx/16"
+      xmlns:fx="http://javafx.com/fxml/1" fx:controller="ir.darkdeveloper.bitkip.controllers.BatchList">
 
-<AnchorPane xmlns="http://javafx.com/javafx"
-            xmlns:fx="http://javafx.com/fxml"
-            fx:controller="ir.darkdeveloper.bitkip.controllers.BatchList"
-            prefHeight="400.0" prefWidth="600.0">
+    <stylesheets>
+        <URL value="@../css/main.css"/>
+        <URL value="@../css/newDownload.css"/>
+    </stylesheets>
 
-</AnchorPane>
+    <HBox maxHeight="2" minHeight="2" styleClass="csm_toolbar"/>
+
+    <HBox styleClass="csm_toolbar">
+        <HBox maxWidth="2" minWidth="2" styleClass="csm_toolbar"/>
+        <HBox minWidth="680" prefWidth="700" fx:id="toolbar" alignment="CENTER" maxHeight="32" minHeight="32"
+              spacing="10">
+            <ImageView fx:id="logoImg" fitWidth="30" fitHeight="30"/>
+            <Label text="Links" styleClass="bold"/>
+            <Region HBox.hgrow="ALWAYS"/>
+            <Button fx:id="closeBtn" onAction="#close"/>
+        </HBox>
+        <HBox maxWidth="2" minWidth="2" styleClass="csm_toolbar"/>
+    </HBox>
+
+    <HBox fx:id="mainBox">
+        <TableView  prefWidth="Infinity" fx:id="linkTable"/>
+        <HBox maxWidth="2" minWidth="2" styleClass="csm_toolbar"/>
+    </HBox>
+
+    <HBox alignment="BOTTOM_CENTER" style="-fx-padding: 15 0 0 0">
+        <HBox spacing="20" alignment="CENTER">
+            <Button text="Cancel" styleClass="cancel_btn" onAction="#onCancel"/>
+            <Button text="Add" styleClass="add_btn" fx:id="addBtn" onAction="#onAdd"/>
+        </HBox>
+    </HBox>
+
+    <HBox maxHeight="2" minHeight="2" styleClass="csm_toolbar"/>
+</VBox>

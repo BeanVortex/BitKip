@@ -215,22 +215,22 @@ public class NewDownloadUtils {
     }
 
 
-    public static void startDownload(DownloadModel dm, TableUtils tableUtils, String speed, String bytes, boolean resume) {
-        DownloadTask downloadTask = new DownloadLimitedTask(dm, Long.MAX_VALUE, false, tableUtils);
+    public static void startDownload(DownloadModel dm, MainTableUtils mainTableUtils, String speed, String bytes, boolean resume) {
+        DownloadTask downloadTask = new DownloadLimitedTask(dm, Long.MAX_VALUE, false, mainTableUtils);
         if (dm.getChunks() == 0) {
             if (speed != null) {
                 if (speed.equals("0")) {
                     if (bytes != null) {
                         if (bytes.equals(dm.getSize() + ""))
-                            downloadTask = new DownloadLimitedTask(dm, Long.MAX_VALUE, false, tableUtils);
+                            downloadTask = new DownloadLimitedTask(dm, Long.MAX_VALUE, false, mainTableUtils);
                         else
-                            downloadTask = new DownloadLimitedTask(dm, Long.parseLong(bytes), false, tableUtils);
+                            downloadTask = new DownloadLimitedTask(dm, Long.parseLong(bytes), false, mainTableUtils);
                     }
                 } else
-                    downloadTask = new DownloadLimitedTask(dm, getBytesFromField(speed), true, tableUtils);
+                    downloadTask = new DownloadLimitedTask(dm, getBytesFromField(speed), true, mainTableUtils);
             }
         } else
-            downloadTask = new DownloadInChunksTask(dm, tableUtils);
+            downloadTask = new DownloadInChunksTask(dm, mainTableUtils);
 
         downloadTask.valueProperty().addListener((observable, oldValue, newValue) -> {
             if (oldValue == null)
@@ -238,14 +238,14 @@ public class NewDownloadUtils {
             var currentSpeed = (newValue - oldValue);
             if (newValue == 0)
                 currentSpeed = 0;
-            tableUtils.updateDownloadSpeedAndRemaining(currentSpeed, dm, newValue);
+            mainTableUtils.updateDownloadSpeedAndRemaining(currentSpeed, dm, newValue);
         });
         downloadTask.progressProperty().addListener((o, old, newV) ->
-                tableUtils.updateDownloadProgress(newV.floatValue() * 100, dm));
+                mainTableUtils.updateDownloadProgress(newV.floatValue() * 100, dm));
         dm.setDownloadTask(downloadTask);
         if (!resume) {
             DownloadsRepo.insertDownload(dm);
-            tableUtils.addRow(dm);
+            mainTableUtils.addRow(dm);
         }
         AppConfigs.currentDownloading.add(dm);
         var executor = Executors.newCachedThreadPool();

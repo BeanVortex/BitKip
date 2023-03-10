@@ -3,7 +3,7 @@ package ir.darkdeveloper.bitkip.controllers;
 import ir.darkdeveloper.bitkip.config.AppConfigs;
 import ir.darkdeveloper.bitkip.controllers.interfaces.NewDownloadFxmlController;
 import ir.darkdeveloper.bitkip.utils.ResizeUtil;
-import ir.darkdeveloper.bitkip.utils.TableUtils;
+import ir.darkdeveloper.bitkip.utils.MainTableUtils;
 import ir.darkdeveloper.bitkip.utils.WindowUtils;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -39,7 +39,7 @@ public class NewDownload implements NewDownloadFxmlController {
     private Button closeBtn;
     private Stage stage;
 
-    private TableUtils tableUtils;
+    private MainTableUtils mainTableUtils;
     private Rectangle2D bounds;
     private final int minWidth = 600, minHeight = 400;
 
@@ -57,8 +57,8 @@ public class NewDownload implements NewDownloadFxmlController {
     }
 
     @Override
-    public void setTableUtils(TableUtils tableUtils) {
-        this.tableUtils = tableUtils;
+    public void setTableUtils(MainTableUtils mainTableUtils) {
+        this.mainTableUtils = mainTableUtils;
         switchToSingleDownload();
     }
 
@@ -160,7 +160,7 @@ public class NewDownload implements NewDownloadFxmlController {
             box.getChildren().add(details);
             box.setId("download_details");
             controller.setStage(stage);
-            controller.setTableUtils(tableUtils);
+            controller.setTableUtils(mainTableUtils);
             AppConfigs.getQueueSubject().addObserver(controller);
             rootChildren.add(box);
         } catch (IOException e) {

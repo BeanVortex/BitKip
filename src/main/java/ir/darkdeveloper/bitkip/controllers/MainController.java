@@ -65,7 +65,7 @@ public class MainController implements FXMLController, QueueObserver {
     private Button hideBtn;
 
     private Stage stage;
-    private TableUtils tableUtils;
+    private MainTableUtils mainTableUtils;
     private Rectangle2D bounds;
     private final int minWidth = 853, minHeight = 515;
 
@@ -102,8 +102,8 @@ public class MainController implements FXMLController, QueueObserver {
         }
         WindowUtils.toolbarInits(toolbar, stage, bounds, actionBtn, minWidth, minHeight);
         WindowUtils.onToolbarDoubleClicked(toolbar, stage, contentTable, bounds, actionBtn, minWidth, minHeight);
-        MenuUtils.initFileMenu(menuFile, tableUtils);
-        MenuUtils.initOperationMenu(operationMenu, tableUtils);
+        MenuUtils.initFileMenu(menuFile, mainTableUtils);
+        MenuUtils.initOperationMenu(operationMenu, mainTableUtils);
         MenuUtils.initAboutMenu(aboutMenu, contentTable);
     }
 
@@ -117,8 +117,8 @@ public class MainController implements FXMLController, QueueObserver {
         StackPane.setAlignment(actionBtn, Pos.BOTTOM_RIGHT);
         bounds = Screen.getPrimary().getVisualBounds();
         mainBox.setPrefHeight(bounds.getHeight());
-        tableUtils = new TableUtils(contentTable);
-        tableUtils.tableInits();
+        mainTableUtils = new MainTableUtils(contentTable);
+        mainTableUtils.tableInits();
         initSides();
     }
 
@@ -172,7 +172,7 @@ public class MainController implements FXMLController, QueueObserver {
                             if (downloadModel.getProgress() == 100)
                                 downloadModel.setDownloadStatus(DownloadStatus.Completed);
                         }).toList();
-                tableUtils.setDownloads(downloadsData);
+                mainTableUtils.setDownloads(downloadsData);
                 if (!queueButtons.isEmpty() && !btn.getStyleClass().contains("selected_queue")) {
                     btn.getStyleClass().add("selected_queue");
                     queueButtons.forEach(otherBtn -> {
@@ -263,7 +263,7 @@ public class MainController implements FXMLController, QueueObserver {
     @FXML
     private void doAction() {
         contentTable.getSelectionModel().clearSelection();
-        FxUtils.newDownloadStage("newDownload.fxml", 600, 550, tableUtils);
+        FxUtils.newDownloadStage("newDownload.fxml", 600, 550, mainTableUtils);
     }
 
     @Override
