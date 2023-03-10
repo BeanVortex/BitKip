@@ -80,4 +80,28 @@ public class LinkTableUtils {
     }
 
 
+    public void updateLink(LinkModel lm) {
+        var l = findLinkModel(lm);
+        if (l != null) {
+            l.setSize(lm.getSize());
+            l.setName(lm.getName());
+            l.setResumeable(l.getResumeable());
+            refreshTable();
+        }
+    }
+
+    public LinkModel findLinkModel(LinkModel link) {
+        for (var d : data)
+            if (link.getLink().equals(d.getLink()))
+                return d;
+        return null;
+    }
+
+    public void refreshTable() {
+        table.refresh();
+    }
+
+    public ObservableList<LinkModel> getLinks() {
+        return table.getItems();
+    }
 }

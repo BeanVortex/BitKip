@@ -13,6 +13,7 @@ module ir.darkdeveloper.bitkip {
     requires org.apache.commons.lang3;
     requires org.junit.jupiter.api;
     requires org.junit.platform.commons;
+    requires reactor.core;
 
     opens ir.darkdeveloper.bitkip to javafx.fxml;
     opens ir.darkdeveloper.bitkip.controllers to javafx.fxml, javafx.base;

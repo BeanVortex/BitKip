@@ -2,11 +2,10 @@ package ir.darkdeveloper.bitkip.controllers;
 
 import ir.darkdeveloper.bitkip.controllers.interfaces.FXMLController;
 import ir.darkdeveloper.bitkip.models.LinkModel;
+import ir.darkdeveloper.bitkip.task.LinkDataTask;
 import ir.darkdeveloper.bitkip.utils.LinkTableUtils;
-import ir.darkdeveloper.bitkip.utils.MainTableUtils;
 import ir.darkdeveloper.bitkip.utils.ResizeUtil;
 import ir.darkdeveloper.bitkip.utils.WindowUtils;
-import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.control.Button;
@@ -19,6 +18,7 @@ import javafx.stage.Stage;
 import org.kordamp.ikonli.javafx.FontIcon;
 
 import java.util.List;
+import java.util.concurrent.Executors;
 
 import static ir.darkdeveloper.bitkip.BitKip.getResource;
 
@@ -37,12 +37,14 @@ public class BatchList implements FXMLController {
     private TableView<LinkModel> linkTable;
     private Stage stage;
 
+    private LinkTableUtils linkTableUtils;
     private Rectangle2D bounds;
 
 
     @Override
     public void initialize() {
         closeBtn.setGraphic(new FontIcon());
+        addBtn.requestFocus();
         bounds = Screen.getPrimary().getVisualBounds();
         mainBox.setPrefHeight(bounds.getHeight());
         linkTable.setPrefWidth(bounds.getWidth());
@@ -56,14 +58,23 @@ public class BatchList implements FXMLController {
     }
 
     public void setData(List<LinkModel> links) {
-        fetchLinksData(links);
-        var linkTableUtils = new LinkTableUtils(linkTable, links);
+        linkTableUtils = new LinkTableUtils(linkTable, links);
         linkTableUtils.tableInits();
+        fetchLinksData(links);
     }
 
     private void fetchLinksData(List<LinkModel> links) {
-        // todo: may be reactive
-        links.add(new LinkModel("link", 156564, 5, true, "asdfsad"));
+        var executor = Executors.newCachedThreadPool();
+        var linkTask = new LinkDataTask(links);
+        linkTask.valueProperty().addListener((o, ol, linkFlux) ->
+                executor.submit(() -> {
+                    linkFlux.subscribe(
+                            lm -> linkTableUtils.updateLink(lm),
+                            Throwable::printStackTrace,
+                            executor::shutdown
+                    );
+                }));
+        new Thread(linkTask).start();
     }
 
     @Override
@@ -102,6 +113,6 @@ public class BatchList implements FXMLController {
 
     @FXML
     private void onAdd() {
-
+        var links = linkTableUtils.getLinks();
     }
 }

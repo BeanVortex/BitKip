@@ -131,39 +131,48 @@ public class SingleDownload implements NewDownloadFxmlController {
     }
 
     private void autoFillLocationAndSizeAndName(boolean prepareFileName) {
-        var executor = Executors.newFixedThreadPool(2);
-        CompletableFuture<Void> fileNameLocationFuture = CompletableFuture.completedFuture(null);
-        var link = urlField.getText();
-        if (prepareFileName)
-            fileNameLocationFuture = NewDownloadUtils.prepareFileName(link, nameField, executor)
-                    .thenAccept(fileName -> NewDownloadUtils.determineLocationAndQueue(locationField, fileName, dm));
-        var sizeFuture = NewDownloadUtils.prepareSize(urlField, sizeLabel, chunksField, bytesField, dm, executor);
-        CompletableFuture.allOf(fileNameLocationFuture, sizeFuture)
-                .whenComplete((unused, throwable) -> {
-                    var file = new File(locationField.getText() + nameField.getText());
-                    var chunkFile = new File(locationField.getText() + nameField.getText() + "#0");
-                    if (file.exists() || chunkFile.exists()) {
+        try {
+            var link = urlField.getText();
+            var connection = NewDownloadUtils.connect(link, 3000, 3000);
+            var executor = Executors.newFixedThreadPool(2);
+            CompletableFuture<Void> fileNameLocationFuture = CompletableFuture.completedFuture(null);
+            if (prepareFileName)
+                fileNameLocationFuture = NewDownloadUtils.prepareFileNameAndFieldsAsync(connection, link, nameField, executor)
+                        .thenAccept(fileName -> NewDownloadUtils.determineLocationAndQueue(locationField, fileName, dm));
+            var sizeFuture = NewDownloadUtils.prepareFileSizeAndFieldsAsync(connection, urlField, sizeLabel, chunksField, bytesField, dm, executor);
+            CompletableFuture.allOf(fileNameLocationFuture, sizeFuture)
+                    .whenComplete((unused, throwable) -> {
+                        var file = new File(locationField.getText() + nameField.getText());
+                        var chunkFile = new File(locationField.getText() + nameField.getText() + "#0");
+                        if (file.exists() || chunkFile.exists()) {
+                            errorLabel.setVisible(true);
+                            downloadBtn.setDisable(true);
+                            addBtn.setDisable(true);
+                            Platform.runLater(() -> errorLabel.setText("File with this name exists in this location"));
+                        } else {
+                            errorLabel.setVisible(false);
+                            downloadBtn.setDisable(false);
+                            addBtn.setDisable(false);
+                        }
+                        executor.shutdown();
+                    })
+                    .exceptionally(throwable -> {
+                        if (!executor.isShutdown())
+                            executor.shutdown();
                         errorLabel.setVisible(true);
                         downloadBtn.setDisable(true);
                         addBtn.setDisable(true);
-                        Platform.runLater(() -> errorLabel.setText("File with this name exists in this location"));
-                    } else {
-                        errorLabel.setVisible(false);
-                        downloadBtn.setDisable(false);
-                        addBtn.setDisable(false);
-                    }
-                    executor.shutdown();
-                })
-                .exceptionally(throwable -> {
-                    if (!executor.isShutdown())
-                        executor.shutdown();
-                    errorLabel.setVisible(true);
-                    downloadBtn.setDisable(true);
-                    addBtn.setDisable(true);
-                    var errorMsg = throwable.getCause().getLocalizedMessage();
-                    Platform.runLater(() -> errorLabel.setText(errorMsg));
-                    return null;
-                });
+                        var errorMsg = throwable.getCause().getLocalizedMessage();
+                        Platform.runLater(() -> errorLabel.setText(errorMsg));
+                        return null;
+                    });
+        } catch (Exception e) {
+            errorLabel.setVisible(true);
+            downloadBtn.setDisable(true);
+            addBtn.setDisable(true);
+            var errorMsg = e.getLocalizedMessage();
+            errorLabel.setText(errorMsg);
+        }
     }
 
 

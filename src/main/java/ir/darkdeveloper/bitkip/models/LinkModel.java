@@ -27,8 +27,9 @@ public class LinkModel {
         this.name = name;
     }
 
-    public LinkModel(String link) {
+    public LinkModel(String link, int chunks) {
         this.link = link;
+        this.chunks = chunks;
     }
 
     public String getSizeString() {

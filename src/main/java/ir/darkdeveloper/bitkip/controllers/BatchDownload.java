@@ -8,8 +8,8 @@ import ir.darkdeveloper.bitkip.models.LinkModel;
 import ir.darkdeveloper.bitkip.models.QueueModel;
 import ir.darkdeveloper.bitkip.repo.QueuesRepo;
 import ir.darkdeveloper.bitkip.utils.FxUtils;
-import ir.darkdeveloper.bitkip.utils.NewDownloadUtils;
 import ir.darkdeveloper.bitkip.utils.MainTableUtils;
+import ir.darkdeveloper.bitkip.utils.NewDownloadUtils;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -22,9 +22,10 @@ import org.kordamp.ikonli.javafx.FontIcon;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executors;
 
-public class BatchDownload implements QueueObserver {
+public class BatchDownload implements NewDownloadFxmlController, QueueObserver {
     @FXML
     private Label errorLabel;
     @FXML
@@ -53,6 +54,7 @@ public class BatchDownload implements QueueObserver {
     private TextField urlField;
 
     private Stage stage;
+    private MainTableUtils mainTableUtils;
 
 
     @Override
@@ -98,9 +100,8 @@ public class BatchDownload implements QueueObserver {
             var url = urlField.getText();
             var start = Integer.parseInt(startField.getText());
             var end = Integer.parseInt(endField.getText());
-            var links = generateLinks(url, start, end, false);
+            var links = generateLinks(url, start, end, Integer.parseInt(chunksField.getText()),false);
             FxUtils.newBatchListStage(links);
-//             todo: new link check stage :: check their size and existence in system
         } catch (IllegalArgumentException e) {
             errorLabel.setVisible(true);
             addBtn.setDisable(true);
@@ -118,7 +119,7 @@ public class BatchDownload implements QueueObserver {
         var end = Integer.parseInt(endField.getText());
         LinkModel link;
         try {
-            var links = generateLinks(url, start, end, true);
+            var links = generateLinks(url, start, end, Integer.parseInt(chunksField.getText()), true);
             link = links.get(0);
         } catch (Exception e) {
             executor.shutdown();
@@ -130,7 +131,8 @@ public class BatchDownload implements QueueObserver {
             errorLabel.setText(errorMsg);
             return;
         }
-        var fileNameLocationFuture = NewDownloadUtils.prepareFileName(link.getLink(), null, executor)
+        var connection = NewDownloadUtils.connect(link.getLink(), 3000, 3000);
+        var fileNameLocationFuture = CompletableFuture.supplyAsync(() -> NewDownloadUtils.extractFileName(link.getLink(), connection))
                 .thenAccept(fileName -> NewDownloadUtils.determineLocationAndQueue(locationField, fileName, dm));
         fileNameLocationFuture.whenComplete((unused, throwable) -> {
             errorLabel.setVisible(false);
@@ -147,7 +149,7 @@ public class BatchDownload implements QueueObserver {
         });
     }
 
-    public List<LinkModel> generateLinks(String url, int start, int end, boolean oneLink) {
+    public List<LinkModel> generateLinks(String url, int start, int end, int chunks, boolean oneLink) {
         if (start > end)
             throw new IllegalArgumentException("Start value cannot be greater than end value");
 
@@ -174,9 +176,7 @@ public class BatchDownload implements QueueObserver {
                     else
                         link = replaceDollarOnce(link, '0');
                 }
-                links.add(new LinkModel(link));
-                if (oneLink)
-                    break;
+                links.add(new LinkModel(link, chunks));
             } else {
                 StringBuilder link = new StringBuilder(url);
                 var digitsToFill = signsIndex.size();
@@ -190,10 +190,10 @@ public class BatchDownload implements QueueObserver {
                     link.setCharAt(link.lastIndexOf("$"), (char) (cpI % 10 + 48));
                     cpI /= 10;
                 }
-                links.add(new LinkModel(link.toString()));
-                if (oneLink)
-                    break;
+                links.add(new LinkModel(link.toString(), chunks));
             }
+            if (oneLink)
+                break;
         }
 
         return links;
@@ -249,4 +249,8 @@ public class BatchDownload implements QueueObserver {
         queueCombo.setValue(queues.get(0));
     }
 
+    @Override
+    public void setTableUtils(MainTableUtils mainTableUtils) {
+        this.mainTableUtils = mainTableUtils;
+    }
 }
