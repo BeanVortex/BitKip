@@ -69,7 +69,7 @@ public class FxUtils {
         stage.setTitle("New Download");
         NewDownloadFxmlController controller = loader.getController();
         controller.setStage(stage);
-        controller.setTableUtils(mainTableUtils);
+        controller.setMainTableUtils(mainTableUtils);
         AppConfigs.getQueueSubject().addObserver(controller);
         stage.show();
     }
@@ -97,7 +97,7 @@ public class FxUtils {
         stage.showAndWait();
     }
 
-    public static void newBatchListStage(List<LinkModel> links) {
+    public static void newBatchListStage(List<LinkModel> links, MainTableUtils mainTableUtils) {
         FXMLLoader loader;
         Stage stage = new Stage();
         VBox root;
@@ -117,6 +117,7 @@ public class FxUtils {
         BatchList controller = loader.getController();
         controller.setStage(stage);
         controller.setData(links);
+        controller.setMainTableUtils(mainTableUtils);
         stage.show();
     }
 

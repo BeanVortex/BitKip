@@ -3,6 +3,9 @@ package ir.darkdeveloper.bitkip.models;
 import ir.darkdeveloper.bitkip.utils.IOUtils;
 import lombok.*;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Getter
 @Setter
 @ToString
@@ -15,17 +18,14 @@ public class LinkModel {
     private int chunks;
     private Boolean resumeable;
     private String name;
+    private String path;
+
+    private final List<QueueModel> queues = new ArrayList<>();
 
     private String sizeString;
     private String resumeableString;
+    private String queuesString;
 
-    public LinkModel(String link, long size, int chunks, boolean resumeable, String name) {
-        this.link = link;
-        this.size = size;
-        this.chunks = chunks;
-        this.resumeable = resumeable;
-        this.name = name;
-    }
 
     public LinkModel(String link, int chunks) {
         this.link = link;
@@ -42,4 +42,8 @@ public class LinkModel {
         return resumeable ? "yes" : "no";
     }
 
+    public String getQueuesString() {
+        var q = queues.toString();
+        return q.substring(q.lastIndexOf(',') + 2, q.lastIndexOf(']'));
+    }
 }

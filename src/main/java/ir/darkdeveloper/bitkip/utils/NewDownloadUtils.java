@@ -77,6 +77,22 @@ public class NewDownloadUtils {
         });
     }
 
+    public static void validInterInputCheck(TextField field) {
+        if (field == null)
+            return;
+        field.textProperty().addListener((o, old, newValue) -> {
+            if (!newValue.matches("\\d*")){
+                field.setText(newValue.replaceAll("\\D", ""));
+                if (field.getText().isBlank())
+                    field.setText("0");
+            }
+        });
+        field.focusedProperty().addListener((o, old, newValue) -> {
+            if (!newValue && field.getText().isBlank())
+                field.setText("0");
+        });
+    }
+
     public static void prepareLinkFromClipboard(TextField urlField) {
         var clip = Clipboard.getSystemClipboard();
         var clipContent = clip.getString();
@@ -125,7 +141,8 @@ public class NewDownloadUtils {
         return rangeSupport != null && !rangeSupport.equals("none");
     }
 
-    public static CompletableFuture<Long> prepareFileSizeAndFieldsAsync(HttpURLConnection connection, TextField urlField,
+    public static CompletableFuture<Long> prepareFileSizeAndFieldsAsync(HttpURLConnection connection, TextField
+            urlField,
                                                                         Label sizeLabel, TextField chunksField,
                                                                         TextField bytesField, DownloadModel dm,
                                                                         Executor executor) {
@@ -159,7 +176,8 @@ public class NewDownloadUtils {
         return UUID.randomUUID().toString();
     }
 
-    public static CompletableFuture<String> prepareFileNameAndFieldsAsync(HttpURLConnection connection, String link,
+    public static CompletableFuture<String> prepareFileNameAndFieldsAsync(HttpURLConnection connection, String
+            link,
                                                                           TextField nameField, Executor executor) {
         final HttpURLConnection[] finalConnection = {connection};
         return CompletableFuture.supplyAsync(() -> {
@@ -173,42 +191,42 @@ public class NewDownloadUtils {
     }
 
 
-    public static void determineLocationAndQueue(TextField locationField, String fileName, DownloadModel downloadModel) {
+    public static void determineLocationAndQueue(TextField locationField, String fileName, DownloadModel dm) {
         Platform.runLater(() -> {
             if (fileName.isBlank())
                 return;
             var compressedMatch = FileExtensions.compressedEx.stream().anyMatch(fileName::endsWith);
             if (compressedMatch) {
                 locationField.setText(AppConfigs.compressedPath);
-                downloadModel.setQueue(new ArrayList<>(List.of(QueuesRepo.findByName("Compressed"))));
+                dm.setQueue(new ArrayList<>(List.of(QueuesRepo.findByName("Compressed"))));
                 return;
             }
             var videoMatch = FileExtensions.videoEx.stream().anyMatch(fileName::endsWith);
             if (videoMatch) {
                 locationField.setText(AppConfigs.videosPath);
-                downloadModel.setQueue(new ArrayList<>(List.of(QueuesRepo.findByName("Videos"))));
+                dm.setQueue(new ArrayList<>(List.of(QueuesRepo.findByName("Videos"))));
                 return;
             }
             var programMatch = FileExtensions.programEx.stream().anyMatch(fileName::endsWith);
             if (programMatch) {
                 locationField.setText(AppConfigs.programsPath);
-                downloadModel.setQueue(new ArrayList<>(List.of(QueuesRepo.findByName("Programs"))));
+                dm.setQueue(new ArrayList<>(List.of(QueuesRepo.findByName("Programs"))));
                 return;
             }
             var musicMatch = FileExtensions.musicEx.stream().anyMatch(fileName::endsWith);
             if (musicMatch) {
                 locationField.setText(AppConfigs.musicPath);
-                downloadModel.setQueue(new ArrayList<>(List.of(QueuesRepo.findByName("Music"))));
+                dm.setQueue(new ArrayList<>(List.of(QueuesRepo.findByName("Music"))));
                 return;
             }
             var documentMatch = FileExtensions.documentEx.stream().anyMatch(fileName::endsWith);
             if (documentMatch) {
                 locationField.setText(AppConfigs.documentPath);
-                downloadModel.setQueue(new ArrayList<>(List.of(QueuesRepo.findByName("Docs"))));
+                dm.setQueue(new ArrayList<>(List.of(QueuesRepo.findByName("Docs"))));
                 return;
             }
             locationField.setText(AppConfigs.othersPath);
-            downloadModel.setQueue(new ArrayList<>(List.of(QueuesRepo.findByName("Others"))));
+            dm.setQueue(new ArrayList<>(List.of(QueuesRepo.findByName("Others"))));
         });
     }
 
@@ -228,7 +246,8 @@ public class NewDownloadUtils {
     }
 
 
-    public static void startDownload(DownloadModel dm, MainTableUtils mainTableUtils, String speed, String bytes, boolean resume) {
+    public static void startDownload(DownloadModel dm, MainTableUtils mainTableUtils, String speed, String bytes,
+                                     boolean resume) {
         DownloadTask downloadTask = new DownloadLimitedTask(dm, Long.MAX_VALUE, false, mainTableUtils);
         if (dm.getChunks() == 0) {
             if (speed != null) {

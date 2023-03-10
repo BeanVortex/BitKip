@@ -22,26 +22,29 @@ public class LinkTableUtils {
     }
 
     public void tableInits() {
-        var linkCol = new TableColumn<LinkModel, String>("Link");
+        var nameCol = new TableColumn<LinkModel, String>("Name");
         var sizeCol = new TableColumn<LinkModel, String>("Size");
         var chunksCol = new TableColumn<LinkModel, Integer>("Chunks");
         var resumeCol = new TableColumn<LinkModel, String>("Resumeable");
-        var nameCol = new TableColumn<LinkModel, String>("Name");
+        var queuesCol = new TableColumn<LinkModel, String>("Queues");
+        var linkCol = new TableColumn<LinkModel, String>("Link");
 
-        linkCol.setPrefWidth(200);
+        nameCol.setPrefWidth(300);
         sizeCol.setPrefWidth(90);
         chunksCol.setPrefWidth(70);
         resumeCol.setPrefWidth(90);
-        nameCol.setPrefWidth(200);
+        queuesCol.setPrefWidth(70);
+        linkCol.setPrefWidth(200);
         nameCol.setSortType(TableColumn.SortType.DESCENDING);
 
-        List<TableColumn<LinkModel, ?>> listOfColumns = List.of(linkCol, sizeCol, chunksCol, resumeCol, nameCol);
+        List<TableColumn<LinkModel, ?>> listOfColumns = List.of(nameCol, sizeCol, chunksCol, resumeCol, queuesCol, linkCol);
         table.getColumns().addAll(listOfColumns);
-        linkCol.setCellValueFactory(new PropertyValueFactory<>("link"));
+        nameCol.setCellValueFactory(new PropertyValueFactory<>("name"));
         sizeCol.setCellValueFactory(new PropertyValueFactory<>("sizeString"));
         chunksCol.setCellValueFactory(new PropertyValueFactory<>("chunks"));
         resumeCol.setCellValueFactory(new PropertyValueFactory<>("resumeableString"));
-        nameCol.setCellValueFactory(new PropertyValueFactory<>("name"));
+        queuesCol.setCellValueFactory(new PropertyValueFactory<>("queuesString"));
+        linkCol.setCellValueFactory(new PropertyValueFactory<>("link"));
 
         linkCol.setCellFactory(TextFieldTableCell.forTableColumn());
         linkCol.setOnEditCommit(e -> e.getTableView().getItems().get(e.getTablePosition().getRow()).setLink(e.getNewValue()));

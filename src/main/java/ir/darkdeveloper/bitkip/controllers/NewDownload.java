@@ -57,7 +57,7 @@ public class NewDownload implements NewDownloadFxmlController {
     }
 
     @Override
-    public void setTableUtils(MainTableUtils mainTableUtils) {
+    public void setMainTableUtils(MainTableUtils mainTableUtils) {
         this.mainTableUtils = mainTableUtils;
         switchToSingleDownload();
     }
@@ -160,7 +160,7 @@ public class NewDownload implements NewDownloadFxmlController {
             box.getChildren().add(details);
             box.setId("download_details");
             controller.setStage(stage);
-            controller.setTableUtils(mainTableUtils);
+            controller.setMainTableUtils(mainTableUtils);
             AppConfigs.getQueueSubject().addObserver(controller);
             rootChildren.add(box);
         } catch (IOException e) {

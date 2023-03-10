@@ -21,7 +21,7 @@ public class DownloadsRepo {
     public static void insertDownload(DownloadModel dm) {
         String lastTryDate = "NULL";
         if (dm.getLastTryDate() != null)
-            lastTryDate =  "\"" + dm.getLastTryDate() + "\"";
+            lastTryDate = "\"" + dm.getLastTryDate() + "\"";
 
         var downloadSql = """
                 INSERT INTO downloads (name, progress, downloaded, size, url, path, chunks, add_date, last_try_date)
@@ -219,5 +219,9 @@ public class DownloadsRepo {
         } catch (SQLException e) {
             e.printStackTrace();
         }
+    }
+
+    public static void insertDownloads(List<DownloadModel> dms) {
+        dms.forEach(DownloadsRepo::insertDownload);
     }
 }

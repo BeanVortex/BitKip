@@ -66,7 +66,7 @@ public class SingleDownload implements NewDownloadFxmlController {
 
 
     @Override
-    public void setTableUtils(MainTableUtils mainTableUtils) {
+    public void setMainTableUtils(MainTableUtils mainTableUtils) {
         this.mainTableUtils = mainTableUtils;
     }
 
@@ -223,9 +223,10 @@ public class SingleDownload implements NewDownloadFxmlController {
         var selectedQueue = queueCombo.getSelectionModel().getSelectedItem();
         var allDownloadsQueue = QueuesRepo.findByName("All Downloads");
         dm.getQueue().add(allDownloadsQueue);
-        dm.setDownloadStatus(DownloadStatus.Trying);
         if (selectedQueue.getId() != allDownloadsQueue.getId())
             dm.getQueue().add(selectedQueue);
+
+        dm.setDownloadStatus(DownloadStatus.Trying);
     }
 
 

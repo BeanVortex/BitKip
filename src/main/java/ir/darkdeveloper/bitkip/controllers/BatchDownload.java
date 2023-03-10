@@ -55,6 +55,7 @@ public class BatchDownload implements NewDownloadFxmlController, QueueObserver {
 
     private Stage stage;
     private MainTableUtils mainTableUtils;
+    private DownloadModel dm;
 
 
     @Override
@@ -79,8 +80,11 @@ public class BatchDownload implements NewDownloadFxmlController, QueueObserver {
         queueCombo.getItems().addAll(queues);
         queueCombo.setValue(queues.get(0));
         errorLabel.setVisible(false);
+        addBtn.setDisable(true);
         NewDownloadUtils.prepareLinkFromClipboard(urlField);
         NewDownloadUtils.validChunksInputChecks(chunksField);
+        NewDownloadUtils.validInterInputCheck(startField);
+        NewDownloadUtils.validInterInputCheck(endField);
         var questionBtns = new Button[]{questionBtnUrl, questionBtnChunks};
         var contents = new String[]{
                 "You want to download several files, clarify where urls are different by $ sign." +
@@ -88,7 +92,7 @@ public class BatchDownload implements NewDownloadFxmlController, QueueObserver {
                 "Every single file is seperated into parts and will be downloaded concurrently"
         };
         NewDownloadUtils.initPopOvers(questionBtns, contents);
-
+        autoFillLocation();
         startField.textProperty().addListener(o -> autoFillLocation());
         endField.textProperty().addListener(o -> autoFillLocation());
         urlField.textProperty().addListener(o -> autoFillLocation());
@@ -100,12 +104,24 @@ public class BatchDownload implements NewDownloadFxmlController, QueueObserver {
             var url = urlField.getText();
             var start = Integer.parseInt(startField.getText());
             var end = Integer.parseInt(endField.getText());
-            var links = generateLinks(url, start, end, Integer.parseInt(chunksField.getText()),false);
-            FxUtils.newBatchListStage(links);
+            var links = generateLinks(url, start, end, Integer.parseInt(chunksField.getText()), false);
+            var selectedQueue = queueCombo.getSelectionModel().getSelectedItem();
+            var allDownloadsQueue = QueuesRepo.findByName("All Downloads");
+            links.forEach(lm -> {
+                lm.getQueues().add(allDownloadsQueue);
+                lm.getQueues().addAll(dm.getQueue());
+                if (selectedQueue.getId() != allDownloadsQueue.getId())
+                    lm.getQueues().add(selectedQueue);
+                lm.setPath(locationField.getText());
+            });
+            FxUtils.newBatchListStage(links, mainTableUtils);
+            stage.close();
         } catch (IllegalArgumentException e) {
+            if (e instanceof NumberFormatException)
+                return;
             errorLabel.setVisible(true);
             addBtn.setDisable(true);
-            var errorStr = e.getCause().getLocalizedMessage();
+            var errorStr = e.getLocalizedMessage();
             errorLabel.setText(errorStr);
         }
     }
@@ -113,14 +129,17 @@ public class BatchDownload implements NewDownloadFxmlController, QueueObserver {
 
     private void autoFillLocation() {
         var executor = Executors.newCachedThreadPool();
-        var dm = new DownloadModel();
+        dm = new DownloadModel();
         var url = urlField.getText();
-        var start = Integer.parseInt(startField.getText());
-        var end = Integer.parseInt(endField.getText());
+
         LinkModel link;
         try {
+            var start = Integer.parseInt(startField.getText());
+            var end = Integer.parseInt(endField.getText());
             var links = generateLinks(url, start, end, Integer.parseInt(chunksField.getText()), true);
             link = links.get(0);
+        } catch (NumberFormatException ignore) {
+            return;
         } catch (Exception e) {
             executor.shutdown();
             errorLabel.setVisible(true);
@@ -250,7 +269,7 @@ public class BatchDownload implements NewDownloadFxmlController, QueueObserver {
     }
 
     @Override
-    public void setTableUtils(MainTableUtils mainTableUtils) {
+    public void setMainTableUtils(MainTableUtils mainTableUtils) {
         this.mainTableUtils = mainTableUtils;
     }
 }

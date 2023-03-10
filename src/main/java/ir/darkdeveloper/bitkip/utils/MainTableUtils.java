@@ -257,4 +257,9 @@ public class MainTableUtils {
         contentTable.getItems().removeAll(selectedItems);
     }
 
+    public void addRows(List<DownloadModel> downloads) {
+        contentTable.getItems().addAll(downloads);
+        data.addAll(downloads);
+        contentTable.sort();
+    }
 }
