@@ -11,6 +11,7 @@ import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 
 import java.net.URL;
+import java.util.ArrayList;
 
 public class BitKip extends Application {
 
@@ -33,8 +34,8 @@ public class BitKip extends Application {
 
     @Override
     public void stop() {
-        AppConfigs.currentDownloading.forEach(dm -> dm.getDownloadTask().pause());
-        AppConfigs.currentDownloading.forEach(DownloadsRepo::updateDownloadProgress);
+        var notObservedDms = new ArrayList<>(AppConfigs.currentDownloading);
+        notObservedDms.forEach(dm -> dm.getDownloadTask().pause());
     }
 
 

@@ -32,9 +32,9 @@ public class DownloadInChunksTask extends DownloadTask {
     private final List<DownloadModel> currentDownloading = AppConfigs.currentDownloading;
     private final List<FileChannel> fileChannels = new ArrayList<>();
     private final List<Path> filePaths = new ArrayList<>();
-    private ExecutorService executor;
     private volatile boolean paused;
     private volatile boolean isCalculating = false;
+    private ExecutorService executor;
     private ExecutorService partsExecutor;
     private ExecutorService statusExecutor;
 
