@@ -74,4 +74,18 @@ public class IOUtils {
         }
         return false;
     }
+
+    public static void deleteDownload(DownloadModel download) {
+        try {
+            if (download.getChunks() == 0)
+                Files.deleteIfExists(Path.of(download.getFilePath()));
+            else {
+                for (int i = 0; i < download.getChunks(); i++)
+                    Files.deleteIfExists(Path.of(download.getFilePath() + "#" + i));
+                Files.deleteIfExists(Path.of(download.getFilePath()));
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
 }

@@ -48,8 +48,8 @@ public class MenuUtils {
         menuItems.get(deleteDownloadsWithFile).setOnAction(event -> {
             var selectedItems = mainTableUtils.getSelected();
             selectedItems.forEach(DownloadsRepo::deleteDownload);
+            selectedItems.forEach(IOUtils::deleteDownload);
             mainTableUtils.remove(selectedItems);
-            // todo: delete files
         });
         menuItems.get(settings).setOnAction(event -> {
             System.out.println("settings");

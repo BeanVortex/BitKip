@@ -229,9 +229,9 @@ public class DownloadInChunksTask extends DownloadTask {
                     download.setProgress(100);
                     mainTableUtils.refreshTable();
                     updateProgress(1, 1);
+                    DownloadsRepo.updateDownloadCompleteDate(download);
                 }
                 DownloadsRepo.updateDownloadProgress(download);
-                DownloadsRepo.updateDownloadCompleteDate(download);
                 DownloadsRepo.updateDownloadLastTryDate(download);
                 currentDownloading.remove(index);
                 mainTableUtils.refreshTable();

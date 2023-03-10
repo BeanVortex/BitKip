@@ -15,11 +15,9 @@ import javafx.scene.input.MouseEvent;
 import javafx.util.Callback;
 import org.apache.commons.lang3.time.DurationFormatUtils;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.text.DecimalFormat;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 public class MainTableUtils {
@@ -128,6 +126,7 @@ public class MainTableUtils {
 
     // sequence is important where labels defined
     private void menuItemOperations(List<DownloadModel> dms, List<MenuItem> menuItems) {
+
         // resume
         menuItems.get(0).setOnAction(e -> dms.forEach(dm -> {
             dm.setLastTryDate(LocalDateTime.now());
@@ -143,8 +142,9 @@ public class MainTableUtils {
             download.getDownloadTask().pause();
         }));
 
+        var notObservedDms = new ArrayList<>(dms);
         // delete
-        menuItems.get(2).setOnAction(e -> dms.forEach(dm -> {
+        menuItems.get(2).setOnAction(e -> notObservedDms.forEach(dm -> {
             var index = AppConfigs.currentDownloading.indexOf(dm);
             var download = dm;
             if (index != -1)
@@ -157,25 +157,16 @@ public class MainTableUtils {
 
 
         // delete with file
-        menuItems.get(3).setOnAction(ev -> dms.forEach(dm -> {
-            try {
-                var index = AppConfigs.currentDownloading.indexOf(dm);
-                var download = dm;
-                if (index != -1)
-                    download = AppConfigs.currentDownloading.get(index);
-                if (download.getDownloadTask() != null && download.getDownloadTask().isRunning())
-                    download.getDownloadTask().pause();
-                if (download.getChunks() == 0)
-                    Files.deleteIfExists(Path.of(download.getFilePath()));
-                else
-                    for (int i = 0; i < download.getChunks(); i++)
-                        Files.deleteIfExists(Path.of(download.getFilePath() + "#" + i));
-
-                DownloadsRepo.deleteDownload(dm);
-                contentTable.getItems().remove(dm);
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
+        menuItems.get(3).setOnAction(ev -> notObservedDms.forEach(dm -> {
+            var index = AppConfigs.currentDownloading.indexOf(dm);
+            var download = dm;
+            if (index != -1)
+                download = AppConfigs.currentDownloading.get(index);
+            if (download.getDownloadTask() != null && download.getDownloadTask().isRunning())
+                download.getDownloadTask().pause();
+            IOUtils.deleteDownload(download);
+            DownloadsRepo.deleteDownload(dm);
+            contentTable.getItems().remove(dm);
         }));
     }
 
