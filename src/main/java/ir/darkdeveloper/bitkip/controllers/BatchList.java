@@ -68,7 +68,7 @@ public class BatchList implements NewDownloadFxmlController {
     }
 
     public void setData(List<LinkModel> links) {
-        linkTableUtils = new LinkTableUtils(linkTable, links);
+        linkTableUtils = new LinkTableUtils(linkTable, links, stage);
         linkTableUtils.tableInits();
         fetchLinksData(links);
     }

@@ -16,9 +16,11 @@ import javafx.util.Callback;
 import org.apache.commons.lang3.time.DurationFormatUtils;
 
 import java.text.DecimalFormat;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+
+import static ir.darkdeveloper.bitkip.utils.ShortcutUtils.*;
+
 
 public class MainTableUtils {
 
@@ -88,8 +90,9 @@ public class MainTableUtils {
 
         contentTable.setOnMouseClicked(onItemsClicked());
         contentTable.setRowFactory(getTableViewTableRowCallback());
-
     }
+
+
 
     private Callback<TableView<DownloadModel>, TableRow<DownloadModel>> getTableViewTableRowCallback() {
         return param -> {
@@ -103,7 +106,8 @@ public class MainTableUtils {
                     var deleteLbl = new Label("delete");
                     var deleteWithFileLbl = new Label("delete with file");
                     var lbls = List.of(resumeLbl, pauseLbl, deleteLbl, deleteWithFileLbl);
-                    var menuItems = MenuUtils.createMenuItems(lbls);
+                    var keyCodes = List.of(SHIFT_R, SHIFT_P, DEL, SHIFT_DEL);
+                    var menuItems = MenuUtils.createMenuItems(lbls, keyCodes);
                     selectedItems.forEach(dm -> {
                         switch (dm.getDownloadStatus()) {
                             case Downloading -> menuItems.get(0).setDisable(true);
@@ -128,45 +132,23 @@ public class MainTableUtils {
     private void menuItemOperations(List<DownloadModel> dms, List<MenuItem> menuItems) {
 
         // resume
-        menuItems.get(0).setOnAction(e -> dms.forEach(dm -> {
-            dm.setLastTryDate(LocalDateTime.now());
-            dm.setDownloadStatus(DownloadStatus.Trying);
-            DownloadsRepo.updateDownloadLastTryDate(dm);
-            refreshTable();
-            NewDownloadUtils.startDownload(dm, this, null, null, true);
-        }));
+        menuItems.get(0).setOnAction(e ->
+                dms.forEach(dm -> DownloadOpUtils.resumeDownload(dm, this::refreshTable, this)));
 
         // pause
-        menuItems.get(1).setOnAction(e -> dms.forEach(dm -> {
-            var download = AppConfigs.currentDownloading.get(AppConfigs.currentDownloading.indexOf(dm));
-            download.getDownloadTask().pause();
-        }));
+        menuItems.get(1).setOnAction(e -> dms.forEach(DownloadOpUtils::pauseDownload));
 
         var notObservedDms = new ArrayList<>(dms);
         // delete
-        menuItems.get(2).setOnAction(e -> notObservedDms.forEach(dm -> {
-            var index = AppConfigs.currentDownloading.indexOf(dm);
-            var download = dm;
-            if (index != -1)
-                download = AppConfigs.currentDownloading.get(index);
-            if (download.getDownloadTask() != null && download.getDownloadTask().isRunning())
-                download.getDownloadTask().pause();
-            DownloadsRepo.deleteDownload(dm);
-            contentTable.getItems().remove(dm);
-        }));
-
-
+        menuItems.get(2).setOnAction(e -> {
+            notObservedDms.forEach(DownloadOpUtils::deleteDownloadRecord);
+            contentTable.getItems().removeAll(notObservedDms);
+        });
         // delete with file
         menuItems.get(3).setOnAction(ev -> notObservedDms.forEach(dm -> {
-            var index = AppConfigs.currentDownloading.indexOf(dm);
-            var download = dm;
-            if (index != -1)
-                download = AppConfigs.currentDownloading.get(index);
-            if (download.getDownloadTask() != null && download.getDownloadTask().isRunning())
-                download.getDownloadTask().pause();
-            IOUtils.deleteDownload(download);
-            DownloadsRepo.deleteDownload(dm);
-            contentTable.getItems().remove(dm);
+            DownloadOpUtils.deleteDownloadRecord(dm);
+            IOUtils.deleteDownload(dm);
+            contentTable.getItems().removeAll(notObservedDms);
         }));
     }
 

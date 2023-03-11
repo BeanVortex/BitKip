@@ -84,6 +84,9 @@ public class MainController implements FXMLController, QueueObserver {
 
     @Override
     public void initAfterStage() {
+        mainTableUtils = new MainTableUtils(contentTable);
+        mainTableUtils.tableInits();
+        ShortcutUtils.initMainTableShortcut(mainTableUtils, stage);
         stage.widthProperty().addListener((ob, o, n) -> {
             contentTable.setPrefWidth(n.doubleValue() + 90);
             toolbar.setPrefWidth(n.longValue());
@@ -117,8 +120,6 @@ public class MainController implements FXMLController, QueueObserver {
         StackPane.setAlignment(actionBtn, Pos.BOTTOM_RIGHT);
         bounds = Screen.getPrimary().getVisualBounds();
         mainBox.setPrefHeight(bounds.getHeight());
-        mainTableUtils = new MainTableUtils(contentTable);
-        mainTableUtils.tableInits();
         initSides();
     }
 

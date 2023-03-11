@@ -7,6 +7,7 @@ import ir.darkdeveloper.bitkip.repo.DownloadsRepo;
 import javafx.application.Platform;
 import javafx.geometry.Side;
 import javafx.scene.control.*;
+import javafx.scene.input.KeyCodeCombination;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -167,14 +168,20 @@ public class MenuUtils {
         return menuItems;
     }
 
-    public static List<MenuItem> createMenuItems(List<Label> lbls) {
+    /**
+     * labels value should correspond keycodes value
+     * otherwise leave keycodes null
+    * */
+    public static List<MenuItem> createMenuItems(List<Label> lbls, List<KeyCodeCombination> keyCodes) {
         var menuItems = new ArrayList<MenuItem>();
-        lbls.forEach(label -> {
-            label.setPrefWidth(150);
+        for (int i = 0; i < lbls.size(); i++) {
+            lbls.get(i).setPrefWidth(150);
             var menuItem = new MenuItem();
-            menuItem.setGraphic(label);
+            menuItem.setGraphic(lbls.get(i));
+            if (keyCodes != null && keyCodes.get(i) != null)
+                menuItem.setAccelerator(keyCodes.get(i));
             menuItems.add(menuItem);
-        });
+        }
         return menuItems;
     }
 

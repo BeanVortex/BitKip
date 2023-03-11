@@ -31,8 +31,8 @@ public class FxUtils {
             var scene = new Scene(root, stage.getWidth(), stage.getHeight());
             MainController controller = loader.getController();
             AppConfigs.getQueueSubject().addObserver(controller);
-            controller.setStage(stage);
             stage.setScene(scene);
+            controller.setStage(stage);
             stage.setTitle("BitKip");
         } catch (IOException ex) {
             ex.printStackTrace();
