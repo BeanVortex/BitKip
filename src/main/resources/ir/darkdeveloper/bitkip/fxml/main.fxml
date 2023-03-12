@@ -35,7 +35,7 @@
                 </ScrollPane>
                 <TableView minWidth="750" prefWidth="Infinity" fx:id="contentTable"/>
             </HBox>
-            <Button fx:id="actionBtn" onAction="#doAction">
+            <Button fx:id="newDownloadBtn" onAction="#onNewDownload">
                 <StackPane.margin>
                     <Insets>
                         <bottom>25</bottom>

@@ -63,7 +63,7 @@
     -fx-alignment: LEFT;
 }
 
-#actionBtn {
+#newDownloadBtn {
     -fx-min-width: 50;
     -fx-min-height: 50;
     -fx-border-color: transparent;
@@ -74,15 +74,15 @@
     -fx-padding: 10px;
 }
 
-#actionBtn:hover {
+#newDownloadBtn:hover {
     -fx-background-color: #388E3C;
 }
 
-#actionBtn:pressed {
+#newDownloadBtn:pressed {
     -fx-effect: none;
 }
 
-#actionBtn .ikonli-font-icon {
+#newDownloadBtn .ikonli-font-icon {
     -fx-icon-code: "fas-plus";
     -fx-icon-size: 20px;
     -fx-icon-color: #FAFAFA;

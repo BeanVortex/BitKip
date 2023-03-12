@@ -50,7 +50,7 @@ public class MainController implements FXMLController, QueueObserver {
     @FXML
     private Button menuFile;
     @FXML
-    private Button actionBtn;
+    private Button newDownloadBtn;
     @FXML
     private TableView<DownloadModel> contentTable;
     @FXML
@@ -96,15 +96,15 @@ public class MainController implements FXMLController, QueueObserver {
             if (WindowUtils.isOnPrimaryScreen(newValue.doubleValue()))
                 bounds = Screen.getPrimary().getVisualBounds();
         });
-        actionBtnInits();
+        newDownloadBtnInits();
         var logoPath = getResource("icons/logo.png");
         if (logoPath != null) {
             var img = new Image(logoPath.toExternalForm());
             logoImg.setImage(img);
             stage.getIcons().add(img);
         }
-        WindowUtils.toolbarInits(toolbar, stage, bounds, actionBtn, minWidth, minHeight);
-        WindowUtils.onToolbarDoubleClicked(toolbar, stage, contentTable, bounds, actionBtn, minWidth, minHeight);
+        WindowUtils.toolbarInits(toolbar, stage, bounds, newDownloadBtn, minWidth, minHeight);
+        WindowUtils.onToolbarDoubleClicked(toolbar, stage, contentTable, bounds, newDownloadBtn, minWidth, minHeight);
         MenuUtils.initFileMenu(menuFile, mainTableUtils);
         MenuUtils.initOperationMenu(operationMenu, mainTableUtils);
         MenuUtils.initAboutMenu(aboutMenu, contentTable);
@@ -116,8 +116,8 @@ public class MainController implements FXMLController, QueueObserver {
         closeBtn.setGraphic(new FontIcon());
         fullWindowBtn.setGraphic(new FontIcon());
         hideBtn.setGraphic(new FontIcon());
-        actionBtn.setGraphic(new FontIcon());
-        StackPane.setAlignment(actionBtn, Pos.BOTTOM_RIGHT);
+        newDownloadBtn.setGraphic(new FontIcon());
+        StackPane.setAlignment(newDownloadBtn, Pos.BOTTOM_RIGHT);
         bounds = Screen.getPrimary().getVisualBounds();
         mainBox.setPrefHeight(bounds.getHeight());
         initSides();
@@ -192,12 +192,10 @@ public class MainController implements FXMLController, QueueObserver {
                 var deleteLbl = new Label("Delete");
 
                 var lbls = List.of(scheduleLbl, deleteLbl);
-                var menuItems = MenuUtils.createMapMenuItems(lbls);
+                var menuItems = MenuUtils.createMapMenuItems(lbls, null);
                 cMenu.getItems().addAll(menuItems.values());
                 btn.setContextMenu(cMenu);
-                menuItems.get(scheduleLbl).setOnAction(e -> {
-                    System.out.println("change schedule");
-                });
+                menuItems.get(scheduleLbl).setOnAction(e -> System.out.println("change schedule"));
                 menuItems.get(deleteLbl).setOnAction(e -> {
                     QueuesRepo.deleteQueue(btn.getText());
                     AppConfigs.deleteQueue(btn.getText());
@@ -209,24 +207,24 @@ public class MainController implements FXMLController, QueueObserver {
     }
 
 
-    private void actionBtnInits() {
-        var transition = new TranslateTransition(Duration.millis(300), actionBtn);
+    private void newDownloadBtnInits() {
+        var transition = new TranslateTransition(Duration.millis(300), newDownloadBtn);
         var scrollBar = new AtomicReference<>((ScrollBar) contentTable.lookup(".scroll-bar:vertical"));
         contentTable.addEventFilter(ScrollEvent.ANY, event -> {
             if (scrollBar.get() == null)
                 scrollBar.set((ScrollBar) contentTable.lookup(".scroll-bar:vertical"));
             if (!scrollBar.get().isVisible()) {
-                if (actionBtn.getTranslateY() == 100)
-                    actionBtn.setTranslateY(0);
+                if (newDownloadBtn.getTranslateY() == 100)
+                    newDownloadBtn.setTranslateY(0);
                 return;
             }
 
-            if (actionBtn.getTranslateY() == 100 && event.getDeltaY() > 0) {
+            if (newDownloadBtn.getTranslateY() == 100 && event.getDeltaY() > 0) {
                 transition.setFromY(100);
                 transition.setToY(0);
                 transition.play();
             }
-            if (actionBtn.getTranslateY() == 0 && event.getDeltaY() < 0) {
+            if (newDownloadBtn.getTranslateY() == 0 && event.getDeltaY() < 0) {
                 transition.setFromY(0);
                 transition.setToY(100);
                 transition.play();
@@ -235,8 +233,8 @@ public class MainController implements FXMLController, QueueObserver {
         stage.heightProperty().addListener((observable, oldValue, newValue) -> {
             var sb = (ScrollBar) contentTable.lookup(".scroll-bar:vertical");
             if (sb != null && !sb.isVisible()) {
-                if (actionBtn.getTranslateY() == 100)
-                    actionBtn.setTranslateY(0);
+                if (newDownloadBtn.getTranslateY() == 100)
+                    newDownloadBtn.setTranslateY(0);
             }
         });
     }
@@ -255,15 +253,15 @@ public class MainController implements FXMLController, QueueObserver {
     private void toggleFullWindowApp() {
         var screenY = stage.getY();
         if (screenY - bounds.getMinY() >= 0 && bounds.getHeight() > stage.getHeight())
-            bounds = WindowUtils.maximizeWindow(stage, bounds, actionBtn);
+            bounds = WindowUtils.maximizeWindow(stage, bounds, newDownloadBtn);
         else if (screenY - bounds.getMinY() <= 0 && bounds.getHeight() <= stage.getHeight())
             bounds = WindowUtils.minimizeWindow(stage, bounds, minWidth, minHeight);
 
     }
 
     @FXML
-    private void doAction() {
-        contentTable.getSelectionModel().clearSelection();
+    private void onNewDownload() {
+        mainTableUtils.clearSelection();
         FxUtils.newDownloadStage("newDownload.fxml", 600, 550, mainTableUtils);
     }
 

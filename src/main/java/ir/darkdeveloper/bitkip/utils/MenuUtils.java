@@ -1,18 +1,16 @@
 package ir.darkdeveloper.bitkip.utils;
 
-import ir.darkdeveloper.bitkip.config.AppConfigs;
 import ir.darkdeveloper.bitkip.models.DownloadModel;
-import ir.darkdeveloper.bitkip.models.DownloadStatus;
-import ir.darkdeveloper.bitkip.repo.DownloadsRepo;
 import javafx.application.Platform;
 import javafx.geometry.Side;
 import javafx.scene.control.*;
 import javafx.scene.input.KeyCodeCombination;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
+
+import static ir.darkdeveloper.bitkip.utils.ShortcutUtils.*;
 
 public class MenuUtils {
 
@@ -26,69 +24,58 @@ public class MenuUtils {
         var settings = new Label("Settings");
         var exit = new Label("exit");
         var lbls = List.of(addLink, batchDownload, deleteDownloads, deleteDownloadsWithFile, settings, exit);
-        var menuItems = createMapMenuItems(lbls);
+        var keyCodes = List.of(NEW_DOWNLOAD_KEY, NEW_BATCH_KEY, DELETE_KEY, DELETE_FILE_KEY, SETTINGS_KEY, QUIT_KEY);
+        var menuItems = createMapMenuItems(lbls, keyCodes);
         c.getItems().addAll(menuItems.values());
         menuFile.setContextMenu(c);
         menuFile.setOnMouseClicked(event -> {
             var selectedItems = mainTableUtils.getSelected();
             menuItems.get(deleteDownloads).setDisable(selectedItems.size() == 0);
+            menuItems.get(deleteDownloadsWithFile).setDisable(selectedItems.size() == 0);
             deleteDownloads.setText("Delete selected (" + selectedItems.size() + ")");
             c.show(menuFile, Side.BOTTOM, 0, 0);
         });
-        menuItems.get(addLink).setOnAction(event -> {
-            System.out.println("new Download");
-        });
-        menuItems.get(batchDownload).setOnAction(event -> {
-            System.out.println("new batch download");
-        });
-        menuItems.get(deleteDownloads).setOnAction(event -> {
-            var selectedItems = mainTableUtils.getSelected();
-            selectedItems.forEach(DownloadsRepo::deleteDownload);
-            mainTableUtils.remove(selectedItems);
-        });
-        menuItems.get(deleteDownloadsWithFile).setOnAction(event -> {
-            var selectedItems = mainTableUtils.getSelected();
-            selectedItems.forEach(DownloadsRepo::deleteDownload);
-            selectedItems.forEach(IOUtils::deleteDownload);
-            mainTableUtils.remove(selectedItems);
-        });
-        menuItems.get(settings).setOnAction(event -> {
-            System.out.println("settings");
-        });
-        menuItems.get(exit).setOnAction(event -> Platform.exit());
+        menuItems.get(addLink).setOnAction(e -> DownloadOpUtils.newDownload(mainTableUtils, false));
+        menuItems.get(batchDownload).setOnAction(e -> DownloadOpUtils.newDownload(mainTableUtils, true));
+        menuItems.get(deleteDownloads).setOnAction(e -> DownloadOpUtils.deleteDownloads(mainTableUtils, false));
+        menuItems.get(deleteDownloadsWithFile).setOnAction(e -> DownloadOpUtils.deleteDownloads(mainTableUtils, true));
+        menuItems.get(settings).setOnAction(e -> System.out.println("settings"));
+        menuItems.get(exit).setOnAction(e -> Platform.exit());
     }
 
 
     public static void initOperationMenu(Button operationMenu, MainTableUtils mainTableUtils) {
         var c = new ContextMenu();
-        var resume = new Label("resume");
-        var pause = new Label("pause");
-        var restart = new Label("restart");
-        var newQueue = new Label("new queue");
-        var addQueue = new Label("add to queue");
-        var startQueue = new Label("start queue");
-        var stopQueue = new Label("stop queue");
+        var resume = new Label("Resume");
+        var pause = new Label("Pause");
+        var restart = new Label("Restart");
+        var newQueue = new Label("New queue");
+        var addQueue = new Label("Add to queue");
+        var startQueue = new Label("Start queue");
+        var stopQueue = new Label("Stop queue");
 
         var lbls = List.of(resume, pause, restart);
+        var keyCodes = List.of(RESUME_KEY, PAUSE_KEY, RESTART_KEY);
+        var menuItems = createMapMenuItems(lbls, keyCodes);
+
         var split = new SeparatorMenuItem();
-        var menuItems = createMapMenuItems(lbls);
         menuItems.put(new Label("s"), split);
 
         var newQueueMenu = new MenuItem();
         newQueueMenu.setGraphic(newQueue);
+        newQueueMenu.setAccelerator(NEW_QUEUE_KEY);
+        menuItems.put(newQueue, newQueueMenu);
 
         var addQueueMenu = new Menu();
         addQueueMenu.setGraphic(addQueue);
+        menuItems.put(addQueue, addQueueMenu);
 
         var startQueueMenu = new Menu();
         startQueueMenu.setGraphic(startQueue);
+        menuItems.put(startQueue, startQueueMenu);
 
         var stopQueueMenu = new Menu();
         stopQueueMenu.setGraphic(stopQueue);
-
-        menuItems.put(newQueue, newQueueMenu);
-        menuItems.put(addQueue, addQueueMenu);
-        menuItems.put(startQueue, startQueueMenu);
         menuItems.put(stopQueue, stopQueueMenu);
 
         c.getItems().addAll(menuItems.values());
@@ -105,36 +92,9 @@ public class MenuUtils {
             c.show(operationMenu, Side.BOTTOM, 0, 0);
         });
 
-        menuItems.get(resume).setOnAction(event -> {
-            var selectedItems = mainTableUtils.getSelected();
-            selectedItems
-                    .filtered(dm -> !AppConfigs.currentDownloading.contains(dm))
-                    .forEach(dm -> {
-                        dm.setLastTryDate(LocalDateTime.now());
-                        dm.setDownloadStatus(DownloadStatus.Trying);
-                        DownloadsRepo.updateDownloadLastTryDate(dm);
-                        mainTableUtils.refreshTable();
-                        NewDownloadUtils.startDownload(dm, mainTableUtils, null, null, true);
-                    });
-        });
-        menuItems.get(pause).setOnAction(event -> {
-            var selectedItems = mainTableUtils.getSelected();
-            selectedItems.forEach(dm -> {
-                if (dm.getDownloadStatus().equals(DownloadStatus.Downloading)) {
-                    var downTask = dm.getDownloadTask();
-                    if (downTask != null && downTask.isRunning())
-                        downTask.pause();
-                    else {
-                        downTask = AppConfigs.currentDownloading
-                                .get(AppConfigs.currentDownloading.indexOf(dm))
-                                .getDownloadTask();
-                        if (downTask.isRunning())
-                            downTask.pause();
-                    }
-                    mainTableUtils.refreshTable();
-                }
-            });
-        });
+        menuItems.get(resume).setOnAction(e -> DownloadOpUtils.resumeDownloads(mainTableUtils));
+        menuItems.get(pause).setOnAction(e -> DownloadOpUtils.pauseDownloads(mainTableUtils));
+        menuItems.get(newQueue).setOnAction(e -> FxUtils.newQueueStage());
     }
 
     public static void initAboutMenu(Button aboutMenu, TableView<DownloadModel> table) {
@@ -143,7 +103,7 @@ public class MenuUtils {
         var about = new Label("About");
 
         var lbls = List.of(checkForUpdates, about);
-        var menuItems = createMapMenuItems(lbls);
+        var menuItems = createMapMenuItems(lbls, null);
         c.getItems().addAll(menuItems.values());
         aboutMenu.setContextMenu(c);
         aboutMenu.setOnAction(event -> {
@@ -157,21 +117,23 @@ public class MenuUtils {
     }
 
 
-    public static LinkedHashMap<Label, MenuItem> createMapMenuItems(List<Label> lbls) {
+    public static LinkedHashMap<Label, MenuItem> createMapMenuItems(List<Label> lbls, List<KeyCodeCombination> keyCodes) {
         var menuItems = new LinkedHashMap<Label, MenuItem>();
-        lbls.forEach(label -> {
-            label.setPrefWidth(150);
+        for (int i = 0; i < lbls.size(); i++) {
+            lbls.get(i).setPrefWidth(150);
             var menuItem = new MenuItem();
-            menuItem.setGraphic(label);
-            menuItems.put(label, menuItem);
-        });
+            menuItem.setGraphic(lbls.get(i));
+            if (keyCodes != null && keyCodes.get(i) != null)
+                menuItem.setAccelerator(keyCodes.get(i));
+            menuItems.put(lbls.get(i), menuItem);
+        }
         return menuItems;
     }
 
     /**
      * labels value should correspond keycodes value
      * otherwise leave keycodes null
-    * */
+     */
     public static List<MenuItem> createMenuItems(List<Label> lbls, List<KeyCodeCombination> keyCodes) {
         var menuItems = new ArrayList<MenuItem>();
         for (int i = 0; i < lbls.size(); i++) {

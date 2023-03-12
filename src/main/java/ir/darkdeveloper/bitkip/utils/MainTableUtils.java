@@ -16,7 +16,6 @@ import javafx.util.Callback;
 import org.apache.commons.lang3.time.DurationFormatUtils;
 
 import java.text.DecimalFormat;
-import java.util.ArrayList;
 import java.util.List;
 
 import static ir.darkdeveloper.bitkip.utils.ShortcutUtils.*;
@@ -93,7 +92,6 @@ public class MainTableUtils {
     }
 
 
-
     private Callback<TableView<DownloadModel>, TableRow<DownloadModel>> getTableViewTableRowCallback() {
         return param -> {
             var row = new TableRow<DownloadModel>();
@@ -106,7 +104,7 @@ public class MainTableUtils {
                     var deleteLbl = new Label("delete");
                     var deleteWithFileLbl = new Label("delete with file");
                     var lbls = List.of(resumeLbl, pauseLbl, deleteLbl, deleteWithFileLbl);
-                    var keyCodes = List.of(SHIFT_R, SHIFT_P, DEL, SHIFT_DEL);
+                    var keyCodes = List.of(RESUME_KEY, PAUSE_KEY, DELETE_KEY, DELETE_FILE_KEY);
                     var menuItems = MenuUtils.createMenuItems(lbls, keyCodes);
                     selectedItems.forEach(dm -> {
                         switch (dm.getDownloadStatus()) {
@@ -119,7 +117,7 @@ public class MainTableUtils {
                         }
                     });
                     cMenu.getItems().addAll(menuItems);
-                    menuItemOperations(selectedItems, menuItems);
+                    menuItemOperations(menuItems);
                     row.setContextMenu(cMenu);
                     cMenu.show(row, event.getX(), event.getY());
                 }
@@ -129,27 +127,15 @@ public class MainTableUtils {
     }
 
     // sequence is important where labels defined
-    private void menuItemOperations(List<DownloadModel> dms, List<MenuItem> menuItems) {
-
+    private void menuItemOperations(List<MenuItem> menuItems) {
         // resume
-        menuItems.get(0).setOnAction(e ->
-                dms.forEach(dm -> DownloadOpUtils.resumeDownload(dm, this::refreshTable, this)));
-
+        menuItems.get(0).setOnAction(e -> DownloadOpUtils.resumeDownloads(this));
         // pause
-        menuItems.get(1).setOnAction(e -> dms.forEach(DownloadOpUtils::pauseDownload));
-
-        var notObservedDms = new ArrayList<>(dms);
+        menuItems.get(1).setOnAction(e -> DownloadOpUtils.pauseDownloads(this));
         // delete
-        menuItems.get(2).setOnAction(e -> {
-            notObservedDms.forEach(DownloadOpUtils::deleteDownloadRecord);
-            contentTable.getItems().removeAll(notObservedDms);
-        });
+        menuItems.get(2).setOnAction(e -> DownloadOpUtils.deleteDownloads(this, false));
         // delete with file
-        menuItems.get(3).setOnAction(ev -> notObservedDms.forEach(dm -> {
-            DownloadOpUtils.deleteDownloadRecord(dm);
-            IOUtils.deleteDownload(dm);
-            contentTable.getItems().removeAll(notObservedDms);
-        }));
+        menuItems.get(3).setOnAction(ev -> DownloadOpUtils.deleteDownloads(this, true));
     }
 
     private EventHandler<? super MouseEvent> onItemsClicked() {
@@ -234,5 +220,9 @@ public class MainTableUtils {
         contentTable.getItems().addAll(downloads);
         data.addAll(downloads);
         contentTable.sort();
+    }
+
+    public void clearSelection() {
+        contentTable.getSelectionModel().clearSelection();
     }
 }
