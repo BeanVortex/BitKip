@@ -125,7 +125,7 @@ public class NewDownloadUtils {
 
     public static void checkFieldsAfterSizePreparation(long fileSize, Label sizeLabel, TextField chunksField,
                                                        TextField bytesField, HttpURLConnection connection) {
-        if (canResume(connection)) {
+        if (!canResume(connection)) {
             chunksField.setText("0");
             chunksField.setDisable(true);
         } else
@@ -141,8 +141,7 @@ public class NewDownloadUtils {
         return rangeSupport != null && !rangeSupport.equals("none");
     }
 
-    public static CompletableFuture<Long> prepareFileSizeAndFieldsAsync(HttpURLConnection connection, TextField
-            urlField,
+    public static CompletableFuture<Long> prepareFileSizeAndFieldsAsync(HttpURLConnection connection, TextField urlField,
                                                                         Label sizeLabel, TextField chunksField,
                                                                         TextField bytesField, DownloadModel dm,
                                                                         Executor executor) {
