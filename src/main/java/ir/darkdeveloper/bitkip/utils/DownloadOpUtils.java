@@ -48,8 +48,8 @@ public class DownloadOpUtils {
         mainTableUtils.remove(selectedItems);
     }
 
-    public static void newDownload(MainTableUtils mainTableUtils, boolean isBatch) {
+    public static void newDownload(MainTableUtils mainTableUtils, boolean isSingle) {
         mainTableUtils.clearSelection();
-        FxUtils.newDownloadStage("newDownload.fxml", mainTableUtils);
+        FxUtils.newDownloadStage("newDownload.fxml", mainTableUtils, isSingle);
     }
 }

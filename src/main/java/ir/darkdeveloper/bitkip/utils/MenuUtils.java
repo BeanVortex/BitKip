@@ -35,8 +35,8 @@ public class MenuUtils {
             deleteDownloads.setText("Delete selected (" + selectedItems.size() + ")");
             c.show(menuFile, Side.BOTTOM, 0, 0);
         });
-        menuItems.get(addLink).setOnAction(e -> DownloadOpUtils.newDownload(mainTableUtils, false));
-        menuItems.get(batchDownload).setOnAction(e -> DownloadOpUtils.newDownload(mainTableUtils, true));
+        menuItems.get(addLink).setOnAction(e -> DownloadOpUtils.newDownload(mainTableUtils, true));
+        menuItems.get(batchDownload).setOnAction(e -> DownloadOpUtils.newDownload(mainTableUtils, false));
         menuItems.get(deleteDownloads).setOnAction(e -> DownloadOpUtils.deleteDownloads(mainTableUtils, false));
         menuItems.get(deleteDownloadsWithFile).setOnAction(e -> DownloadOpUtils.deleteDownloads(mainTableUtils, true));
         menuItems.get(settings).setOnAction(e -> System.out.println("settings"));

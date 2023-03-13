@@ -60,7 +60,14 @@ public class NewDownload implements NewDownloadFxmlController {
     @Override
     public void setMainTableUtils(MainTableUtils mainTableUtils) {
         this.mainTableUtils = mainTableUtils;
-        switchToSingleDownload();
+    }
+
+    public void setIsSingle(boolean isSingle) {
+        this.isSingle = isSingle;
+        if (isSingle)
+            switchToSingleDownload();
+        else
+            switchToMultipleDownload();
     }
 
     @Override

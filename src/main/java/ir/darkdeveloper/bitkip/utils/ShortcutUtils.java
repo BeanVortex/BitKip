@@ -25,8 +25,8 @@ public class ShortcutUtils {
 
     public static void initMainTableShortcut(MainTableUtils mainTableUtils, Stage stage) {
 
-        Runnable newDownload = () -> DownloadOpUtils.newDownload(mainTableUtils, false);
-        Runnable newBatchDownload = () -> DownloadOpUtils.newDownload(mainTableUtils, true);
+        Runnable newDownload = () -> DownloadOpUtils.newDownload(mainTableUtils, true);
+        Runnable newBatchDownload = () -> DownloadOpUtils.newDownload(mainTableUtils, false);
         Runnable resume = () -> DownloadOpUtils.resumeDownloads(mainTableUtils);
         Runnable pause = () -> DownloadOpUtils.pauseDownloads(mainTableUtils);
         Runnable delete = () -> DownloadOpUtils.deleteDownloads(mainTableUtils, false);

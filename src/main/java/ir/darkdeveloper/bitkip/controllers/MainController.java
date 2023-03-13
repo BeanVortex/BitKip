@@ -261,8 +261,7 @@ public class MainController implements FXMLController, QueueObserver {
 
     @FXML
     private void onNewDownload() {
-        mainTableUtils.clearSelection();
-        FxUtils.newDownloadStage("newDownload.fxml", mainTableUtils);
+        DownloadOpUtils.newDownload(mainTableUtils, true);
     }
 
     @Override

@@ -4,8 +4,8 @@ package ir.darkdeveloper.bitkip.utils;
 import ir.darkdeveloper.bitkip.config.AppConfigs;
 import ir.darkdeveloper.bitkip.controllers.BatchList;
 import ir.darkdeveloper.bitkip.controllers.MainController;
+import ir.darkdeveloper.bitkip.controllers.NewDownload;
 import ir.darkdeveloper.bitkip.controllers.NewQueueController;
-import ir.darkdeveloper.bitkip.controllers.interfaces.NewDownloadFxmlController;
 import ir.darkdeveloper.bitkip.models.LinkModel;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXMLLoader;
@@ -50,7 +50,7 @@ public class FxUtils {
         return null;
     }
 
-    public static void newDownloadStage(String fxmlFilename, MainTableUtils mainTableUtils) {
+    public static void newDownloadStage(String fxmlFilename, MainTableUtils mainTableUtils, boolean isSingle) {
         FXMLLoader loader;
         Stage stage = new Stage();
         Parent root;
@@ -67,9 +67,10 @@ public class FxUtils {
         stage.setMinHeight(AppConfigs.newDownloadMinHeight);
         stage.initStyle(StageStyle.TRANSPARENT);
         stage.setTitle("New Download");
-        NewDownloadFxmlController controller = loader.getController();
+        NewDownload controller = loader.getController();
         controller.setStage(stage);
         controller.setMainTableUtils(mainTableUtils);
+        controller.setIsSingle(isSingle);
         AppConfigs.getQueueSubject().addObserver(controller);
         stage.show();
     }

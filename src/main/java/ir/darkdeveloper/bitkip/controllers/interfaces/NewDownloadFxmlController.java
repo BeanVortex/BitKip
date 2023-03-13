@@ -5,4 +5,5 @@ import ir.darkdeveloper.bitkip.utils.MainTableUtils;
 
 public interface NewDownloadFxmlController extends QueueObserver {
     void setMainTableUtils(MainTableUtils mainTableUtils);
+
 }
