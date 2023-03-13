@@ -176,8 +176,7 @@ public class NewDownloadUtils {
         return UUID.randomUUID().toString();
     }
 
-    public static CompletableFuture<String> prepareFileNameAndFieldsAsync(HttpURLConnection connection, String
-            link,
+    public static CompletableFuture<String> prepareFileNameAndFieldsAsync(HttpURLConnection connection, String link,
                                                                           TextField nameField, Executor executor) {
         final HttpURLConnection[] finalConnection = {connection};
         return CompletableFuture.supplyAsync(() -> {

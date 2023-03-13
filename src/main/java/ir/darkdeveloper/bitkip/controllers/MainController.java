@@ -33,6 +33,7 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static ir.darkdeveloper.bitkip.BitKip.getResource;
+import static ir.darkdeveloper.bitkip.config.AppConfigs.*;
 
 
 public class MainController implements FXMLController, QueueObserver {
@@ -67,7 +68,6 @@ public class MainController implements FXMLController, QueueObserver {
     private Stage stage;
     private MainTableUtils mainTableUtils;
     private Rectangle2D bounds;
-    private final int minWidth = 853, minHeight = 515;
 
     @Override
     public void setStage(Stage stage) {
@@ -103,8 +103,8 @@ public class MainController implements FXMLController, QueueObserver {
             logoImg.setImage(img);
             stage.getIcons().add(img);
         }
-        WindowUtils.toolbarInits(toolbar, stage, bounds, newDownloadBtn, minWidth, minHeight);
-        WindowUtils.onToolbarDoubleClicked(toolbar, stage, contentTable, bounds, newDownloadBtn, minWidth, minHeight);
+        WindowUtils.toolbarInits(toolbar, stage, bounds, newDownloadBtn, mainPrefWidth, mainPrefHeight);
+        WindowUtils.onToolbarDoubleClicked(toolbar, stage, contentTable, bounds, newDownloadBtn, mainPrefWidth, mainPrefHeight);
         MenuUtils.initFileMenu(menuFile, mainTableUtils);
         MenuUtils.initOperationMenu(operationMenu, mainTableUtils);
         MenuUtils.initAboutMenu(aboutMenu, contentTable);
@@ -255,14 +255,14 @@ public class MainController implements FXMLController, QueueObserver {
         if (screenY - bounds.getMinY() >= 0 && bounds.getHeight() > stage.getHeight())
             bounds = WindowUtils.maximizeWindow(stage, bounds, newDownloadBtn);
         else if (screenY - bounds.getMinY() <= 0 && bounds.getHeight() <= stage.getHeight())
-            bounds = WindowUtils.minimizeWindow(stage, bounds, minWidth, minHeight);
+            bounds = WindowUtils.minimizeWindow(stage, bounds, mainPrefWidth, mainPrefHeight);
 
     }
 
     @FXML
     private void onNewDownload() {
         mainTableUtils.clearSelection();
-        FxUtils.newDownloadStage("newDownload.fxml", 600, 550, mainTableUtils);
+        FxUtils.newDownloadStage("newDownload.fxml", mainTableUtils);
     }
 
     @Override

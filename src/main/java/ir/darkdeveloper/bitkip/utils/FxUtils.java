@@ -32,6 +32,8 @@ public class FxUtils {
             MainController controller = loader.getController();
             AppConfigs.getQueueSubject().addObserver(controller);
             stage.setScene(scene);
+            stage.setMinWidth(AppConfigs.mainMinWidth);
+            stage.setMinHeight(AppConfigs.mainMinHeight);
             controller.setStage(stage);
             stage.setTitle("BitKip");
         } catch (IOException ex) {
@@ -48,8 +50,7 @@ public class FxUtils {
         return null;
     }
 
-    public static void newDownloadStage(String fxmlFilename, double minWidth,
-                                        double minHeight, MainTableUtils mainTableUtils) {
+    public static void newDownloadStage(String fxmlFilename, MainTableUtils mainTableUtils) {
         FXMLLoader loader;
         Stage stage = new Stage();
         Parent root;
@@ -62,10 +63,9 @@ public class FxUtils {
         }
         var scene = new Scene(root);
         stage.setScene(scene);
-        stage.setMinWidth(minWidth);
-        stage.setMinHeight(minHeight);
+        stage.setMinWidth(AppConfigs.newDownloadMinWidth);
+        stage.setMinHeight(AppConfigs.newDownloadMinHeight);
         stage.initStyle(StageStyle.TRANSPARENT);
-        stage.setMaxHeight(600);
         stage.setTitle("New Download");
         NewDownloadFxmlController controller = loader.getController();
         controller.setStage(stage);

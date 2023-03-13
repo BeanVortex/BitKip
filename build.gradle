@@ -11,6 +11,7 @@ group 'ir.darkdeveloper'
 version '0.1.0'
 sourceCompatibility = '19'
 targetCompatibility = '19'
+mainClassName = 'ir.darkdeveloper.bitkip.BitKip'
 
 repositories {
     mavenCentral()
@@ -27,7 +28,7 @@ tasks.withType(JavaCompile).configureEach {
 }
 
 application {
-    mainClass = 'ir.darkdeveloper.bitkip.BitKip'
+    mainClass = mainClassName
     mainModule = 'ir.darkdeveloper.bitkip'
 }
 

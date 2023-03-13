@@ -129,17 +129,31 @@ public class BatchDownload implements NewDownloadFxmlController, QueueObserver {
 
     private void autoFillLocation() {
         var executor = Executors.newCachedThreadPool();
-        dm = new DownloadModel();
-        var url = urlField.getText();
-
-        LinkModel link;
         try {
+            dm = new DownloadModel();
+            var url = urlField.getText();
             var start = Integer.parseInt(startField.getText());
             var end = Integer.parseInt(endField.getText());
             var links = generateLinks(url, start, end, Integer.parseInt(chunksField.getText()), true);
-            link = links.get(0);
+            var link = links.get(0);
+
+            var connection = NewDownloadUtils.connect(link.getLink(), 3000, 3000);
+            var fileNameLocationFuture = CompletableFuture.supplyAsync(() -> NewDownloadUtils.extractFileName(link.getLink(), connection))
+                    .thenAccept(fileName -> NewDownloadUtils.determineLocationAndQueue(locationField, fileName, dm));
+            fileNameLocationFuture.whenComplete((unused, throwable) -> {
+                errorLabel.setVisible(false);
+                addBtn.setDisable(false);
+                executor.shutdown();
+            }).exceptionally(throwable -> {
+                if (!executor.isShutdown())
+                    executor.shutdown();
+                errorLabel.setVisible(true);
+                addBtn.setDisable(true);
+                var errorMsg = throwable.getCause().getLocalizedMessage();
+                Platform.runLater(() -> errorLabel.setText(errorMsg));
+                return null;
+            });
         } catch (NumberFormatException ignore) {
-            return;
         } catch (Exception e) {
             executor.shutdown();
             errorLabel.setVisible(true);
@@ -148,24 +162,7 @@ public class BatchDownload implements NewDownloadFxmlController, QueueObserver {
             if (e instanceof IndexOutOfBoundsException)
                 errorMsg = "No links found";
             errorLabel.setText(errorMsg);
-            return;
         }
-        var connection = NewDownloadUtils.connect(link.getLink(), 3000, 3000);
-        var fileNameLocationFuture = CompletableFuture.supplyAsync(() -> NewDownloadUtils.extractFileName(link.getLink(), connection))
-                .thenAccept(fileName -> NewDownloadUtils.determineLocationAndQueue(locationField, fileName, dm));
-        fileNameLocationFuture.whenComplete((unused, throwable) -> {
-            errorLabel.setVisible(false);
-            addBtn.setDisable(false);
-            executor.shutdown();
-        }).exceptionally(throwable -> {
-            if (!executor.isShutdown())
-                executor.shutdown();
-            errorLabel.setVisible(true);
-            addBtn.setDisable(true);
-            var errorMsg = throwable.getCause().getLocalizedMessage();
-            Platform.runLater(() -> errorLabel.setText(errorMsg));
-            return null;
-        });
     }
 
     public List<LinkModel> generateLinks(String url, int start, int end, int chunks, boolean oneLink) {

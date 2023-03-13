@@ -50,6 +50,6 @@ public class DownloadOpUtils {
 
     public static void newDownload(MainTableUtils mainTableUtils, boolean isBatch) {
         mainTableUtils.clearSelection();
-        FxUtils.newDownloadStage("newDownload.fxml", 600, 550, mainTableUtils);
+        FxUtils.newDownloadStage("newDownload.fxml", mainTableUtils);
     }
 }

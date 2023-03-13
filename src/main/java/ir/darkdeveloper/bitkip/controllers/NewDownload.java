@@ -21,6 +21,8 @@ import org.kordamp.ikonli.javafx.FontIcon;
 import java.io.IOException;
 
 import static ir.darkdeveloper.bitkip.BitKip.getResource;
+import static ir.darkdeveloper.bitkip.config.AppConfigs.newDownloadMinHeight;
+import static ir.darkdeveloper.bitkip.config.AppConfigs.newDownloadMinWidth;
 
 public class NewDownload implements NewDownloadFxmlController {
     @FXML
@@ -41,7 +43,6 @@ public class NewDownload implements NewDownloadFxmlController {
 
     private MainTableUtils mainTableUtils;
     private Rectangle2D bounds;
-    private final int minWidth = 600, minHeight = 400;
 
     private boolean isSingle = true;
 
@@ -88,8 +89,8 @@ public class NewDownload implements NewDownloadFxmlController {
                 bounds = Screen.getPrimary().getVisualBounds();
         });
 
-        WindowUtils.toolbarInits(toolbar, stage, bounds, minWidth, minHeight);
-        WindowUtils.onToolbarDoubleClicked(toolbar, stage, null, bounds, null, minWidth, minHeight);
+        WindowUtils.toolbarInits(toolbar, stage, bounds, newDownloadMinWidth, newDownloadMinHeight);
+        WindowUtils.onToolbarDoubleClicked(toolbar, stage, null, bounds, null, newDownloadMinWidth, newDownloadMinHeight);
         ResizeUtil.addResizeListener(stage);
 
     }
@@ -110,7 +111,7 @@ public class NewDownload implements NewDownloadFxmlController {
 
     @FXML
     private void toggleFullWindowApp() {
-        bounds = WindowUtils.toggleWindowSize(stage, bounds, minWidth, minHeight);
+        bounds = WindowUtils.toggleWindowSize(stage, bounds, newDownloadMinWidth, newDownloadMinHeight);
     }
 
     @FXML
