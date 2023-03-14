@@ -5,6 +5,8 @@ module ir.darkdeveloper.bitkip {
 
     requires org.controlsfx.controls;
     requires org.kordamp.ikonli.javafx;
+    //dynamic load in jlink image
+    requires org.kordamp.ikonli.fontawesome5;
     requires org.kordamp.bootstrapfx.core;
     requires java.logging;
     requires lombok;
