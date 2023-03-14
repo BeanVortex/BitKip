@@ -277,7 +277,7 @@ public class NewDownloadUtils {
             DownloadsRepo.insertDownload(dm);
             mainTableUtils.addRow(dm);
         }
-        AppConfigs.currentDownloading.add(dm);
+        AppConfigs.currentDownloadings.add(dm);
         var executor = Executors.newCachedThreadPool();
         downloadTask.setExecutor(executor);
         executor.submit(downloadTask);

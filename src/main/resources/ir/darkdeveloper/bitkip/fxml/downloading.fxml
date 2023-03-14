@@ -1,14 +1,53 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import java.lang.*?>
-<?import java.util.*?>
-<?import javafx.scene.*?>
 <?import javafx.scene.control.*?>
+<?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.*?>
+<?import java.net.URL?>
+<VBox minWidth="600" prefWidth="600"
+      minHeight="260" prefHeight="260"
+      xmlns="http://javafx.com/javafx/16"
+      xmlns:fx="http://javafx.com/fxml/1" fx:controller="ir.darkdeveloper.bitkip.controllers.DownloadingController">
+    <stylesheets>
+        <URL value="@../css/main.css"/>
+        <URL value="@../css/newDownload.css"/>
+    </stylesheets>
 
-<AnchorPane xmlns="http://javafx.com/javafx"
-            xmlns:fx="http://javafx.com/fxml"
-            fx:controller="ir.darkdeveloper.bitkip.controllers.DownloadingController"
-            prefHeight="400.0" prefWidth="600.0">
+    <HBox maxHeight="2" minHeight="2" styleClass="csm_toolbar"/>
 
-</AnchorPane>
+    <HBox styleClass="csm_toolbar" minWidth="296" prefWidth="296">
+        <HBox maxWidth="2" minWidth="2" styleClass="csm_toolbar"/>
+        <HBox fx:id="toolbar" minWidth="296" prefWidth="296" alignment="CENTER" maxHeight="32" minHeight="32"
+              spacing="10">
+            <ImageView fx:id="logoImg" fitWidth="30" fitHeight="30"/>
+            <Label fx:id="titleLbl" text="Downloading..." styleClass="bold"/>
+            <Region HBox.hgrow="ALWAYS"/>
+            <Button fx:id="hideBtn" onAction="#hideWindowApp"/>
+            <Button fx:id="closeBtn" onAction="#closeApp"/>
+        </HBox>
+        <HBox maxWidth="2" minWidth="2" styleClass="csm_toolbar"/>
+    </HBox>
+
+
+    <VBox spacing="10" style="-fx-padding: 8">
+        <Label fx:id="nameLbl" text="fileName"/>
+        <Label fx:id="queueLbl" text="queueName"/>
+        <Label fx:id="statusLbl" text="status"/>
+        <VBox spacing="5">
+            <HBox>
+                <Label fx:id="speedLbl" text="0 MB/s"/>
+                <Region HBox.hgrow="ALWAYS"/>
+                <Label fx:id="downloadedOfLbl" text="0 MB / 0 MB"/>
+            </HBox>
+            <ProgressBar fx:id="downloadProgress" prefWidth="Infinity"/>
+        </VBox>
+        <Label fx:id="remainingLbl" text="remaining time"/>
+        <HBox alignment="BOTTOM_CENTER" style="-fx-padding: 10 0 5 0">
+            <HBox spacing="20" alignment="CENTER">
+                <Button text="Close" styleClass="cancel_btn" onAction="#onClose"/>
+                <Button text="Pause" styleClass="add_btn" fx:id="controlBtn" onAction="#onControl"/>
+            </HBox>
+        </HBox>
+
+    </VBox>
+</VBox>

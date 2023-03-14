@@ -1,6 +1,5 @@
 package ir.darkdeveloper.bitkip.utils;
 
-import ir.darkdeveloper.bitkip.config.AppConfigs;
 import ir.darkdeveloper.bitkip.models.DownloadModel;
 import ir.darkdeveloper.bitkip.models.DownloadStatus;
 import ir.darkdeveloper.bitkip.repo.DownloadsRepo;
@@ -18,6 +17,7 @@ import org.apache.commons.lang3.time.DurationFormatUtils;
 import java.text.DecimalFormat;
 import java.util.List;
 
+import static ir.darkdeveloper.bitkip.config.AppConfigs.currentDownloadings;
 import static ir.darkdeveloper.bitkip.utils.ShortcutUtils.*;
 
 
@@ -26,7 +26,6 @@ public class MainTableUtils {
 
     private final TableView<DownloadModel> contentTable;
     private final ObservableList<DownloadModel> data = FXCollections.observableArrayList();
-    private final List<DownloadModel> currentDownloading = AppConfigs.currentDownloading;
 
     public MainTableUtils(TableView<DownloadModel> contentTable) {
         this.contentTable = contentTable;
@@ -140,8 +139,9 @@ public class MainTableUtils {
 
     private EventHandler<? super MouseEvent> onItemsClicked() {
         return event -> {
-            if (event.getButton().equals(MouseButton.PRIMARY)) {
-                // todo: open downloading stage
+            if (event.getButton().equals(MouseButton.PRIMARY) && event.getClickCount() == 2) {
+                var dm = getSelected().get(0);
+                DownloadOpUtils.openDownloadingStage(dm, this);
             }
         };
     }
@@ -160,7 +160,7 @@ public class MainTableUtils {
 
     public void updateDownloadSpeedAndRemaining(long speed, DownloadModel dm, Long bytesDownloaded) {
         var downTask = dm.getDownloadTask();
-        if (downTask.isRunning() && currentDownloading.size() != 0) {
+        if (downTask.isRunning() && currentDownloadings.size() != 0) {
             var i = findDownload(dm.getId());
             if (i != null) {
                 i.setSpeed(speed);
@@ -169,7 +169,6 @@ public class MainTableUtils {
                 i.setDownloaded(bytesDownloaded);
                 if (speed != 0) {
                     long delta = dm.getSize() - bytesDownloaded;
-                    // todo bug chunks
                     var remaining = DurationFormatUtils.formatDuration((delta / speed) * 1000, "dd:HH:mm:ss");
                     i.setRemainingTime(remaining);
                 }
@@ -180,8 +179,8 @@ public class MainTableUtils {
 
     public void updateDownloadProgress(float progress, DownloadModel dm) {
         var downTask = dm.getDownloadTask();
-        if (downTask.isRunning() && currentDownloading.size() != 0) {
-            var i2 = currentDownloading.get(currentDownloading.indexOf(dm));
+        if (downTask.isRunning() && currentDownloadings.size() != 0) {
+            var i2 = currentDownloadings.get(currentDownloadings.indexOf(dm));
             i2.setProgress(progress);
             var i = findDownload(dm.getId());
             if (i != null) {

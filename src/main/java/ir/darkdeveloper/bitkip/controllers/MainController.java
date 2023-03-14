@@ -166,7 +166,7 @@ public class MainController implements FXMLController, QueueObserver {
             if (event.getClickCount() == 2)
                 return;
             if (event.getButton().equals(MouseButton.PRIMARY)) {
-                AppConfigs.currentDownloading.forEach(DownloadsRepo::updateTableStatus);
+                AppConfigs.currentDownloadings.forEach(DownloadsRepo::updateTableStatus);
                 var downloadsData = DownloadsRepo.getDownloadsByQueue(queueModel.getId())
                         .stream().peek(downloadModel -> {
                             downloadModel.setDownloadStatus(DownloadStatus.Paused);

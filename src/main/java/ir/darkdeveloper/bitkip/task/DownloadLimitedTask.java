@@ -1,6 +1,5 @@
 package ir.darkdeveloper.bitkip.task;
 
-import ir.darkdeveloper.bitkip.config.AppConfigs;
 import ir.darkdeveloper.bitkip.models.DownloadModel;
 import ir.darkdeveloper.bitkip.models.DownloadStatus;
 import ir.darkdeveloper.bitkip.repo.DownloadsRepo;
@@ -18,9 +17,10 @@ import java.net.URL;
 import java.nio.channels.Channels;
 import java.nio.channels.FileChannel;
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+
+import static ir.darkdeveloper.bitkip.config.AppConfigs.currentDownloadings;
 
 
 public class DownloadLimitedTask extends DownloadTask {
@@ -29,7 +29,6 @@ public class DownloadLimitedTask extends DownloadTask {
     private final long limit;
     private final boolean isSpeedLimited;
     private final MainTableUtils mainTableUtils;
-    private final List<DownloadModel> currentDownloading = AppConfigs.currentDownloading;
     private File file;
     private ExecutorService executor;
 
@@ -122,9 +121,9 @@ public class DownloadLimitedTask extends DownloadTask {
     @Override
     protected void succeeded() {
         try {
-            var index = currentDownloading.indexOf(downloadModel);
+            var index = currentDownloadings.indexOf(downloadModel);
             if (index != -1) {
-                var download = currentDownloading.get(index);
+                var download = currentDownloadings.get(index);
                 download.setDownloadStatus(DownloadStatus.Paused);
                 if (file.exists() && getCurrentFileSize(file) == downloadModel.getSize()) {
                     download.setCompleteDate(LocalDateTime.now());
@@ -136,7 +135,7 @@ public class DownloadLimitedTask extends DownloadTask {
                 download.setDownloaded(getCurrentFileSize(file));
                 DownloadsRepo.updateDownloadProgress(download);
                 DownloadsRepo.updateDownloadLastTryDate(download);
-                currentDownloading.remove(index);
+                currentDownloadings.remove(index);
                 mainTableUtils.refreshTable();
             }
             executor.shutdown();

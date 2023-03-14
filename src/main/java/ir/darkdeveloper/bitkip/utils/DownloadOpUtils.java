@@ -1,32 +1,40 @@
 package ir.darkdeveloper.bitkip.utils;
 
-import ir.darkdeveloper.bitkip.config.AppConfigs;
+import ir.darkdeveloper.bitkip.controllers.DownloadingController;
+import ir.darkdeveloper.bitkip.models.DownloadModel;
 import ir.darkdeveloper.bitkip.models.DownloadStatus;
 import ir.darkdeveloper.bitkip.repo.DownloadsRepo;
 
 import java.time.LocalDateTime;
+
+import static ir.darkdeveloper.bitkip.config.AppConfigs.currentDownloadings;
+import static ir.darkdeveloper.bitkip.config.AppConfigs.openDownloadings;
 
 public class DownloadOpUtils {
 
     public static void resumeDownloads(MainTableUtils mainTableUtils) {
         var selectedItems = mainTableUtils.getSelected();
         selectedItems
-                .filtered(dm -> !AppConfigs.currentDownloading.contains(dm))
+                .filtered(dm -> !currentDownloadings.contains(dm))
                 .forEach(dm -> {
                     dm.setLastTryDate(LocalDateTime.now());
                     dm.setDownloadStatus(DownloadStatus.Trying);
                     DownloadsRepo.updateDownloadLastTryDate(dm);
                     mainTableUtils.refreshTable();
                     NewDownloadUtils.startDownload(dm, mainTableUtils, null, null, true);
+                    openDownloadings.stream().filter(dc -> dc.getDownloadModel().equals(dm))
+                            .forEach(DownloadingController::initDownloadListeners);
                 });
     }
 
     public static void pauseDownloads(MainTableUtils mainTableUtils) {
         mainTableUtils.getSelected().forEach(dm -> {
-            var index = AppConfigs.currentDownloading.indexOf(dm);
+            var index = currentDownloadings.indexOf(dm);
             if (index != -1) {
-                var download = AppConfigs.currentDownloading.get(index);
+                var download = currentDownloadings.get(index);
                 download.getDownloadTask().pause();
+                openDownloadings.stream().filter(dc -> dc.getDownloadModel().equals(dm))
+                        .forEach(DownloadingController::onPause);
             }
         });
     }
@@ -34,9 +42,9 @@ public class DownloadOpUtils {
     public static void deleteDownloads(MainTableUtils mainTableUtils, boolean withFiles) {
         var selectedItems = mainTableUtils.getSelected();
         selectedItems.forEach(dm -> {
-            var index = AppConfigs.currentDownloading.indexOf(dm);
+            var index = currentDownloadings.indexOf(dm);
             if (index != -1)
-                dm = AppConfigs.currentDownloading.get(index);
+                dm = currentDownloadings.get(index);
             if (dm.getDownloadTask() != null && dm.getDownloadTask().isRunning())
                 dm.getDownloadTask().pause();
             DownloadsRepo.deleteDownload(dm);
@@ -50,6 +58,10 @@ public class DownloadOpUtils {
 
     public static void newDownload(MainTableUtils mainTableUtils, boolean isSingle) {
         mainTableUtils.clearSelection();
-        FxUtils.newDownloadStage("newDownload.fxml", mainTableUtils, isSingle);
+        FxUtils.newDownloadStage(mainTableUtils, isSingle);
+    }
+
+    public static void openDownloadingStage(DownloadModel dm, MainTableUtils mainTableUtils) {
+        FxUtils.newDownloadingStage(dm, mainTableUtils);
     }
 }

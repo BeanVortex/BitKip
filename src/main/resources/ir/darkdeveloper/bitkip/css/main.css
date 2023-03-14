@@ -1,7 +1,7 @@
 
 .csm_toolbar {
     -fx-background-color: #657a85;
-    -fx-padding: 0px 5px 2px 10px;
+    -fx-padding: 0px 5px 2px 0px;
 }
 
 .toolbar_menu, .csm_toolbar .label {

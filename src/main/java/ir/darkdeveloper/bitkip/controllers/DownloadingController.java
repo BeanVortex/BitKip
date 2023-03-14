@@ -1,20 +1,92 @@
 package ir.darkdeveloper.bitkip.controllers;
 
 import ir.darkdeveloper.bitkip.controllers.interfaces.FXMLController;
+import ir.darkdeveloper.bitkip.models.DownloadModel;
+import ir.darkdeveloper.bitkip.models.DownloadStatus;
+import ir.darkdeveloper.bitkip.repo.DownloadsRepo;
+import ir.darkdeveloper.bitkip.task.DownloadTask;
+import ir.darkdeveloper.bitkip.utils.*;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.SimpleBooleanProperty;
+import javafx.fxml.FXML;
+import javafx.geometry.Rectangle2D;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import javafx.scene.control.ProgressBar;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
+import javafx.scene.layout.HBox;
+import javafx.stage.Screen;
 import javafx.stage.Stage;
+import org.apache.commons.lang3.time.DurationFormatUtils;
+import org.kordamp.ikonli.javafx.FontIcon;
+
+import java.time.LocalDateTime;
+
+import static ir.darkdeveloper.bitkip.BitKip.getResource;
+import static ir.darkdeveloper.bitkip.config.AppConfigs.*;
 
 public class DownloadingController implements FXMLController {
 
+    @FXML
+    private ImageView logoImg;
+    @FXML
+    private Label titleLbl;
+    @FXML
+    private ProgressBar downloadProgress;
+    @FXML
+    private Label nameLbl;
+    @FXML
+    private Label queueLbl;
+    @FXML
+    private Label statusLbl;
+    @FXML
+    private Label speedLbl;
+    @FXML
+    private Label downloadedOfLbl;
+    @FXML
+    private Label remainingLbl;
+    @FXML
+    private Button controlBtn;
+    @FXML
+    private HBox toolbar;
+    @FXML
+    private Button hideBtn;
+    @FXML
+    private Button closeBtn;
+
     private Stage stage;
+    private DownloadModel downloadModel;
+    private Rectangle2D bounds;
+
+    private final BooleanProperty isPaused = new SimpleBooleanProperty(true);
+    private MainTableUtils mainTableUtils;
+
 
     @Override
     public void initAfterStage() {
+        stage.widthProperty().addListener((ob, o, n) -> toolbar.setPrefWidth(n.longValue()));
 
+        var logoPath = getResource("icons/logo.png");
+        if (logoPath != null) {
+            var img = new Image(logoPath.toExternalForm());
+            logoImg.setImage(img);
+            stage.getIcons().add(img);
+        }
+
+        stage.xProperty().addListener((observable, oldValue, newValue) -> {
+            if (WindowUtils.isOnPrimaryScreen(newValue.doubleValue()))
+                bounds = Screen.getPrimary().getVisualBounds();
+        });
+
+        WindowUtils.toolbarInits(toolbar, stage, bounds, downloadingMinWidth, downloadingMinHeight);
+        ResizeUtil.addResizeListener(stage);
     }
 
     @Override
     public void setStage(Stage stage) {
         this.stage = stage;
+        stage.setOnCloseRequest(event -> closeApp());
         initAfterStage();
     }
 
@@ -23,9 +95,150 @@ public class DownloadingController implements FXMLController {
         return stage;
     }
 
+    public void setMainTableUtils(MainTableUtils mainTableUtils) {
+        this.mainTableUtils = mainTableUtils;
+    }
+
+    public void setDownloadModel(DownloadModel downloadModel) {
+        this.downloadModel = downloadModel;
+        initDownloadData();
+        initDownloadListeners();
+    }
+
+    private void initDownloadData() {
+        var end = downloadModel.getName().length();
+        if (end > 60)
+            end = 60;
+        titleLbl.setText(downloadModel.getName().substring(0, end));
+        nameLbl.setText("Name: " + downloadModel.getName());
+        var queues = downloadModel.getQueue().toString();
+        queueLbl.setText("Queues: " + queues.substring(1, queues.length() - 2));
+        statusLbl.setText("Status: " + downloadModel.getDownloadStatus().name());
+        var downloadOf = "%s / %s"
+                .formatted(IOUtils.formatBytes(downloadModel.getDownloaded()),
+                        IOUtils.formatBytes(downloadModel.getSize()));
+        downloadedOfLbl.setText(downloadOf);
+        onComplete();
+    }
+
+
+    public void initDownloadListeners() {
+        var dt = getDownloadTask();
+        if (dt != null) {
+            isPaused.set(false);
+            bytesDownloadedListener(dt);
+            progressListener(dt);
+        } else
+            isPaused.set(true);
+    }
+
+    private DownloadTask getDownloadTask() {
+        var i = currentDownloadings.indexOf(downloadModel);
+        if (i != -1) {
+            var downloadingModel = currentDownloadings.get(i);
+            return downloadingModel.getDownloadTask();
+        }
+        return null;
+    }
+
+    private void bytesDownloadedListener(DownloadTask dt) {
+        dt.valueProperty().addListener((o, oldValue, bytesDownloaded) -> {
+            if (!isPaused.get()) {
+                if (oldValue == null)
+                    oldValue = bytesDownloaded;
+                var speed = (bytesDownloaded - oldValue);
+                if (bytesDownloaded == 0)
+                    speed = 0;
+
+                speedLbl.setText(IOUtils.formatBytes(speed));
+                statusLbl.setText("Status: " + DownloadStatus.Downloading);
+                var downloadOf = "%s / %s"
+                        .formatted(IOUtils.formatBytes(bytesDownloaded),
+                                IOUtils.formatBytes(downloadModel.getSize()));
+                downloadedOfLbl.setText(downloadOf);
+                if (speed != 0) {
+                    long delta = downloadModel.getSize() - bytesDownloaded;
+                    var remaining = DurationFormatUtils.formatDuration((delta / speed) * 1000, "dd:HH:mm:ss");
+                    remainingLbl.setText("Remaining: " + remaining);
+                }
+            }
+            if (bytesDownloaded == downloadModel.getSize()) {
+                downloadModel.setDownloadStatus(DownloadStatus.Completed);
+                onComplete();
+            }
+        });
+    }
+
+    private void progressListener(DownloadTask dt) {
+        dt.progressProperty().addListener((o, old, progress) -> downloadProgress.setProgress(progress.doubleValue()));
+    }
+
 
     @Override
     public void initialize() {
+        closeBtn.setGraphic(new FontIcon());
+        hideBtn.setGraphic(new FontIcon());
+        bounds = Screen.getPrimary().getVisualBounds();
+        controlBtn.setText(isPaused.get() ? "Resume" : "Pause");
+        remainingLbl.setText("Remaining: Paused");
+        isPaused.addListener((o, ol, newValue) -> {
+            controlBtn.setText(newValue ? "Resume" : "Pause");
+            statusLbl.setText("Status: " + (newValue ? DownloadStatus.Paused : DownloadStatus.Downloading));
+            if (newValue)
+                remainingLbl.setText("Remaining: Paused");
+        });
+    }
+
+    @FXML
+    private void onClose() {
+        closeApp();
+    }
+
+    @FXML
+    private void onControl() {
+        if (isPaused.get()) {
+            downloadModel.setLastTryDate(LocalDateTime.now());
+            downloadModel.setDownloadStatus(DownloadStatus.Trying);
+            statusLbl.setText("Status: " + DownloadStatus.Trying);
+            DownloadsRepo.updateDownloadLastTryDate(downloadModel);
+            mainTableUtils.refreshTable();
+            NewDownloadUtils.startDownload(downloadModel, mainTableUtils, null, null, true);
+            isPaused.set(false);
+            initDownloadListeners();
+        } else onPause();
 
     }
+
+    public void onPause() {
+        var dt = getDownloadTask();
+        if (dt != null)
+            dt.pause();
+        isPaused.set(true);
+    }
+
+    private void onComplete() {
+        if (downloadModel.getDownloadStatus() == DownloadStatus.Completed) {
+            remainingLbl.setText("Remaining : Done");
+            controlBtn.setPrefWidth(0);
+            controlBtn.setVisible(false);
+            downloadProgress.setProgress(100);
+        }
+    }
+
+    @FXML
+    private void hideWindowApp() {
+        stage.setIconified(true);
+    }
+
+    @FXML
+    private void closeApp() {
+        openDownloadings.remove(this);
+        stage.close();
+    }
+
+    public DownloadModel getDownloadModel() {
+        return downloadModel;
+    }
+
+
 }

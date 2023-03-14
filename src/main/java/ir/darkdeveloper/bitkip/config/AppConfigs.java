@@ -1,5 +1,6 @@
 package ir.darkdeveloper.bitkip.config;
 
+import ir.darkdeveloper.bitkip.controllers.DownloadingController;
 import ir.darkdeveloper.bitkip.models.DownloadModel;
 import ir.darkdeveloper.bitkip.models.QueueModel;
 import javafx.application.HostServices;
@@ -31,8 +32,13 @@ public class AppConfigs {
     public static final double newDownloadMinWidth = 600;
     public static final double newDownloadMinHeight = 550;
 
+    public static final double downloadingMinWidth = 600;
+    public static final double downloadingMinHeight = 260;
+
     public static HostServices hostServices;
-    public static final List<DownloadModel> currentDownloading = new ArrayList<>();
+    public static final List<DownloadModel> currentDownloadings = new ArrayList<>();
+
+    public static final List<DownloadingController> openDownloadings = new ArrayList<>();
 
     public static void setHostServices(HostServices hostServices) {
         AppConfigs.hostServices = hostServices;

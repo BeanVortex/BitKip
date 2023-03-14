@@ -21,11 +21,9 @@ public class BitKip extends Application {
         DownloadsRepo.createTable();
         QueuesRepo.createTableAndDefaultRecords();
         AppConfigs.setQueues(QueuesRepo.getQueues());
-        FxUtils.switchSceneToMain(stage, "main.fxml");
+        FxUtils.switchSceneToMain(stage);
         AppConfigs.setHostServices(getHostServices());
         stage.initStyle(StageStyle.UNDECORATED);
-        stage.setMinHeight(515);
-        stage.setMinWidth(883);
         stage.setResizable(true);
         ResizeUtil.addResizeListener(stage);
         stage.show();
@@ -34,7 +32,7 @@ public class BitKip extends Application {
 
     @Override
     public void stop() {
-        var notObservedDms = new ArrayList<>(AppConfigs.currentDownloading);
+        var notObservedDms = new ArrayList<>(AppConfigs.currentDownloadings);
         notObservedDms.forEach(dm -> dm.getDownloadTask().pause());
     }
 

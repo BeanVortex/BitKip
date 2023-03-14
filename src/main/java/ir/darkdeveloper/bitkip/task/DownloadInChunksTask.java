@@ -29,7 +29,7 @@ import java.util.concurrent.Executors;
 public class DownloadInChunksTask extends DownloadTask {
     private final int chunks;
     private final MainTableUtils mainTableUtils;
-    private final List<DownloadModel> currentDownloading = AppConfigs.currentDownloading;
+    private final List<DownloadModel> currentDownloading = AppConfigs.currentDownloadings;
     private final List<FileChannel> fileChannels = new ArrayList<>();
     private final List<Path> filePaths = new ArrayList<>();
     private volatile boolean paused;
