@@ -32,20 +32,24 @@ import static ir.darkdeveloper.bitkip.config.AppConfigs.openDownloadings;
 public class DownloadInChunksTask extends DownloadTask {
     private final int chunks;
     private final MainTableUtils mainTableUtils;
+    private final Long limit;
     private final List<FileChannel> fileChannels = new ArrayList<>();
     private final List<Path> filePaths = new ArrayList<>();
     private volatile boolean paused;
     private volatile boolean isCalculating;
+    private final boolean isLimited;
     private ExecutorService executor;
     private ExecutorService partsExecutor;
     private ExecutorService statusExecutor;
 
-    public DownloadInChunksTask(DownloadModel downloadModel, MainTableUtils mainTableUtils) {
+    public DownloadInChunksTask(DownloadModel downloadModel, MainTableUtils mainTableUtils, Long limit) {
         super(downloadModel);
         if (downloadModel.getChunks() == 0)
             throw new IllegalArgumentException("To download file in chunks, chunks must not be 0");
         this.chunks = downloadModel.getChunks();
         this.mainTableUtils = mainTableUtils;
+        this.limit = limit;
+        isLimited = limit != null;
     }
 
 
@@ -119,34 +123,70 @@ public class DownloadInChunksTask extends DownloadTask {
                 if (from == to)
                     break;
             }
-            long finalExistingFileSize = existingFileSize;
-            long finalTo = to - 1;
             if (from != 0 && i == 0)
                 from--;
-            long finalFrom = from;
 
-            var c = CompletableFuture.runAsync(() -> {
-                try {
-                    var con = (HttpURLConnection) url.openConnection();
-                    con.setReadTimeout(3000);
-                    con.setConnectTimeout(3000);
-                    con.addRequestProperty("Range", "bytes=" + finalFrom + "-" + finalTo);
-                    var out = new FileOutputStream(partFile, partFile.exists());
-                    var fileChannel = out.getChannel();
-                    fileChannels.add(fileChannel);
-                    var byteChannel = Channels.newChannel(con.getInputStream());
-                    fileChannel.transferFrom(byteChannel, finalExistingFileSize, Long.MAX_VALUE);
-                    fileChannel.close();
-                    con.disconnect();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                    this.pause();
-                    throw new RuntimeException(e);
-                }
-            }, partsExecutor);
-            futures.add(c);
+            if (isLimited)
+                addFuturesLimited(url, partsExecutor, futures, to, from, partFile, existingFileSize);
+            else
+                addFutures(url,partsExecutor, futures, to, from, partFile, existingFileSize);
         }
         return futures;
+    }
+
+    private void addFutures(URL url, ExecutorService partsExecutor, ArrayList<CompletableFuture<Void>> futures, long to, long from, File partFile, long existingFileSize) {
+        long finalTo = to - 1;
+        var c = CompletableFuture.runAsync(() -> {
+            try {
+                var con = (HttpURLConnection) url.openConnection();
+                con.setReadTimeout(3000);
+                con.setConnectTimeout(3000);
+                con.addRequestProperty("Range", "bytes=" + from + "-" + finalTo);
+                var out = new FileOutputStream(partFile, partFile.exists());
+                var fileChannel = out.getChannel();
+                fileChannels.add(fileChannel);
+                var byteChannel = Channels.newChannel(con.getInputStream());
+                fileChannel.transferFrom(byteChannel, existingFileSize, Long.MAX_VALUE);
+                fileChannel.close();
+                con.disconnect();
+            } catch (IOException e) {
+                e.printStackTrace();
+                this.pause();
+                throw new RuntimeException(e);
+            }
+        }, partsExecutor);
+        futures.add(c);
+    }
+
+    private void addFuturesLimited(URL url, ExecutorService partsExecutor, ArrayList<CompletableFuture<Void>> futures,
+                                   long to, long from, File partFile, long existingFileSize) {
+        long finalTo = to - 1;
+        var bytesToDownloadEachInCycle = limit / chunks;
+        var c = CompletableFuture.runAsync(() -> {
+            try {
+                var con = (HttpURLConnection) url.openConnection();
+                con.setReadTimeout(3000);
+                con.setConnectTimeout(3000);
+                con.addRequestProperty("Range", "bytes=" + from + "-" + finalTo);
+                var out = new FileOutputStream(partFile, partFile.exists());
+                var fileChannel = out.getChannel();
+                fileChannels.add(fileChannel);
+                var byteChannel = Channels.newChannel(con.getInputStream());
+                long finalExistingFileSize = existingFileSize;
+                while (from + finalExistingFileSize < finalTo) {
+                    fileChannel.transferFrom(byteChannel, finalExistingFileSize, bytesToDownloadEachInCycle);
+                    finalExistingFileSize += bytesToDownloadEachInCycle;
+                    Thread.sleep(ONE_SEC);
+                }
+                fileChannel.close();
+                con.disconnect();
+            } catch (IOException | InterruptedException e) {
+                e.printStackTrace();
+                this.pause();
+                throw new RuntimeException(e);
+            }
+        }, partsExecutor);
+        futures.add(c);
     }
 
 
@@ -206,7 +246,7 @@ public class DownloadInChunksTask extends DownloadTask {
                     updateProgress(1, 1);
                     DownloadsRepo.updateDownloadCompleteDate(download);
                     openDownloadings.stream().filter(dc -> dc.getDownloadModel().equals(download))
-                            .forEach(dc-> dc.onComplete(download));
+                            .forEach(dc -> dc.onComplete(download));
                 }
                 DownloadsRepo.updateDownloadProgress(download);
                 DownloadsRepo.updateDownloadLastTryDate(download);

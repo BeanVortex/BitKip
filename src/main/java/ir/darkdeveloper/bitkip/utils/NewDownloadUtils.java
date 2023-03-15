@@ -28,6 +28,8 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
+import static ir.darkdeveloper.bitkip.config.AppConfigs.currentDownloadings;
+
 public class NewDownloadUtils {
 
     public static void validInputChecks(TextField chunksField, TextField bytesField,
@@ -257,10 +259,17 @@ public class NewDownloadUtils {
                             downloadTask = new DownloadLimitedTask(dm, Long.parseLong(bytes), false, mainTableUtils);
                     }
                 } else
-                    downloadTask = new DownloadLimitedTask(dm, getBytesFromField(speed), true, mainTableUtils);
+                    downloadTask = new DownloadLimitedTask(dm, getBytesFromString(speed), true, mainTableUtils);
             }
-        } else
-            downloadTask = new DownloadInChunksTask(dm, mainTableUtils);
+        } else {
+            if (speed != null) {
+                if (speed.equals("0"))
+                    downloadTask = new DownloadInChunksTask(dm, mainTableUtils, null);
+                else
+                    downloadTask = new DownloadInChunksTask(dm, mainTableUtils, getBytesFromString(speed));
+            } else
+                downloadTask = new DownloadInChunksTask(dm, mainTableUtils, null);
+        }
 
         downloadTask.valueProperty().addListener((observable, oldValue, newValue) -> {
             if (oldValue == null)
@@ -277,13 +286,13 @@ public class NewDownloadUtils {
             DownloadsRepo.insertDownload(dm);
             mainTableUtils.addRow(dm);
         }
-        AppConfigs.currentDownloadings.add(dm);
+        currentDownloadings.add(dm);
         var executor = Executors.newCachedThreadPool();
         downloadTask.setExecutor(executor);
         executor.submit(downloadTask);
     }
 
-    private static long getBytesFromField(String mb) {
+    private static long getBytesFromString(String mb) {
         var mbVal = Double.parseDouble(mb);
         return (long) (mbVal * Math.pow(2, 20));
     }
