@@ -1,6 +1,6 @@
 package ir.darkdeveloper.bitkip.task;
 
-import ir.darkdeveloper.bitkip.config.AppConfigs;
+import ir.darkdeveloper.bitkip.controllers.DownloadingController;
 import ir.darkdeveloper.bitkip.models.DownloadModel;
 import ir.darkdeveloper.bitkip.models.DownloadStatus;
 import ir.darkdeveloper.bitkip.repo.DownloadsRepo;
@@ -26,14 +26,16 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import static ir.darkdeveloper.bitkip.config.AppConfigs.currentDownloadings;
+import static ir.darkdeveloper.bitkip.config.AppConfigs.openDownloadings;
+
 public class DownloadInChunksTask extends DownloadTask {
     private final int chunks;
     private final MainTableUtils mainTableUtils;
-    private final List<DownloadModel> currentDownloading = AppConfigs.currentDownloadings;
     private final List<FileChannel> fileChannels = new ArrayList<>();
     private final List<Path> filePaths = new ArrayList<>();
     private volatile boolean paused;
-    private volatile boolean isCalculating = false;
+    private volatile boolean isCalculating;
     private ExecutorService executor;
     private ExecutorService partsExecutor;
     private ExecutorService statusExecutor;
@@ -52,30 +54,15 @@ public class DownloadInChunksTask extends DownloadTask {
         var url = new URL(downloadModel.getUrl());
         var file = new File(downloadModel.getFilePath());
         var fileSize = downloadModel.getSize();
-        if (file.exists() && isCompleted(downloadModel, file))
+        if (file.exists() && isCompleted(downloadModel, file, mainTableUtils))
             return 0L;
         downloadInChunks(url, fileSize);
         return 0L;
     }
 
-    private boolean isCompleted(DownloadModel download, File file) {
-        try {
-            var fs = download.getSize();
-            var existingFileSize = getCurrentFileSize(file);
-            if (fs != 0 && existingFileSize == fs) {
-                download.setDownloadStatus(DownloadStatus.Completed);
-                mainTableUtils.refreshTable();
-                currentDownloading.remove(downloadModel);
-                System.out.println("already downloaded");
-                return true;
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return false;
-    }
 
-    private void downloadInChunks(URL url, long fileSize) throws IOException, InterruptedException, ExecutionException {
+    private void downloadInChunks(URL url, long fileSize)
+            throws IOException, InterruptedException, ExecutionException {
         partsExecutor = Executors.newCachedThreadPool();
         statusExecutor = calculateSpeedAndProgressChunks(fileSize);
         var futures = prepareParts(url, fileSize, partsExecutor);
@@ -90,7 +77,8 @@ public class DownloadInChunksTask extends DownloadTask {
         statusExecutor.shutdown();
     }
 
-    private List<CompletableFuture<Void>> prepareParts(URL url, long fileSize, ExecutorService partsExecutor) throws IOException {
+    private List<CompletableFuture<Void>> prepareParts(URL url, long fileSize,
+                                                       ExecutorService partsExecutor) throws IOException {
         var bytesForEach = fileSize / chunks;
         var futures = new ArrayList<CompletableFuture<Void>>();
         var to = bytesForEach;
@@ -189,39 +177,26 @@ public class DownloadInChunksTask extends DownloadTask {
 
     @Override
     public void pause() {
-        try {
-            paused = true;
-            for (var channel : fileChannels)
-                channel.close();
-            var index = currentDownloading.indexOf(downloadModel);
-            if (index != -1) {
-                var download = currentDownloading.get(index);
-                download.setDownloadStatus(DownloadStatus.Paused);
-                DownloadsRepo.updateDownloadProgress(download);
-                DownloadsRepo.updateDownloadLastTryDate(download);
-                currentDownloading.remove(index);
-                mainTableUtils.refreshTable();
-            }
-            partsExecutor.shutdown();
-            statusExecutor.shutdown();
-            executor.shutdown();
-            System.gc();
-            cancel();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+        succeeded();
     }
 
+    @Override
+    protected void failed() {
+        paused = true;
+        pause();
+    }
 
     @Override
     protected void succeeded() {
         try {
-            var index = currentDownloading.indexOf(downloadModel);
+            var index = currentDownloadings.indexOf(downloadModel);
             if (index != -1) {
-                paused = true;
-                statusExecutor.shutdown();
-                var download = currentDownloading.get(index);
+                for (var channel : fileChannels)
+                    channel.close();
+                var download = currentDownloadings.get(index);
                 download.setDownloadStatus(DownloadStatus.Paused);
+                openDownloadings.stream().filter(dc -> dc.getDownloadModel().equals(download))
+                        .forEach(DownloadingController::onPause);
                 if (IOUtils.mergeFiles(download, chunks, filePaths)) {
                     download.setCompleteDate(LocalDateTime.now());
                     download.setDownloadStatus(DownloadStatus.Completed);
@@ -230,14 +205,17 @@ public class DownloadInChunksTask extends DownloadTask {
                     mainTableUtils.refreshTable();
                     updateProgress(1, 1);
                     DownloadsRepo.updateDownloadCompleteDate(download);
+                    openDownloadings.stream().filter(dc -> dc.getDownloadModel().equals(download))
+                            .forEach(dc-> dc.onComplete(download));
                 }
                 DownloadsRepo.updateDownloadProgress(download);
                 DownloadsRepo.updateDownloadLastTryDate(download);
-                currentDownloading.remove(index);
+                currentDownloadings.remove(index);
                 mainTableUtils.refreshTable();
             }
             if (partsExecutor != null)
                 partsExecutor.shutdown();
+            statusExecutor.shutdown();
             executor.shutdown();
             System.gc();
         } catch (IOException e) {

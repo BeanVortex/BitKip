@@ -7,6 +7,7 @@ import ir.darkdeveloper.bitkip.models.DownloadStatus;
 import ir.darkdeveloper.bitkip.models.QueueModel;
 import ir.darkdeveloper.bitkip.repo.DownloadsRepo;
 import ir.darkdeveloper.bitkip.repo.QueuesRepo;
+import ir.darkdeveloper.bitkip.utils.DownloadOpUtils;
 import ir.darkdeveloper.bitkip.utils.FxUtils;
 import ir.darkdeveloper.bitkip.utils.NewDownloadUtils;
 import ir.darkdeveloper.bitkip.utils.MainTableUtils;
@@ -205,6 +206,7 @@ public class SingleDownload implements NewDownloadFxmlController {
         prepareDownload();
         dm.setLastTryDate(LocalDateTime.now());
         NewDownloadUtils.startDownload(dm, mainTableUtils, speedField.getText(), bytesField.getText(), false);
+        DownloadOpUtils.openDownloadingStage(dm, mainTableUtils);
         stage.close();
     }
 

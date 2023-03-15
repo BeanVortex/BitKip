@@ -1,5 +1,6 @@
 package ir.darkdeveloper.bitkip.task;
 
+import ir.darkdeveloper.bitkip.controllers.DownloadingController;
 import ir.darkdeveloper.bitkip.models.DownloadModel;
 import ir.darkdeveloper.bitkip.models.DownloadStatus;
 import ir.darkdeveloper.bitkip.repo.DownloadsRepo;
@@ -21,11 +22,12 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import static ir.darkdeveloper.bitkip.config.AppConfigs.currentDownloadings;
+import static ir.darkdeveloper.bitkip.config.AppConfigs.openDownloadings;
 
 
 public class DownloadLimitedTask extends DownloadTask {
-    private boolean paused = false;
-    private boolean isCalculating = false;
+    private boolean paused;
+    private boolean isCalculating;
     private final long limit;
     private final boolean isSpeedLimited;
     private final MainTableUtils mainTableUtils;
@@ -125,12 +127,17 @@ public class DownloadLimitedTask extends DownloadTask {
             if (index != -1) {
                 var download = currentDownloadings.get(index);
                 download.setDownloadStatus(DownloadStatus.Paused);
+                openDownloadings.stream().filter(dc -> dc.getDownloadModel().equals(download))
+                        .forEach(DownloadingController::onPause);
                 if (file.exists() && getCurrentFileSize(file) == downloadModel.getSize()) {
                     download.setCompleteDate(LocalDateTime.now());
                     download.setDownloadStatus(DownloadStatus.Completed);
                     download.setProgress(100);
                     download.setDownloaded(downloadModel.getSize());
+                    updateProgress(1, 1);
                     DownloadsRepo.updateDownloadCompleteDate(download);
+                    openDownloadings.stream().filter(dc -> dc.getDownloadModel().equals(download))
+                            .forEach(dc-> dc.onComplete(download));
                 }
                 download.setDownloaded(getCurrentFileSize(file));
                 DownloadsRepo.updateDownloadProgress(download);
@@ -207,7 +214,6 @@ public class DownloadLimitedTask extends DownloadTask {
     public void pause() {
         paused = true;
         succeeded();
-        cancel();
     }
 
     @Override

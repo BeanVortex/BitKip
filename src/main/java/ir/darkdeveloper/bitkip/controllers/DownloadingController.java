@@ -6,6 +6,7 @@ import ir.darkdeveloper.bitkip.models.DownloadStatus;
 import ir.darkdeveloper.bitkip.repo.DownloadsRepo;
 import ir.darkdeveloper.bitkip.task.DownloadTask;
 import ir.darkdeveloper.bitkip.utils.*;
+import javafx.application.Platform;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.fxml.FXML;
@@ -86,7 +87,7 @@ public class DownloadingController implements FXMLController {
     @Override
     public void setStage(Stage stage) {
         this.stage = stage;
-        stage.setOnCloseRequest(event -> closeApp());
+        stage.setOnCloseRequest(event -> closeStage());
         initAfterStage();
     }
 
@@ -118,7 +119,7 @@ public class DownloadingController implements FXMLController {
                 .formatted(IOUtils.formatBytes(downloadModel.getDownloaded()),
                         IOUtils.formatBytes(downloadModel.getSize()));
         downloadedOfLbl.setText(downloadOf);
-        onComplete();
+        onComplete(downloadModel);
     }
 
 
@@ -150,6 +151,10 @@ public class DownloadingController implements FXMLController {
                 if (bytesDownloaded == 0)
                     speed = 0;
 
+                downloadModel.setSpeed(speed);
+                downloadModel.setDownloadStatus(DownloadStatus.Downloading);
+                downloadModel.setDownloaded(bytesDownloaded);
+
                 speedLbl.setText(IOUtils.formatBytes(speed));
                 statusLbl.setText("Status: " + DownloadStatus.Downloading);
                 var downloadOf = "%s / %s"
@@ -162,15 +167,14 @@ public class DownloadingController implements FXMLController {
                     remainingLbl.setText("Remaining: " + remaining);
                 }
             }
-            if (bytesDownloaded == downloadModel.getSize()) {
-                downloadModel.setDownloadStatus(DownloadStatus.Completed);
-                onComplete();
-            }
         });
     }
 
     private void progressListener(DownloadTask dt) {
-        dt.progressProperty().addListener((o, old, progress) -> downloadProgress.setProgress(progress.doubleValue()));
+        dt.progressProperty().addListener((o, old, progress) -> {
+            downloadProgress.setProgress(progress.floatValue());
+            downloadModel.setProgress(progress.floatValue());
+        });
     }
 
 
@@ -184,6 +188,10 @@ public class DownloadingController implements FXMLController {
         isPaused.addListener((o, ol, newValue) -> {
             controlBtn.setText(newValue ? "Resume" : "Pause");
             statusLbl.setText("Status: " + (newValue ? DownloadStatus.Paused : DownloadStatus.Downloading));
+            var downloadOf = "%s / %s"
+                    .formatted(IOUtils.formatBytes(downloadModel.getDownloaded()),
+                            IOUtils.formatBytes(downloadModel.getSize()));
+            downloadedOfLbl.setText(downloadOf);
             if (newValue)
                 remainingLbl.setText("Remaining: Paused");
         });
@@ -191,7 +199,7 @@ public class DownloadingController implements FXMLController {
 
     @FXML
     private void onClose() {
-        closeApp();
+        closeStage();
     }
 
     @FXML
@@ -205,23 +213,27 @@ public class DownloadingController implements FXMLController {
             NewDownloadUtils.startDownload(downloadModel, mainTableUtils, null, null, true);
             isPaused.set(false);
             initDownloadListeners();
-        } else onPause();
+        } else {
+            var dt = getDownloadTask();
+            if (dt != null)
+                dt.pause();
+            isPaused.set(true);
+        }
 
     }
 
     public void onPause() {
-        var dt = getDownloadTask();
-        if (dt != null)
-            dt.pause();
-        isPaused.set(true);
+        Platform.runLater(() -> isPaused.set(true));
     }
 
-    private void onComplete() {
-        if (downloadModel.getDownloadStatus() == DownloadStatus.Completed) {
-            remainingLbl.setText("Remaining : Done");
+    public void onComplete(DownloadModel download) {
+        if (download.getDownloadStatus() == DownloadStatus.Completed) {
+            remainingLbl.setText("Remaining: Done");
             controlBtn.setPrefWidth(0);
             controlBtn.setVisible(false);
             downloadProgress.setProgress(100);
+            statusLbl.setText("Status: Complete");
+            stage.requestFocus();
         }
     }
 
@@ -231,7 +243,7 @@ public class DownloadingController implements FXMLController {
     }
 
     @FXML
-    private void closeApp() {
+    public void closeStage() {
         openDownloadings.remove(this);
         stage.close();
     }

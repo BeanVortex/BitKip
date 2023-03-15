@@ -6,6 +6,7 @@ import ir.darkdeveloper.bitkip.models.DownloadStatus;
 import ir.darkdeveloper.bitkip.repo.DownloadsRepo;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 
 import static ir.darkdeveloper.bitkip.config.AppConfigs.currentDownloadings;
 import static ir.darkdeveloper.bitkip.config.AppConfigs.openDownloadings;
@@ -33,8 +34,6 @@ public class DownloadOpUtils {
             if (index != -1) {
                 var download = currentDownloadings.get(index);
                 download.getDownloadTask().pause();
-                openDownloadings.stream().filter(dc -> dc.getDownloadModel().equals(dm))
-                        .forEach(DownloadingController::onPause);
             }
         });
     }
@@ -43,6 +42,7 @@ public class DownloadOpUtils {
         var selectedItems = mainTableUtils.getSelected();
         selectedItems.forEach(dm -> {
             var index = currentDownloadings.indexOf(dm);
+
             if (index != -1)
                 dm = currentDownloadings.get(index);
             if (dm.getDownloadTask() != null && dm.getDownloadTask().isRunning())
@@ -50,7 +50,10 @@ public class DownloadOpUtils {
             DownloadsRepo.deleteDownload(dm);
             if (withFiles)
                 IOUtils.deleteDownload(dm);
-
+            var finalDm = dm;
+            var openDownloadingsCopy = new ArrayList<>(openDownloadings);
+            openDownloadingsCopy.stream().filter(dc -> dc.getDownloadModel().equals(finalDm))
+                    .forEach(DownloadingController::closeStage);
         });
 
         mainTableUtils.remove(selectedItems);
