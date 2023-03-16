@@ -3,7 +3,6 @@ package ir.darkdeveloper.bitkip.controllers;
 import ir.darkdeveloper.bitkip.controllers.interfaces.FXMLController;
 import ir.darkdeveloper.bitkip.models.DownloadModel;
 import ir.darkdeveloper.bitkip.models.DownloadStatus;
-import ir.darkdeveloper.bitkip.repo.DownloadsRepo;
 import ir.darkdeveloper.bitkip.task.DownloadTask;
 import ir.darkdeveloper.bitkip.utils.*;
 import javafx.application.Platform;
@@ -22,7 +21,7 @@ import javafx.stage.Stage;
 import org.apache.commons.lang3.time.DurationFormatUtils;
 import org.kordamp.ikonli.javafx.FontIcon;
 
-import java.time.LocalDateTime;
+import java.util.List;
 
 import static ir.darkdeveloper.bitkip.BitKip.getResource;
 import static ir.darkdeveloper.bitkip.config.AppConfigs.*;
@@ -33,6 +32,8 @@ public class DownloadingController implements FXMLController {
     private ImageView logoImg;
     @FXML
     private Label titleLbl;
+    @FXML
+    private Label progressLbl;
     @FXML
     private ProgressBar downloadProgress;
     @FXML
@@ -61,6 +62,7 @@ public class DownloadingController implements FXMLController {
     private Rectangle2D bounds;
 
     private final BooleanProperty isPaused = new SimpleBooleanProperty(true);
+    private boolean isComplete = false;
     private MainTableUtils mainTableUtils;
 
 
@@ -119,9 +121,9 @@ public class DownloadingController implements FXMLController {
                 .formatted(IOUtils.formatBytes(downloadModel.getDownloaded()),
                         IOUtils.formatBytes(downloadModel.getSize()));
         downloadedOfLbl.setText(downloadOf);
+        progressLbl.setText("Progress: %.2f%%".formatted(downloadModel.getProgress()));
         onComplete(downloadModel);
     }
-
 
     public void initDownloadListeners() {
         var dt = getDownloadTask();
@@ -173,7 +175,7 @@ public class DownloadingController implements FXMLController {
     private void progressListener(DownloadTask dt) {
         dt.progressProperty().addListener((o, old, progress) -> {
             downloadProgress.setProgress(progress.floatValue());
-            downloadModel.setProgress(progress.floatValue());
+            progressLbl.setText("Progress: %.2f%%".formatted(progress.floatValue() * 100));
         });
     }
 
@@ -204,15 +206,17 @@ public class DownloadingController implements FXMLController {
 
     @FXML
     private void onControl() {
+
+        if (isComplete) {
+            //todo: open
+            System.out.println("opened");
+            return;
+        }
+
         if (isPaused.get()) {
-            downloadModel.setLastTryDate(LocalDateTime.now());
-            downloadModel.setDownloadStatus(DownloadStatus.Trying);
             statusLbl.setText("Status: " + DownloadStatus.Trying);
-            DownloadsRepo.updateDownloadLastTryDate(downloadModel);
-            mainTableUtils.refreshTable();
-            NewDownloadUtils.startDownload(downloadModel, mainTableUtils, null, null, true);
+            DownloadOpUtils.resumeDownloads(mainTableUtils, List.of(downloadModel));
             isPaused.set(false);
-            initDownloadListeners();
         } else {
             var dt = getDownloadTask();
             if (dt != null)
@@ -228,11 +232,16 @@ public class DownloadingController implements FXMLController {
 
     public void onComplete(DownloadModel download) {
         if (download.getDownloadStatus() == DownloadStatus.Completed) {
+            isComplete = true;
             remainingLbl.setText("Remaining: Done");
-            controlBtn.setPrefWidth(0);
-            controlBtn.setVisible(false);
+            controlBtn.setText("Open");
             downloadProgress.setProgress(100);
             statusLbl.setText("Status: Complete");
+            progressLbl.setText("Progress: 100%");
+            var downloadOf = "%s / %s"
+                    .formatted(IOUtils.formatBytes(downloadModel.getSize()),
+                            IOUtils.formatBytes(downloadModel.getSize()));
+            downloadedOfLbl.setText(downloadOf);
             stage.requestFocus();
         }
     }

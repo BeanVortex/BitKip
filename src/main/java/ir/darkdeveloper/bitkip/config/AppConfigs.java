@@ -33,7 +33,7 @@ public class AppConfigs {
     public static final double newDownloadMinHeight = 550;
 
     public static final double downloadingMinWidth = 600;
-    public static final double downloadingMinHeight = 260;
+    public static final double downloadingMinHeight = 310;
 
     public static HostServices hostServices;
     public static final List<DownloadModel> currentDownloadings = new ArrayList<>();

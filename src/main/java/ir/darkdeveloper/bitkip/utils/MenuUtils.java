@@ -92,7 +92,7 @@ public class MenuUtils {
             c.show(operationMenu, Side.BOTTOM, 0, 0);
         });
 
-        menuItems.get(resume).setOnAction(e -> DownloadOpUtils.resumeDownloads(mainTableUtils));
+        menuItems.get(resume).setOnAction(e -> DownloadOpUtils.resumeDownloads(mainTableUtils, mainTableUtils.getSelected()));
         menuItems.get(pause).setOnAction(e -> DownloadOpUtils.pauseDownloads(mainTableUtils));
         menuItems.get(newQueue).setOnAction(e -> FxUtils.newQueueStage());
     }

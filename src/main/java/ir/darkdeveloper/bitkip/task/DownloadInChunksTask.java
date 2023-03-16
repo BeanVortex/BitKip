@@ -39,8 +39,6 @@ public class DownloadInChunksTask extends DownloadTask {
     private volatile boolean isCalculating;
     private final boolean isLimited;
     private ExecutorService executor;
-    private ExecutorService partsExecutor;
-    private ExecutorService statusExecutor;
 
     public DownloadInChunksTask(DownloadModel downloadModel, MainTableUtils mainTableUtils, Long limit) {
         super(downloadModel);
@@ -67,8 +65,8 @@ public class DownloadInChunksTask extends DownloadTask {
 
     private void downloadInChunks(URL url, long fileSize)
             throws IOException, InterruptedException, ExecutionException {
-        partsExecutor = Executors.newCachedThreadPool();
-        statusExecutor = calculateSpeedAndProgressChunks(fileSize);
+        var partsExecutor = Executors.newCachedThreadPool();
+        var statusExecutor = calculateSpeedAndProgressChunks(fileSize);
         var futures = prepareParts(url, fileSize, partsExecutor);
         if (!futures.isEmpty()) {
             isCalculating = true;
@@ -76,9 +74,10 @@ public class DownloadInChunksTask extends DownloadTask {
             futures.toArray(futureArr);
             CompletableFuture.allOf(futureArr).get();
         }
-        if (paused)
-            paused = false;
+        partsExecutor.shutdown();
         statusExecutor.shutdown();
+        executor.shutdown();
+        System.gc();
     }
 
     private List<CompletableFuture<Void>> prepareParts(URL url, long fileSize,
@@ -129,7 +128,7 @@ public class DownloadInChunksTask extends DownloadTask {
             if (isLimited)
                 addFuturesLimited(url, partsExecutor, futures, to, from, partFile, existingFileSize);
             else
-                addFutures(url,partsExecutor, futures, to, from, partFile, existingFileSize);
+                addFutures(url, partsExecutor, futures, to, from, partFile, existingFileSize);
         }
         return futures;
     }
@@ -202,12 +201,10 @@ public class DownloadInChunksTask extends DownloadTask {
                     for (int i = 0; i < chunks; i++)
                         currentFileSize += Files.size(filePaths.get(i));
 
-
                     updateProgress(currentFileSize, fileSize);
                     updateValue(currentFileSize);
                 }
             } catch (NoSuchFileException ignore) {
-
             } catch (IOException | InterruptedException e) {
                 e.printStackTrace();
             }
@@ -217,6 +214,7 @@ public class DownloadInChunksTask extends DownloadTask {
 
     @Override
     public void pause() {
+        paused = true;
         succeeded();
     }
 
@@ -235,8 +233,6 @@ public class DownloadInChunksTask extends DownloadTask {
                     channel.close();
                 var download = currentDownloadings.get(index);
                 download.setDownloadStatus(DownloadStatus.Paused);
-                openDownloadings.stream().filter(dc -> dc.getDownloadModel().equals(download))
-                        .forEach(DownloadingController::onPause);
                 if (IOUtils.mergeFiles(download, chunks, filePaths)) {
                     download.setCompleteDate(LocalDateTime.now());
                     download.setDownloadStatus(DownloadStatus.Completed);
@@ -247,17 +243,15 @@ public class DownloadInChunksTask extends DownloadTask {
                     DownloadsRepo.updateDownloadCompleteDate(download);
                     openDownloadings.stream().filter(dc -> dc.getDownloadModel().equals(download))
                             .forEach(dc -> dc.onComplete(download));
-                }
+                } else
+                    openDownloadings.stream().filter(dc -> dc.getDownloadModel().equals(download))
+                            .forEach(DownloadingController::onPause);
+
                 DownloadsRepo.updateDownloadProgress(download);
                 DownloadsRepo.updateDownloadLastTryDate(download);
                 currentDownloadings.remove(index);
                 mainTableUtils.refreshTable();
             }
-            if (partsExecutor != null)
-                partsExecutor.shutdown();
-            statusExecutor.shutdown();
-            executor.shutdown();
-            System.gc();
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

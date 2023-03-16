@@ -5,7 +5,7 @@
 <?import javafx.scene.layout.*?>
 <?import java.net.URL?>
 <VBox minWidth="600" prefWidth="600"
-      minHeight="260" prefHeight="260"
+      minHeight="310" prefHeight="310"
       xmlns="http://javafx.com/javafx/16"
       xmlns:fx="http://javafx.com/fxml/1" fx:controller="ir.darkdeveloper.bitkip.controllers.DownloadingController">
     <stylesheets>
@@ -33,7 +33,7 @@
         <Label fx:id="nameLbl" text="fileName"/>
         <Label fx:id="queueLbl" text="queueName"/>
         <Label fx:id="statusLbl" text="status"/>
-        <VBox spacing="5">
+        <VBox spacing="5" style="-fx-padding: 10 0 10 0">
             <HBox>
                 <Label fx:id="speedLbl" text="0 MB/s"/>
                 <Region HBox.hgrow="ALWAYS"/>
@@ -41,12 +41,12 @@
             </HBox>
             <ProgressBar fx:id="downloadProgress" prefWidth="Infinity"/>
         </VBox>
+        <Label fx:id="progressLbl" text="progress"/>
         <Label fx:id="remainingLbl" text="remaining time"/>
-        <HBox alignment="BOTTOM_CENTER" style="-fx-padding: 10 0 5 0">
-            <HBox spacing="20" alignment="CENTER">
-                <Button text="Close" styleClass="cancel_btn" onAction="#onClose"/>
-                <Button text="Pause" styleClass="add_btn" fx:id="controlBtn" onAction="#onControl"/>
-            </HBox>
+
+        <HBox alignment="BOTTOM_CENTER" spacing="20" style="-fx-padding: 10 0 5 0">
+            <Button text="Close" styleClass="cancel_btn" onAction="#onClose"/>
+            <Button text="Pause" styleClass="add_btn" fx:id="controlBtn" onAction="#onControl"/>
         </HBox>
 
     </VBox>

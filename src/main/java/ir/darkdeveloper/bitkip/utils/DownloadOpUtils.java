@@ -7,16 +7,15 @@ import ir.darkdeveloper.bitkip.repo.DownloadsRepo;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.List;
 
 import static ir.darkdeveloper.bitkip.config.AppConfigs.currentDownloadings;
 import static ir.darkdeveloper.bitkip.config.AppConfigs.openDownloadings;
 
 public class DownloadOpUtils {
 
-    public static void resumeDownloads(MainTableUtils mainTableUtils) {
-        var selectedItems = mainTableUtils.getSelected();
-        selectedItems
-                .filtered(dm -> !currentDownloadings.contains(dm))
+    public static void resumeDownloads(MainTableUtils mainTableUtils, List<DownloadModel> modelList) {
+        modelList.stream().filter(dm -> !currentDownloadings.contains(dm))
                 .forEach(dm -> {
                     dm.setLastTryDate(LocalDateTime.now());
                     dm.setDownloadStatus(DownloadStatus.Trying);

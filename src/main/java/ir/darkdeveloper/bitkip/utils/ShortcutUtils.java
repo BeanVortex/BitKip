@@ -27,7 +27,7 @@ public class ShortcutUtils {
 
         Runnable newDownload = () -> DownloadOpUtils.newDownload(mainTableUtils, true);
         Runnable newBatchDownload = () -> DownloadOpUtils.newDownload(mainTableUtils, false);
-        Runnable resume = () -> DownloadOpUtils.resumeDownloads(mainTableUtils);
+        Runnable resume = () -> DownloadOpUtils.resumeDownloads(mainTableUtils, mainTableUtils.getSelected());
         Runnable pause = () -> DownloadOpUtils.pauseDownloads(mainTableUtils);
         Runnable delete = () -> DownloadOpUtils.deleteDownloads(mainTableUtils, false);
         Runnable shiftDelete = () -> DownloadOpUtils.deleteDownloads(mainTableUtils, true);
@@ -57,8 +57,6 @@ public class ShortcutUtils {
             //
             System.out.println("stop to queue");
         };
-
-
 
 
         stage.getScene().getAccelerators().put(NEW_DOWNLOAD_KEY, newDownload);

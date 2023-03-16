@@ -79,7 +79,6 @@ public class DownloadLimitedTask extends DownloadTask {
                 downloadValueLimited(fileChannel, in, limit, existingFileSize, statusExecutor);
             return getCurrentFileSize(file);
         }
-
     }
 
     private long downloadSpeedLimited(FileChannel fileChannel, InputStream in,
@@ -127,8 +126,6 @@ public class DownloadLimitedTask extends DownloadTask {
             if (index != -1) {
                 var download = currentDownloadings.get(index);
                 download.setDownloadStatus(DownloadStatus.Paused);
-                openDownloadings.stream().filter(dc -> dc.getDownloadModel().equals(download))
-                        .forEach(DownloadingController::onPause);
                 if (file.exists() && getCurrentFileSize(file) == downloadModel.getSize()) {
                     download.setCompleteDate(LocalDateTime.now());
                     download.setDownloadStatus(DownloadStatus.Completed);
@@ -137,8 +134,10 @@ public class DownloadLimitedTask extends DownloadTask {
                     updateProgress(1, 1);
                     DownloadsRepo.updateDownloadCompleteDate(download);
                     openDownloadings.stream().filter(dc -> dc.getDownloadModel().equals(download))
-                            .forEach(dc-> dc.onComplete(download));
-                }
+                            .forEach(dc -> dc.onComplete(download));
+                } else
+                    openDownloadings.stream().filter(dc -> dc.getDownloadModel().equals(download))
+                            .forEach(DownloadingController::onPause);
                 download.setDownloaded(getCurrentFileSize(file));
                 DownloadsRepo.updateDownloadProgress(download);
                 DownloadsRepo.updateDownloadLastTryDate(download);
