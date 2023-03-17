@@ -204,11 +204,17 @@ public class DownloadsRepo {
     }
 
     public static void updateTableStatus(DownloadModel dm) {
+        var lastTryDate = "NULL";
+        if (dm.getLastTryDate() != null)
+            lastTryDate = "\"" + dm.getLastTryDate() + "\"";
+        var completeDate = "NULL";
+        if (dm.getCompleteDate() != null)
+            completeDate = "\"" + dm.getCompleteDate() + "\"";
         var sql = """
-                UPDATE downloads SET progress = %f, downloaded = %d, complete_date = "%s",
-                    last_try_date = "%s" WHERE id = %d
+                UPDATE downloads SET progress = %f, downloaded = %d, complete_date = %s,
+                    last_try_date = %s WHERE id = %d
                 """.formatted(dm.getProgress(), dm.getDownloaded(),
-                dm.getCompleteDate(), dm.getLastTryDate(), dm.getId());
+                completeDate, lastTryDate, dm.getId());
         executeSql(sql);
     }
 
