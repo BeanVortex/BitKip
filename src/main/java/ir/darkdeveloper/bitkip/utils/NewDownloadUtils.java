@@ -70,6 +70,8 @@ public class NewDownloadUtils {
                 var cores = Runtime.getRuntime().availableProcessors();
                 if (chunks > cores * 2)
                     chunks = cores * 2;
+                if (chunks == 1)
+                    chunks = 2;
                 chunksField.setText(chunks + "");
             }
         });
@@ -83,7 +85,7 @@ public class NewDownloadUtils {
         if (field == null)
             return;
         field.textProperty().addListener((o, old, newValue) -> {
-            if (!newValue.matches("\\d*")){
+            if (!newValue.matches("\\d*")) {
                 field.setText(newValue.replaceAll("\\D", ""));
                 if (field.getText().isBlank())
                     field.setText("0");

@@ -5,15 +5,13 @@ import ir.darkdeveloper.bitkip.models.DownloadModel;
 import ir.darkdeveloper.bitkip.models.DownloadStatus;
 import ir.darkdeveloper.bitkip.repo.DownloadsRepo;
 import ir.darkdeveloper.bitkip.utils.MainTableUtils;
-import javafx.application.Platform;
-import javafx.concurrent.WorkerStateEvent;
-import javafx.event.EventHandler;
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
+import java.net.SocketTimeoutException;
 import java.net.URL;
 import java.nio.channels.Channels;
 import java.nio.channels.FileChannel;
@@ -33,6 +31,7 @@ public class DownloadLimitedTask extends DownloadTask {
     private final MainTableUtils mainTableUtils;
     private File file;
     private ExecutorService executor;
+    private FileChannel fileChannel;
 
 
     /**
@@ -47,44 +46,48 @@ public class DownloadLimitedTask extends DownloadTask {
 
 
     @Override
-    protected Long call() throws Exception {
-        var url = new URL(downloadModel.getUrl());
-        var connection = (HttpURLConnection) url.openConnection();
-        connection.setReadTimeout(3000);
+    protected Long call() throws IOException, InterruptedException {
         file = new File(downloadModel.getFilePath());
-        // for resume
-        configureResume(connection, file);
         if (file.exists() && isCompleted(downloadModel, file))
             return 0L;
+        performDownload();
+        return getCurrentFileSize(file);
+    }
 
-        var in = connection.getInputStream();
-        var fileSize = downloadModel.getSize();
+    private void performDownload() throws IOException, InterruptedException {
+        try {
+            var url = new URL(downloadModel.getUrl());
+            var connection = (HttpURLConnection) url.openConnection();
+            connection.setReadTimeout(3000);
+            connection.setConnectTimeout(3000);
+            configureResume(connection, file);
+            var in = connection.getInputStream();
+            var fileSize = downloadModel.getSize();
 
-        var out = new FileOutputStream(file, file.exists());
-        var fileChannel = out.getChannel();
+            var out = new FileOutputStream(file, file.exists());
+            fileChannel = out.getChannel();
 
-        Platform.runLater(() -> {
-            setOnCancelled(closeFileChannelEvent(fileChannel));
-            setOnSucceeded(closeFileChannelEvent(fileChannel));
-        });
-        var existingFileSize = 0L;
-        if (file.exists())
-            existingFileSize = getCurrentFileSize(file);
+            var existingFileSize = 0L;
+            if (file.exists())
+                existingFileSize = getCurrentFileSize(file);
 
-        if (isSpeedLimited)
-            return downloadSpeedLimited(fileChannel, in, file, limit, fileSize, existingFileSize);
-        else {
-            var statusExecutor = calculateSpeedAndProgress(file, fileSize);
-            if (statusExecutor != null)
-                downloadValueLimited(fileChannel, in, limit, existingFileSize, statusExecutor);
-            return getCurrentFileSize(file);
+            if (isSpeedLimited)
+                downloadSpeedLimited(fileChannel, in, file, limit, fileSize, existingFileSize);
+            else {
+                var statusExecutor = calculateSpeedAndProgress(file, fileSize);
+                if (statusExecutor != null)
+                    downloadValueLimited(fileChannel, in, limit, existingFileSize, statusExecutor);
+            }
+        }catch (SocketTimeoutException s){
+            s.printStackTrace();
+            Thread.sleep(2000);
+            performDownload();
         }
     }
 
-    private long downloadSpeedLimited(FileChannel fileChannel, InputStream in,
+    private void downloadSpeedLimited(FileChannel fileChannel, InputStream in,
                                       File file, long limit, long fileSize,
                                       long existingFileSize) throws IOException, InterruptedException {
-        var start = System.currentTimeMillis();
         var byteChannel = Channels.newChannel(in);
         do {
             var beforeDown = System.currentTimeMillis();
@@ -103,25 +106,21 @@ public class DownloadLimitedTask extends DownloadTask {
             updateProgress(currentFileSize, fileSize);
             updateValue(existingFileSize);
         } while (existingFileSize < fileSize && !paused);
-        System.out.println("Lasted: " + (System.currentTimeMillis() - start));
-        return existingFileSize;
     }
 
     private void downloadValueLimited(FileChannel fileChannel, InputStream in,
                                       long limit, long existingFileSize,
                                       ExecutorService statusExecutor) throws IOException {
         var byteChannel = Channels.newChannel(in);
-        var s = System.currentTimeMillis();
         fileChannel.transferFrom(byteChannel, existingFileSize, limit);
-        var e = System.currentTimeMillis() - s;
         paused = true;
         statusExecutor.shutdown();
-        System.out.println("Lasted: " + e);
     }
 
     @Override
     protected void succeeded() {
         try {
+            fileChannel.close();
             var index = currentDownloadings.indexOf(downloadModel);
             if (index != -1) {
                 var download = currentDownloadings.get(index);
@@ -176,16 +175,6 @@ public class DownloadLimitedTask extends DownloadTask {
             }
         });
         return executorService;
-    }
-
-    private EventHandler<WorkerStateEvent> closeFileChannelEvent(FileChannel fileChannel) {
-        return event -> {
-            try {
-                fileChannel.close();
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-        };
     }
 
     private void configureResume(HttpURLConnection connection, File file) throws IOException {
