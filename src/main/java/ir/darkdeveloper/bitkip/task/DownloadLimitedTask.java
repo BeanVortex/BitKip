@@ -13,6 +13,7 @@ import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.SocketTimeoutException;
 import java.net.URL;
+import java.net.UnknownHostException;
 import java.nio.channels.Channels;
 import java.nio.channels.FileChannel;
 import java.time.LocalDateTime;
@@ -55,6 +56,7 @@ public class DownloadLimitedTask extends DownloadTask {
     }
 
     private void performDownload() throws IOException, InterruptedException {
+        ExecutorService statusExecutor = null;
         try {
             var url = new URL(downloadModel.getUrl());
             var connection = (HttpURLConnection) url.openConnection();
@@ -74,15 +76,21 @@ public class DownloadLimitedTask extends DownloadTask {
             if (isSpeedLimited)
                 downloadSpeedLimited(fileChannel, in, file, limit, fileSize, existingFileSize);
             else {
-                var statusExecutor = calculateSpeedAndProgress(file, fileSize);
+                statusExecutor = calculateSpeedAndProgress(file, fileSize);
                 if (statusExecutor != null)
-                    downloadValueLimited(fileChannel, in, limit, existingFileSize, statusExecutor);
+                    downloadValueLimited(fileChannel, in, limit, existingFileSize);
             }
-        }catch (SocketTimeoutException s){
+        } catch (SocketTimeoutException | UnknownHostException s) {
             s.printStackTrace();
             Thread.sleep(2000);
             performDownload();
         }
+        var currFileSize = getCurrentFileSize(file);
+        if (!paused && currFileSize != downloadModel.getSize())
+            performDownload();
+        paused = true;
+        if (statusExecutor != null)
+            statusExecutor.shutdown();
     }
 
     private void downloadSpeedLimited(FileChannel fileChannel, InputStream in,
@@ -109,12 +117,9 @@ public class DownloadLimitedTask extends DownloadTask {
     }
 
     private void downloadValueLimited(FileChannel fileChannel, InputStream in,
-                                      long limit, long existingFileSize,
-                                      ExecutorService statusExecutor) throws IOException {
+                                      long limit, long existingFileSize) throws IOException {
         var byteChannel = Channels.newChannel(in);
         fileChannel.transferFrom(byteChannel, existingFileSize, limit);
-        paused = true;
-        statusExecutor.shutdown();
     }
 
     @Override

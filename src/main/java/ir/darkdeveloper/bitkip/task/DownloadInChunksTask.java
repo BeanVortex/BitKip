@@ -13,6 +13,7 @@ import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.SocketTimeoutException;
 import java.net.URL;
+import java.net.UnknownHostException;
 import java.nio.channels.Channels;
 import java.nio.channels.FileChannel;
 import java.nio.file.Files;
@@ -175,7 +176,7 @@ public class DownloadInChunksTask extends DownloadTask {
             fileChannel.transferFrom(byteChannel, existingFileSize, Long.MAX_VALUE);
             fileChannel.close();
             con.disconnect();
-        } catch (SocketTimeoutException s) {
+        } catch (SocketTimeoutException | UnknownHostException s) {
             s.printStackTrace();
             Thread.sleep(2000);
             var currFileSize = getCurrentFileSize(partFile);
@@ -208,7 +209,7 @@ public class DownloadInChunksTask extends DownloadTask {
             }
             fileChannel.close();
             con.disconnect();
-        } catch (SocketTimeoutException s) {
+        } catch (SocketTimeoutException | UnknownHostException s) {
             s.printStackTrace();
             Thread.sleep(2000);
             var currFileSize = getCurrentFileSize(partFile);
