@@ -127,19 +127,19 @@ public class DownloadInChunksTask extends DownloadTask {
             var finalTo = to - 1;
             var finalFrom = from;
 
-            addFutures(url, existingFileSize, partsExecutor, futures, partFile, finalTo, finalFrom);
+            addFutures(url, existingFileSize, partsExecutor, futures, partFile, finalTo, finalFrom, fromContinue);
         }
         return futures;
     }
 
     private void addFutures(URL url, long fileSize, ExecutorService partsExecutor,
                             ArrayList<CompletableFuture<Void>> futures, File partFile,
-                            long finalTo, long finalFrom) {
+                            long finalTo, long finalFrom, long fromContinue) {
         CompletableFuture<Void> c;
         if (isLimited) {
             c = CompletableFuture.runAsync(() -> {
                 try {
-                    performLimitedDownload(url, finalFrom, finalTo, partFile, fileSize);
+                    performLimitedDownload(url, fromContinue, finalFrom, finalTo, partFile, fileSize);
                 } catch (IOException | InterruptedException e) {
                     e.printStackTrace();
                     this.pause();
@@ -149,7 +149,7 @@ public class DownloadInChunksTask extends DownloadTask {
         } else {
             c = CompletableFuture.runAsync(() -> {
                 try {
-                    performDownload(url, finalFrom, finalTo, partFile, fileSize);
+                    performDownload(url, fromContinue, finalFrom, finalTo, partFile, fileSize);
                 } catch (IOException | InterruptedException e) {
                     e.printStackTrace();
                     this.pause();
@@ -161,7 +161,7 @@ public class DownloadInChunksTask extends DownloadTask {
     }
 
 
-    private void performDownload(URL url, long from, long to, File partFile, long existingFileSize)
+    private void performDownload(URL url, long fromContinue, long from, long to, File partFile, long existingFileSize)
             throws InterruptedException, IOException {
         try {
             var con = (HttpURLConnection) url.openConnection();
@@ -178,12 +178,17 @@ public class DownloadInChunksTask extends DownloadTask {
         } catch (SocketTimeoutException s) {
             s.printStackTrace();
             Thread.sleep(2000);
-            performDownload(url, from, to, partFile, existingFileSize);
+            var currFileSize = getCurrentFileSize(partFile);
+            performDownload(url, fromContinue, fromContinue + currFileSize, to, partFile, currFileSize);
         }
+        var currFileSize = getCurrentFileSize(partFile);
+        if (!paused && currFileSize != (to - fromContinue + 1))
+            performDownload(url, fromContinue, fromContinue + currFileSize, to, partFile, currFileSize);
+
     }
 
 
-    private void performLimitedDownload(URL url, long from, long to, File partFile, long existingFileSize)
+    private void performLimitedDownload(URL url, long fromContinue, long from, long to, File partFile, long existingFileSize)
             throws IOException, InterruptedException {
         try {
             var bytesToDownloadEachInCycle = limit / chunks;
@@ -204,9 +209,14 @@ public class DownloadInChunksTask extends DownloadTask {
             fileChannel.close();
             con.disconnect();
         } catch (SocketTimeoutException s) {
+            s.printStackTrace();
             Thread.sleep(2000);
-            performLimitedDownload(url, from, to, partFile, existingFileSize);
+            var currFileSize = getCurrentFileSize(partFile);
+            performDownload(url, fromContinue, fromContinue + currFileSize, to, partFile, currFileSize);
         }
+        var currFileSize = getCurrentFileSize(partFile);
+        if (!paused && currFileSize != (to - fromContinue + 1))
+            performDownload(url, fromContinue, fromContinue + currFileSize, to, partFile, currFileSize);
     }
 
 
