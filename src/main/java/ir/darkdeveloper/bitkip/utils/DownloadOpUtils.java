@@ -14,14 +14,15 @@ import static ir.darkdeveloper.bitkip.config.AppConfigs.openDownloadings;
 
 public class DownloadOpUtils {
 
-    public static void resumeDownloads(MainTableUtils mainTableUtils, List<DownloadModel> modelList) {
+    public static void resumeDownloads(MainTableUtils mainTableUtils, List<DownloadModel> modelList,
+                                       String speedLimit, String byteLimit) {
         modelList.stream().filter(dm -> !currentDownloadings.contains(dm))
                 .forEach(dm -> {
                     dm.setLastTryDate(LocalDateTime.now());
                     dm.setDownloadStatus(DownloadStatus.Trying);
                     DownloadsRepo.updateDownloadLastTryDate(dm);
                     mainTableUtils.refreshTable();
-                    NewDownloadUtils.startDownload(dm, mainTableUtils, null, null, true);
+                    NewDownloadUtils.startDownload(dm, mainTableUtils, speedLimit, byteLimit, true);
                     openDownloadings.stream().filter(dc -> dc.getDownloadModel().equals(dm))
                             .forEach(DownloadingController::initDownloadListeners);
                 });

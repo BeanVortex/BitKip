@@ -42,6 +42,8 @@ public class AppConfigs {
 
     public static final List<DownloadingController> openDownloadings = new ArrayList<>();
 
+    public static boolean showCompleteDialog = true;
+
     public static void setHostServices(HostServices hostServices) {
         AppConfigs.hostServices = hostServices;
     }

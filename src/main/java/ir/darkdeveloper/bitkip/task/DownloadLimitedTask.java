@@ -4,6 +4,7 @@ import ir.darkdeveloper.bitkip.controllers.DownloadingController;
 import ir.darkdeveloper.bitkip.models.DownloadModel;
 import ir.darkdeveloper.bitkip.models.DownloadStatus;
 import ir.darkdeveloper.bitkip.repo.DownloadsRepo;
+import ir.darkdeveloper.bitkip.utils.DownloadOpUtils;
 import ir.darkdeveloper.bitkip.utils.MainTableUtils;
 
 import java.io.File;
@@ -146,7 +147,13 @@ public class DownloadLimitedTask extends DownloadTask {
                     updateProgress(1, 1);
                     DownloadsRepo.updateDownloadCompleteDate(download);
                     openDownloadings.stream().filter(dc -> dc.getDownloadModel().equals(download))
-                            .forEach(dc -> dc.onComplete(download));
+                            .findAny().ifPresentOrElse(dc -> dc.onComplete(download),
+                                    () -> {
+                                        if (download.isShowCompleteDialog())
+                                            DownloadOpUtils.openDownloadingStage(download, mainTableUtils);
+                                    });
+                    if (download.isOpenAfterComplete())
+                        hostServices.showDocument(download.getFilePath());
                 } else
                     openDownloadings.stream().filter(dc -> dc.getDownloadModel().equals(download))
                             .forEach(DownloadingController::onPause);

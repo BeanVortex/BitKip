@@ -23,9 +23,13 @@ public class DownloadsRepo {
         if (dm.getLastTryDate() != null)
             lastTryDate = "\"" + dm.getLastTryDate() + "\"";
 
+        var showDialog = dm.isShowCompleteDialog() ? 1 : 0;
+        var openFile = dm.isOpenAfterComplete() ? 1 : 0;
+
         var downloadSql = """
-                INSERT INTO downloads (name, progress, downloaded, size, url, path, chunks, add_date, last_try_date)
-                VALUES ("%s", %f, %d, %d, "%s", "%s", %d, "%s", %s)
+                INSERT INTO downloads (name, progress, downloaded, size, url, path, chunks, add_date, last_try_date,
+                show_complete_dialog, open_after_complete)
+                VALUES ("%s", %f, %d, %d, "%s", "%s", %d, "%s", %s, %d, %d)
                 """.formatted(
                 dm.getName(),
                 dm.getProgress(),
@@ -35,7 +39,9 @@ public class DownloadsRepo {
                 dm.getFilePath(),
                 dm.getChunks(),
                 dm.getAddDate().toString(),
-                lastTryDate);
+                lastTryDate,
+                showDialog,
+                openFile);
 
         try (var con = dbHelper.openConnection();
              var stmt = con.createStatement()) {
@@ -165,6 +171,8 @@ public class DownloadsRepo {
         var filePath = rs.getString(COL_PATH);
         var chunks = rs.getInt(COL_CHUNKS);
         var queueId = rs.getInt("queue_id");
+        var showCompleteDialog = rs.getBoolean("show_complete_dialog");
+        var openAfterComplete = rs.getBoolean("open_after_complete");
         var queueName = rs.getString("queue_name");
         var queueEditable = rs.getBoolean(COL_EDITABLE);
         var queueCanAddDown = rs.getBoolean(COL_CAN_ADD_DOWN);
@@ -177,7 +185,8 @@ public class DownloadsRepo {
         return DownloadModel.builder()
                 .id(id).name(name).progress(progress).downloaded(downloaded).size(size).url(url).filePath(filePath)
                 .chunks(chunks).queue(new ArrayList<>(List.of(queue))).addDate(LocalDateTime.parse(addDate))
-                .lastTryDate(lastTryDateStr).completeDate(completeDateStr)
+                .lastTryDate(lastTryDateStr).completeDate(completeDateStr).openAfterComplete(openAfterComplete)
+                .showCompleteDialog(showCompleteDialog)
                 .build();
     }
 
@@ -200,6 +209,19 @@ public class DownloadsRepo {
         var sql = """
                 UPDATE downloads SET last_try_date = "%s" WHERE id = %d;
                 """.formatted(dm.getLastTryDate(), dm.getId());
+        executeSql(sql);
+    }
+
+    public static void updateDownloadOpenAfterComplete(DownloadModel dm) {
+        var sql = """
+                UPDATE downloads SET open_after_complete = %d WHERE id = %d;
+                """.formatted(dm.isOpenAfterComplete() ? 1 : 0, dm.getId());
+        executeSql(sql);
+    }
+    public static void updateDownloadShowCompleteDialog(DownloadModel dm) {
+        var sql = """
+                UPDATE downloads SET show_complete_dialog = %d WHERE id = %d;
+                """.formatted(dm.isShowCompleteDialog() ? 1 : 0, dm.getId());
         executeSql(sql);
     }
 

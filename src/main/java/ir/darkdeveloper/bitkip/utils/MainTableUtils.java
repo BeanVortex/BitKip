@@ -128,7 +128,8 @@ public class MainTableUtils {
     // sequence is important where labels defined
     private void menuItemOperations(List<MenuItem> menuItems) {
         // resume
-        menuItems.get(0).setOnAction(e -> DownloadOpUtils.resumeDownloads(this, getSelected()));
+        menuItems.get(0).setOnAction(e ->
+                DownloadOpUtils.resumeDownloads(this, getSelected(), null, null));
         // pause
         menuItems.get(1).setOnAction(e -> DownloadOpUtils.pauseDownloads(this));
         // delete

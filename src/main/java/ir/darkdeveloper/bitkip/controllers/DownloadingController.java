@@ -3,6 +3,7 @@ package ir.darkdeveloper.bitkip.controllers;
 import ir.darkdeveloper.bitkip.controllers.interfaces.FXMLController;
 import ir.darkdeveloper.bitkip.models.DownloadModel;
 import ir.darkdeveloper.bitkip.models.DownloadStatus;
+import ir.darkdeveloper.bitkip.repo.DownloadsRepo;
 import ir.darkdeveloper.bitkip.task.DownloadTask;
 import ir.darkdeveloper.bitkip.utils.*;
 import javafx.application.Platform;
@@ -17,9 +18,11 @@ import javafx.scene.layout.HBox;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
 import org.apache.commons.lang3.time.DurationFormatUtils;
+import org.controlsfx.control.Notifications;
 import org.controlsfx.control.ToggleSwitch;
 import org.kordamp.ikonli.javafx.FontIcon;
 
+import java.io.File;
 import java.util.List;
 
 import static ir.darkdeveloper.bitkip.BitKip.getResource;
@@ -71,8 +74,6 @@ public class DownloadingController implements FXMLController {
     private final BooleanProperty isPaused = new SimpleBooleanProperty(true);
     private boolean isComplete = false;
     private MainTableUtils mainTableUtils;
-
-    private boolean openAfterComplete = false;
 
 
     @Override
@@ -140,7 +141,8 @@ public class DownloadingController implements FXMLController {
                         IOUtils.formatBytes(downloadModel.getSize()));
         downloadedOfLbl.setText(downloadOf);
         progressLbl.setText("Progress: %.2f%%".formatted(downloadModel.getProgress()));
-        openSwitch.setSelected(openAfterComplete);
+        openSwitch.setSelected(downloadModel.isOpenAfterComplete());
+        showSwitch.setSelected(downloadModel.isShowCompleteDialog());
         onComplete(downloadModel);
     }
 
@@ -215,7 +217,14 @@ public class DownloadingController implements FXMLController {
                 remainingLbl.setText("Remaining: Paused");
         });
 
-        openSwitch.selectedProperty().addListener((o, old, newVal) -> openAfterComplete = newVal);
+        openSwitch.selectedProperty().addListener((o, old, newVal) -> {
+            downloadModel.setOpenAfterComplete(newVal);
+            DownloadsRepo.updateDownloadOpenAfterComplete(downloadModel);
+        });
+        showSwitch.selectedProperty().addListener((o, old, newVal) -> {
+            downloadModel.setShowCompleteDialog(newVal);
+            DownloadsRepo.updateDownloadShowCompleteDialog(downloadModel);
+        });
     }
 
     @FXML
@@ -227,13 +236,20 @@ public class DownloadingController implements FXMLController {
     private void onControl() {
 
         if (isComplete) {
+            if (!new File(downloadModel.getFilePath()).exists()) {
+                Notifications.create()
+                        .title("File not found")
+                        .text("File has been moved or removed")
+                        .showError();
+                return;
+            }
             hostServices.showDocument(downloadModel.getFilePath());
             return;
         }
 
         if (isPaused.get()) {
             statusLbl.setText("Status: " + DownloadStatus.Trying);
-            DownloadOpUtils.resumeDownloads(mainTableUtils, List.of(downloadModel));
+            DownloadOpUtils.resumeDownloads(mainTableUtils, List.of(downloadModel), null, null);
             isPaused.set(false);
         } else {
             var dt = getDownloadTask();
@@ -261,8 +277,6 @@ public class DownloadingController implements FXMLController {
                             IOUtils.formatBytes(downloadModel.getSize()));
             downloadedOfLbl.setText(downloadOf);
             stage.requestFocus();
-            if (openAfterComplete)
-                onControl();
         }
     }
 

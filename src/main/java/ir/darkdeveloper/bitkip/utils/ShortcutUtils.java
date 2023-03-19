@@ -27,7 +27,8 @@ public class ShortcutUtils {
 
         Runnable newDownload = () -> DownloadOpUtils.newDownload(mainTableUtils, true);
         Runnable newBatchDownload = () -> DownloadOpUtils.newDownload(mainTableUtils, false);
-        Runnable resume = () -> DownloadOpUtils.resumeDownloads(mainTableUtils, mainTableUtils.getSelected());
+        Runnable resume = () -> DownloadOpUtils.resumeDownloads(mainTableUtils,
+                mainTableUtils.getSelected(), null, null);
         Runnable pause = () -> DownloadOpUtils.pauseDownloads(mainTableUtils);
         Runnable delete = () -> DownloadOpUtils.deleteDownloads(mainTableUtils, false);
         Runnable shiftDelete = () -> DownloadOpUtils.deleteDownloads(mainTableUtils, true);

@@ -29,6 +29,7 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
 import static ir.darkdeveloper.bitkip.config.AppConfigs.currentDownloadings;
+import static ir.darkdeveloper.bitkip.config.AppConfigs.showCompleteDialog;
 
 public class NewDownloadUtils {
 
@@ -248,8 +249,8 @@ public class NewDownloadUtils {
     }
 
 
-    public static void startDownload(DownloadModel dm, MainTableUtils mainTableUtils, String speed, String bytes,
-                                     boolean resume) {
+    public static void startDownload(DownloadModel dm, MainTableUtils mainTableUtils,
+                                     String speed, String bytes, boolean resume) {
         DownloadTask downloadTask = new DownloadLimitedTask(dm, Long.MAX_VALUE, false, mainTableUtils);
         if (dm.getChunks() == 0) {
             if (speed != null) {
@@ -284,6 +285,8 @@ public class NewDownloadUtils {
         downloadTask.progressProperty().addListener((o, old, newV) ->
                 mainTableUtils.updateDownloadProgress(newV.floatValue() * 100, dm));
         dm.setDownloadTask(downloadTask);
+        dm.setShowCompleteDialog(showCompleteDialog);
+        dm.setOpenAfterComplete(false);
         if (!resume) {
             DownloadsRepo.insertDownload(dm);
             mainTableUtils.addRow(dm);
