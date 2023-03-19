@@ -10,15 +10,14 @@ import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.fxml.FXML;
 import javafx.geometry.Rectangle2D;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.control.ProgressBar;
+import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
 import org.apache.commons.lang3.time.DurationFormatUtils;
+import org.controlsfx.control.ToggleSwitch;
 import org.kordamp.ikonli.javafx.FontIcon;
 
 import java.util.List;
@@ -28,6 +27,14 @@ import static ir.darkdeveloper.bitkip.config.AppConfigs.*;
 
 public class DownloadingController implements FXMLController {
 
+    @FXML
+    private ToggleSwitch openSwitch;
+    @FXML
+    private ToggleSwitch showSwitch;
+    @FXML
+    private Accordion accordion;
+    @FXML
+    private TitledPane advancedPane;
     @FXML
     private ImageView logoImg;
     @FXML
@@ -65,6 +72,8 @@ public class DownloadingController implements FXMLController {
     private boolean isComplete = false;
     private MainTableUtils mainTableUtils;
 
+    private boolean openAfterComplete = false;
+
 
     @Override
     public void initAfterStage() {
@@ -84,6 +93,15 @@ public class DownloadingController implements FXMLController {
 
         WindowUtils.toolbarInits(toolbar, stage, bounds, downloadingMinWidth, downloadingMinHeight);
         ResizeUtil.addResizeListener(stage);
+
+
+        advancedPane.expandedProperty().addListener((observable, oldValue, newValue) -> {
+            if (newValue)
+                stage.setHeight(downloadingMinHeight + advancedPane.getHeight() + accordion.getHeight());
+            else
+                stage.setHeight(downloadingMinHeight);
+
+        });
     }
 
     @Override
@@ -122,6 +140,7 @@ public class DownloadingController implements FXMLController {
                         IOUtils.formatBytes(downloadModel.getSize()));
         downloadedOfLbl.setText(downloadOf);
         progressLbl.setText("Progress: %.2f%%".formatted(downloadModel.getProgress()));
+        openSwitch.setSelected(openAfterComplete);
         onComplete(downloadModel);
     }
 
@@ -136,12 +155,10 @@ public class DownloadingController implements FXMLController {
     }
 
     private DownloadTask getDownloadTask() {
-        var i = currentDownloadings.indexOf(downloadModel);
-        if (i != -1) {
-            var downloadingModel = currentDownloadings.get(i);
-            return downloadingModel.getDownloadTask();
-        }
-        return null;
+        return currentDownloadings.stream()
+                .filter(c -> c.equals(downloadModel))
+                .findAny()
+                .map(DownloadModel::getDownloadTask).orElse(null);
     }
 
     private void bytesDownloadedListener(DownloadTask dt) {
@@ -197,6 +214,8 @@ public class DownloadingController implements FXMLController {
             if (newValue)
                 remainingLbl.setText("Remaining: Paused");
         });
+
+        openSwitch.selectedProperty().addListener((o, old, newVal) -> openAfterComplete = newVal);
     }
 
     @FXML
@@ -208,8 +227,7 @@ public class DownloadingController implements FXMLController {
     private void onControl() {
 
         if (isComplete) {
-            //todo: open
-            System.out.println("opened");
+            hostServices.showDocument(downloadModel.getFilePath());
             return;
         }
 
@@ -243,6 +261,8 @@ public class DownloadingController implements FXMLController {
                             IOUtils.formatBytes(downloadModel.getSize()));
             downloadedOfLbl.setText(downloadOf);
             stage.requestFocus();
+            if (openAfterComplete)
+                onControl();
         }
     }
 
@@ -260,6 +280,5 @@ public class DownloadingController implements FXMLController {
     public DownloadModel getDownloadModel() {
         return downloadModel;
     }
-
 
 }

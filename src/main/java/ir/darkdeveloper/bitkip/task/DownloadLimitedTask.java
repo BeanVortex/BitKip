@@ -20,8 +20,7 @@ import java.time.LocalDateTime;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import static ir.darkdeveloper.bitkip.config.AppConfigs.currentDownloadings;
-import static ir.darkdeveloper.bitkip.config.AppConfigs.openDownloadings;
+import static ir.darkdeveloper.bitkip.config.AppConfigs.*;
 
 
 public class DownloadLimitedTask extends DownloadTask {
@@ -33,6 +32,7 @@ public class DownloadLimitedTask extends DownloadTask {
     private File file;
     private ExecutorService executor;
     private FileChannel fileChannel;
+    private int retries = 0;
 
 
     /**
@@ -49,7 +49,7 @@ public class DownloadLimitedTask extends DownloadTask {
     @Override
     protected Long call() throws IOException, InterruptedException {
         file = new File(downloadModel.getFilePath());
-        if (file.exists() && isCompleted(downloadModel, file))
+        if (file.exists() && isCompleted(downloadModel, file, mainTableUtils))
             return 0L;
         performDownload();
         return getCurrentFileSize(file);
@@ -57,37 +57,42 @@ public class DownloadLimitedTask extends DownloadTask {
 
     private void performDownload() throws IOException, InterruptedException {
         ExecutorService statusExecutor = null;
-        try {
-            var url = new URL(downloadModel.getUrl());
-            var connection = (HttpURLConnection) url.openConnection();
-            connection.setReadTimeout(3000);
-            connection.setConnectTimeout(3000);
-            configureResume(connection, file);
-            var in = connection.getInputStream();
-            var fileSize = downloadModel.getSize();
+        if (retries != downloadRetryCount) {
+            try {
+                var url = new URL(downloadModel.getUrl());
+                var connection = (HttpURLConnection) url.openConnection();
+                connection.setReadTimeout(3000);
+                connection.setConnectTimeout(3000);
+                configureResume(connection, file);
+                var in = connection.getInputStream();
+                var fileSize = downloadModel.getSize();
 
-            var out = new FileOutputStream(file, file.exists());
-            fileChannel = out.getChannel();
+                var out = new FileOutputStream(file, file.exists());
+                fileChannel = out.getChannel();
 
-            var existingFileSize = 0L;
-            if (file.exists())
-                existingFileSize = getCurrentFileSize(file);
+                var existingFileSize = 0L;
+                if (file.exists())
+                    existingFileSize = getCurrentFileSize(file);
 
-            if (isSpeedLimited)
-                downloadSpeedLimited(fileChannel, in, file, limit, fileSize, existingFileSize);
-            else {
-                statusExecutor = calculateSpeedAndProgress(file, fileSize);
-                if (statusExecutor != null)
-                    downloadValueLimited(fileChannel, in, limit, existingFileSize);
+                if (isSpeedLimited)
+                    downloadSpeedLimited(fileChannel, in, file, limit, fileSize, existingFileSize);
+                else {
+                    statusExecutor = calculateSpeedAndProgress(file, fileSize);
+                    if (statusExecutor != null)
+                        downloadValueLimited(fileChannel, in, limit, existingFileSize);
+                }
+            } catch (SocketTimeoutException | UnknownHostException s) {
+                s.printStackTrace();
+                retries++;
+                if (!paused) {
+                    Thread.sleep(2000);
+                    performDownload();
+                }
             }
-        } catch (SocketTimeoutException | UnknownHostException s) {
-            s.printStackTrace();
-            Thread.sleep(2000);
-            performDownload();
+            var currFileSize = getCurrentFileSize(file);
+            if (!paused && currFileSize != downloadModel.getSize())
+                performDownload();
         }
-        var currFileSize = getCurrentFileSize(file);
-        if (!paused && currFileSize != downloadModel.getSize())
-            performDownload();
         paused = true;
         if (statusExecutor != null)
             statusExecutor.shutdown();
@@ -125,10 +130,13 @@ public class DownloadLimitedTask extends DownloadTask {
     @Override
     protected void succeeded() {
         try {
-            fileChannel.close();
-            var index = currentDownloadings.indexOf(downloadModel);
-            if (index != -1) {
-                var download = currentDownloadings.get(index);
+            if (fileChannel != null)
+                fileChannel.close();
+            var dmOpt = currentDownloadings.stream()
+                    .filter(c -> c.equals(downloadModel))
+                    .findAny();
+            if (dmOpt.isPresent()) {
+                var download = dmOpt.get();
                 download.setDownloadStatus(DownloadStatus.Paused);
                 if (file.exists() && getCurrentFileSize(file) == downloadModel.getSize()) {
                     download.setCompleteDate(LocalDateTime.now());
@@ -145,7 +153,9 @@ public class DownloadLimitedTask extends DownloadTask {
                 download.setDownloaded(getCurrentFileSize(file));
                 DownloadsRepo.updateDownloadProgress(download);
                 DownloadsRepo.updateDownloadLastTryDate(download);
-                currentDownloadings.remove(index);
+                if (download.isOpenAfterComplete())
+                    hostServices.showDocument(download.getFilePath());
+                currentDownloadings.remove(download);
                 mainTableUtils.refreshTable();
             }
             executor.shutdown();
@@ -153,6 +163,7 @@ public class DownloadLimitedTask extends DownloadTask {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+
     }
 
     @Override
@@ -189,19 +200,6 @@ public class DownloadLimitedTask extends DownloadTask {
         }
     }
 
-    private boolean isCompleted(DownloadModel download, File file) {
-        try {
-            var fs = download.getSize();
-            var existingFileSize = getCurrentFileSize(file);
-            if (fs != 0 && existingFileSize == fs) {
-                System.out.println("already downloaded");
-                return true;
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return false;
-    }
 
     @Override
     public void pause() {

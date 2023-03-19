@@ -28,8 +28,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import static ir.darkdeveloper.bitkip.config.AppConfigs.currentDownloadings;
-import static ir.darkdeveloper.bitkip.config.AppConfigs.openDownloadings;
+import static ir.darkdeveloper.bitkip.config.AppConfigs.*;
 
 public class DownloadInChunksTask extends DownloadTask {
     private final int chunks;
@@ -43,6 +42,7 @@ public class DownloadInChunksTask extends DownloadTask {
     private ExecutorService executor;
     private ExecutorService partsExecutor;
     private ExecutorService statusExecutor;
+    private int retries = 0;
 
     public DownloadInChunksTask(DownloadModel downloadModel, MainTableUtils mainTableUtils, Long limit) {
         super(downloadModel);
@@ -164,60 +164,69 @@ public class DownloadInChunksTask extends DownloadTask {
 
     private void performDownload(URL url, long fromContinue, long from, long to, File partFile, long existingFileSize)
             throws InterruptedException, IOException {
-        try {
-            var con = (HttpURLConnection) url.openConnection();
-            con.setReadTimeout(3000);
-            con.setConnectTimeout(3000);
-            con.addRequestProperty("Range", "bytes=" + from + "-" + to);
-            var out = new FileOutputStream(partFile, partFile.exists());
-            var fileChannel = out.getChannel();
-            fileChannels.add(fileChannel);
-            var byteChannel = Channels.newChannel(con.getInputStream());
-            fileChannel.transferFrom(byteChannel, existingFileSize, Long.MAX_VALUE);
-            fileChannel.close();
-            con.disconnect();
-        } catch (SocketTimeoutException | UnknownHostException s) {
-            s.printStackTrace();
-            Thread.sleep(2000);
+        if (retries != downloadRetryCount) {
+            try {
+                var con = (HttpURLConnection) url.openConnection();
+                con.setReadTimeout(3000);
+                con.setConnectTimeout(3000);
+                con.addRequestProperty("Range", "bytes=" + from + "-" + to);
+                var out = new FileOutputStream(partFile, partFile.exists());
+                var fileChannel = out.getChannel();
+                fileChannels.add(fileChannel);
+                var byteChannel = Channels.newChannel(con.getInputStream());
+                fileChannel.transferFrom(byteChannel, existingFileSize, Long.MAX_VALUE);
+                fileChannel.close();
+                con.disconnect();
+            } catch (SocketTimeoutException | UnknownHostException s) {
+                s.printStackTrace();
+                retries++;
+                if (!paused) {
+                    Thread.sleep(2000);
+                    var currFileSize = getCurrentFileSize(partFile);
+                    performDownload(url, fromContinue, fromContinue + currFileSize, to, partFile, currFileSize);
+                }
+            }
             var currFileSize = getCurrentFileSize(partFile);
-            performDownload(url, fromContinue, fromContinue + currFileSize, to, partFile, currFileSize);
+            if (!paused && currFileSize != (to - fromContinue + 1))
+                performDownload(url, fromContinue, fromContinue + currFileSize, to, partFile, currFileSize);
         }
-        var currFileSize = getCurrentFileSize(partFile);
-        if (!paused && currFileSize != (to - fromContinue + 1))
-            performDownload(url, fromContinue, fromContinue + currFileSize, to, partFile, currFileSize);
-
     }
 
 
     private void performLimitedDownload(URL url, long fromContinue, long from, long to, File partFile, long existingFileSize)
             throws IOException, InterruptedException {
-        try {
-            var bytesToDownloadEachInCycle = limit / chunks;
-            var con = (HttpURLConnection) url.openConnection();
-            con.setReadTimeout(3000);
-            con.setConnectTimeout(3000);
-            con.addRequestProperty("Range", "bytes=" + from + "-" + to);
-            var out = new FileOutputStream(partFile, partFile.exists());
-            var fileChannel = out.getChannel();
-            fileChannels.add(fileChannel);
-            var byteChannel = Channels.newChannel(con.getInputStream());
-            long finalExistingFileSize = existingFileSize;
-            while (from + finalExistingFileSize < to) {
-                fileChannel.transferFrom(byteChannel, finalExistingFileSize, bytesToDownloadEachInCycle);
-                finalExistingFileSize += bytesToDownloadEachInCycle;
-                Thread.sleep(ONE_SEC);
+        if (retries != downloadRetryCount) {
+            try {
+                var bytesToDownloadEachInCycle = limit / chunks;
+                var con = (HttpURLConnection) url.openConnection();
+                con.setReadTimeout(3000);
+                con.setConnectTimeout(3000);
+                con.addRequestProperty("Range", "bytes=" + from + "-" + to);
+                var out = new FileOutputStream(partFile, partFile.exists());
+                var fileChannel = out.getChannel();
+                fileChannels.add(fileChannel);
+                var byteChannel = Channels.newChannel(con.getInputStream());
+                long finalExistingFileSize = existingFileSize;
+                while (from + finalExistingFileSize < to) {
+                    fileChannel.transferFrom(byteChannel, finalExistingFileSize, bytesToDownloadEachInCycle);
+                    finalExistingFileSize += bytesToDownloadEachInCycle;
+                    Thread.sleep(ONE_SEC);
+                }
+                fileChannel.close();
+                con.disconnect();
+            } catch (SocketTimeoutException | UnknownHostException s) {
+                s.printStackTrace();
+                retries++;
+                if (!paused) {
+                    Thread.sleep(2000);
+                    var currFileSize = getCurrentFileSize(partFile);
+                    performDownload(url, fromContinue, fromContinue + currFileSize, to, partFile, currFileSize);
+                }
             }
-            fileChannel.close();
-            con.disconnect();
-        } catch (SocketTimeoutException | UnknownHostException s) {
-            s.printStackTrace();
-            Thread.sleep(2000);
             var currFileSize = getCurrentFileSize(partFile);
-            performDownload(url, fromContinue, fromContinue + currFileSize, to, partFile, currFileSize);
+            if (!paused && currFileSize != (to - fromContinue + 1))
+                performDownload(url, fromContinue, fromContinue + currFileSize, to, partFile, currFileSize);
         }
-        var currFileSize = getCurrentFileSize(partFile);
-        if (!paused && currFileSize != (to - fromContinue + 1))
-            performDownload(url, fromContinue, fromContinue + currFileSize, to, partFile, currFileSize);
     }
 
 
@@ -259,11 +268,13 @@ public class DownloadInChunksTask extends DownloadTask {
     @Override
     protected void succeeded() {
         try {
-            var index = currentDownloadings.indexOf(downloadModel);
-            if (index != -1) {
-                for (var channel : fileChannels)
-                    channel.close();
-                var download = currentDownloadings.get(index);
+            for (var channel : fileChannels)
+                channel.close();
+            var dmOpt = currentDownloadings.stream()
+                    .filter(c -> c.equals(downloadModel))
+                    .findAny();
+            if (dmOpt.isPresent()) {
+                var download = dmOpt.get();
                 download.setDownloadStatus(DownloadStatus.Paused);
                 if (IOUtils.mergeFiles(download, chunks, filePaths)) {
                     download.setCompleteDate(LocalDateTime.now());
@@ -281,7 +292,9 @@ public class DownloadInChunksTask extends DownloadTask {
 
                 DownloadsRepo.updateDownloadProgress(download);
                 DownloadsRepo.updateDownloadLastTryDate(download);
-                currentDownloadings.remove(index);
+                if (download.isOpenAfterComplete())
+                    hostServices.showDocument(download.getFilePath());
+                currentDownloadings.remove(download);
                 mainTableUtils.refreshTable();
             }
             partsExecutor.shutdown();

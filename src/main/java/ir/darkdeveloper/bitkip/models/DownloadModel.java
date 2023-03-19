@@ -33,6 +33,8 @@ public class DownloadModel {
     private LocalDateTime addDate;
     private LocalDateTime lastTryDate;
     private LocalDateTime completeDate;
+    private boolean openAfterComplete;
+    private boolean showCompleteDialog;
 
     private String sizeString;
     private String downloadedString;

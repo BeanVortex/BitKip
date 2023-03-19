@@ -13,6 +13,8 @@ import javafx.stage.StageStyle;
 import java.net.URL;
 import java.util.ArrayList;
 
+import static ir.darkdeveloper.bitkip.config.AppConfigs.currentDownloadings;
+
 public class BitKip extends Application {
 
     @Override
@@ -32,7 +34,7 @@ public class BitKip extends Application {
 
     @Override
     public void stop() {
-        var notObservedDms = new ArrayList<>(AppConfigs.currentDownloadings);
+        var notObservedDms = new ArrayList<>(currentDownloadings);
         notObservedDms.forEach(dm -> dm.getDownloadTask().pause());
     }
 

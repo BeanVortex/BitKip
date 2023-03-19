@@ -13,6 +13,7 @@ import java.nio.file.Path;
 import java.util.concurrent.ExecutorService;
 
 import static ir.darkdeveloper.bitkip.config.AppConfigs.currentDownloadings;
+
 public abstract class DownloadTask extends Task<Long> {
 
     long ONE_SEC = 1000;
@@ -35,7 +36,10 @@ public abstract class DownloadTask extends Task<Long> {
             if (fs != 0 && existingFileSize == fs) {
                 download.setDownloadStatus(DownloadStatus.Completed);
                 mainTableUtils.refreshTable();
-                currentDownloadings.remove(downloadModel);
+                currentDownloadings.stream()
+                        .filter(c -> c.equals(downloadModel))
+                        .findAny()
+                        .ifPresent(currentDownloadings::remove);
                 System.out.println("already downloaded");
                 return true;
             }
@@ -44,6 +48,7 @@ public abstract class DownloadTask extends Task<Long> {
         }
         return false;
     }
+
     public abstract void setExecutor(ExecutorService executor);
 
 }

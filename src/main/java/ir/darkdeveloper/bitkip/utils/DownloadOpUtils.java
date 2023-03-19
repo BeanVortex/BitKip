@@ -28,30 +28,23 @@ public class DownloadOpUtils {
     }
 
     public static void pauseDownloads(MainTableUtils mainTableUtils) {
-        mainTableUtils.getSelected().forEach(dm -> {
-            var index = currentDownloadings.indexOf(dm);
-            if (index != -1) {
-                var download = currentDownloadings.get(index);
-                download.getDownloadTask().pause();
-            }
-        });
+        mainTableUtils.getSelected().forEach(dm ->
+                currentDownloadings.stream().filter(c -> c.equals(dm))
+                        .findAny().ifPresent(dm2 -> dm2.getDownloadTask().pause())
+        );
     }
 
     public static void deleteDownloads(MainTableUtils mainTableUtils, boolean withFiles) {
         var selectedItems = mainTableUtils.getSelected();
         selectedItems.forEach(dm -> {
-            var index = currentDownloadings.indexOf(dm);
-
-            if (index != -1)
-                dm = currentDownloadings.get(index);
-            if (dm.getDownloadTask() != null && dm.getDownloadTask().isRunning())
-                dm.getDownloadTask().pause();
+            currentDownloadings.stream().filter(c -> c.equals(dm))
+                    .findAny()
+                    .ifPresent(dm2 -> dm2.getDownloadTask().pause());
             DownloadsRepo.deleteDownload(dm);
             if (withFiles)
                 IOUtils.deleteDownload(dm);
-            var finalDm = dm;
             var openDownloadingsCopy = new ArrayList<>(openDownloadings);
-            openDownloadingsCopy.stream().filter(dc -> dc.getDownloadModel().equals(finalDm))
+            openDownloadingsCopy.stream().filter(dc -> dc.getDownloadModel().equals(dm))
                     .forEach(DownloadingController::closeStage);
         });
 
