@@ -15,6 +15,7 @@ import javafx.util.Callback;
 import org.apache.commons.lang3.time.DurationFormatUtils;
 
 import java.text.DecimalFormat;
+import java.util.LinkedHashMap;
 import java.util.List;
 
 import static ir.darkdeveloper.bitkip.config.AppConfigs.currentDownloadings;
@@ -98,25 +99,17 @@ public class MainTableUtils {
                 var selectedItems = getSelected();
                 if (!row.isEmpty() && event.getButton().equals(MouseButton.SECONDARY)) {
                     var cMenu = new ContextMenu();
+                    var downloadingLbl = new Label("details");
                     var resumeLbl = new Label("resume");
                     var pauseLbl = new Label("pause");
                     var deleteLbl = new Label("delete");
                     var deleteWithFileLbl = new Label("delete with file");
-                    var lbls = List.of(resumeLbl, pauseLbl, deleteLbl, deleteWithFileLbl);
-                    var keyCodes = List.of(RESUME_KEY, PAUSE_KEY, DELETE_KEY, DELETE_FILE_KEY);
-                    var menuItems = MenuUtils.createMenuItems(lbls, keyCodes);
-                    selectedItems.forEach(dm -> {
-                        switch (dm.getDownloadStatus()) {
-                            case Downloading -> menuItems.get(0).setDisable(true);
-                            case Paused -> menuItems.get(1).setDisable(true);
-                            case Completed -> {
-                                menuItems.get(0).setDisable(true);
-                                menuItems.get(1).setDisable(true);
-                            }
-                        }
-                    });
-                    cMenu.getItems().addAll(menuItems);
-                    menuItemOperations(menuItems);
+                    var lbls = List.of(downloadingLbl, resumeLbl, pauseLbl, deleteLbl, deleteWithFileLbl);
+                    var keyCodes = List.of(DOWNLOADING_STAGE_KEY, RESUME_KEY, PAUSE_KEY, DELETE_KEY, DELETE_FILE_KEY);
+                    var menuItems = MenuUtils.createMapMenuItems(lbls, keyCodes);
+                    MenuUtils.disableMenuItems(resumeLbl, pauseLbl, menuItems, selectedItems);
+                    cMenu.getItems().addAll(menuItems.values());
+                    menuItemOperations(menuItems, lbls);
                     row.setContextMenu(cMenu);
                     cMenu.show(row, event.getX(), event.getY());
                 }
@@ -126,16 +119,19 @@ public class MainTableUtils {
     }
 
     // sequence is important where labels defined
-    private void menuItemOperations(List<MenuItem> menuItems) {
+    private void menuItemOperations(LinkedHashMap<Label, MenuItem> menuItems, List<Label> lbls) {
+        //details
+        menuItems.get(lbls.get(0)).setOnAction(e ->
+                getSelected().forEach(dm -> FxUtils.newDownloadingStage(dm, this)));
         // resume
-        menuItems.get(0).setOnAction(e ->
+        menuItems.get(lbls.get(1)).setOnAction(e ->
                 DownloadOpUtils.resumeDownloads(this, getSelected(), null, null));
         // pause
-        menuItems.get(1).setOnAction(e -> DownloadOpUtils.pauseDownloads(this));
+        menuItems.get(lbls.get(2)).setOnAction(e -> DownloadOpUtils.pauseDownloads(this));
         // delete
-        menuItems.get(2).setOnAction(e -> DownloadOpUtils.deleteDownloads(this, false));
+        menuItems.get(lbls.get(3)).setOnAction(e -> DownloadOpUtils.deleteDownloads(this, false));
         // delete with file
-        menuItems.get(3).setOnAction(ev -> DownloadOpUtils.deleteDownloads(this, true));
+        menuItems.get(lbls.get(4)).setOnAction(ev -> DownloadOpUtils.deleteDownloads(this, true));
     }
 
     private EventHandler<? super MouseEvent> onItemsClicked() {

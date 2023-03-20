@@ -68,6 +68,7 @@ public class LinkTableUtils {
         table.getSortOrder().add(nameCol);
         table.setEditable(true);
         table.setRowFactory(getTableViewTableRowCallback());
+        shortcutActions();
     }
 
     private void shortcutActions() {
@@ -89,9 +90,9 @@ public class LinkTableUtils {
                     var deleteLbl = new Label("delete");
                     var lbls = List.of(deleteLbl);
                     var keyCodes = List.of(DEL);
-                    var menuItems = MenuUtils.createMenuItems(lbls, keyCodes);
-                    cMenu.getItems().addAll(menuItems);
-                    menuItems.get(0).setOnAction(e -> links.forEach(ln -> table.getItems().remove(ln)));
+                    var menuItems = MenuUtils.createMapMenuItems(lbls, keyCodes);
+                    cMenu.getItems().addAll(menuItems.values());
+                    menuItems.get(deleteLbl).setOnAction(e -> links.forEach(ln -> table.getItems().remove(ln)));
                     row.setContextMenu(cMenu);
                     cMenu.show(row, event.getX(), event.getY());
                 }
