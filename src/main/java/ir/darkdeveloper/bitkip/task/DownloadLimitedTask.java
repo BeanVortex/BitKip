@@ -160,8 +160,6 @@ public class DownloadLimitedTask extends DownloadTask {
                 download.setDownloaded(getCurrentFileSize(file));
                 DownloadsRepo.updateDownloadProgress(download);
                 DownloadsRepo.updateDownloadLastTryDate(download);
-                if (download.isOpenAfterComplete())
-                    hostServices.showDocument(download.getFilePath());
                 currentDownloadings.remove(download);
                 mainTableUtils.refreshTable();
             }

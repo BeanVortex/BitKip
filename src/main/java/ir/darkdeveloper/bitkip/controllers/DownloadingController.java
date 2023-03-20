@@ -207,6 +207,8 @@ public class DownloadingController implements FXMLController {
         controlBtn.setText(isPaused.get() ? "Resume" : "Pause");
         remainingLbl.setText("Remaining: Paused");
         isPaused.addListener((o, ol, newValue) -> {
+            if (downloadModel.getDownloadStatus() == DownloadStatus.Completed)
+                return;
             controlBtn.setText(newValue ? "Resume" : "Pause");
             statusLbl.setText("Status: " + (newValue ? DownloadStatus.Paused : DownloadStatus.Downloading));
             var downloadOf = "%s / %s"
@@ -266,6 +268,7 @@ public class DownloadingController implements FXMLController {
 
     public void onComplete(DownloadModel download) {
         if (download.getDownloadStatus() == DownloadStatus.Completed) {
+            stage.requestFocus();
             isComplete = true;
             remainingLbl.setText("Remaining: Done");
             controlBtn.setText("Open");
@@ -276,7 +279,6 @@ public class DownloadingController implements FXMLController {
                     .formatted(IOUtils.formatBytes(downloadModel.getSize()),
                             IOUtils.formatBytes(downloadModel.getSize()));
             downloadedOfLbl.setText(downloadOf);
-            stage.requestFocus();
         }
     }
 
