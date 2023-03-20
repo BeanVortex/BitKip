@@ -15,6 +15,7 @@ import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
 import org.apache.commons.lang3.time.DurationFormatUtils;
@@ -31,11 +32,15 @@ import static ir.darkdeveloper.bitkip.config.AppConfigs.*;
 public class DownloadingController implements FXMLController {
 
     @FXML
+    private VBox advancedVbox;
+    @FXML
+    private TextField speedField;
+    @FXML
+    private TextField bytesField;
+    @FXML
     private ToggleSwitch openSwitch;
     @FXML
     private ToggleSwitch showSwitch;
-    @FXML
-    private Accordion accordion;
     @FXML
     private TitledPane advancedPane;
     @FXML
@@ -95,13 +100,11 @@ public class DownloadingController implements FXMLController {
         WindowUtils.toolbarInits(toolbar, stage, bounds, downloadingMinWidth, downloadingMinHeight);
         ResizeUtil.addResizeListener(stage);
 
-
         advancedPane.expandedProperty().addListener((observable, oldValue, newValue) -> {
             if (newValue)
-                stage.setHeight(downloadingMinHeight + advancedPane.getHeight() + accordion.getHeight());
+                stage.setHeight(downloadingMinHeight + advancedVbox.getHeight());
             else
                 stage.setHeight(downloadingMinHeight);
-
         });
     }
 
@@ -128,6 +131,8 @@ public class DownloadingController implements FXMLController {
     }
 
     private void initDownloadData() {
+        InputValidations.validInputChecks(null, bytesField, speedField, downloadModel);
+        bytesField.setText(downloadModel.getSize() + "");
         var end = downloadModel.getName().length();
         if (end > 60)
             end = 60;
@@ -209,6 +214,10 @@ public class DownloadingController implements FXMLController {
         isPaused.addListener((o, ol, newValue) -> {
             if (downloadModel.getDownloadStatus() == DownloadStatus.Completed)
                 return;
+            bytesField.setDisable(!newValue);
+            speedField.setDisable(!newValue);
+            if (!speedField.getText().equals("0"))
+                bytesField.setDisable(true);
             controlBtn.setText(newValue ? "Resume" : "Pause");
             statusLbl.setText("Status: " + (newValue ? DownloadStatus.Paused : DownloadStatus.Downloading));
             var downloadOf = "%s / %s"
@@ -279,6 +288,8 @@ public class DownloadingController implements FXMLController {
                     .formatted(IOUtils.formatBytes(downloadModel.getSize()),
                             IOUtils.formatBytes(downloadModel.getSize()));
             downloadedOfLbl.setText(downloadOf);
+            bytesField.setDisable(true);
+            speedField.setDisable(true);
         }
     }
 

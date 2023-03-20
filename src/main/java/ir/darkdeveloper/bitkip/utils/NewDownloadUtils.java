@@ -12,7 +12,6 @@ import javafx.event.ActionEvent;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
-import javafx.scene.input.Clipboard;
 import javafx.stage.DirectoryChooser;
 import org.controlsfx.control.Notifications;
 import org.controlsfx.control.PopOver;
@@ -33,79 +32,6 @@ import static ir.darkdeveloper.bitkip.config.AppConfigs.showCompleteDialog;
 
 public class NewDownloadUtils {
 
-    public static void validInputChecks(TextField chunksField, TextField bytesField,
-                                        TextField speedField) {
-        validChunksInputChecks(chunksField);
-        validSpeedInputChecks(speedField);
-        validBytesInputChecks(bytesField, chunksField, speedField);
-    }
-
-    private static void validBytesInputChecks(TextField bytesField, TextField chunksField, TextField speedField) {
-        if (bytesField == null || chunksField == null || speedField == null)
-            return;
-        speedField.textProperty().addListener((o, old, newValue) -> bytesField.setDisable(!newValue.equals("0")));
-        chunksField.textProperty().addListener((o, old, newValue) -> bytesField.setDisable(!newValue.equals("0")));
-    }
-
-    private static void validSpeedInputChecks(TextField speedField) {
-        if (speedField == null)
-            return;
-        speedField.textProperty().addListener((o, old, newValue) -> {
-            if (!newValue.matches("\\d+\\.?\\d*"))
-                speedField.setText(newValue.replaceAll("[a-zA-Z`!@#$%^&*()?<>,;:'\"\\-_+=]*", ""));
-        });
-        speedField.focusedProperty().addListener((o, old, newValue) -> {
-            if (!newValue && speedField.getText().isBlank())
-                speedField.setText("0");
-        });
-    }
-
-    public static void validChunksInputChecks(TextField chunksField) {
-        if (chunksField == null)
-            return;
-        chunksField.textProperty().addListener((o, old, newValue) -> {
-            if (!newValue.matches("\\d*"))
-                chunksField.setText(newValue.replaceAll("\\D", ""));
-            if (!chunksField.getText().isBlank()) {
-                var chunks = Integer.parseInt(chunksField.getText());
-                var cores = Runtime.getRuntime().availableProcessors();
-                if (chunks > cores * 2)
-                    chunks = cores * 2;
-                if (chunks == 1)
-                    chunks = 2;
-                chunksField.setText(chunks + "");
-            }
-        });
-        chunksField.focusedProperty().addListener((o, old, newValue) -> {
-            if (!newValue && chunksField.getText().isBlank())
-                chunksField.setText("0");
-        });
-    }
-
-    public static void validInterInputCheck(TextField field) {
-        if (field == null)
-            return;
-        field.textProperty().addListener((o, old, newValue) -> {
-            if (!newValue.matches("\\d*")) {
-                field.setText(newValue.replaceAll("\\D", ""));
-                if (field.getText().isBlank())
-                    field.setText("0");
-            }
-        });
-        field.focusedProperty().addListener((o, old, newValue) -> {
-            if (!newValue && field.getText().isBlank())
-                field.setText("0");
-        });
-    }
-
-    public static void prepareLinkFromClipboard(TextField urlField) {
-        var clip = Clipboard.getSystemClipboard();
-        var clipContent = clip.getString();
-        if (clipContent == null)
-            return;
-        if (clipContent.startsWith("http") || clipContent.startsWith("https"))
-            urlField.setText(clipContent);
-    }
 
     public static HttpURLConnection connect(String uri, int connectTimeout, int readTimeout) {
         try {

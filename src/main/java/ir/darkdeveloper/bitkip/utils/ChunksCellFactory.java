@@ -18,7 +18,7 @@ public class ChunksCellFactory extends TableCell<LinkModel, Integer> {
                 commitEdit(Integer.valueOf(textField.getText().isBlank() ? "0" : textField.getText()));
             }
         });
-        NewDownloadUtils.validChunksInputChecks(textField);
+        InputValidations.validChunksInputChecks(textField);
     }
 
     @Override

@@ -7,10 +7,7 @@ import ir.darkdeveloper.bitkip.models.DownloadStatus;
 import ir.darkdeveloper.bitkip.models.QueueModel;
 import ir.darkdeveloper.bitkip.repo.DownloadsRepo;
 import ir.darkdeveloper.bitkip.repo.QueuesRepo;
-import ir.darkdeveloper.bitkip.utils.DownloadOpUtils;
-import ir.darkdeveloper.bitkip.utils.FxUtils;
-import ir.darkdeveloper.bitkip.utils.NewDownloadUtils;
-import ir.darkdeveloper.bitkip.utils.MainTableUtils;
+import ir.darkdeveloper.bitkip.utils.*;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -106,8 +103,8 @@ public class SingleDownload implements NewDownloadFxmlController {
                 "File is seperated into parts and will be downloaded concurrently"
         };
         NewDownloadUtils.initPopOvers(questionBtns, contents);
-        NewDownloadUtils.validInputChecks(chunksField, bytesField, speedField);
-        NewDownloadUtils.prepareLinkFromClipboard(urlField);
+        InputValidations.validInputChecks(chunksField, bytesField, speedField, dm);
+        InputValidations.prepareLinkFromClipboard(urlField);
         urlField.textProperty().addListener((o, oldValue, newValue) -> {
             if (!newValue.isBlank())
                 autoFillLocationAndSizeAndName(true);
@@ -121,13 +118,6 @@ public class SingleDownload implements NewDownloadFxmlController {
                 autoFillLocationAndSizeAndName(false);
         });
         autoFillLocationAndSizeAndName(true);
-
-        bytesField.textProperty().addListener((o, old, newValue) -> {
-            if (!newValue.matches("\\d*"))
-                bytesField.setText(newValue.replaceAll("\\D", ""));
-            chunksField.setDisable(!bytesField.getText().equals(dm.getSize() + ""));
-            speedField.setDisable(!bytesField.getText().equals(dm.getSize() + ""));
-        });
 
     }
 
