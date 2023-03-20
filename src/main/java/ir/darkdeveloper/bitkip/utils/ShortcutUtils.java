@@ -9,6 +9,7 @@ import javafx.stage.Stage;
 public class ShortcutUtils {
 
     public static final KeyCodeCombination NEW_DOWNLOAD_KEY = new KeyCodeCombination(KeyCode.N, KeyCombination.CONTROL_DOWN);
+    public static final KeyCodeCombination OPEN_KEY = new KeyCodeCombination(KeyCode.ENTER);
     public static final KeyCodeCombination DOWNLOADING_STAGE_KEY = new KeyCodeCombination(KeyCode.D, KeyCombination.CONTROL_DOWN);
     public static final KeyCodeCombination NEW_BATCH_KEY = new KeyCodeCombination(KeyCode.B, KeyCombination.CONTROL_DOWN);
     public static final KeyCodeCombination SETTINGS_KEY = new KeyCodeCombination(KeyCode.S, KeyCombination.CONTROL_DOWN);
@@ -26,9 +27,9 @@ public class ShortcutUtils {
 
     public static void initMainTableShortcut(MainTableUtils mainTableUtils, Stage stage) {
 
+
         Runnable downloadingStage = () -> mainTableUtils.getSelected()
                 .forEach(dm -> FxUtils.newDownloadingStage(dm, mainTableUtils));
-
         Runnable newDownload = () -> DownloadOpUtils.newDownload(mainTableUtils, true);
         Runnable newBatchDownload = () -> DownloadOpUtils.newDownload(mainTableUtils, false);
         Runnable resume = () -> DownloadOpUtils.resumeDownloads(mainTableUtils,
@@ -62,7 +63,6 @@ public class ShortcutUtils {
             //
             System.out.println("stop to queue");
         };
-
 
         stage.getScene().getAccelerators().put(DOWNLOADING_STAGE_KEY, downloadingStage);
         stage.getScene().getAccelerators().put(NEW_DOWNLOAD_KEY, newDownload);

@@ -37,6 +37,7 @@ public class MenuUtils {
 
     public static void initOperationMenu(Button operationMenu, MainTableUtils mainTableUtils) {
         var c = new ContextMenu();
+        var open = new Label("Open");
         var resume = new Label("Resume");
         var pause = new Label("Pause");
         var restart = new Label("Restart");
@@ -47,8 +48,8 @@ public class MenuUtils {
         var startQueue = new Label("Start queue");
         var stopQueue = new Label("Stop queue");
 
-        var lbls = List.of(resume, pause, restart, deleteDownloads, deleteDownloadsWithFile);
-        var keyCodes = List.of(RESUME_KEY, PAUSE_KEY, RESTART_KEY, DELETE_KEY, DELETE_FILE_KEY);
+        var lbls = List.of(open, resume, pause, restart, deleteDownloads, deleteDownloadsWithFile);
+        var keyCodes = List.of(OPEN_KEY, RESUME_KEY, PAUSE_KEY, RESTART_KEY, DELETE_KEY, DELETE_FILE_KEY);
         var menuItems = createMapMenuItems(lbls, keyCodes);
 
         var split = new SeparatorMenuItem();
@@ -82,7 +83,7 @@ public class MenuUtils {
             menuItems.get(addQueue).setDisable(selectedItems.size() == 0);
             readQueueList(addQueueMenu, startQueueMenu, stopQueueMenu);
 
-            disableMenuItems(resume, pause, menuItems, selectedItems);
+            disableMenuItems(resume, pause, open, menuItems, selectedItems);
 
             menuItems.get(deleteDownloads).setDisable(selectedItems.size() == 0);
             menuItems.get(deleteDownloadsWithFile).setDisable(selectedItems.size() == 0);
@@ -91,6 +92,7 @@ public class MenuUtils {
             c.show(operationMenu, Side.BOTTOM, 0, 0);
         });
 
+        menuItems.get(open).setOnAction(e -> DownloadOpUtils.openFiles(mainTableUtils.getSelected()));
         menuItems.get(resume).setOnAction(e -> DownloadOpUtils.resumeDownloads(mainTableUtils,
                 mainTableUtils.getSelected(), null, null));
         menuItems.get(pause).setOnAction(e -> DownloadOpUtils.pauseDownloads(mainTableUtils));
@@ -100,21 +102,26 @@ public class MenuUtils {
         menuItems.get(newQueue).setOnAction(e -> FxUtils.newQueueStage());
     }
 
-    public static void disableMenuItems(Label resume, Label pause, LinkedHashMap<Label, MenuItem> menuItems, ObservableList<DownloadModel> selectedItems) {
+    public static void disableMenuItems(Label resume, Label pause, Label openLbl,
+                                        LinkedHashMap<Label, MenuItem> menuItems,
+                                        ObservableList<DownloadModel> selectedItems) {
         selectedItems.stream().filter(dm -> dm.getDownloadStatus() == DownloadStatus.Paused)
                 .findAny().ifPresent(dm -> {
                     menuItems.get(resume).setDisable(false);
                     menuItems.get(pause).setDisable(true);
+                    menuItems.get(openLbl).setDisable(true);
                 });
         selectedItems.stream().filter(dm -> dm.getDownloadStatus() == DownloadStatus.Downloading)
                 .findAny().ifPresent(dm -> {
                     menuItems.get(resume).setDisable(true);
                     menuItems.get(pause).setDisable(false);
+                    menuItems.get(openLbl).setDisable(true);
                 });
         selectedItems.stream().filter(dm -> dm.getDownloadStatus() == DownloadStatus.Completed)
                 .findAny().ifPresent(dm -> {
                     menuItems.get(resume).setDisable(true);
                     menuItems.get(pause).setDisable(true);
+                    menuItems.get(openLbl).setDisable(false);
                 });
     }
 

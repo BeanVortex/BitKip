@@ -99,15 +99,16 @@ public class MainTableUtils {
                 var selectedItems = getSelected();
                 if (!row.isEmpty() && event.getButton().equals(MouseButton.SECONDARY)) {
                     var cMenu = new ContextMenu();
-                    var downloadingLbl = new Label("details");
+                    var openLbl = new Label("open");
                     var resumeLbl = new Label("resume");
                     var pauseLbl = new Label("pause");
+                    var downloadingLbl = new Label("details");
                     var deleteLbl = new Label("delete");
                     var deleteWithFileLbl = new Label("delete with file");
-                    var lbls = List.of(downloadingLbl, resumeLbl, pauseLbl, deleteLbl, deleteWithFileLbl);
-                    var keyCodes = List.of(DOWNLOADING_STAGE_KEY, RESUME_KEY, PAUSE_KEY, DELETE_KEY, DELETE_FILE_KEY);
+                    var lbls = List.of(openLbl, resumeLbl, pauseLbl, downloadingLbl, deleteLbl, deleteWithFileLbl);
+                    var keyCodes = List.of(OPEN_KEY, RESUME_KEY, PAUSE_KEY, DOWNLOADING_STAGE_KEY, DELETE_KEY, DELETE_FILE_KEY);
                     var menuItems = MenuUtils.createMapMenuItems(lbls, keyCodes);
-                    MenuUtils.disableMenuItems(resumeLbl, pauseLbl, menuItems, selectedItems);
+                    MenuUtils.disableMenuItems(resumeLbl, pauseLbl,openLbl, menuItems, selectedItems);
                     cMenu.getItems().addAll(menuItems.values());
                     menuItemOperations(menuItems, lbls);
                     row.setContextMenu(cMenu);
@@ -120,18 +121,20 @@ public class MainTableUtils {
 
     // sequence is important where labels defined
     private void menuItemOperations(LinkedHashMap<Label, MenuItem> menuItems, List<Label> lbls) {
-        //details
-        menuItems.get(lbls.get(0)).setOnAction(e ->
-                getSelected().forEach(dm -> FxUtils.newDownloadingStage(dm, this)));
+        //OPEN
+        menuItems.get(lbls.get(0)).setOnAction(e -> DownloadOpUtils.openFiles(getSelected()));
         // resume
         menuItems.get(lbls.get(1)).setOnAction(e ->
                 DownloadOpUtils.resumeDownloads(this, getSelected(), null, null));
         // pause
         menuItems.get(lbls.get(2)).setOnAction(e -> DownloadOpUtils.pauseDownloads(this));
+        //details
+        menuItems.get(lbls.get(3)).setOnAction(e ->
+                getSelected().forEach(dm -> FxUtils.newDownloadingStage(dm, this)));
         // delete
-        menuItems.get(lbls.get(3)).setOnAction(e -> DownloadOpUtils.deleteDownloads(this, false));
+        menuItems.get(lbls.get(4)).setOnAction(e -> DownloadOpUtils.deleteDownloads(this, false));
         // delete with file
-        menuItems.get(lbls.get(4)).setOnAction(ev -> DownloadOpUtils.deleteDownloads(this, true));
+        menuItems.get(lbls.get(5)).setOnAction(ev -> DownloadOpUtils.deleteDownloads(this, true));
     }
 
     private EventHandler<? super MouseEvent> onItemsClicked() {

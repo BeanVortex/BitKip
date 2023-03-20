@@ -4,13 +4,15 @@ import ir.darkdeveloper.bitkip.controllers.DownloadingController;
 import ir.darkdeveloper.bitkip.models.DownloadModel;
 import ir.darkdeveloper.bitkip.models.DownloadStatus;
 import ir.darkdeveloper.bitkip.repo.DownloadsRepo;
+import javafx.collections.ObservableList;
+import org.controlsfx.control.Notifications;
 
+import java.io.File;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-import static ir.darkdeveloper.bitkip.config.AppConfigs.currentDownloadings;
-import static ir.darkdeveloper.bitkip.config.AppConfigs.openDownloadings;
+import static ir.darkdeveloper.bitkip.config.AppConfigs.*;
 
 public class DownloadOpUtils {
 
@@ -59,5 +61,19 @@ public class DownloadOpUtils {
 
     public static void openDownloadingStage(DownloadModel dm, MainTableUtils mainTableUtils) {
         FxUtils.newDownloadingStage(dm, mainTableUtils);
+    }
+
+    public static void openFiles(ObservableList<DownloadModel> selected) {
+        selected.filtered(dm -> dm.getDownloadStatus() == DownloadStatus.Completed)
+                .forEach(dm -> {
+                    if (!new File(dm.getFilePath()).exists()) {
+                        Notifications.create()
+                                .title("File not found")
+                                .text("%s has been moved or removed".formatted(dm.getName()))
+                                .showError();
+                        return;
+                    }
+                    hostServices.showDocument(dm.getFilePath());
+                });
     }
 }
