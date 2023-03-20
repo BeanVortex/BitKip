@@ -126,6 +126,7 @@ public class DownloadLimitedTask extends DownloadTask {
                                       long limit, long existingFileSize) throws IOException {
         var byteChannel = Channels.newChannel(in);
         fileChannel.transferFrom(byteChannel, existingFileSize, limit);
+        paused = true;
     }
 
     @Override

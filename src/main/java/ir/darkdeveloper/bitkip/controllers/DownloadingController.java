@@ -260,7 +260,8 @@ public class DownloadingController implements FXMLController {
 
         if (isPaused.get()) {
             statusLbl.setText("Status: " + DownloadStatus.Trying);
-            DownloadOpUtils.resumeDownloads(mainTableUtils, List.of(downloadModel), null, null);
+            DownloadOpUtils.resumeDownloads(mainTableUtils, List.of(downloadModel),
+                    speedField.getText(), bytesField.getText());
             isPaused.set(false);
         } else {
             var dt = getDownloadTask();
