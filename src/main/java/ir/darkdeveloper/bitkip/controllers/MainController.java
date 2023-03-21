@@ -86,7 +86,6 @@ public class MainController implements FXMLController, QueueObserver {
     public void initAfterStage() {
         mainTableUtils = new MainTableUtils(contentTable);
         mainTableUtils.tableInits();
-        ShortcutUtils.initMainTableShortcut(mainTableUtils, stage);
         stage.widthProperty().addListener((ob, o, n) -> {
             contentTable.setPrefWidth(n.doubleValue() + 90);
             toolbar.setPrefWidth(n.longValue());
