@@ -114,8 +114,9 @@ public class DownloadsRepo {
         var queueCountSql = """
                 SELECT count(*) AS queue_count
                 FROM downloads
-                         INNER JOIN queue_download qd ON downloads.id = qd.download_id;
-                """;
+                         INNER JOIN queue_download qd ON downloads.id = qd.download_id
+                         WHERE qd.download_id = %d;
+                """.formatted(download_id);
         var insertQueueDownloadSql = """
                 INSERT INTO queue_download (download_id, queue_id) VALUES (%d,%d);
                 """.formatted(download_id, queue_id);
@@ -135,7 +136,7 @@ public class DownloadsRepo {
         var updateQueueSql = """
                 UPDATE queue_download
                 SET queue_id = %d
-                WHERE queue_id = %d;
+                WHERE queue_id = %d AND download_id = %d;
                 """;
 
         try (var con = dbHelper.openConnection();
@@ -147,7 +148,7 @@ public class DownloadsRepo {
                 var prevQueueRS = stmt.executeQuery(idOfNotDefaultQueueSql);
                 prevQueueRS.next();
                 var prevQueueId = prevQueueRS.getInt("queue_id");
-                stmt.executeUpdate(updateQueueSql.formatted(prevQueueId, queue_id));
+                stmt.executeUpdate(updateQueueSql.formatted(queue_id, prevQueueId, download_id));
             } else if (queueCount == 2)
                 stmt.executeUpdate(insertQueueDownloadSql);
             else throw new Exception("queue count for the download is not correct");
@@ -218,6 +219,7 @@ public class DownloadsRepo {
                 """.formatted(dm.isOpenAfterComplete() ? 1 : 0, dm.getId());
         executeSql(sql);
     }
+
     public static void updateDownloadShowCompleteDialog(DownloadModel dm) {
         var sql = """
                 UPDATE downloads SET show_complete_dialog = %d WHERE id = %d;

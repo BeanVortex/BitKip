@@ -2,15 +2,21 @@ package ir.darkdeveloper.bitkip.utils;
 
 import ir.darkdeveloper.bitkip.models.DownloadModel;
 import ir.darkdeveloper.bitkip.models.DownloadStatus;
+import ir.darkdeveloper.bitkip.models.QueueModel;
+import ir.darkdeveloper.bitkip.repo.DownloadsRepo;
+import ir.darkdeveloper.bitkip.repo.QueuesRepo;
 import javafx.application.Platform;
 import javafx.collections.ObservableList;
 import javafx.geometry.Side;
 import javafx.scene.control.*;
 import javafx.scene.input.KeyCodeCombination;
+import javafx.scene.paint.Paint;
 
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 
+import static ir.darkdeveloper.bitkip.utils.FileExtensions.staticQueueNames;
 import static ir.darkdeveloper.bitkip.utils.ShortcutUtils.*;
 
 public class MenuUtils {
@@ -62,27 +68,27 @@ public class MenuUtils {
 
         var addQueueMenu = new Menu();
         addQueueMenu.setGraphic(addQueue);
-        menuItems.put(addQueue, addQueueMenu);
 
         var startQueueMenu = new Menu();
         startQueueMenu.setGraphic(startQueue);
-        menuItems.put(startQueue, startQueueMenu);
 
         var stopQueueMenu = new Menu();
         stopQueueMenu.setGraphic(stopQueue);
+
+        readQueueList(addQueueMenu, startQueueMenu, stopQueueMenu, mainTableUtils);
+
+        menuItems.put(addQueue, addQueueMenu);
+        menuItems.put(startQueue, startQueueMenu);
         menuItems.put(stopQueue, stopQueueMenu);
-
         c.getItems().addAll(menuItems.values());
-
         operationMenu.setContextMenu(c);
+
         operationMenu.setOnMouseClicked(event -> {
             var selectedItems = mainTableUtils.getSelected();
             menuItems.get(resume).setDisable(selectedItems.size() == 0);
             menuItems.get(pause).setDisable(selectedItems.size() == 0);
             menuItems.get(restart).setDisable(selectedItems.size() == 0);
             menuItems.get(addQueue).setDisable(selectedItems.size() == 0);
-            readQueueList(addQueueMenu, startQueueMenu, stopQueueMenu);
-
             disableMenuItems(resume, pause, open, menuItems, selectedItems);
 
             menuItems.get(deleteDownloads).setDisable(selectedItems.size() == 0);
@@ -140,8 +146,52 @@ public class MenuUtils {
         });
     }
 
-    private static void readQueueList(Menu addQueueMenu, Menu startQueueMenu, Menu stopQueueMenu) {
+    private static void readQueueList(Menu addQueueMenu, Menu startQueueMenu, Menu stopQueueMenu, MainTableUtils mainTableUtils) {
         // read queue list from the file
+        var addQueueItems = new LinkedHashMap<MenuItem, QueueModel>();
+        var startQueueItems = new LinkedHashMap<MenuItem, QueueModel>();
+        var stopQueueItems = new LinkedHashMap<MenuItem, QueueModel>();
+        QueuesRepo.getQueues().forEach(qm -> {
+            var defaultColor = ((Label) addQueueMenu.getGraphic()).getTextFill();
+            if (staticQueueNames.stream().noneMatch(s -> qm.getName().equals(s))) {
+                var addQueueMenuItem = createMenuItem(qm, defaultColor);
+                addQueueItems.put(addQueueMenuItem, qm);
+            }
+            var startQueueMenuItem = createMenuItem(qm, defaultColor);
+            var stopQueueMenuItem = createMenuItem(qm, defaultColor);
+            startQueueItems.put(startQueueMenuItem, qm);
+            stopQueueItems.put(stopQueueMenuItem, qm);
+        });
+        addQueueMenu.getItems().addAll(addQueueItems.keySet());
+        startQueueMenu.getItems().addAll(startQueueItems.keySet());
+        stopQueueMenu.getItems().addAll(stopQueueItems.keySet());
+
+        addQueueMenu.getItems().forEach(menuItem ->
+                menuItem.setOnAction(event -> {
+                    var qm = addQueueItems.get(menuItem);
+                    var notObserved = new ArrayList<>(mainTableUtils.getSelected());
+                    notObserved.forEach(dm -> {
+                        if (dm.getQueue().contains(qm))
+                            return;
+                        if (staticQueueNames.stream().noneMatch(s -> dm.getQueue().get(0).getName().equals(s)))
+                            mainTableUtils.remove(dm);
+                        DownloadsRepo.updateDownloadQueue(dm.getId(), qm.getId());
+                    });
+                }));
+
+    }
+
+    private static MenuItem createMenuItem(QueueModel qm, Paint defaultColor) {
+        var queueMenuItem = new MenuItem();
+        var lbl = new Label(qm.getName());
+        lbl.setTextFill(defaultColor);
+        lbl.setOnMouseEntered(e -> lbl.setTextFill(Paint.valueOf("#fff")));
+        lbl.setOnMouseExited(e -> lbl.setTextFill(defaultColor));
+        lbl.setPrefWidth(150);
+        lbl.setStyle("-fx-padding: 2 0 0 2");
+        queueMenuItem.setGraphic(lbl);
+        queueMenuItem.setStyle("-fx-padding: 0");
+        return queueMenuItem;
     }
 
 
