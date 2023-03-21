@@ -13,6 +13,7 @@ import javafx.scene.input.KeyCodeCombination;
 import javafx.scene.paint.Paint;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 
@@ -43,92 +44,103 @@ public class MenuUtils {
 
     public static void initOperationMenu(Button operationMenu, MainTableUtils mainTableUtils) {
         var c = new ContextMenu();
-        var open = new Label("Open");
-        var resume = new Label("Resume");
-        var pause = new Label("Pause");
-        var restart = new Label("Restart");
-        var deleteDownloads = new Label("Delete selected");
-        var deleteDownloadsWithFile = new Label("Delete selected with file");
-        var newQueue = new Label("New queue");
-        var addQueue = new Label("Add to queue");
-        var startQueue = new Label("Start queue");
-        var stopQueue = new Label("Stop queue");
+        var openLbl = new Label("Open");
+        var resumeLbl = new Label("Resume");
+        var pauseLbl = new Label("Pause");
+        var restartLbl = new Label("Restart");
+        var deleteLbl = new Label("Delete selected");
+        var deleteWithFileLbl = new Label("Delete selected with file");
+        var newQueueLbl = new Label("New queue");
+        var deleteFromQueueLbl = new Label("Delete from this queue");
+        var addToQueueLbl = new Label("Add to queue");
+        var startQueueLbl = new Label("Start queue");
+        var stopQueueLbl = new Label("Stop queue");
 
-        var lbls = List.of(open, resume, pause, restart, deleteDownloads, deleteDownloadsWithFile);
+        var lbls = List.of(openLbl, resumeLbl, pauseLbl, restartLbl, deleteLbl, deleteWithFileLbl);
         var keyCodes = List.of(OPEN_KEY, RESUME_KEY, PAUSE_KEY, RESTART_KEY, DELETE_KEY, DELETE_FILE_KEY);
         var menuItems = createMapMenuItems(lbls, keyCodes);
 
         var split = new SeparatorMenuItem();
         menuItems.put(new Label("s"), split);
 
-        var newQueueMenu = new MenuItem();
-        newQueueMenu.setGraphic(newQueue);
-        newQueueMenu.setAccelerator(NEW_QUEUE_KEY);
-        menuItems.put(newQueue, newQueueMenu);
+        var lbls2 = List.of(newQueueLbl, deleteFromQueueLbl);
+        var keyCodes2 = Arrays.asList(NEW_QUEUE_KEY, null);
+        var menuItems2 = createMapMenuItems(lbls2, keyCodes2);
+        menuItems.putAll(menuItems2);
 
-        var addQueueMenu = new Menu();
-        addQueueMenu.setGraphic(addQueue);
+        var addToQueueMenu = new Menu();
+        addToQueueMenu.setGraphic(addToQueueLbl);
 
         var startQueueMenu = new Menu();
-        startQueueMenu.setGraphic(startQueue);
+        startQueueMenu.setGraphic(startQueueLbl);
 
         var stopQueueMenu = new Menu();
-        stopQueueMenu.setGraphic(stopQueue);
+        stopQueueMenu.setGraphic(stopQueueLbl);
 
-        readQueueList(addQueueMenu, startQueueMenu, stopQueueMenu, mainTableUtils);
+        initQueueMenuList(addToQueueMenu, startQueueMenu, stopQueueMenu, mainTableUtils);
 
-        menuItems.put(addQueue, addQueueMenu);
-        menuItems.put(startQueue, startQueueMenu);
-        menuItems.put(stopQueue, stopQueueMenu);
+        menuItems.put(addToQueueLbl, addToQueueMenu);
+        menuItems.put(startQueueLbl, startQueueMenu);
+        menuItems.put(stopQueueLbl, stopQueueMenu);
         c.getItems().addAll(menuItems.values());
         operationMenu.setContextMenu(c);
 
         operationMenu.setOnMouseClicked(event -> {
             var selectedItems = mainTableUtils.getSelected();
-            menuItems.get(resume).setDisable(selectedItems.size() == 0);
-            menuItems.get(pause).setDisable(selectedItems.size() == 0);
-            menuItems.get(restart).setDisable(selectedItems.size() == 0);
-            menuItems.get(addQueue).setDisable(selectedItems.size() == 0);
-            disableMenuItems(resume, pause, open, menuItems, selectedItems);
-
-            menuItems.get(deleteDownloads).setDisable(selectedItems.size() == 0);
-            menuItems.get(deleteDownloadsWithFile).setDisable(selectedItems.size() == 0);
-            deleteDownloads.setText("Delete selected (" + selectedItems.size() + ")");
-
+            disableMenuItems(resumeLbl, pauseLbl, openLbl, deleteFromQueueLbl, restartLbl,
+                    addToQueueLbl, deleteLbl, deleteWithFileLbl, menuItems, selectedItems);
+            deleteLbl.setText("Delete selected (" + selectedItems.size() + ")");
             c.show(operationMenu, Side.BOTTOM, 0, 0);
         });
 
-        menuItems.get(open).setOnAction(e -> DownloadOpUtils.openFiles(mainTableUtils.getSelected()));
-        menuItems.get(resume).setOnAction(e -> DownloadOpUtils.resumeDownloads(mainTableUtils,
+        menuItems.get(openLbl).setOnAction(e -> DownloadOpUtils.openFiles(mainTableUtils.getSelected()));
+        menuItems.get(resumeLbl).setOnAction(e -> DownloadOpUtils.resumeDownloads(mainTableUtils,
                 mainTableUtils.getSelected(), null, null));
-        menuItems.get(pause).setOnAction(e -> DownloadOpUtils.pauseDownloads(mainTableUtils));
-        menuItems.get(restart).setOnAction(e -> System.out.println("restart"));
-        menuItems.get(deleteDownloads).setOnAction(e -> DownloadOpUtils.deleteDownloads(mainTableUtils, false));
-        menuItems.get(deleteDownloadsWithFile).setOnAction(e -> DownloadOpUtils.deleteDownloads(mainTableUtils, true));
-        menuItems.get(newQueue).setOnAction(e -> FxUtils.newQueueStage());
+        menuItems.get(pauseLbl).setOnAction(e -> DownloadOpUtils.pauseDownloads(mainTableUtils));
+        menuItems.get(restartLbl).setOnAction(e -> System.out.println("restartLbl"));
+        menuItems.get(deleteLbl).setOnAction(e -> DownloadOpUtils.deleteDownloads(mainTableUtils, false));
+        menuItems.get(deleteWithFileLbl).setOnAction(e -> DownloadOpUtils.deleteDownloads(mainTableUtils, true));
+        menuItems.get(newQueueLbl).setOnAction(e -> FxUtils.newQueueStage());
     }
 
-    public static void disableMenuItems(Label resume, Label pause, Label openLbl,
+    public static void disableMenuItems(Label resumeLbl, Label pauseLbl, Label openLbl, Label deleteFromQueueLbl,
+                                        Label restartLbl, Label addToQueueLbl, Label deleteLbl,
+                                        Label deleteWithFileLbl,
                                         LinkedHashMap<Label, MenuItem> menuItems,
                                         ObservableList<DownloadModel> selectedItems) {
+        menuItems.get(openLbl).setDisable(selectedItems.isEmpty());
+        menuItems.get(resumeLbl).setDisable(selectedItems.isEmpty());
+        menuItems.get(pauseLbl).setDisable(selectedItems.isEmpty());
+        menuItems.get(restartLbl).setDisable(selectedItems.isEmpty());
+        menuItems.get(addToQueueLbl).setDisable(selectedItems.isEmpty());
+        menuItems.get(deleteLbl).setDisable(selectedItems.isEmpty());
+        menuItems.get(deleteWithFileLbl).setDisable(selectedItems.isEmpty());
+
         selectedItems.stream().filter(dm -> dm.getDownloadStatus() == DownloadStatus.Paused)
                 .findAny().ifPresent(dm -> {
-                    menuItems.get(resume).setDisable(false);
-                    menuItems.get(pause).setDisable(true);
+                    menuItems.get(resumeLbl).setDisable(false);
+                    menuItems.get(pauseLbl).setDisable(true);
                     menuItems.get(openLbl).setDisable(true);
                 });
         selectedItems.stream().filter(dm -> dm.getDownloadStatus() == DownloadStatus.Downloading)
                 .findAny().ifPresent(dm -> {
-                    menuItems.get(resume).setDisable(true);
-                    menuItems.get(pause).setDisable(false);
+                    menuItems.get(resumeLbl).setDisable(true);
+                    menuItems.get(pauseLbl).setDisable(false);
                     menuItems.get(openLbl).setDisable(true);
                 });
         selectedItems.stream().filter(dm -> dm.getDownloadStatus() == DownloadStatus.Completed)
                 .findAny().ifPresent(dm -> {
-                    menuItems.get(resume).setDisable(true);
-                    menuItems.get(pause).setDisable(true);
+                    menuItems.get(resumeLbl).setDisable(true);
+                    menuItems.get(pauseLbl).setDisable(true);
                     menuItems.get(openLbl).setDisable(false);
                 });
+        selectedItems
+                .filtered(dm -> staticQueueNames.stream()
+                        .anyMatch(s -> dm.getQueue().get(0).getName().equals(s)))
+                .stream()
+                .findAny()
+                .ifPresentOrElse(dm -> menuItems.get(deleteFromQueueLbl).setDisable(true),
+                        () -> menuItems.get(deleteFromQueueLbl).setDisable(selectedItems.isEmpty()));
     }
 
     public static void initAboutMenu(Button aboutMenu, TableView<DownloadModel> table) {
@@ -146,29 +158,29 @@ public class MenuUtils {
         });
     }
 
-    private static void readQueueList(Menu addQueueMenu, Menu startQueueMenu, Menu stopQueueMenu, MainTableUtils mainTableUtils) {
-        // read queue list from the file
-        var addQueueItems = new LinkedHashMap<MenuItem, QueueModel>();
+    private static void initQueueMenuList(Menu addToQueueMenu, Menu startQueueMenu,
+                                          Menu stopQueueMenu, MainTableUtils mainTableUtils) {
+        var addToQueueItems = new LinkedHashMap<MenuItem, QueueModel>();
         var startQueueItems = new LinkedHashMap<MenuItem, QueueModel>();
         var stopQueueItems = new LinkedHashMap<MenuItem, QueueModel>();
         QueuesRepo.getQueues().forEach(qm -> {
-            var defaultColor = ((Label) addQueueMenu.getGraphic()).getTextFill();
+            var defaultColor = ((Label) addToQueueMenu.getGraphic()).getTextFill();
             if (staticQueueNames.stream().noneMatch(s -> qm.getName().equals(s))) {
-                var addQueueMenuItem = createMenuItem(qm, defaultColor);
-                addQueueItems.put(addQueueMenuItem, qm);
+                var addToQueueMenuItem = createMenuItem(qm, defaultColor);
+                addToQueueItems.put(addToQueueMenuItem, qm);
             }
             var startQueueMenuItem = createMenuItem(qm, defaultColor);
             var stopQueueMenuItem = createMenuItem(qm, defaultColor);
             startQueueItems.put(startQueueMenuItem, qm);
             stopQueueItems.put(stopQueueMenuItem, qm);
         });
-        addQueueMenu.getItems().addAll(addQueueItems.keySet());
+        addToQueueMenu.getItems().addAll(addToQueueItems.keySet());
         startQueueMenu.getItems().addAll(startQueueItems.keySet());
         stopQueueMenu.getItems().addAll(stopQueueItems.keySet());
 
-        addQueueMenu.getItems().forEach(menuItem ->
+        addToQueueMenu.getItems().forEach(menuItem ->
                 menuItem.setOnAction(event -> {
-                    var qm = addQueueItems.get(menuItem);
+                    var qm = addToQueueItems.get(menuItem);
                     var notObserved = new ArrayList<>(mainTableUtils.getSelected());
                     notObserved.forEach(dm -> {
                         if (dm.getQueue().contains(qm))
@@ -181,7 +193,7 @@ public class MenuUtils {
 
     }
 
-    private static MenuItem createMenuItem(QueueModel qm, Paint defaultColor) {
+    public static MenuItem createMenuItem(QueueModel qm, Paint defaultColor) {
         var queueMenuItem = new MenuItem();
         var lbl = new Label(qm.getName());
         lbl.setTextFill(defaultColor);

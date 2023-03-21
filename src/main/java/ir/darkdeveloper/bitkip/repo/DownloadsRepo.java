@@ -162,6 +162,15 @@ public class DownloadsRepo {
         executeSql(sql);
     }
 
+    public static void deleteDownloadQueue(int downloadId, int queueId) {
+        var sql = """
+                DELETE FROM queue_download
+                WHERE download_id = %d
+                    AND queue_id = %d;
+                """.formatted(downloadId, queueId);
+        executeSql(sql);
+    }
+
     private static DownloadModel createDownload(ResultSet rs) throws SQLException {
         var id = rs.getInt(COL_ID);
         var name = rs.getString(COL_NAME);

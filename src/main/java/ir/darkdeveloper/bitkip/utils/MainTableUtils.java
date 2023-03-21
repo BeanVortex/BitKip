@@ -2,6 +2,7 @@ package ir.darkdeveloper.bitkip.utils;
 
 import ir.darkdeveloper.bitkip.models.DownloadModel;
 import ir.darkdeveloper.bitkip.models.DownloadStatus;
+import ir.darkdeveloper.bitkip.models.QueueModel;
 import ir.darkdeveloper.bitkip.repo.DownloadsRepo;
 import ir.darkdeveloper.bitkip.repo.QueuesRepo;
 import javafx.collections.FXCollections;
@@ -15,10 +16,14 @@ import javafx.util.Callback;
 import org.apache.commons.lang3.time.DurationFormatUtils;
 
 import java.text.DecimalFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 
 import static ir.darkdeveloper.bitkip.config.AppConfigs.currentDownloadings;
+import static ir.darkdeveloper.bitkip.utils.FileExtensions.staticQueueNames;
+import static ir.darkdeveloper.bitkip.utils.MenuUtils.createMenuItem;
 import static ir.darkdeveloper.bitkip.utils.ShortcutUtils.*;
 
 
@@ -102,15 +107,32 @@ public class MainTableUtils {
                     var openLbl = new Label("open");
                     var resumeLbl = new Label("resume");
                     var pauseLbl = new Label("pause");
+                    var restartLbl = new Label("restart");
                     var downloadingLbl = new Label("details");
+                    var deleteFromQueueLbl = new Label("delete from this queue");
                     var deleteLbl = new Label("delete");
                     var deleteWithFileLbl = new Label("delete with file");
-                    var lbls = List.of(openLbl, resumeLbl, pauseLbl, downloadingLbl, deleteLbl, deleteWithFileLbl);
-                    var keyCodes = List.of(OPEN_KEY, RESUME_KEY, PAUSE_KEY, DOWNLOADING_STAGE_KEY, DELETE_KEY, DELETE_FILE_KEY);
+                    var lbls = List.of(openLbl, resumeLbl, pauseLbl, restartLbl, downloadingLbl, deleteFromQueueLbl,
+                            deleteLbl, deleteWithFileLbl);
+                    var keyCodes = Arrays.asList(OPEN_KEY, RESUME_KEY, PAUSE_KEY, RESTART_KEY, DOWNLOADING_STAGE_KEY,
+                            null, DELETE_KEY, DELETE_FILE_KEY);
                     var menuItems = MenuUtils.createMapMenuItems(lbls, keyCodes);
-                    MenuUtils.disableMenuItems(resumeLbl, pauseLbl,openLbl, menuItems, selectedItems);
-                    cMenu.getItems().addAll(menuItems.values());
+
+                    var addToQueueMenu = new Menu();
+                    var addToQueueLbl = new Label("add to queue");
+                    addToQueueMenu.setGraphic(addToQueueLbl);
+                    initAddToQueueMenu(addToQueueMenu);
                     menuItemOperations(menuItems, lbls);
+                    for (var item : menuItems.values()) {
+                        if (item.getGraphic().equals(deleteFromQueueLbl))
+                            cMenu.getItems().add(addToQueueMenu);
+                        cMenu.getItems().add(item);
+                    }
+
+                    menuItems.put(addToQueueLbl, addToQueueMenu);
+                    MenuUtils.disableMenuItems(resumeLbl, pauseLbl, openLbl, deleteFromQueueLbl, restartLbl,
+                            addToQueueLbl,deleteLbl, deleteWithFileLbl, menuItems, selectedItems);
+
                     row.setContextMenu(cMenu);
                     cMenu.show(row, event.getX(), event.getY());
                 }
@@ -119,22 +141,59 @@ public class MainTableUtils {
         };
     }
 
+    private void initAddToQueueMenu(Menu addToQueueMenu) {
+        var addQueueItems = new LinkedHashMap<MenuItem, QueueModel>();
+        QueuesRepo.getQueues().forEach(qm -> {
+            if (staticQueueNames.stream().noneMatch(s -> qm.getName().equals(s))) {
+                var defaultColor = ((Label) addToQueueMenu.getGraphic()).getTextFill();
+                var addToQueueMenuItem = createMenuItem(qm, defaultColor);
+                addQueueItems.put(addToQueueMenuItem, qm);
+            }
+        });
+        addToQueueMenu.getItems().addAll(addQueueItems.keySet());
+
+        addToQueueMenu.getItems().forEach(menuItem ->
+                menuItem.setOnAction(event -> {
+                    var qm = addQueueItems.get(menuItem);
+                    var notObserved = new ArrayList<>(getSelected());
+                    notObserved.forEach(dm -> {
+                        if (dm.getQueue().contains(qm))
+                            return;
+                        if (staticQueueNames.stream().noneMatch(s -> dm.getQueue().get(0).getName().equals(s)))
+                            remove(dm);
+                        DownloadsRepo.updateDownloadQueue(dm.getId(), qm.getId());
+                    });
+                }));
+    }
+
     // sequence is important where labels defined
     private void menuItemOperations(LinkedHashMap<Label, MenuItem> menuItems, List<Label> lbls) {
-        //OPEN
+        // OPEN
         menuItems.get(lbls.get(0)).setOnAction(e -> DownloadOpUtils.openFiles(getSelected()));
-        // resume
+        // RESUME
         menuItems.get(lbls.get(1)).setOnAction(e ->
                 DownloadOpUtils.resumeDownloads(this, getSelected(), null, null));
-        // pause
+        // PAUSE
         menuItems.get(lbls.get(2)).setOnAction(e -> DownloadOpUtils.pauseDownloads(this));
-        //details
-        menuItems.get(lbls.get(3)).setOnAction(e ->
+        // RESTART
+        menuItems.get(lbls.get(3)).setOnAction(e -> System.out.println("restart"));
+        // DETAILS
+        menuItems.get(lbls.get(4)).setOnAction(e ->
                 getSelected().forEach(dm -> FxUtils.newDownloadingStage(dm, this)));
-        // delete
-        menuItems.get(lbls.get(4)).setOnAction(e -> DownloadOpUtils.deleteDownloads(this, false));
-        // delete with file
-        menuItems.get(lbls.get(5)).setOnAction(ev -> DownloadOpUtils.deleteDownloads(this, true));
+        // DELETE FROM QUEUE
+        menuItems.get(lbls.get(5)).setOnAction(e ->
+                getSelected().forEach(dm -> {
+                    remove(dm);
+                    dm.getQueue()
+                            .stream()
+                            .filter(qm -> !staticQueueNames.contains(qm.getName()))
+                            .findAny()
+                            .ifPresent(qm -> DownloadsRepo.deleteDownloadQueue(dm.getId(), qm.getId()));
+                }));
+        // DELETE
+        menuItems.get(lbls.get(6)).setOnAction(e -> DownloadOpUtils.deleteDownloads(this, false));
+        // DELETE WITH FILE
+        menuItems.get(lbls.get(7)).setOnAction(ev -> DownloadOpUtils.deleteDownloads(this, true));
     }
 
     private EventHandler<? super MouseEvent> onItemsClicked() {
