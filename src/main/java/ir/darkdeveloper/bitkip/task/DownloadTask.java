@@ -51,4 +51,8 @@ public abstract class DownloadTask extends Task<Long> {
 
     public abstract void setExecutor(ExecutorService executor);
 
+    public abstract boolean isPaused();
+
+    public abstract void setBlocking(boolean blocking);
+
 }

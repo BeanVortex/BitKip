@@ -171,6 +171,11 @@ public class MainController implements FXMLController, QueueObserver {
                             downloadModel.setDownloadStatus(DownloadStatus.Paused);
                             if (downloadModel.getProgress() == 100)
                                 downloadModel.setDownloadStatus(DownloadStatus.Completed);
+                        }).map(dm -> {
+                            // this will make downloads in currentDownloadings, observed by table
+                            if (currentDownloadings.contains(dm))
+                                return currentDownloadings.get(currentDownloadings.indexOf(dm));
+                            return dm;
                         }).toList();
                 mainTableUtils.setDownloads(downloadsData);
                 if (!queueButtons.isEmpty() && !btn.getStyleClass().contains("selected_queue")) {

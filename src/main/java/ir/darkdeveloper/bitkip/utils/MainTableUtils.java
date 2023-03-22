@@ -5,7 +5,6 @@ import ir.darkdeveloper.bitkip.models.DownloadStatus;
 import ir.darkdeveloper.bitkip.models.QueueModel;
 import ir.darkdeveloper.bitkip.repo.DownloadsRepo;
 import ir.darkdeveloper.bitkip.repo.QueuesRepo;
-import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.EventHandler;
 import javafx.scene.control.*;
@@ -31,7 +30,6 @@ public class MainTableUtils {
 
 
     private final TableView<DownloadModel> contentTable;
-    private final ObservableList<DownloadModel> data = FXCollections.observableArrayList();
 
     public MainTableUtils(TableView<DownloadModel> contentTable) {
         this.contentTable = contentTable;
@@ -87,11 +85,9 @@ public class MainTableUtils {
                 })
                 .filter(dm -> dm.getQueue().contains(allDownloadsQueue))
                 .toList();
-        data.addAll(downloadList);
         contentTable.getItems().clear();
-        contentTable.getItems().addAll(data);
+        contentTable.getItems().addAll(downloadList);
         contentTable.getSortOrder().add(addDateColumn);
-
         contentTable.setOnMouseClicked(onItemsClicked());
         contentTable.setRowFactory(getTableViewTableRowCallback());
     }
@@ -131,7 +127,7 @@ public class MainTableUtils {
 
                     menuItems.put(addToQueueLbl, addToQueueMenu);
                     MenuUtils.disableMenuItems(resumeLbl, pauseLbl, openLbl, deleteFromQueueLbl, restartLbl,
-                            addToQueueLbl,deleteLbl, deleteWithFileLbl, menuItems, selectedItems);
+                            addToQueueLbl, deleteLbl, deleteWithFileLbl, menuItems, selectedItems);
 
                     row.setContextMenu(cMenu);
                     cMenu.show(row, event.getX(), event.getY());
@@ -207,19 +203,17 @@ public class MainTableUtils {
 
     public void addRow(DownloadModel download) {
         contentTable.getItems().add(download);
-        data.add(download);
         contentTable.sort();
     }
 
     public void setDownloads(List<DownloadModel> downloadModels) {
         contentTable.getItems().setAll(downloadModels);
-        data.setAll(downloadModels);
         contentTable.sort();
     }
 
     public void updateDownloadSpeedAndRemaining(long speed, DownloadModel dm, Long bytesDownloaded) {
         var downTask = dm.getDownloadTask();
-        if (downTask.isRunning() && currentDownloadings.size() != 0) {
+        if (!downTask.isPaused() && currentDownloadings.contains(dm)) {
             var i = findDownload(dm.getId());
             if (i != null) {
                 i.setSpeed(speed);
@@ -238,7 +232,7 @@ public class MainTableUtils {
 
     public void updateDownloadProgress(float progress, DownloadModel dm) {
         var downTask = dm.getDownloadTask();
-        if (downTask.isRunning() && currentDownloadings.size() != 0) {
+        if (!downTask.isPaused() && currentDownloadings.contains(dm)) {
             var i2 = currentDownloadings.get(currentDownloadings.indexOf(dm));
             i2.setProgress(progress);
             var i = findDownload(dm.getId());
@@ -250,14 +244,13 @@ public class MainTableUtils {
                 i.setProgressString(new DecimalFormat("##.#").format(progress) + " %");
             }
         }
-        contentTable.refresh();
+        refreshTable();
 
     }
 
-
     public DownloadModel findDownload(int id) {
-        for (var d : data)
-            if (id == d.getId())
+        for (var d : contentTable.getItems())
+            if (d.getId() == id)
                 return d;
         return null;
     }
@@ -280,11 +273,15 @@ public class MainTableUtils {
 
     public void addRows(List<DownloadModel> downloads) {
         contentTable.getItems().addAll(downloads);
-        data.addAll(downloads);
         contentTable.sort();
     }
 
     public void clearSelection() {
         contentTable.getSelectionModel().clearSelection();
     }
+
+    public DownloadModel getObservedDownload(DownloadModel dm) {
+        return findDownload(dm.getId());
+    }
+
 }

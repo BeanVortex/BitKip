@@ -19,7 +19,6 @@ import java.nio.channels.Channels;
 import java.nio.channels.FileChannel;
 import java.time.LocalDateTime;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 import static ir.darkdeveloper.bitkip.config.AppConfigs.*;
 
@@ -34,6 +33,7 @@ public class DownloadLimitedTask extends DownloadTask {
     private ExecutorService executor;
     private FileChannel fileChannel;
     private int retries = 0;
+    private boolean blocking;
 
 
     /**
@@ -56,8 +56,8 @@ public class DownloadLimitedTask extends DownloadTask {
         return getCurrentFileSize(file);
     }
 
+
     private void performDownload() throws IOException, InterruptedException {
-        ExecutorService statusExecutor = null;
         if (retries != downloadRetryCount) {
             try {
                 var url = new URL(downloadModel.getUrl());
@@ -78,9 +78,8 @@ public class DownloadLimitedTask extends DownloadTask {
                 if (isSpeedLimited)
                     downloadSpeedLimited(fileChannel, in, file, limit, fileSize, existingFileSize);
                 else {
-                    statusExecutor = calculateSpeedAndProgress(file, fileSize);
-                    if (statusExecutor != null)
-                        downloadValueLimited(fileChannel, in, limit, existingFileSize);
+                    calculateSpeedAndProgress(file, fileSize);
+                    downloadValueLimited(fileChannel, in, limit, existingFileSize);
                 }
             } catch (SocketTimeoutException | UnknownHostException s) {
                 s.printStackTrace();
@@ -94,9 +93,11 @@ public class DownloadLimitedTask extends DownloadTask {
             if (!paused && currFileSize != downloadModel.getSize())
                 performDownload();
         }
+        if (blocking && paused) {
+            succeeded();
+            mainTableUtils.updateDownloadProgress(downloadModel.getProgress(), downloadModel);
+        }
         paused = true;
-        if (statusExecutor != null)
-            statusExecutor.shutdown();
     }
 
     private void downloadSpeedLimited(FileChannel fileChannel, InputStream in,
@@ -126,7 +127,6 @@ public class DownloadLimitedTask extends DownloadTask {
                                       long limit, long existingFileSize) throws IOException {
         var byteChannel = Channels.newChannel(in);
         fileChannel.transferFrom(byteChannel, existingFileSize, limit);
-        paused = true;
     }
 
     @Override
@@ -140,9 +140,11 @@ public class DownloadLimitedTask extends DownloadTask {
             if (dmOpt.isPresent()) {
                 var download = dmOpt.get();
                 download.setDownloadStatus(DownloadStatus.Paused);
+                downloadModel.setDownloadStatus(DownloadStatus.Paused);
                 if (file.exists() && getCurrentFileSize(file) == downloadModel.getSize()) {
                     download.setCompleteDate(LocalDateTime.now());
                     download.setDownloadStatus(DownloadStatus.Completed);
+                    downloadModel.setDownloadStatus(DownloadStatus.Completed);
                     download.setProgress(100);
                     download.setDownloaded(downloadModel.getSize());
                     updateProgress(1, 1);
@@ -155,16 +157,17 @@ public class DownloadLimitedTask extends DownloadTask {
                                     });
                     if (download.isOpenAfterComplete())
                         hostServices.showDocument(download.getFilePath());
-                } else
-                    openDownloadings.stream().filter(dc -> dc.getDownloadModel().equals(download))
-                            .forEach(DownloadingController::onPause);
+                } else openDownloadings.stream().filter(dc -> dc.getDownloadModel().equals(download))
+                        .forEach(DownloadingController::onPause);
+
                 download.setDownloaded(getCurrentFileSize(file));
                 DownloadsRepo.updateDownloadProgress(download);
                 DownloadsRepo.updateDownloadLastTryDate(download);
                 currentDownloadings.remove(download);
                 mainTableUtils.refreshTable();
             }
-            executor.shutdown();
+            if (executor != null && !blocking)
+                executor.shutdown();
             System.gc();
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -177,12 +180,10 @@ public class DownloadLimitedTask extends DownloadTask {
         pause();
     }
 
-    private ExecutorService calculateSpeedAndProgress(File file, long fileSize) {
+    private void calculateSpeedAndProgress(File file, long fileSize) {
         if (isCalculating)
-            return null;
-
-        var executorService = Executors.newCachedThreadPool();
-        executorService.submit(() -> {
+            return;
+        executor.submit(() -> {
             try {
                 isCalculating = true;
                 while (!paused) {
@@ -196,7 +197,6 @@ public class DownloadLimitedTask extends DownloadTask {
                 e.printStackTrace();
             }
         });
-        return executorService;
     }
 
     private void configureResume(HttpURLConnection connection, File file) throws IOException {
@@ -216,5 +216,15 @@ public class DownloadLimitedTask extends DownloadTask {
     @Override
     public void setExecutor(ExecutorService executor) {
         this.executor = executor;
+    }
+
+    @Override
+    public boolean isPaused() {
+        return paused;
+    }
+
+    @Override
+    public void setBlocking(boolean blocking) {
+        this.blocking = blocking;
     }
 }

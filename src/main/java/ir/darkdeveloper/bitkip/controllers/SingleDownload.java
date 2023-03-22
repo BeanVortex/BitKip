@@ -194,8 +194,8 @@ public class SingleDownload implements NewDownloadFxmlController {
     @FXML
     private void onDownload() {
         prepareDownload();
-        dm.setLastTryDate(LocalDateTime.now());
-        NewDownloadUtils.startDownload(dm, mainTableUtils, speedField.getText(), bytesField.getText(), false);
+        DownloadOpUtils.startDownload(mainTableUtils, dm, speedField.getText(), bytesField.getText(),
+                false, false, null);
         DownloadOpUtils.openDownloadingStage(dm, mainTableUtils);
         stage.close();
     }

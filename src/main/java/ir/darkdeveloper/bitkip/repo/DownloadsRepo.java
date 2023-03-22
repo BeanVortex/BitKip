@@ -1,6 +1,7 @@
 package ir.darkdeveloper.bitkip.repo;
 
 import ir.darkdeveloper.bitkip.models.DownloadModel;
+import ir.darkdeveloper.bitkip.models.DownloadStatus;
 import ir.darkdeveloper.bitkip.models.QueueModel;
 
 import java.sql.ResultSet;
@@ -62,19 +63,6 @@ public class DownloadsRepo {
         }
     }
 
-    public static DownloadModel findById(int id) {
-        var sql = "SELECT * FROM " + DOWNLOADS_TABLE_NAME + " WHERE " + COL_ID + "=" + id + ";";
-        try (var con = dbHelper.openConnection();
-             var stmt = con.createStatement();
-             var rs = stmt.executeQuery(sql)) {
-            if (rs.next())
-                return createDownload(rs);
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
-
     public static List<DownloadModel> getDownloads() {
         var sql = """
                 SELECT *, q.name as queue_name
@@ -85,14 +73,14 @@ public class DownloadsRepo {
         return fetchDownloads(sql);
     }
 
-    public static List<DownloadModel> getDownloadsByQueue(int id) {
+    public static List<DownloadModel> getDownloadsByQueue(int queueId) {
         var sql = """
                 SELECT *, q.name as queue_name
                 FROM downloads d
                          INNER JOIN queue_download qd ON d.id = qd.download_id
                          INNER JOIN queues q ON q.id = qd.queue_id
                 WHERE qd.queue_id = %d;
-                """.formatted(id);
+                """.formatted(queueId);
         return fetchDownloads(sql);
     }
 
@@ -192,11 +180,12 @@ public class DownloadsRepo {
         var lastTryDateStr = lastTryDate == null ? null : LocalDateTime.parse(lastTryDate);
         var completeDate = rs.getString(COL_COMPLETE_DATE);
         var completeDateStr = completeDate == null ? null : LocalDateTime.parse(completeDate);
+        var downloadStatus = progress != 100 ? DownloadStatus.Paused : DownloadStatus.Completed;
         return DownloadModel.builder()
                 .id(id).name(name).progress(progress).downloaded(downloaded).size(size).url(url).filePath(filePath)
                 .chunks(chunks).queue(new ArrayList<>(List.of(queue))).addDate(LocalDateTime.parse(addDate))
                 .lastTryDate(lastTryDateStr).completeDate(completeDateStr).openAfterComplete(openAfterComplete)
-                .showCompleteDialog(showCompleteDialog)
+                .showCompleteDialog(showCompleteDialog).downloadStatus(downloadStatus)
                 .build();
     }
 

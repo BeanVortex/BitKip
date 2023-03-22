@@ -95,4 +95,7 @@ public class DownloadModel {
         return IOUtils.formatBytes(speed);
     }
 
+    public void setDownloadStatus(DownloadStatus downloadStatus) {
+        this.downloadStatus = downloadStatus;
+    }
 }

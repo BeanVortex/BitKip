@@ -61,15 +61,6 @@ public class QueuesRepo {
     }
 
 
-    public static void deleteQueue(int id) {
-        var sql = "DELETE FROM " + QUEUES_TABLE_NAME + " WHERE " + COL_ID + "=" + id + ";";
-        try (var con = dbHelper.openConnection();
-             var stmt = con.createStatement()) {
-            stmt.executeUpdate(sql);
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-    }
 
     public static void deleteQueue(String name) {
         var sql = """

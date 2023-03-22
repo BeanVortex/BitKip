@@ -27,7 +27,6 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 import static ir.darkdeveloper.bitkip.config.AppConfigs.*;
 
@@ -41,9 +40,9 @@ public class DownloadInChunksTask extends DownloadTask {
     private volatile boolean isCalculating;
     private final boolean isLimited;
     private ExecutorService executor;
-    private ExecutorService partsExecutor;
-    private ExecutorService statusExecutor;
     private int retries = 0;
+
+    private boolean blocking;
 
     public DownloadInChunksTask(DownloadModel downloadModel, MainTableUtils mainTableUtils, Long limit) {
         super(downloadModel);
@@ -64,15 +63,16 @@ public class DownloadInChunksTask extends DownloadTask {
         if (file.exists() && isCompleted(downloadModel, file, mainTableUtils))
             return 0L;
         downloadInChunks(url, fileSize);
+        if (blocking)
+            succeeded();
         return 0L;
     }
 
 
     private void downloadInChunks(URL url, long fileSize)
             throws IOException, InterruptedException, ExecutionException {
-        partsExecutor = Executors.newCachedThreadPool();
-        statusExecutor = calculateSpeedAndProgressChunks(fileSize);
-        var futures = prepareParts(url, fileSize, partsExecutor);
+        calculateSpeedAndProgressChunks(fileSize);
+        var futures = prepareParts(url, fileSize);
         if (!futures.isEmpty()) {
             isCalculating = true;
             var futureArr = new CompletableFuture[futures.size()];
@@ -81,8 +81,7 @@ public class DownloadInChunksTask extends DownloadTask {
         }
     }
 
-    private List<CompletableFuture<Void>> prepareParts(URL url, long fileSize,
-                                                       ExecutorService partsExecutor) throws IOException {
+    private List<CompletableFuture<Void>> prepareParts(URL url, long fileSize) throws IOException {
         var bytesForEach = fileSize / chunks;
         var futures = new ArrayList<CompletableFuture<Void>>();
         var to = bytesForEach;
@@ -129,14 +128,13 @@ public class DownloadInChunksTask extends DownloadTask {
             var finalTo = to - 1;
             var finalFrom = from;
 
-            addFutures(url, existingFileSize, partsExecutor, futures, partFile, finalTo, finalFrom, fromContinue);
+            addFutures(url, existingFileSize, futures, partFile, finalTo, finalFrom, fromContinue);
         }
         return futures;
     }
 
-    private void addFutures(URL url, long fileSize, ExecutorService partsExecutor,
-                            ArrayList<CompletableFuture<Void>> futures, File partFile,
-                            long finalTo, long finalFrom, long fromContinue) {
+    private void addFutures(URL url, long fileSize, ArrayList<CompletableFuture<Void>> futures,
+                            File partFile, long finalTo, long finalFrom, long fromContinue) {
         CompletableFuture<Void> c;
         if (isLimited) {
             c = CompletableFuture.runAsync(() -> {
@@ -147,7 +145,7 @@ public class DownloadInChunksTask extends DownloadTask {
                     this.pause();
                     throw new RuntimeException(e);
                 }
-            }, partsExecutor);
+            }, executor);
         } else {
             c = CompletableFuture.runAsync(() -> {
                 try {
@@ -157,7 +155,7 @@ public class DownloadInChunksTask extends DownloadTask {
                     this.pause();
                     throw new RuntimeException(e);
                 }
-            }, partsExecutor);
+            }, executor);
         }
         futures.add(c);
     }
@@ -231,8 +229,7 @@ public class DownloadInChunksTask extends DownloadTask {
     }
 
 
-    private ExecutorService calculateSpeedAndProgressChunks(long fileSize) {
-        var statusExecutor = Executors.newCachedThreadPool();
+    private void calculateSpeedAndProgressChunks(long fileSize) {
         executor.submit(() -> {
             try {
                 while (!isCalculating) Thread.onSpinWait();
@@ -251,7 +248,6 @@ public class DownloadInChunksTask extends DownloadTask {
                 e.printStackTrace();
             }
         });
-        return statusExecutor;
     }
 
     @Override
@@ -303,9 +299,8 @@ public class DownloadInChunksTask extends DownloadTask {
                 currentDownloadings.remove(download);
                 mainTableUtils.refreshTable();
             }
-            partsExecutor.shutdown();
-            statusExecutor.shutdown();
-            executor.shutdown();
+            if (executor != null)
+                executor.shutdown();
             System.gc();
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -315,5 +310,15 @@ public class DownloadInChunksTask extends DownloadTask {
     @Override
     public void setExecutor(ExecutorService executor) {
         this.executor = executor;
+    }
+
+    @Override
+    public boolean isPaused() {
+        return paused;
+    }
+
+    @Override
+    public void setBlocking(boolean blocking) {
+        this.blocking = blocking;
     }
 }

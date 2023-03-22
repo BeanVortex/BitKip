@@ -179,7 +179,7 @@ public class MenuUtils {
         stopQueueMenu.getItems().addAll(stopQueueItems.keySet());
 
         addToQueueMenu.getItems().forEach(menuItem ->
-                menuItem.setOnAction(event -> {
+                menuItem.setOnAction(e -> {
                     var qm = addToQueueItems.get(menuItem);
                     var notObserved = new ArrayList<>(mainTableUtils.getSelected());
                     notObserved.forEach(dm -> {
@@ -191,6 +191,8 @@ public class MenuUtils {
                     });
                 }));
 
+        startQueueMenu.getItems().forEach(menuItem -> menuItem.setOnAction(e ->
+                DownloadOpUtils.startDownloadsInQueue(startQueueItems, menuItem, mainTableUtils)));
     }
 
     public static MenuItem createMenuItem(QueueModel qm, Paint defaultColor) {

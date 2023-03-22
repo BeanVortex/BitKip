@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import static ir.darkdeveloper.bitkip.config.AppConfigs.currentDownloadings;
@@ -175,8 +176,13 @@ public class NewDownloadUtils {
     }
 
 
+    /**
+     * @param blocking of course, it should be done in concurrent environment otherwise it will block the main thread.
+     *                 mostly using for queue downloading
+     */
     public static void startDownload(DownloadModel dm, MainTableUtils mainTableUtils,
-                                     String speed, String bytes, boolean resume) {
+                                     String speed, String bytes, boolean resume, boolean blocking,
+                                     ExecutorService executor) {
         DownloadTask downloadTask = new DownloadLimitedTask(dm, Long.MAX_VALUE, false, mainTableUtils);
         if (dm.getChunks() == 0) {
             if (speed != null) {
@@ -210,6 +216,7 @@ public class NewDownloadUtils {
         });
         downloadTask.progressProperty().addListener((o, old, newV) ->
                 mainTableUtils.updateDownloadProgress(newV.floatValue() * 100, dm));
+        downloadTask.setBlocking(blocking);
         dm.setDownloadTask(downloadTask);
         dm.setShowCompleteDialog(showCompleteDialog);
         dm.setOpenAfterComplete(false);
@@ -218,9 +225,15 @@ public class NewDownloadUtils {
             mainTableUtils.addRow(dm);
         }
         currentDownloadings.add(dm);
-        var executor = Executors.newCachedThreadPool();
+        if (executor == null)
+            executor = Executors.newCachedThreadPool();
         downloadTask.setExecutor(executor);
-        executor.submit(downloadTask);
+
+        if (blocking)
+            downloadTask.run();
+        else
+            executor.submit(downloadTask);
+
     }
 
     private static long getBytesFromString(String mb) {
