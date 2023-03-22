@@ -7,7 +7,6 @@ import javafx.application.HostServices;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 public class AppConfigs {
@@ -39,8 +38,8 @@ public class AppConfigs {
     public static int downloadRetryCount = 2;
     public static HostServices hostServices;
 
-    public static final List<DownloadModel> currentDownloadings = Collections.synchronizedList(new ArrayList<>());
-
+    public static final List<DownloadModel> currentDownloadings = new ArrayList<>();
+    public static final List<QueueModel> startedQueues = new ArrayList<>();
     public static final List<DownloadingController> openDownloadings = new ArrayList<>();
 
     public static boolean showCompleteDialog = true;

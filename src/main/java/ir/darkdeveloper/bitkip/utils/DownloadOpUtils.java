@@ -104,15 +104,21 @@ public class DownloadOpUtils {
 
     public static void startDownloadsInQueue(LinkedHashMap<MenuItem, QueueModel> startQueueItems,
                                              MenuItem menuItem, MainTableUtils mainTableUtils) {
-        var executor = Executors.newCachedThreadPool();
-        executor.submit(() -> {
-            var qm = startQueueItems.get(menuItem);
-            var downloadsByQueue = DownloadsRepo.getDownloadsByQueue(qm.getId())
-                    .stream().filter(dm -> dm.getDownloadStatus() == DownloadStatus.Paused).toList();
-            downloadsByQueue.forEach(dm -> {
-                dm = mainTableUtils.getObservedDownload(dm);
-                startDownload(mainTableUtils, dm, null, null, true, true, executor);
+        var qm = startQueueItems.get(menuItem);
+        if (!startedQueues.contains(qm)) {
+            menuItem.setDisable(true);
+            startedQueues.add(qm);
+            var executor = Executors.newCachedThreadPool();
+            executor.submit(() -> {
+                var downloadsByQueue = DownloadsRepo.getDownloadsByQueue(qm.getId())
+                        .stream().filter(dm -> dm.getDownloadStatus() == DownloadStatus.Paused).toList();
+                downloadsByQueue.forEach(dm -> {
+                    dm = mainTableUtils.getObservedDownload(dm);
+                    startDownload(mainTableUtils, dm, null, null, true, true, executor);
+                });
+                menuItem.setDisable(false);
+                startedQueues.remove(qm);
             });
-        });
+        }
     }
 }
