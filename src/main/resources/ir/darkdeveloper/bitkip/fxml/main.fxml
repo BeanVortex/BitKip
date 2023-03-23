@@ -13,7 +13,8 @@
 
     <HBox styleClass="csm_toolbar" minWidth="835" prefWidth="1000">
         <HBox maxWidth="2" minWidth="2" styleClass="csm_toolbar"/>
-        <HBox minWidth="831" prefWidth="996" fx:id="toolbar" alignment="CENTER" maxHeight="32" minHeight="32" spacing="10">
+        <HBox minWidth="831" prefWidth="996" fx:id="toolbar" alignment="CENTER" maxHeight="32" minHeight="32"
+              spacing="10">
             <ImageView fx:id="logoImg" fitWidth="30" fitHeight="30"/>
             <Button fx:id="menuFile" text="File" styleClass="toolbar_menu,bold"/>
             <Button fx:id="operationMenu" text="Operation" styleClass="toolbar_menu,bold"/>
@@ -29,8 +30,9 @@
     <HBox fx:id="mainBox">
         <StackPane>
             <HBox>
-                <ScrollPane minWidth="130" prefWidth="100" fx:id="sideScrollPane">
-                    <VBox prefWidth="130" minWidth="100" styleClass="side" fx:id="side" alignment="TOP_CENTER"/>
+                <ScrollPane prefWidth="130" minWidth="130" fx:id="sideScrollPane"  styleClass="side">
+                    <VBox prefWidth="130" minWidth="100" styleClass="side" fx:id="side"
+                          alignment="TOP_CENTER"/>
                 </ScrollPane>
                 <TableView minWidth="750" prefWidth="Infinity" fx:id="contentTable"/>
             </HBox>

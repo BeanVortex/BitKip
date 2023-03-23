@@ -41,7 +41,6 @@
 
 .side {
     -fx-background-color: #78909C;
-    -fx-background-radius: 0 0 15px 0;
 }
 
 .side .side_queue {

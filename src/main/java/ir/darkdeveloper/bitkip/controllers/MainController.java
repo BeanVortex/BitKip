@@ -90,7 +90,10 @@ public class MainController implements FXMLController, QueueObserver {
             contentTable.setPrefWidth(n.doubleValue() + 90);
             toolbar.setPrefWidth(n.longValue());
         });
-
+        stage.heightProperty().addListener((ob, o, n) -> {
+            sideScrollPane.setPrefHeight(n.doubleValue() - toolbar.getPrefHeight());
+            side.setPrefHeight(n.doubleValue() - toolbar.getPrefHeight());
+        });
         stage.xProperty().addListener((observable, oldValue, newValue) -> {
             if (WindowUtils.isOnPrimaryScreen(newValue.doubleValue()))
                 bounds = Screen.getPrimary().getVisualBounds();
