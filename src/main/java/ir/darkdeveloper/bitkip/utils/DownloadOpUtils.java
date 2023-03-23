@@ -3,19 +3,15 @@ package ir.darkdeveloper.bitkip.utils;
 import ir.darkdeveloper.bitkip.controllers.DownloadingController;
 import ir.darkdeveloper.bitkip.models.DownloadModel;
 import ir.darkdeveloper.bitkip.models.DownloadStatus;
-import ir.darkdeveloper.bitkip.models.QueueModel;
 import ir.darkdeveloper.bitkip.repo.DownloadsRepo;
 import javafx.collections.ObservableList;
-import javafx.scene.control.MenuItem;
 import org.controlsfx.control.Notifications;
 
 import java.io.File;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 import static ir.darkdeveloper.bitkip.config.AppConfigs.*;
 
@@ -56,17 +52,20 @@ public class DownloadOpUtils {
     }
 
     public static void pauseDownloads(MainTableUtils mainTableUtils) {
-        mainTableUtils.getSelected().forEach(dm ->
-                currentDownloadings.stream().filter(c -> c.equals(dm))
-                        .findAny().ifPresent(dm2 -> dm2.getDownloadTask().pause())
-        );
+        mainTableUtils.getSelected().forEach(DownloadOpUtils::pauseDownload);
+    }
+
+    public static void pauseDownload(DownloadModel dm) {
+        currentDownloadings.stream()
+                .filter(c -> c.equals(dm))
+                .findFirst().ifPresent(dm2 -> dm2.getDownloadTask().pause());
     }
 
     public static void deleteDownloads(MainTableUtils mainTableUtils, boolean withFiles) {
         var selectedItems = mainTableUtils.getSelected();
         selectedItems.forEach(dm -> {
             currentDownloadings.stream().filter(c -> c.equals(dm))
-                    .findAny()
+                    .findFirst()
                     .ifPresent(dm2 -> dm2.getDownloadTask().pause());
             DownloadsRepo.deleteDownload(dm);
             if (withFiles)
@@ -102,23 +101,5 @@ public class DownloadOpUtils {
                 });
     }
 
-    public static void startDownloadsInQueue(LinkedHashMap<MenuItem, QueueModel> startQueueItems,
-                                             MenuItem menuItem, MainTableUtils mainTableUtils) {
-        var qm = startQueueItems.get(menuItem);
-        if (!startedQueues.contains(qm)) {
-            menuItem.setDisable(true);
-            startedQueues.add(qm);
-            var executor = Executors.newCachedThreadPool();
-            executor.submit(() -> {
-                var downloadsByQueue = DownloadsRepo.getDownloadsByQueue(qm.getId())
-                        .stream().filter(dm -> dm.getDownloadStatus() == DownloadStatus.Paused).toList();
-                downloadsByQueue.forEach(dm -> {
-                    dm = mainTableUtils.getObservedDownload(dm);
-                    startDownload(mainTableUtils, dm, null, null, true, true, executor);
-                });
-                menuItem.setDisable(false);
-                startedQueues.remove(qm);
-            });
-        }
-    }
+
 }

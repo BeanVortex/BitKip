@@ -164,7 +164,7 @@ public class DownloadingController implements FXMLController {
     private DownloadTask getDownloadTask() {
         return currentDownloadings.stream()
                 .filter(c -> c.equals(downloadModel))
-                .findAny()
+                .findFirst()
                 .map(DownloadModel::getDownloadTask).orElse(null);
     }
 

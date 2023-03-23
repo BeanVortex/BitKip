@@ -136,7 +136,7 @@ public class DownloadLimitedTask extends DownloadTask {
                 fileChannel.close();
             var dmOpt = currentDownloadings.stream()
                     .filter(c -> c.equals(downloadModel))
-                    .findAny();
+                    .findFirst();
             if (dmOpt.isPresent()) {
                 var download = dmOpt.get();
                 download.setDownloadStatus(DownloadStatus.Paused);
@@ -150,7 +150,7 @@ public class DownloadLimitedTask extends DownloadTask {
                     updateProgress(1, 1);
                     DownloadsRepo.updateDownloadCompleteDate(download);
                     openDownloadings.stream().filter(dc -> dc.getDownloadModel().equals(download))
-                            .findAny().ifPresentOrElse(dc -> dc.onComplete(download),
+                            .findFirst().ifPresentOrElse(dc -> dc.onComplete(download),
                                     () -> {
                                         if (download.isShowCompleteDialog())
                                             DownloadOpUtils.openDownloadingStage(download, mainTableUtils);

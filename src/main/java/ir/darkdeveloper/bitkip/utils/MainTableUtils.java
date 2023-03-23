@@ -183,7 +183,7 @@ public class MainTableUtils {
                     dm.getQueue()
                             .stream()
                             .filter(qm -> !staticQueueNames.contains(qm.getName()))
-                            .findAny()
+                            .findFirst()
                             .ifPresent(qm -> DownloadsRepo.deleteDownloadQueue(dm.getId(), qm.getId()));
                 }));
         // DELETE

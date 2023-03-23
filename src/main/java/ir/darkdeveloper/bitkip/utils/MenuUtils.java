@@ -89,6 +89,7 @@ public class MenuUtils {
             var selectedItems = mainTableUtils.getSelected();
             disableMenuItems(resumeLbl, pauseLbl, openLbl, deleteFromQueueLbl, restartLbl,
                     addToQueueLbl, deleteLbl, deleteWithFileLbl, menuItems, selectedItems);
+//            disableStopQueueItems(stopQueueMenu);
             deleteLbl.setText("Delete selected (" + selectedItems.size() + ")");
             c.show(operationMenu, Side.BOTTOM, 0, 0);
         });
@@ -117,19 +118,19 @@ public class MenuUtils {
         menuItems.get(deleteWithFileLbl).setDisable(selectedItems.isEmpty());
 
         selectedItems.stream().filter(dm -> dm.getDownloadStatus() == DownloadStatus.Paused)
-                .findAny().ifPresent(dm -> {
+                .findFirst().ifPresent(dm -> {
                     menuItems.get(resumeLbl).setDisable(false);
                     menuItems.get(pauseLbl).setDisable(true);
                     menuItems.get(openLbl).setDisable(true);
                 });
         selectedItems.stream().filter(dm -> dm.getDownloadStatus() == DownloadStatus.Downloading)
-                .findAny().ifPresent(dm -> {
+                .findFirst().ifPresent(dm -> {
                     menuItems.get(resumeLbl).setDisable(true);
                     menuItems.get(pauseLbl).setDisable(false);
                     menuItems.get(openLbl).setDisable(true);
                 });
         selectedItems.stream().filter(dm -> dm.getDownloadStatus() == DownloadStatus.Completed)
-                .findAny().ifPresent(dm -> {
+                .findFirst().ifPresent(dm -> {
                     menuItems.get(resumeLbl).setDisable(true);
                     menuItems.get(pauseLbl).setDisable(true);
                     menuItems.get(openLbl).setDisable(false);
@@ -138,7 +139,7 @@ public class MenuUtils {
                 .filtered(dm -> staticQueueNames.stream()
                         .anyMatch(s -> dm.getQueue().get(0).getName().equals(s)))
                 .stream()
-                .findAny()
+                .findFirst()
                 .ifPresentOrElse(dm -> menuItems.get(deleteFromQueueLbl).setDisable(true),
                         () -> menuItems.get(deleteFromQueueLbl).setDisable(selectedItems.isEmpty()));
     }
@@ -171,6 +172,7 @@ public class MenuUtils {
             }
             var startQueueMenuItem = createMenuItem(qm, defaultColor);
             var stopQueueMenuItem = createMenuItem(qm, defaultColor);
+            stopQueueMenuItem.setDisable(true);
             startQueueItems.put(startQueueMenuItem, qm);
             stopQueueItems.put(stopQueueMenuItem, qm);
         });
@@ -191,9 +193,27 @@ public class MenuUtils {
                     });
                 }));
 
-        startQueueMenu.getItems().forEach(menuItem -> menuItem.setOnAction(e ->
-                DownloadOpUtils.startDownloadsInQueue(startQueueItems, menuItem, mainTableUtils)));
+        startQueueMenu.getItems().forEach(startItem -> startItem.setOnAction(e ->
+                stopQueueItems.keySet()
+                        .stream()
+                        .filter(stopItem -> ((Label) stopItem.getGraphic()).getText()
+                                .equals(((Label) startItem.getGraphic()).getText()))
+                        .findFirst()
+                        .ifPresent(stopItem -> QueueUtils.startQueue(startQueueItems.get(startItem), startItem,
+                                stopItem, mainTableUtils))
+        ));
+
+        stopQueueMenu.getItems().forEach(stopItem -> stopItem.setOnAction(e ->
+                startQueueItems.keySet()
+                        .stream()
+                        .filter(startItem -> ((Label) startItem.getGraphic()).getText()
+                                .equals(((Label) stopItem.getGraphic()).getText()))
+                        .findFirst()
+                        .ifPresent(startItem -> QueueUtils.stopQueue(stopQueueItems.get(stopItem), startItem,
+                                stopItem, mainTableUtils))
+        ));
     }
+
 
     public static MenuItem createMenuItem(QueueModel qm, Paint defaultColor) {
         var queueMenuItem = new MenuItem();

@@ -63,8 +63,6 @@ public class DownloadInChunksTask extends DownloadTask {
         if (file.exists() && isCompleted(downloadModel, file, mainTableUtils))
             return 0L;
         downloadInChunks(url, fileSize);
-        if (blocking)
-            succeeded();
         return 0L;
     }
 
@@ -79,6 +77,10 @@ public class DownloadInChunksTask extends DownloadTask {
             futures.toArray(futureArr);
             CompletableFuture.allOf(futureArr).get();
         }
+//        if (blocking && paused) {
+//            succeeded();
+//            mainTableUtils.updateDownloadProgress(downloadModel.getProgress(), downloadModel);
+//        }
     }
 
     private List<CompletableFuture<Void>> prepareParts(URL url, long fileSize) throws IOException {
@@ -253,7 +255,12 @@ public class DownloadInChunksTask extends DownloadTask {
     @Override
     public void pause() {
         paused = true;
-        succeeded();
+        try {
+            for (var channel : fileChannels)
+                channel.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
@@ -269,7 +276,7 @@ public class DownloadInChunksTask extends DownloadTask {
                 channel.close();
             var dmOpt = currentDownloadings.stream()
                     .filter(c -> c.equals(downloadModel))
-                    .findAny();
+                    .findFirst();
             if (dmOpt.isPresent()) {
                 var download = dmOpt.get();
                 download.setDownloadStatus(DownloadStatus.Paused);
@@ -282,7 +289,7 @@ public class DownloadInChunksTask extends DownloadTask {
                     updateProgress(1, 1);
                     DownloadsRepo.updateDownloadCompleteDate(download);
                     openDownloadings.stream().filter(dc -> dc.getDownloadModel().equals(download))
-                            .findAny().ifPresentOrElse(dc -> dc.onComplete(download),
+                            .findFirst().ifPresentOrElse(dc -> dc.onComplete(download),
                                     () -> {
                                         if (download.isShowCompleteDialog())
                                             DownloadOpUtils.openDownloadingStage(download, mainTableUtils);
@@ -299,7 +306,7 @@ public class DownloadInChunksTask extends DownloadTask {
                 currentDownloadings.remove(download);
                 mainTableUtils.refreshTable();
             }
-            if (executor != null)
+            if (executor != null && !blocking)
                 executor.shutdown();
             System.gc();
         } catch (IOException e) {
