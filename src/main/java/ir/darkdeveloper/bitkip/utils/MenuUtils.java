@@ -89,7 +89,6 @@ public class MenuUtils {
             var selectedItems = mainTableUtils.getSelected();
             disableMenuItems(resumeLbl, pauseLbl, openLbl, deleteFromQueueLbl, restartLbl,
                     addToQueueLbl, deleteLbl, deleteWithFileLbl, menuItems, selectedItems);
-//            disableStopQueueItems(stopQueueMenu);
             deleteLbl.setText("Delete selected (" + selectedItems.size() + ")");
             c.show(operationMenu, Side.BOTTOM, 0, 0);
         });

@@ -90,10 +90,9 @@ public class MainController implements FXMLController, QueueObserver {
             contentTable.setPrefWidth(n.doubleValue() + 90);
             toolbar.setPrefWidth(n.longValue());
         });
-        stage.heightProperty().addListener((ob, o, n) -> {
-            sideScrollPane.setPrefHeight(n.doubleValue() - toolbar.getPrefHeight());
-            side.setPrefHeight(n.doubleValue() - toolbar.getPrefHeight());
-        });
+        stage.heightProperty().addListener((ob, o, n) ->
+                sideScrollPane.setPrefHeight(n.doubleValue() - toolbar.getPrefHeight()));
+
         stage.xProperty().addListener((observable, oldValue, newValue) -> {
             if (WindowUtils.isOnPrimaryScreen(newValue.doubleValue()))
                 bounds = Screen.getPrimary().getVisualBounds();
@@ -126,23 +125,8 @@ public class MainController implements FXMLController, QueueObserver {
     }
 
     private void initSides() {
-        var vScrollBar = new ScrollBar();
-        vScrollBar.setOrientation(Orientation.VERTICAL);
-        vScrollBar.minProperty().bind(sideScrollPane.vminProperty());
-        vScrollBar.maxProperty().bind(sideScrollPane.vmaxProperty());
-        vScrollBar.visibleAmountProperty().bind(sideScrollPane.heightProperty().divide(side.heightProperty()));
-        sideScrollPane.vvalueProperty().bindBidirectional(vScrollBar.valueProperty());
-
-        var hScrollBar = new ScrollBar();
-        hScrollBar.setOrientation(Orientation.HORIZONTAL);
-        hScrollBar.minProperty().bind(sideScrollPane.hminProperty());
-        hScrollBar.maxProperty().bind(sideScrollPane.hmaxProperty());
-        hScrollBar.visibleAmountProperty().bind(sideScrollPane.widthProperty().divide(side.heightProperty()));
-        sideScrollPane.hvalueProperty().bindBidirectional(hScrollBar.valueProperty());
-
-        sideScrollPane.setVbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
+        sideScrollPane.setVbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
         sideScrollPane.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
-        sideScrollPane.setPadding(Insets.EMPTY);
         var queueButtons = new ArrayList<Button>();
         side.getChildren().clear();
         var queues = AppConfigs.getQueues();
@@ -155,8 +139,9 @@ public class MainController implements FXMLController, QueueObserver {
                 btn.getStyleClass().add("selected_queue");
             btn.setPrefWidth(side.getPrefWidth());
             btn.setPrefHeight(60);
-            btn.setOnMouseClicked(onSideQueueClicked(queueButtons, queueModel, btn));
+            btn.setMinHeight(60);
             queueButtons.add(btn);
+            btn.setOnMouseClicked(onSideQueueClicked(queueButtons, queueModel, btn));
             side.getChildren().add(btn);
         });
 
@@ -274,5 +259,6 @@ public class MainController implements FXMLController, QueueObserver {
     @Override
     public void updateQueue() {
         initSides();
+        MenuUtils.initOperationMenu(operationMenu, mainTableUtils);
     }
 }
