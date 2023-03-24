@@ -16,7 +16,7 @@ import static ir.darkdeveloper.bitkip.config.AppConfigs.startedQueues;
 public class QueueUtils {
     public static void startQueue(QueueModel qm, MenuItem startItem, MenuItem stopItem, MainTableUtils mainTableUtils) {
         if (!startedQueues.contains(qm)) {
-            var downloadsByQueue = DownloadsRepo.getDownloadsByQueue(qm.getId())
+            var downloadsByQueue = DownloadsRepo.getDownloadsByQueueName(qm.getName())
                     .stream().filter(dm -> dm.getDownloadStatus() == DownloadStatus.Paused)
                     .sorted(Comparator.comparing(DownloadModel::getAddToQueueDate))
                     .toList();
@@ -48,7 +48,7 @@ public class QueueUtils {
 
     public static void stopQueue(QueueModel qm, MenuItem startItem, MenuItem stopItem, MainTableUtils mainTableUtils) {
         if (startedQueues.contains(qm)) {
-            var downloadsByQueue = DownloadsRepo.getDownloadsByQueue(qm.getId())
+            var downloadsByQueue = DownloadsRepo.getDownloadsByQueueName(qm.getName())
                     .stream().filter(dm -> dm.getDownloadStatus() != DownloadStatus.Completed).toList();
             startItem.setDisable(false);
             stopItem.setDisable(true);

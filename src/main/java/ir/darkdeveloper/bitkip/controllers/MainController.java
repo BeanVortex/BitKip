@@ -34,6 +34,8 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import static ir.darkdeveloper.bitkip.BitKip.getResource;
 import static ir.darkdeveloper.bitkip.config.AppConfigs.*;
+import static ir.darkdeveloper.bitkip.utils.FileExtensions.ALL_DOWNLOADS_QUEUE;
+import static ir.darkdeveloper.bitkip.utils.FileExtensions.staticQueueNames;
 
 
 public class MainController implements FXMLController, QueueObserver {
@@ -86,16 +88,14 @@ public class MainController implements FXMLController, QueueObserver {
     public void initAfterStage() {
         mainTableUtils = new MainTableUtils(contentTable);
         mainTableUtils.tableInits();
-        var allDownloadsQueue = QueuesRepo.findByName("All Downloads");
-        var downloadList = DownloadsRepo.getDownloads().stream()
+        var downloadList = DownloadsRepo.getDownloadsByQueueName(ALL_DOWNLOADS_QUEUE).stream()
                 .peek(dm -> {
                     dm.setDownloadStatus(DownloadStatus.Paused);
                     if (dm.getProgress() == 100)
                         dm.setDownloadStatus(DownloadStatus.Completed);
                 })
-                .filter(dm -> dm.getQueue().contains(allDownloadsQueue))
                 .toList();
-        mainTableUtils.setDownloads(downloadList, allDownloadsQueue);
+        mainTableUtils.setDownloads(downloadList, true);
         stage.widthProperty().addListener((ob, o, n) -> {
             contentTable.setPrefWidth(n.doubleValue() + 90);
             toolbar.setPrefWidth(n.longValue());
@@ -163,7 +163,7 @@ public class MainController implements FXMLController, QueueObserver {
                 return;
             if (event.getButton().equals(MouseButton.PRIMARY)) {
                 currentDownloadings.forEach(DownloadsRepo::updateTableStatus);
-                var downloadsData = DownloadsRepo.getDownloadsByQueue(qm.getId())
+                var downloadsData = DownloadsRepo.getDownloadsByQueueName(qm.getName())
                         .stream().peek(downloadModel -> {
                             downloadModel.setDownloadStatus(DownloadStatus.Paused);
                             if (downloadModel.getProgress() == 100)
@@ -174,7 +174,7 @@ public class MainController implements FXMLController, QueueObserver {
                                 return currentDownloadings.get(currentDownloadings.indexOf(dm));
                             return dm;
                         }).toList();
-                mainTableUtils.setDownloads(downloadsData, qm);
+                mainTableUtils.setDownloads(downloadsData, staticQueueNames.contains(qm.getName()));
                 if (!queueButtons.isEmpty() && !btn.getStyleClass().contains("selected_queue")) {
                     btn.getStyleClass().add("selected_queue");
                     queueButtons.forEach(otherBtn -> {

@@ -64,24 +64,15 @@ public class DownloadsRepo {
         }
     }
 
-    public static List<DownloadModel> getDownloads() {
-        var sql = """
-                SELECT *, q.name as queue_name
-                FROM downloads d
-                         INNER JOIN queue_download qd ON d.id = qd.download_id
-                         INNER JOIN queues q on q.id = qd.queue_id;
-                                """;
-        return fetchDownloads(sql);
-    }
 
-    public static List<DownloadModel> getDownloadsByQueue(int queueId) {
+    public static List<DownloadModel> getDownloadsByQueueName(String queueName) {
         var sql = """
                 SELECT *, q.name as queue_name
                 FROM downloads d
                          INNER JOIN queue_download qd ON d.id = qd.download_id
                          INNER JOIN queues q ON q.id = qd.queue_id
-                WHERE qd.queue_id = %d;
-                """.formatted(queueId);
+                WHERE queue_name = "%s";
+                """.formatted(queueName);
         return fetchDownloads(sql);
     }
 
@@ -98,6 +89,8 @@ public class DownloadsRepo {
         }
         return list;
     }
+
+
 
     public static void updateDownloadQueue(int download_id, int queue_id) {
         var queueCountSql = """

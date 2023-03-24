@@ -195,8 +195,8 @@ public class MainTableUtils {
         contentTable.sort();
     }
 
-    public void setDownloads(List<DownloadModel> dms, QueueModel qm) {
-        if (staticQueueNames.contains(qm.getName())) {
+    public void setDownloads(List<DownloadModel> dms, boolean addDateSort) {
+        if (addDateSort) {
             addDateColumn.setSortType(TableColumn.SortType.DESCENDING);
             contentTable.getSortOrder().clear();
             contentTable.getSortOrder().add(addDateColumn);
