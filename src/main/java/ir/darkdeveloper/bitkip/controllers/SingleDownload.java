@@ -212,6 +212,7 @@ public class SingleDownload implements NewDownloadFxmlController {
         dm.setName(fileName);
         dm.setChunks(Integer.parseInt(chunksField.getText()));
         dm.setAddDate(LocalDateTime.now());
+        dm.setAddToQueueDate(LocalDateTime.now());
         var selectedQueue = queueCombo.getSelectionModel().getSelectedItem();
         var allDownloadsQueue = QueuesRepo.findByName("All Downloads");
         dm.getQueue().add(allDownloadsQueue);

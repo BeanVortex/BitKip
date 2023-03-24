@@ -28,9 +28,9 @@ public class DownloadsRepo {
         var openFile = dm.isOpenAfterComplete() ? 1 : 0;
 
         var downloadSql = """
-                INSERT INTO downloads (name, progress, downloaded, size, url, path, chunks, add_date, last_try_date,
-                show_complete_dialog, open_after_complete)
-                VALUES ("%s", %f, %d, %d, "%s", "%s", %d, "%s", %s, %d, %d)
+                INSERT INTO downloads (name, progress, downloaded, size, url, path, chunks, add_date,
+                 add_to_queue_date, last_try_date, show_complete_dialog, open_after_complete)
+                VALUES ("%s", %f, %d, %d, "%s", "%s", %d, "%s", "%s", %s, %d, %d)
                 """.formatted(
                 dm.getName(),
                 dm.getProgress(),
@@ -40,6 +40,7 @@ public class DownloadsRepo {
                 dm.getFilePath(),
                 dm.getChunks(),
                 dm.getAddDate().toString(),
+                dm.getAddToQueueDate(),
                 lastTryDate,
                 showDialog,
                 openFile);
@@ -126,6 +127,11 @@ public class DownloadsRepo {
                 SET queue_id = %d
                 WHERE queue_id = %d AND download_id = %d;
                 """;
+        var updateAddToQueueDateSql = """
+                UPDATE downloads
+                SET add_to_queue_date = "%s"
+                WHERE id = %d;
+                """.formatted(LocalDateTime.now(), download_id);
 
         try (var con = dbHelper.openConnection();
              var stmt = con.createStatement()) {
@@ -140,6 +146,7 @@ public class DownloadsRepo {
             } else if (queueCount == 2)
                 stmt.executeUpdate(insertQueueDownloadSql);
             else throw new Exception("queue count for the download is not correct");
+            stmt.executeUpdate(updateAddToQueueDateSql);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -176,6 +183,9 @@ public class DownloadsRepo {
         var queueCanAddDown = rs.getBoolean(COL_CAN_ADD_DOWN);
         var queue = new QueueModel(queueId, queueName, queueEditable, queueCanAddDown);
         var addDate = rs.getString(COL_ADD_DATE);
+        var addDateStr = LocalDateTime.parse(addDate);
+        var addToQueueDate = rs.getString("add_to_queue_date");
+        var addToQueueDateStr = LocalDateTime.parse(addToQueueDate);
         var lastTryDate = rs.getString(COL_LAST_TRY_DATE);
         var lastTryDateStr = lastTryDate == null ? null : LocalDateTime.parse(lastTryDate);
         var completeDate = rs.getString(COL_COMPLETE_DATE);
@@ -183,7 +193,7 @@ public class DownloadsRepo {
         var downloadStatus = progress != 100 ? DownloadStatus.Paused : DownloadStatus.Completed;
         return DownloadModel.builder()
                 .id(id).name(name).progress(progress).downloaded(downloaded).size(size).url(url).filePath(filePath)
-                .chunks(chunks).queue(new ArrayList<>(List.of(queue))).addDate(LocalDateTime.parse(addDate))
+                .chunks(chunks).queue(new ArrayList<>(List.of(queue))).addDate(addDateStr).addToQueueDate(addToQueueDateStr)
                 .lastTryDate(lastTryDateStr).completeDate(completeDateStr).openAfterComplete(openAfterComplete)
                 .showCompleteDialog(showCompleteDialog).downloadStatus(downloadStatus)
                 .build();

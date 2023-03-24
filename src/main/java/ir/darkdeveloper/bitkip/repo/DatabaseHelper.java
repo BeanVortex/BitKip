@@ -9,7 +9,6 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.logging.Logger;
 
 public class DatabaseHelper {
 
@@ -24,13 +23,11 @@ public class DatabaseHelper {
     static final String COL_URL = "url";
     static final String COL_PATH = "path";
     static final String COL_CHUNKS = "chunks";
-    static final String COL_ADD_DATE = "add_Date";
+    static final String COL_ADD_DATE = "add_date";
     static final String COL_LAST_TRY_DATE = "last_try_date";
     static final String COL_COMPLETE_DATE = "complete_date";
     static final String COL_EDITABLE = "editable";
     static final String COL_CAN_ADD_DOWN = "can_add_download";
-
-    private static final Logger log = Logger.getLogger(DatabaseHelper.class.getName());
 
     Connection openConnection() throws SQLException {
         var path = AppConfigs.dataPath + File.separator + "bitkip.db";
@@ -52,6 +49,7 @@ public class DatabaseHelper {
                 + COL_PATH + " VARCHAR,"
                 + COL_CHUNKS + " INTEGER,"
                 + COL_ADD_DATE + " VARCHAR,"
+                + "add_to_queue_date VARCHAR,"
                 + COL_LAST_TRY_DATE + " VARCHAR,"
                 + COL_COMPLETE_DATE + " VARCHAR"
                 + ");";
@@ -88,7 +86,6 @@ public class DatabaseHelper {
             stmt.executeUpdate(sql);
             stmt.close();
             con.close();
-            log.info("created db");
         } catch (SQLException e) {
             e.printStackTrace();
         }

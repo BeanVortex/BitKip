@@ -86,6 +86,16 @@ public class MainController implements FXMLController, QueueObserver {
     public void initAfterStage() {
         mainTableUtils = new MainTableUtils(contentTable);
         mainTableUtils.tableInits();
+        var allDownloadsQueue = QueuesRepo.findByName("All Downloads");
+        var downloadList = DownloadsRepo.getDownloads().stream()
+                .peek(dm -> {
+                    dm.setDownloadStatus(DownloadStatus.Paused);
+                    if (dm.getProgress() == 100)
+                        dm.setDownloadStatus(DownloadStatus.Completed);
+                })
+                .filter(dm -> dm.getQueue().contains(allDownloadsQueue))
+                .toList();
+        mainTableUtils.setDownloads(downloadList, allDownloadsQueue);
         stage.widthProperty().addListener((ob, o, n) -> {
             contentTable.setPrefWidth(n.doubleValue() + 90);
             toolbar.setPrefWidth(n.longValue());
@@ -147,14 +157,13 @@ public class MainController implements FXMLController, QueueObserver {
 
     }
 
-    private EventHandler<MouseEvent> onSideQueueClicked(ArrayList<Button> queueButtons,
-                                                        QueueModel queueModel, Button btn) {
+    private EventHandler<MouseEvent> onSideQueueClicked(ArrayList<Button> queueButtons, QueueModel qm, Button btn) {
         return event -> {
             if (event.getClickCount() == 2)
                 return;
             if (event.getButton().equals(MouseButton.PRIMARY)) {
                 currentDownloadings.forEach(DownloadsRepo::updateTableStatus);
-                var downloadsData = DownloadsRepo.getDownloadsByQueue(queueModel.getId())
+                var downloadsData = DownloadsRepo.getDownloadsByQueue(qm.getId())
                         .stream().peek(downloadModel -> {
                             downloadModel.setDownloadStatus(DownloadStatus.Paused);
                             if (downloadModel.getProgress() == 100)
@@ -165,7 +174,7 @@ public class MainController implements FXMLController, QueueObserver {
                                 return currentDownloadings.get(currentDownloadings.indexOf(dm));
                             return dm;
                         }).toList();
-                mainTableUtils.setDownloads(downloadsData);
+                mainTableUtils.setDownloads(downloadsData, qm);
                 if (!queueButtons.isEmpty() && !btn.getStyleClass().contains("selected_queue")) {
                     btn.getStyleClass().add("selected_queue");
                     queueButtons.forEach(otherBtn -> {

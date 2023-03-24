@@ -31,6 +31,7 @@ public class DownloadModel {
     private DownloadStatus downloadStatus;
     private DownloadTask downloadTask;
     private LocalDateTime addDate;
+    private LocalDateTime addToQueueDate;
     private LocalDateTime lastTryDate;
     private LocalDateTime completeDate;
     private boolean openAfterComplete;
@@ -41,6 +42,7 @@ public class DownloadModel {
     private String progressString;
     private String speedString;
     private String addDateString;
+    private String addToQueueDateString;
     private String lastTryDateString;
     private String completeDateString;
 
@@ -65,6 +67,10 @@ public class DownloadModel {
 
     public String getAddDateString() {
         return DATE_FORMATTER.format(addDate);
+    }
+
+    public String getAddToQueueDateString() {
+        return DATE_FORMATTER.format(addToQueueDate);
     }
 
     public String getLastTryDateString() {

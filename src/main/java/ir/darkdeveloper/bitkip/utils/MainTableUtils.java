@@ -31,37 +31,38 @@ public class MainTableUtils {
 
     private final TableView<DownloadModel> contentTable;
 
+    private final TableColumn<DownloadModel, String> nameColumn = new TableColumn<>("Name");
+    private final TableColumn<DownloadModel, String> progressColumn = new TableColumn<>("Progress");
+    private final TableColumn<DownloadModel, String> speedColumn = new TableColumn<>("Speed");
+    private final TableColumn<DownloadModel, String> downloadedColumn = new TableColumn<>("Downloaded");
+    private final TableColumn<DownloadModel, String> sizeColumn = new TableColumn<>("Size");
+    private final TableColumn<DownloadModel, String> statusColumn = new TableColumn<>("Status");
+    private final TableColumn<DownloadModel, String> remainingColumn = new TableColumn<>("Remaining");
+    private final TableColumn<DownloadModel, Integer> chunksColumn = new TableColumn<>("Chunks");
+    private final TableColumn<DownloadModel, String> addDateColumn = new TableColumn<>("Added on");
+    private final TableColumn<DownloadModel, String> addToQueueDateColumn = new TableColumn<>("Added to queue on");
+    private final TableColumn<DownloadModel, String> lastTryColumn = new TableColumn<>("Last try");
+    private final TableColumn<DownloadModel, String> completeColumn = new TableColumn<>("Completed On");
+
     public MainTableUtils(TableView<DownloadModel> contentTable) {
         this.contentTable = contentTable;
     }
 
     public void tableInits() {
-        var nameColumn = new TableColumn<DownloadModel, String>("Name");
-        var progressColumn = new TableColumn<DownloadModel, String>("Progress");
-        var speedColumn = new TableColumn<DownloadModel, String>("Speed");
-        var downloadedColumn = new TableColumn<DownloadModel, String>("Downloaded");
-        var sizeColumn = new TableColumn<DownloadModel, String>("Size");
-        var statusColumn = new TableColumn<DownloadModel, String>("Status");
-        var remainingColumn = new TableColumn<DownloadModel, String>("Remaining");
-        var chunksColumn = new TableColumn<DownloadModel, Integer>("Chunks");
-        var addDateColumn = new TableColumn<DownloadModel, String>("Added on");
-        var lastTryColumn = new TableColumn<DownloadModel, String>("Last try");
-        var completeColumn = new TableColumn<DownloadModel, String>("Completed On");
-
         nameColumn.setPrefWidth(200);
         speedColumn.setPrefWidth(100);
         downloadedColumn.setPrefWidth(90);
         sizeColumn.setPrefWidth(90);
         statusColumn.setPrefWidth(120);
         remainingColumn.setPrefWidth(80);
-        addDateColumn.setPrefWidth(135);
-        lastTryColumn.setPrefWidth(135);
-        completeColumn.setPrefWidth(135);
-        addDateColumn.setSortType(TableColumn.SortType.DESCENDING);
+        addDateColumn.setPrefWidth(150);
+        addToQueueDateColumn.setPrefWidth(150);
+        lastTryColumn.setPrefWidth(150);
+        completeColumn.setPrefWidth(150);
 
         List<TableColumn<DownloadModel, ?>> listOfColumns = List.of(nameColumn, progressColumn, speedColumn,
                 downloadedColumn, sizeColumn, statusColumn, remainingColumn, chunksColumn, addDateColumn,
-                lastTryColumn, completeColumn);
+                lastTryColumn, completeColumn, addToQueueDateColumn);
         contentTable.getColumns().addAll(listOfColumns);
         nameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
         progressColumn.setCellValueFactory(new PropertyValueFactory<>("progressString"));
@@ -72,22 +73,10 @@ public class MainTableUtils {
         remainingColumn.setCellValueFactory(new PropertyValueFactory<>("remainingTime"));
         chunksColumn.setCellValueFactory(new PropertyValueFactory<>("chunks"));
         addDateColumn.setCellValueFactory(new PropertyValueFactory<>("addDateString"));
+        addToQueueDateColumn.setCellValueFactory(new PropertyValueFactory<>("addToQueueDateString"));
         lastTryColumn.setCellValueFactory(new PropertyValueFactory<>("lastTryDateString"));
         completeColumn.setCellValueFactory(new PropertyValueFactory<>("completeDateString"));
-
         contentTable.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
-        var allDownloadsQueue = QueuesRepo.findByName("All Downloads");
-        var downloadList = DownloadsRepo.getDownloads().stream()
-                .peek(dm -> {
-                    dm.setDownloadStatus(DownloadStatus.Paused);
-                    if (dm.getProgress() == 100)
-                        dm.setDownloadStatus(DownloadStatus.Completed);
-                })
-                .filter(dm -> dm.getQueue().contains(allDownloadsQueue))
-                .toList();
-        contentTable.getItems().clear();
-        contentTable.getItems().addAll(downloadList);
-        contentTable.getSortOrder().add(addDateColumn);
         contentTable.setOnMouseClicked(onItemsClicked());
         contentTable.setRowFactory(getTableViewTableRowCallback());
     }
@@ -206,8 +195,17 @@ public class MainTableUtils {
         contentTable.sort();
     }
 
-    public void setDownloads(List<DownloadModel> downloadModels) {
-        contentTable.getItems().setAll(downloadModels);
+    public void setDownloads(List<DownloadModel> dms, QueueModel qm) {
+        if (staticQueueNames.contains(qm.getName())) {
+            addDateColumn.setSortType(TableColumn.SortType.DESCENDING);
+            contentTable.getSortOrder().clear();
+            contentTable.getSortOrder().add(addDateColumn);
+        } else {
+            addToQueueDateColumn.setSortType(TableColumn.SortType.DESCENDING);
+            contentTable.getSortOrder().clear();
+            contentTable.getSortOrder().add(addToQueueDateColumn);
+        }
+        contentTable.getItems().setAll(dms);
         contentTable.sort();
     }
 
