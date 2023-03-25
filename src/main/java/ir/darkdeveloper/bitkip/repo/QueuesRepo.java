@@ -8,6 +8,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import static ir.darkdeveloper.bitkip.repo.DatabaseHelper.*;
 
@@ -79,9 +80,9 @@ public class QueuesRepo {
         var name = rs.getString(COL_NAME);
         var editable = rs.getBoolean(COL_EDITABLE);
         var canAddDownload = rs.getBoolean(COL_CAN_ADD_DOWN);
-        List<DownloadModel> downloads = null;
+        CopyOnWriteArrayList<DownloadModel> downloads = null;
         if (fetchDownloads)
-            downloads = DownloadsRepo.getDownloadsByQueueName(name);
+            downloads = new CopyOnWriteArrayList<>(DownloadsRepo.getDownloadsByQueueName(name));
         return new QueueModel(id, name, editable, canAddDownload, downloads);
     }
 }

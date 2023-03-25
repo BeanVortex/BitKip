@@ -3,13 +3,13 @@ package ir.darkdeveloper.bitkip.utils;
 import ir.darkdeveloper.bitkip.models.DownloadModel;
 import ir.darkdeveloper.bitkip.models.DownloadStatus;
 import ir.darkdeveloper.bitkip.models.QueueModel;
-import ir.darkdeveloper.bitkip.repo.DownloadsRepo;
 import ir.darkdeveloper.bitkip.repo.QueuesRepo;
 import javafx.application.Platform;
 import javafx.scene.control.MenuItem;
 import org.controlsfx.control.Notifications;
 
 import java.util.Comparator;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.Executors;
 
 import static ir.darkdeveloper.bitkip.config.AppConfigs.startedQueues;
@@ -28,11 +28,12 @@ public class QueueUtils {
             }
             startItem.setDisable(true);
             stopItem.setDisable(false);
-            qm.setDownloads(downloadsByQueue);
+            qm.setDownloads(new CopyOnWriteArrayList<>(downloadsByQueue));
             startedQueues.add(qm);
             var executor = Executors.newCachedThreadPool();
             executor.submit(() -> {
-                for (var dm : qm.getDownloads()) {
+                for (int i = 0; i < qm.getDownloads().size(); i++) {
+                    var dm = qm.getDownloads().get(i);
                     if (dm.getDownloadStatus() == DownloadStatus.Paused) {
                         dm = mainTableUtils.getObservedDownload(dm);
                         DownloadOpUtils.startDownload(mainTableUtils, dm, null, null, true,
@@ -49,22 +50,20 @@ public class QueueUtils {
                 startedQueues.remove(qm);
                 executor.shutdown();
             });
-            executor.close();
         }
     }
 
 
     public static void stopQueue(QueueModel qm, MenuItem startItem, MenuItem stopItem, MainTableUtils mainTableUtils) {
         if (startedQueues.contains(qm)) {
-            var downloadsByQueue = DownloadsRepo.getDownloadsByQueueName(qm.getName())
-                    .stream().filter(dm -> dm.getDownloadStatus() != DownloadStatus.Completed).toList();
             startItem.setDisable(false);
             stopItem.setDisable(true);
-            startedQueues.remove(qm);
+            var downloadsByQueue = startedQueues.get(startedQueues.indexOf(qm)).getDownloads();
             downloadsByQueue.forEach(dm -> {
                 dm = mainTableUtils.getObservedDownload(dm);
                 DownloadOpUtils.pauseDownload(dm);
             });
+            startedQueues.remove(qm);
             queueDoneNotification(qm);
         }
     }
