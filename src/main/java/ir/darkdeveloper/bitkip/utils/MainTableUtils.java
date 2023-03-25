@@ -21,6 +21,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 
 import static ir.darkdeveloper.bitkip.config.AppConfigs.currentDownloadings;
+import static ir.darkdeveloper.bitkip.config.AppConfigs.startedQueues;
 import static ir.darkdeveloper.bitkip.utils.FileExtensions.staticQueueNames;
 import static ir.darkdeveloper.bitkip.utils.MenuUtils.createMenuItem;
 import static ir.darkdeveloper.bitkip.utils.ShortcutUtils.*;
@@ -128,7 +129,7 @@ public class MainTableUtils {
 
     private void initAddToQueueMenu(Menu addToQueueMenu) {
         var addQueueItems = new LinkedHashMap<MenuItem, QueueModel>();
-        QueuesRepo.getQueues().forEach(qm -> {
+        QueuesRepo.getQueues(false).forEach(qm -> {
             if (staticQueueNames.stream().noneMatch(s -> qm.getName().equals(s))) {
                 var defaultColor = ((Label) addToQueueMenu.getGraphic()).getTextFill();
                 var addToQueueMenuItem = createMenuItem(qm, defaultColor);
@@ -146,6 +147,8 @@ public class MainTableUtils {
                             return;
                         if (staticQueueNames.stream().noneMatch(s -> dm.getQueue().get(0).getName().equals(s)))
                             remove(dm);
+                        if (startedQueues.contains(qm))
+                            startedQueues.get(startedQueues.indexOf(qm)).getDownloads().add(dm);
                         DownloadsRepo.updateDownloadQueue(dm.getId(), qm.getId());
                     });
                 }));
@@ -173,7 +176,12 @@ public class MainTableUtils {
                             .stream()
                             .filter(qm -> !staticQueueNames.contains(qm.getName()))
                             .findFirst()
-                            .ifPresent(qm -> DownloadsRepo.deleteDownloadQueue(dm.getId(), qm.getId()));
+                            .ifPresent(qm -> {
+                                if (startedQueues.contains(qm))
+                                    startedQueues.get(startedQueues.indexOf(qm)).getDownloads().remove(dm);
+                                DownloadsRepo.deleteDownloadQueue(dm.getId(), qm.getId());
+                            });
+
                 }));
         // DELETE
         menuItems.get(lbls.get(6)).setOnAction(e -> DownloadOpUtils.deleteDownloads(this, false));

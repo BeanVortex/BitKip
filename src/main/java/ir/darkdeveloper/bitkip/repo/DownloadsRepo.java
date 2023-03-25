@@ -174,7 +174,7 @@ public class DownloadsRepo {
         var queueName = rs.getString("queue_name");
         var queueEditable = rs.getBoolean(COL_EDITABLE);
         var queueCanAddDown = rs.getBoolean(COL_CAN_ADD_DOWN);
-        var queue = new QueueModel(queueId, queueName, queueEditable, queueCanAddDown);
+        var queue = new QueueModel(queueId, queueName, queueEditable, queueCanAddDown, null);
         var addDate = rs.getString(COL_ADD_DATE);
         var addDateStr = LocalDateTime.parse(addDate);
         var addToQueueDate = rs.getString("add_to_queue_date");

@@ -17,6 +17,7 @@ import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 
+import static ir.darkdeveloper.bitkip.config.AppConfigs.startedQueues;
 import static ir.darkdeveloper.bitkip.utils.FileExtensions.staticQueueNames;
 import static ir.darkdeveloper.bitkip.utils.ShortcutUtils.*;
 
@@ -163,7 +164,7 @@ public class MenuUtils {
         var addToQueueItems = new LinkedHashMap<MenuItem, QueueModel>();
         var startQueueItems = new LinkedHashMap<MenuItem, QueueModel>();
         var stopQueueItems = new LinkedHashMap<MenuItem, QueueModel>();
-        QueuesRepo.getQueues().forEach(qm -> {
+        QueuesRepo.getQueues(false).forEach(qm -> {
             var defaultColor = ((Label) addToQueueMenu.getGraphic()).getTextFill();
             if (staticQueueNames.stream().noneMatch(s -> qm.getName().equals(s))) {
                 var addToQueueMenuItem = createMenuItem(qm, defaultColor);
@@ -188,6 +189,8 @@ public class MenuUtils {
                             return;
                         if (staticQueueNames.stream().noneMatch(s -> dm.getQueue().get(0).getName().equals(s)))
                             mainTableUtils.remove(dm);
+                        if (startedQueues.contains(qm))
+                            startedQueues.get(startedQueues.indexOf(qm)).getDownloads().add(dm);
                         DownloadsRepo.updateDownloadQueue(dm.getId(), qm.getId());
                     });
                 }));

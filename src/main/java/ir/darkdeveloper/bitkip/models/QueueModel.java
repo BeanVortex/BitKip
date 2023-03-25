@@ -2,6 +2,7 @@ package ir.darkdeveloper.bitkip.models;
 
 import lombok.*;
 
+import java.util.List;
 import java.util.Objects;
 
 
@@ -15,6 +16,7 @@ public class QueueModel {
     private boolean editable;
     private boolean canAddDownload;
 
+    private List<DownloadModel> downloads;
 
     public QueueModel(String name, boolean editable, boolean canAddDownload) {
         this.name = name;

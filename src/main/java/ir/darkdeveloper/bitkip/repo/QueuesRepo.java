@@ -1,5 +1,6 @@
 package ir.darkdeveloper.bitkip.repo;
 
+import ir.darkdeveloper.bitkip.models.DownloadModel;
 import ir.darkdeveloper.bitkip.models.QueueModel;
 import ir.darkdeveloper.bitkip.utils.FileExtensions;
 
@@ -31,13 +32,13 @@ public class QueuesRepo {
         dbHelper.insertQueue(sql, queue);
     }
 
-    public static QueueModel findByName(String name) {
+    public static QueueModel findByName(String name, boolean fetchDownloads) {
         var sql = "SELECT * FROM queues WHERE name=\"" + name + "\";";
         try (var con = dbHelper.openConnection();
              var stmt = con.createStatement();
              var rs = stmt.executeQuery(sql)) {
             if (rs.next())
-                return createQueueModel(rs);
+                return createQueueModel(rs, fetchDownloads);
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -45,21 +46,20 @@ public class QueuesRepo {
     }
 
 
-    public static List<QueueModel> getQueues() {
+    public static List<QueueModel> getQueues(boolean fetchDownloads) {
         var list = new ArrayList<QueueModel>();
         var sql = "SELECT * FROM " + QUEUES_TABLE_NAME + ";";
         try (var con = dbHelper.openConnection();
              var stmt = con.createStatement();
              var rs = stmt.executeQuery(sql)) {
             while (rs.next())
-                list.add(createQueueModel(rs));
+                list.add(createQueueModel(rs, fetchDownloads));
             return list;
         } catch (SQLException e) {
             e.printStackTrace();
         }
         return list;
     }
-
 
 
     public static void deleteQueue(String name) {
@@ -74,11 +74,14 @@ public class QueuesRepo {
         }
     }
 
-    private static QueueModel createQueueModel(ResultSet rs) throws SQLException {
+    private static QueueModel createQueueModel(ResultSet rs, boolean fetchDownloads) throws SQLException {
         var id = rs.getInt(COL_ID);
         var name = rs.getString(COL_NAME);
         var editable = rs.getBoolean(COL_EDITABLE);
         var canAddDownload = rs.getBoolean(COL_CAN_ADD_DOWN);
-        return new QueueModel(id, name, editable, canAddDownload);
+        List<DownloadModel> downloads = null;
+        if (fetchDownloads)
+            downloads = DownloadsRepo.getDownloadsByQueueName(name);
+        return new QueueModel(id, name, editable, canAddDownload, downloads);
     }
 }

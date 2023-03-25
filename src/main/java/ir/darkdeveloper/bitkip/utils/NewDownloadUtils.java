@@ -30,6 +30,7 @@ import java.util.concurrent.Executors;
 
 import static ir.darkdeveloper.bitkip.config.AppConfigs.currentDownloadings;
 import static ir.darkdeveloper.bitkip.config.AppConfigs.showCompleteDialog;
+import static ir.darkdeveloper.bitkip.utils.FileExtensions.*;
 
 public class NewDownloadUtils {
 
@@ -128,35 +129,35 @@ public class NewDownloadUtils {
             var compressedMatch = FileExtensions.compressedEx.stream().anyMatch(fileName::endsWith);
             if (compressedMatch) {
                 locationField.setText(AppConfigs.compressedPath);
-                dm.setQueue(new ArrayList<>(List.of(QueuesRepo.findByName("Compressed"))));
+                dm.setQueue(new ArrayList<>(List.of(QueuesRepo.findByName(COMPRESSED_QUEUE, false))));
                 return;
             }
             var videoMatch = FileExtensions.videoEx.stream().anyMatch(fileName::endsWith);
             if (videoMatch) {
                 locationField.setText(AppConfigs.videosPath);
-                dm.setQueue(new ArrayList<>(List.of(QueuesRepo.findByName("Videos"))));
+                dm.setQueue(new ArrayList<>(List.of(QueuesRepo.findByName(VIDEOS_QUEUE, false))));
                 return;
             }
             var programMatch = FileExtensions.programEx.stream().anyMatch(fileName::endsWith);
             if (programMatch) {
                 locationField.setText(AppConfigs.programsPath);
-                dm.setQueue(new ArrayList<>(List.of(QueuesRepo.findByName("Programs"))));
+                dm.setQueue(new ArrayList<>(List.of(QueuesRepo.findByName(PROGRAMS_QUEUE, false))));
                 return;
             }
             var musicMatch = FileExtensions.musicEx.stream().anyMatch(fileName::endsWith);
             if (musicMatch) {
                 locationField.setText(AppConfigs.musicPath);
-                dm.setQueue(new ArrayList<>(List.of(QueuesRepo.findByName("Music"))));
+                dm.setQueue(new ArrayList<>(List.of(QueuesRepo.findByName(MUSIC_QUEUE, false))));
                 return;
             }
             var documentMatch = FileExtensions.documentEx.stream().anyMatch(fileName::endsWith);
             if (documentMatch) {
                 locationField.setText(AppConfigs.documentPath);
-                dm.setQueue(new ArrayList<>(List.of(QueuesRepo.findByName("Docs"))));
+                dm.setQueue(new ArrayList<>(List.of(QueuesRepo.findByName(DOCS_QUEUE, false))));
                 return;
             }
             locationField.setText(AppConfigs.othersPath);
-            dm.setQueue(new ArrayList<>(List.of(QueuesRepo.findByName("Others"))));
+            dm.setQueue(new ArrayList<>(List.of(QueuesRepo.findByName(OTHERS_QUEUE, false))));
         });
     }
 

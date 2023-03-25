@@ -23,6 +23,8 @@ import java.time.LocalDateTime;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executors;
 
+import static ir.darkdeveloper.bitkip.utils.FileExtensions.ALL_DOWNLOADS_QUEUE;
+
 public class SingleDownload implements NewDownloadFxmlController {
 
     @FXML
@@ -86,7 +88,7 @@ public class SingleDownload implements NewDownloadFxmlController {
 
     @Override
     public void initialize() {
-        var queues = QueuesRepo.getQueues().stream().filter(QueueModel::isCanAddDownload).toList();
+        var queues = QueuesRepo.getQueues(false).stream().filter(QueueModel::isCanAddDownload).toList();
         queueCombo.getItems().addAll(queues);
         queueCombo.setValue(queues.get(0));
         openLocation.setGraphic(new FontIcon());
@@ -214,7 +216,7 @@ public class SingleDownload implements NewDownloadFxmlController {
         dm.setAddDate(LocalDateTime.now());
         dm.setAddToQueueDate(LocalDateTime.now());
         var selectedQueue = queueCombo.getSelectionModel().getSelectedItem();
-        var allDownloadsQueue = QueuesRepo.findByName("All Downloads");
+        var allDownloadsQueue = QueuesRepo.findByName(ALL_DOWNLOADS_QUEUE, false);
         dm.getQueue().add(allDownloadsQueue);
         if (selectedQueue.getId() != allDownloadsQueue.getId())
             dm.getQueue().add(selectedQueue);
@@ -227,7 +229,7 @@ public class SingleDownload implements NewDownloadFxmlController {
     public void updateQueue() {
         var queues = AppConfigs.getQueues();
         if (queues.isEmpty())
-            queues = QueuesRepo.getQueues();
+            queues = QueuesRepo.getQueues(false);
         queues = queues.stream().filter(QueueModel::isCanAddDownload).toList();
         queueCombo.getItems().clear();
         queueCombo.getItems().addAll(queues);

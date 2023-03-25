@@ -7,10 +7,7 @@ import ir.darkdeveloper.bitkip.models.DownloadModel;
 import ir.darkdeveloper.bitkip.models.LinkModel;
 import ir.darkdeveloper.bitkip.models.QueueModel;
 import ir.darkdeveloper.bitkip.repo.QueuesRepo;
-import ir.darkdeveloper.bitkip.utils.FxUtils;
-import ir.darkdeveloper.bitkip.utils.InputValidations;
-import ir.darkdeveloper.bitkip.utils.MainTableUtils;
-import ir.darkdeveloper.bitkip.utils.NewDownloadUtils;
+import ir.darkdeveloper.bitkip.utils.*;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -25,6 +22,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executors;
+
+import static ir.darkdeveloper.bitkip.utils.FileExtensions.ALL_DOWNLOADS_QUEUE;
 
 public class BatchDownload implements NewDownloadFxmlController, QueueObserver {
     @FXML
@@ -77,7 +76,7 @@ public class BatchDownload implements NewDownloadFxmlController, QueueObserver {
         openLocation.setGraphic(new FontIcon());
         questionBtnUrl.setGraphic(new FontIcon());
         newQueue.setGraphic(new FontIcon());
-        var queues = QueuesRepo.getQueues().stream().filter(QueueModel::isCanAddDownload).toList();
+        var queues = QueuesRepo.getQueues(false).stream().filter(QueueModel::isCanAddDownload).toList();
         queueCombo.getItems().addAll(queues);
         queueCombo.setValue(queues.get(0));
         errorLabel.setVisible(false);
@@ -107,7 +106,7 @@ public class BatchDownload implements NewDownloadFxmlController, QueueObserver {
             var end = Integer.parseInt(endField.getText());
             var links = generateLinks(url, start, end, Integer.parseInt(chunksField.getText()), false);
             var selectedQueue = queueCombo.getSelectionModel().getSelectedItem();
-            var allDownloadsQueue = QueuesRepo.findByName("All Downloads");
+            var allDownloadsQueue = QueuesRepo.findByName(ALL_DOWNLOADS_QUEUE, false);
             links.forEach(lm -> {
                 lm.getQueues().add(allDownloadsQueue);
                 lm.getQueues().addAll(dm.getQueue());
@@ -164,6 +163,7 @@ public class BatchDownload implements NewDownloadFxmlController, QueueObserver {
                 errorMsg = "No links found";
             errorLabel.setText(errorMsg);
         }
+        executor.close();
     }
 
     public List<LinkModel> generateLinks(String url, int start, int end, int chunks, boolean oneLink) {
@@ -259,7 +259,7 @@ public class BatchDownload implements NewDownloadFxmlController, QueueObserver {
     public void updateQueue() {
         var queues = AppConfigs.getQueues();
         if (queues.isEmpty())
-            queues = QueuesRepo.getQueues();
+            queues = QueuesRepo.getQueues(false);
         queues = queues.stream().filter(QueueModel::isCanAddDownload).toList();
         queueCombo.getItems().clear();
         queueCombo.getItems().addAll(queues);
