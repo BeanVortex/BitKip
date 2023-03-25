@@ -90,6 +90,7 @@ public class MenuUtils {
             var selectedItems = mainTableUtils.getSelected();
             disableMenuItems(resumeLbl, pauseLbl, openLbl, deleteFromQueueLbl, restartLbl,
                     addToQueueLbl, deleteLbl, deleteWithFileLbl, menuItems, selectedItems);
+            disableEnableStartStopQueue(startQueueMenu, stopQueueMenu);
             deleteLbl.setText("Delete selected (" + selectedItems.size() + ")");
             c.show(operationMenu, Side.BOTTOM, 0, 0);
         });
@@ -102,6 +103,17 @@ public class MenuUtils {
         menuItems.get(deleteLbl).setOnAction(e -> DownloadOpUtils.deleteDownloads(mainTableUtils, false));
         menuItems.get(deleteWithFileLbl).setOnAction(e -> DownloadOpUtils.deleteDownloads(mainTableUtils, true));
         menuItems.get(newQueueLbl).setOnAction(e -> FxUtils.newQueueStage());
+    }
+
+    private static void disableEnableStartStopQueue(Menu startQueueMenu, Menu stopQueueMenu) {
+        var startedQueueNames = startedQueues.stream().map(QueueModel::getName)
+                .toList();
+        startQueueMenu.getItems().stream()
+                .filter(i -> startedQueueNames.contains(((Label) i.getGraphic()).getText()))
+                .forEach(item -> item.setDisable(true));
+        stopQueueMenu.getItems().stream()
+                .filter(i -> startedQueueNames.contains(((Label) i.getGraphic()).getText()))
+                .forEach(item -> item.setDisable(false));
     }
 
     public static void disableMenuItems(Label resumeLbl, Label pauseLbl, Label openLbl, Label deleteFromQueueLbl,

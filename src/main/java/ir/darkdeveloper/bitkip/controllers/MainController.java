@@ -183,25 +183,39 @@ public class MainController implements FXMLController, QueueObserver {
                     });
                 }
             } else if (event.getButton().equals(MouseButton.SECONDARY)) {
-                if (FileExtensions.staticQueueNames.stream().anyMatch(s -> btn.getText().equals(s)))
-                    return;
                 var cMenu = btn.getContextMenu();
                 if (cMenu == null)
                     cMenu = new ContextMenu();
                 cMenu.getItems().clear();
-                var scheduleLbl = new Label("Change Schedule");
+                var startQueueLbl = new Label("Start queue");
+                var stopQueueLbl = new Label("Stop queue");
+                var scheduleLbl = new Label("Change schedule");
                 var deleteLbl = new Label("Delete");
 
-                var lbls = List.of(scheduleLbl, deleteLbl);
+                List<Label> lbls;
+                if (FileExtensions.staticQueueNames.stream().anyMatch(s -> qm.getName().equals(s)))
+                    lbls = List.of(startQueueLbl, stopQueueLbl);
+                else
+                    lbls = List.of(startQueueLbl, stopQueueLbl, scheduleLbl, deleteLbl);
                 var menuItems = MenuUtils.createMapMenuItems(lbls, null);
                 cMenu.getItems().addAll(menuItems.values());
                 btn.setContextMenu(cMenu);
-                menuItems.get(scheduleLbl).setOnAction(e -> System.out.println("change schedule"));
-                menuItems.get(deleteLbl).setOnAction(e -> {
-                    QueuesRepo.deleteQueue(btn.getText());
-                    AppConfigs.deleteQueue(btn.getText());
-                    initialize();
-                });
+
+                menuItems.get(startQueueLbl).setDisable(startedQueues.contains(qm));
+                menuItems.get(stopQueueLbl).setDisable(!startedQueues.contains(qm));
+
+                menuItems.get(startQueueLbl).setOnAction(e ->
+                        QueueUtils.startQueue(qm, menuItems.get(startQueueLbl), menuItems.get(stopQueueLbl), mainTableUtils));
+                menuItems.get(stopQueueLbl).setOnAction(e ->
+                        QueueUtils.stopQueue(qm, menuItems.get(startQueueLbl), menuItems.get(stopQueueLbl), mainTableUtils));
+                if (menuItems.containsKey(scheduleLbl))
+                    menuItems.get(scheduleLbl).setOnAction(e -> System.out.println("change schedule"));
+                if (menuItems.containsKey(deleteLbl))
+                    menuItems.get(deleteLbl).setOnAction(e -> {
+                        QueuesRepo.deleteQueue(btn.getText());
+                        AppConfigs.deleteQueue(btn.getText());
+                        initialize();
+                    });
                 cMenu.show(btn, Side.BOTTOM, 0, 0);
             }
         };
