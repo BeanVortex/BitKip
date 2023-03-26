@@ -5,6 +5,7 @@ import ir.darkdeveloper.bitkip.repo.DownloadsRepo;
 import ir.darkdeveloper.bitkip.repo.QueuesRepo;
 import ir.darkdeveloper.bitkip.utils.FxUtils;
 import ir.darkdeveloper.bitkip.utils.IOUtils;
+import ir.darkdeveloper.bitkip.utils.MoreUtils;
 import ir.darkdeveloper.bitkip.utils.ResizeUtil;
 import javafx.application.Application;
 import javafx.stage.Stage;
@@ -28,6 +29,7 @@ public class BitKip extends Application {
         stage.initStyle(StageStyle.UNDECORATED);
         stage.setResizable(true);
         ResizeUtil.addResizeListener(stage);
+        MoreUtils.checkUpdates(false);
         stage.show();
     }
 

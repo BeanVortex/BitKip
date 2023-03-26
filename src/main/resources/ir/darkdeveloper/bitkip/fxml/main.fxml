@@ -18,7 +18,7 @@
             <ImageView fx:id="logoImg" fitWidth="30" fitHeight="30"/>
             <Button fx:id="menuFile" text="File" styleClass="toolbar_menu,bold"/>
             <Button fx:id="operationMenu" text="Operation" styleClass="toolbar_menu,bold"/>
-            <Button fx:id="aboutMenu" text="About" styleClass="toolbar_menu,bold"/>
+            <Button fx:id="moreBtn" text="More" styleClass="toolbar_menu,bold"/>
             <Region HBox.hgrow="ALWAYS"/>
             <Button fx:id="hideBtn" onAction="#hideWindowApp"/>
             <Button fx:id="fullWindowBtn" onAction="#toggleFullWindowApp"/>

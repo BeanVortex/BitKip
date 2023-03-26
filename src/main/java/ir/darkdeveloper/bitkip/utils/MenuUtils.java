@@ -135,7 +135,8 @@ public class MenuUtils {
                     menuItems.get(pauseLbl).setDisable(true);
                     menuItems.get(openLbl).setDisable(true);
                 });
-        selectedItems.stream().filter(dm -> dm.getDownloadStatus() == DownloadStatus.Downloading)
+        selectedItems.stream().filter(dm -> dm.getDownloadStatus() == DownloadStatus.Downloading
+                        || dm.getDownloadStatus() == DownloadStatus.Trying)
                 .findFirst().ifPresent(dm -> {
                     menuItems.get(resumeLbl).setDisable(true);
                     menuItems.get(pauseLbl).setDisable(false);
@@ -156,19 +157,22 @@ public class MenuUtils {
                         () -> menuItems.get(deleteFromQueueLbl).setDisable(selectedItems.isEmpty()));
     }
 
-    public static void initAboutMenu(Button aboutMenu, TableView<DownloadModel> table) {
+    public static void initMoreMenu(Button moreBtn, TableView<DownloadModel> table) {
         var c = new ContextMenu();
-        var checkForUpdates = new Label("Check updates");
-        var about = new Label("About");
+        var checkForUpdatesLbl = new Label("Check updates");
+        var aboutLbl = new Label("About");
 
-        var lbls = List.of(checkForUpdates, about);
+        var lbls = List.of(checkForUpdatesLbl, aboutLbl);
         var menuItems = createMapMenuItems(lbls, null);
         c.getItems().addAll(menuItems.values());
-        aboutMenu.setContextMenu(c);
-        aboutMenu.setOnAction(event -> {
+        moreBtn.setContextMenu(c);
+        moreBtn.setOnAction(event -> {
             table.getSelectionModel().clearSelection();
-            c.show(aboutMenu, Side.BOTTOM, 0, 0);
+            c.show(moreBtn, Side.BOTTOM, 0, 0);
         });
+
+        menuItems.get(checkForUpdatesLbl).setOnAction(e -> MoreUtils.checkUpdates(false));
+        menuItems.get(aboutLbl).setOnAction(e -> FxUtils.newAboutStage());
     }
 
     private static void initQueueMenuList(Menu addToQueueMenu, Menu startQueueMenu,

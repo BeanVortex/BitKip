@@ -16,6 +16,7 @@ import java.net.SocketTimeoutException;
 import java.net.URL;
 import java.net.UnknownHostException;
 import java.nio.channels.Channels;
+import java.nio.channels.ClosedChannelException;
 import java.nio.channels.FileChannel;
 import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
@@ -77,10 +78,6 @@ public class DownloadInChunksTask extends DownloadTask {
             futures.toArray(futureArr);
             CompletableFuture.allOf(futureArr).get();
         }
-//        if (blocking && paused) {
-//            succeeded();
-//            mainTableUtils.updateDownloadProgress(downloadModel.getProgress(), downloadModel);
-//        }
     }
 
     private List<CompletableFuture<Void>> prepareParts(URL url, long fileSize) throws IOException {
@@ -186,7 +183,7 @@ public class DownloadInChunksTask extends DownloadTask {
                     var currFileSize = getCurrentFileSize(partFile);
                     performDownload(url, fromContinue, fromContinue + currFileSize, to, partFile, currFileSize);
                 }
-            }
+            } catch (ClosedChannelException ignore) {}
             var currFileSize = getCurrentFileSize(partFile);
             if (!paused && currFileSize != (to - fromContinue + 1))
                 performDownload(url, fromContinue, fromContinue + currFileSize, to, partFile, currFileSize);
@@ -256,6 +253,7 @@ public class DownloadInChunksTask extends DownloadTask {
     public void pause() {
         paused = true;
         try {
+            //this will cause execution get out of transferFrom
             for (var channel : fileChannels)
                 channel.close();
         } catch (IOException e) {

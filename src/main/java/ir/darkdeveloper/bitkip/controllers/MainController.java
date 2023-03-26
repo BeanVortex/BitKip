@@ -49,7 +49,7 @@ public class MainController implements FXMLController, QueueObserver {
     @FXML
     private Button operationMenu;
     @FXML
-    private Button aboutMenu;
+    private Button moreBtn;
     @FXML
     private Button menuFile;
     @FXML
@@ -118,7 +118,7 @@ public class MainController implements FXMLController, QueueObserver {
         WindowUtils.onToolbarDoubleClicked(toolbar, stage, contentTable, bounds, newDownloadBtn, mainPrefWidth, mainPrefHeight);
         MenuUtils.initFileMenu(menuFile, mainTableUtils);
         MenuUtils.initOperationMenu(operationMenu, mainTableUtils);
-        MenuUtils.initAboutMenu(aboutMenu, contentTable);
+        MenuUtils.initMoreMenu(moreBtn, contentTable);
     }
 
 

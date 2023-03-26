@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.VBox?>
+<VBox prefHeight="350.0" prefWidth="450.0" spacing="20" stylesheets="@../css/about.css"
+      style="-fx-padding: 10"
+      fx:id="parent"
+      xmlns="http://javafx.com/javafx/16" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="ir.darkdeveloper.bitkip.controllers.AboutController"
+      alignment="TOP_CENTER">
+
+    <ImageView fitHeight="180" fitWidth="180" fx:id="logoImg"/>
+
+    <VBox alignment="CENTER" spacing="5">
+        <Label text="JBookFinder" style="-fx-font-size: 18"/>
+        <Label text="version" fx:id="versionLbl" styleClass="descText"/>
+        <Button text="check for updates" fx:id="updateBtn" onAction="#checkForUpdates"/>
+    </VBox>
+
+    <VBox alignment="CENTER">
+        <Label styleClass="settingDescription" text="Developed by DarkDeveloper 2023"/>
+        <Hyperlink text="https://github.com/DarkDeveloper-arch/BitKip" onAction="#openGithubPage"/>
+    </VBox>
+</VBox>

@@ -16,6 +16,7 @@ import java.net.SocketTimeoutException;
 import java.net.URL;
 import java.net.UnknownHostException;
 import java.nio.channels.Channels;
+import java.nio.channels.ClosedChannelException;
 import java.nio.channels.FileChannel;
 import java.time.LocalDateTime;
 import java.util.concurrent.ExecutorService;
@@ -88,6 +89,7 @@ public class DownloadLimitedTask extends DownloadTask {
                     Thread.sleep(2000);
                     performDownload();
                 }
+            } catch (ClosedChannelException ignore) {
             }
             var currFileSize = getCurrentFileSize(file);
             if (!paused && currFileSize != downloadModel.getSize())

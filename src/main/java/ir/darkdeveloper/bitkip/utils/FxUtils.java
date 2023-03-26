@@ -3,6 +3,7 @@ package ir.darkdeveloper.bitkip.utils;
 
 import ir.darkdeveloper.bitkip.config.AppConfigs;
 import ir.darkdeveloper.bitkip.controllers.*;
+import ir.darkdeveloper.bitkip.controllers.interfaces.FXMLController;
 import ir.darkdeveloper.bitkip.models.DownloadModel;
 import ir.darkdeveloper.bitkip.models.LinkModel;
 import javafx.event.ActionEvent;
@@ -10,6 +11,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.image.Image;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
@@ -97,6 +99,31 @@ public class FxUtils {
         controller.setStage(stage);
         AppConfigs.getQueueSubject().addObserver(controller);
         stage.showAndWait();
+    }
+
+    public static void newAboutStage() {
+        FXMLLoader loader;
+        Stage stage = new Stage();
+        VBox root;
+        try {
+            loader = new FXMLLoader(getResource("fxml/about.fxml"));
+            root = loader.load();
+        } catch (IOException e) {
+            e.printStackTrace();
+            throw new RuntimeException(e);
+        }
+        var scene = new Scene(root);
+        stage.setScene(scene);
+        stage.setMinWidth(root.getPrefWidth());
+        stage.setMinHeight(root.getPrefHeight());
+//        stage.initStyle(StageStyle.TRANSPARENT);
+        stage.setTitle("About");
+        var logoPath = getResource("images/logo.png");
+        if (logoPath != null)
+            stage.getIcons().add(new Image(logoPath.toExternalForm()));
+        FXMLController controller = loader.getController();
+        controller.setStage(stage);
+        stage.show();
     }
 
     public static void newDownloadingStage(DownloadModel dm, MainTableUtils mainTableUtils) {
