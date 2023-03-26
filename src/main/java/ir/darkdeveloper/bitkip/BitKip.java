@@ -15,6 +15,7 @@ import java.net.URL;
 import java.util.ArrayList;
 
 import static ir.darkdeveloper.bitkip.config.AppConfigs.currentDownloadings;
+import static ir.darkdeveloper.bitkip.config.AppConfigs.startedQueues;
 
 public class BitKip extends Application {
 
@@ -38,6 +39,7 @@ public class BitKip extends Application {
     public void stop() {
         var notObservedDms = new ArrayList<>(currentDownloadings);
         notObservedDms.forEach(dm -> dm.getDownloadTask().pause());
+        startedQueues.clear();
     }
 
 
