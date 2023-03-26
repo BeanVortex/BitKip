@@ -171,7 +171,7 @@ public class MenuUtils {
             c.show(moreBtn, Side.BOTTOM, 0, 0);
         });
 
-        menuItems.get(checkForUpdatesLbl).setOnAction(e -> MoreUtils.checkUpdates(false));
+        menuItems.get(checkForUpdatesLbl).setOnAction(e -> MoreUtils.checkUpdates(true));
         menuItems.get(aboutLbl).setOnAction(e -> FxUtils.newAboutStage());
     }
 

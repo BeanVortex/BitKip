@@ -2,7 +2,8 @@ module ir.darkdeveloper.bitkip {
 
     requires javafx.controls;
     requires javafx.fxml;
-
+    requires java.base;
+    requires jdk.crypto.cryptoki;
     requires org.controlsfx.controls;
     requires org.kordamp.ikonli.javafx;
     //dynamic load in jlink image

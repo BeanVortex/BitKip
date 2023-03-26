@@ -13,7 +13,7 @@ import java.util.concurrent.Executors;
 
 public class MoreUtils {
 
-    public static void checkUpdates(boolean fromAbout) {
+    public static void checkUpdates(boolean showNoUpdatesNotification) {
         var updateChecker = new UpdateCheckTask();
         var executor = Executors.newCachedThreadPool();
         updateChecker.setExecutor(executor);
@@ -41,7 +41,7 @@ public class MoreUtils {
                         alert.close();
                 });
             } else {
-                if (fromAbout)
+                if (showNoUpdatesNotification)
                     Notifications.create()
                             .title("Checked for updates")
                             .text("No updates available")
