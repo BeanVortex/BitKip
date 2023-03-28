@@ -13,7 +13,7 @@
     <ImageView fitHeight="180" fitWidth="180" fx:id="logoImg"/>
 
     <VBox alignment="CENTER" spacing="5">
-        <Label text="JBookFinder" style="-fx-font-size: 18"/>
+        <Label text="BitKip" style="-fx-font-size: 18"/>
         <Label text="version" fx:id="versionLbl" styleClass="descText"/>
         <Button text="check for updates" fx:id="updateBtn" onAction="#checkForUpdates"/>
     </VBox>
