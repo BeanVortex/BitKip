@@ -98,9 +98,6 @@ public class SchedulerController implements FXMLController, QueueObserver {
         queueList.setOnMouseClicked(e -> {
             if (e.getButton() == MouseButton.PRIMARY)
                 selectedQueue.set(queueList.getSelectionModel().getSelectedItem());
-            else if (e.getButton() == MouseButton.SECONDARY) {
-                // todo show menu of clearing schedule
-            }
         });
     }
 
