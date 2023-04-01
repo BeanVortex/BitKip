@@ -54,7 +54,8 @@ public class AppConfigs {
 
     private static final QueueSubject queueSubject = new QueueSubject();
     private static List<QueueModel> queues = new ArrayList<>();
-    public static void addQueue(QueueModel queue){
+
+    public static void addQueue(QueueModel queue) {
         queues.add(queue);
         queueSubject.notifyAllObservers();
     }

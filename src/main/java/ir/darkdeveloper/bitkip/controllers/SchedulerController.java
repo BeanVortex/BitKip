@@ -43,6 +43,7 @@ public class SchedulerController implements FXMLController, QueueObserver {
     private Rectangle2D bounds;
 
 
+
     @Override
     public void initialize() {
         closeBtn.setGraphic(new FontIcon());

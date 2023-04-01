@@ -17,12 +17,19 @@ import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 
 import java.io.IOException;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 import static ir.darkdeveloper.bitkip.BitKip.getResource;
 import static ir.darkdeveloper.bitkip.config.AppConfigs.*;
 
 public class FxUtils {
+
+    // these constants are used to prevent these stages to show more than 1
+    private static final String SCHEDULER_STAGE = "Scheduler";
+    private static final String ABOUT_STAGE = "About";
+    public static final Map<String, Stage> openStages = new LinkedHashMap<>();
 
 
     public static void switchSceneToMain(Stage stage) {
@@ -102,6 +109,10 @@ public class FxUtils {
     }
 
     public static void newAboutStage() {
+        if (openStages.containsKey(ABOUT_STAGE)){
+            openStages.get(ABOUT_STAGE).toFront();
+            return;
+        }
         FXMLLoader loader;
         Stage stage = new Stage();
         VBox root;
@@ -123,7 +134,9 @@ public class FxUtils {
             stage.getIcons().add(new Image(logoPath.toExternalForm()));
         FXMLController controller = loader.getController();
         controller.setStage(stage);
+        stage.setOnCloseRequest(e-> openStages.remove(ABOUT_STAGE));
         stage.show();
+        openStages.put(ABOUT_STAGE, stage);
     }
 
     public static void newDownloadingStage(DownloadModel dm, MainTableUtils mainTableUtils) {
@@ -179,6 +192,10 @@ public class FxUtils {
     }
 
     public static void newSchedulerStage(QueueModel selectedQueue) {
+        if (openStages.containsKey(SCHEDULER_STAGE)){
+            openStages.get(SCHEDULER_STAGE).toFront();
+            return;
+        }
         FXMLLoader loader;
         Stage stage = new Stage();
         VBox root;
@@ -191,6 +208,7 @@ public class FxUtils {
         }
         var scene = new Scene(root);
         stage.setScene(scene);
+
         stage.setMinWidth(root.getPrefWidth());
         stage.setMinHeight(root.getPrefHeight());
         stage.initStyle(StageStyle.TRANSPARENT);
@@ -200,6 +218,8 @@ public class FxUtils {
         controller.setSelectedQueue(selectedQueue);
         getQueueSubject().addObserver(controller);
         stage.show();
+        stage.setOnCloseRequest(e -> openStages.remove(SCHEDULER_STAGE));
+        openStages.put(SCHEDULER_STAGE, stage);
     }
 
 }

@@ -279,6 +279,7 @@ public class DownloadingController implements FXMLController {
     public void onComplete(DownloadModel download) {
         if (download.getDownloadStatus() == DownloadStatus.Completed) {
             stage.requestFocus();
+            stage.toFront();
             isComplete = true;
             remainingLbl.setText("Remaining: Done");
             controlBtn.setText("Open");
