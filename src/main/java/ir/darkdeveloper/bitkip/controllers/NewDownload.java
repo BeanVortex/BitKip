@@ -112,17 +112,17 @@ public class NewDownload implements NewDownloadFxmlController {
     }
 
     @FXML
-    private void hideWindowApp() {
+    private void hideStage() {
         stage.setIconified(true);
     }
 
     @FXML
-    private void toggleFullWindowApp() {
+    private void toggleStageSize() {
         bounds = WindowUtils.toggleWindowSize(stage, bounds, newDownloadMinWidth, newDownloadMinHeight);
     }
 
     @FXML
-    private void closeApp() {
+    private void closeStage() {
         stage.close();
     }
 

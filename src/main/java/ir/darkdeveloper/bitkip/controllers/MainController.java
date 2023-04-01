@@ -194,7 +194,7 @@ public class MainController implements FXMLController, QueueObserver {
 
                 List<Label> lbls;
                 if (FileExtensions.staticQueueNames.stream().anyMatch(s -> qm.getName().equals(s)))
-                    lbls = List.of(startQueueLbl, stopQueueLbl);
+                    lbls = List.of(startQueueLbl, stopQueueLbl, scheduleLbl);
                 else
                     lbls = List.of(startQueueLbl, stopQueueLbl, scheduleLbl, deleteLbl);
                 var menuItems = MenuUtils.createMapMenuItems(lbls, null);
@@ -208,8 +208,7 @@ public class MainController implements FXMLController, QueueObserver {
                         QueueUtils.startQueue(qm, menuItems.get(startQueueLbl), menuItems.get(stopQueueLbl), mainTableUtils));
                 menuItems.get(stopQueueLbl).setOnAction(e ->
                         QueueUtils.stopQueue(qm, menuItems.get(startQueueLbl), menuItems.get(stopQueueLbl), mainTableUtils));
-                if (menuItems.containsKey(scheduleLbl))
-                    menuItems.get(scheduleLbl).setOnAction(e -> System.out.println("change schedule"));
+                menuItems.get(scheduleLbl).setOnAction(e -> FxUtils.newSchedulerStage(qm));
                 if (menuItems.containsKey(deleteLbl))
                     menuItems.get(deleteLbl).setOnAction(e -> {
                         QueuesRepo.deleteQueue(btn.getText());

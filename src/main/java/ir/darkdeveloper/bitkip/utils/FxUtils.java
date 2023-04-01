@@ -1,11 +1,11 @@
 package ir.darkdeveloper.bitkip.utils;
 
 
-import ir.darkdeveloper.bitkip.config.AppConfigs;
 import ir.darkdeveloper.bitkip.controllers.*;
 import ir.darkdeveloper.bitkip.controllers.interfaces.FXMLController;
 import ir.darkdeveloper.bitkip.models.DownloadModel;
 import ir.darkdeveloper.bitkip.models.LinkModel;
+import ir.darkdeveloper.bitkip.models.QueueModel;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
@@ -20,7 +20,7 @@ import java.io.IOException;
 import java.util.List;
 
 import static ir.darkdeveloper.bitkip.BitKip.getResource;
-import static ir.darkdeveloper.bitkip.config.AppConfigs.openDownloadings;
+import static ir.darkdeveloper.bitkip.config.AppConfigs.*;
 
 public class FxUtils {
 
@@ -31,10 +31,10 @@ public class FxUtils {
             Parent root = loader.load();
             var scene = new Scene(root, stage.getWidth(), stage.getHeight());
             MainController controller = loader.getController();
-            AppConfigs.getQueueSubject().addObserver(controller);
+            getQueueSubject().addObserver(controller);
             stage.setScene(scene);
-            stage.setMinWidth(AppConfigs.mainMinWidth);
-            stage.setMinHeight(AppConfigs.mainMinHeight);
+            stage.setMinWidth(mainMinWidth);
+            stage.setMinHeight(mainMinHeight);
             controller.setStage(stage);
             stage.setTitle("BitKip");
         } catch (IOException ex) {
@@ -64,8 +64,8 @@ public class FxUtils {
         }
         var scene = new Scene(root);
         stage.setScene(scene);
-        stage.setMinWidth(AppConfigs.newDownloadMinWidth);
-        stage.setMinHeight(AppConfigs.newDownloadMinHeight);
+        stage.setMinWidth(newDownloadMinWidth);
+        stage.setMinHeight(newDownloadMinHeight);
         stage.setWidth(root.getPrefWidth());
         stage.setHeight(root.getPrefHeight());
         stage.initStyle(StageStyle.TRANSPARENT);
@@ -74,7 +74,7 @@ public class FxUtils {
         controller.setStage(stage);
         controller.setMainTableUtils(mainTableUtils);
         controller.setIsSingle(isSingle);
-        AppConfigs.getQueueSubject().addObserver(controller);
+        getQueueSubject().addObserver(controller);
         stage.show();
     }
 
@@ -97,7 +97,7 @@ public class FxUtils {
         stage.setTitle("New Queue");
         NewQueueController controller = loader.getController();
         controller.setStage(stage);
-        AppConfigs.getQueueSubject().addObserver(controller);
+        getQueueSubject().addObserver(controller);
         stage.showAndWait();
     }
 
@@ -175,6 +175,30 @@ public class FxUtils {
         controller.setStage(stage);
         controller.setData(links);
         controller.setMainTableUtils(mainTableUtils);
+        stage.show();
+    }
+
+    public static void newSchedulerStage(QueueModel selectedQueue) {
+        FXMLLoader loader;
+        Stage stage = new Stage();
+        VBox root;
+        try {
+            loader = new FXMLLoader(getResource("fxml/scheduler.fxml"));
+            root = loader.load();
+        } catch (IOException e) {
+            e.printStackTrace();
+            throw new RuntimeException(e);
+        }
+        var scene = new Scene(root);
+        stage.setScene(scene);
+        stage.setMinWidth(root.getPrefWidth());
+        stage.setMinHeight(root.getPrefHeight());
+        stage.initStyle(StageStyle.TRANSPARENT);
+        stage.setTitle("Scheduler: %s".formatted(selectedQueue.getName()));
+        SchedulerController controller = loader.getController();
+        controller.setStage(stage);
+        controller.setSelectedQueue(selectedQueue);
+        getQueueSubject().addObserver(controller);
         stage.show();
     }
 
