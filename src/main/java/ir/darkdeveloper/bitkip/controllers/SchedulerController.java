@@ -3,17 +3,20 @@ package ir.darkdeveloper.bitkip.controllers;
 import ir.darkdeveloper.bitkip.config.QueueObserver;
 import ir.darkdeveloper.bitkip.controllers.interfaces.FXMLController;
 import ir.darkdeveloper.bitkip.models.QueueModel;
+import ir.darkdeveloper.bitkip.models.TurnOffModel;
 import ir.darkdeveloper.bitkip.utils.InputValidations;
 import ir.darkdeveloper.bitkip.utils.ResizeUtil;
 import ir.darkdeveloper.bitkip.utils.WindowUtils;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseButton;
+import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Screen;
@@ -28,15 +31,53 @@ import static ir.darkdeveloper.bitkip.utils.FxUtils.openStages;
 public class SchedulerController implements FXMLController, QueueObserver {
 
     @FXML
+    private ComboBox<TurnOffModel> powerCombo;
+    @FXML
+    private CheckBox whenDoneCheck;
+    @FXML
+    private Spinner<Integer> stopHourSpinner;
+    @FXML
+    private Spinner<Integer> stopMinuteSpinner;
+    @FXML
+    private Spinner<Integer> stopSecondSpinner;
+    @FXML
+    private HBox stopContainer;
+    @FXML
+    private CheckBox stopAtCheck;
+    @FXML
+    private CheckBox saturdayCheck;
+    @FXML
+    private CheckBox sundayCheck;
+    @FXML
+    private CheckBox mondayCheck;
+    @FXML
+    private CheckBox tuesdayCheck;
+    @FXML
+    private CheckBox wednesdayCheck;
+    @FXML
+    private CheckBox thursdayCheck;
+    @FXML
+    private CheckBox fridayCheck;
+    @FXML
+    private RadioButton onceRadio;
+    @FXML
+    private RadioButton dailyRadio;
+    @FXML
+    private GridPane weeksContainer;
+    @FXML
+    private DatePicker datePicker;
+    @FXML
     private HBox horLine1;
+    @FXML
+    private HBox horLine2;
     @FXML
     private CheckBox enableToggle;
     @FXML
-    private Spinner<Integer> hourSpinner;
+    private Spinner<Integer> startHourSpinner;
     @FXML
-    private Spinner<Integer> minuteSpinner;
+    private Spinner<Integer> startMinuteSpinner;
     @FXML
-    private Spinner<Integer> secondSpinner;
+    private Spinner<Integer> startSecondSpinner;
     @FXML
     private VBox mainBox;
     @FXML
@@ -67,48 +108,53 @@ public class SchedulerController implements FXMLController, QueueObserver {
         initQueuesList();
         selectedQueue.addListener((ob, old, newVal) -> initSelectedQueueData());
         initSpinners();
+        initRadios();
+        initPowerCombo();
+    }
+
+    private void initPowerCombo() {
+        var items = FXCollections.observableArrayList(TurnOffModel.TURN_OFF, TurnOffModel.SLEEP, TurnOffModel.HIBERNATE);
+        powerCombo.setItems(items);
+        powerCombo.getSelectionModel().select(0);
+        powerCombo.setDisable(true);
+    }
+
+    private void initRadios() {
+        var tg = new ToggleGroup();
+        onceRadio.setToggleGroup(tg);
+        dailyRadio.setToggleGroup(tg);
+        dailyRadio.selectedProperty().addListener(o -> {
+            datePicker.setDisable(true);
+            weeksContainer.setDisable(false);
+        });
+        onceRadio.selectedProperty().addListener(o -> {
+            datePicker.setDisable(false);
+            weeksContainer.setDisable(true);
+        });
+        dailyRadio.setSelected(true);
     }
 
     private void initSpinners() {
         var hourFactory = new SpinnerValueFactory.IntegerSpinnerValueFactory(0, 23, 15);
         var minuteFactory = new SpinnerValueFactory.IntegerSpinnerValueFactory(0, 59, 30);
         var secondFactory = new SpinnerValueFactory.IntegerSpinnerValueFactory(0, 59, 0);
-        hourSpinner.setValueFactory(hourFactory);
-        minuteSpinner.setValueFactory(minuteFactory);
-        secondSpinner.setValueFactory(secondFactory);
+        startHourSpinner.setValueFactory(hourFactory);
+        startMinuteSpinner.setValueFactory(minuteFactory);
+        startSecondSpinner.setValueFactory(secondFactory);
+        stopHourSpinner.setValueFactory(hourFactory);
+        stopMinuteSpinner.setValueFactory(minuteFactory);
+        stopSecondSpinner.setValueFactory(secondFactory);
 
-        hourSpinner.setEditable(true);
-        minuteSpinner.setEditable(true);
-        secondSpinner.setEditable(true);
+        startHourSpinner.setEditable(true);
+        startMinuteSpinner.setEditable(true);
+        startSecondSpinner.setEditable(true);
+        stopHourSpinner.setEditable(true);
+        stopMinuteSpinner.setEditable(true);
+        stopSecondSpinner.setEditable(true);
 
-        InputValidations.validIntInputCheck(hourSpinner.getEditor(), 15);
-        InputValidations.validIntInputCheck(minuteSpinner.getEditor(), 30);
-        InputValidations.validIntInputCheck(secondSpinner.getEditor(), 0);
+        InputValidations.validTimePickerInputs(startHourSpinner, startMinuteSpinner, startSecondSpinner);
+        InputValidations.validTimePickerInputs(stopHourSpinner, stopMinuteSpinner, stopSecondSpinner);
 
-        hourSpinner.getEditor().textProperty().addListener((o, o2, n) -> {
-            if (n == null)
-                return;
-            if (n.isBlank())
-                hourSpinner.getEditor().setText("0");
-            if (!n.isBlank() && Integer.parseInt(n) > 23)
-                hourSpinner.getEditor().setText("23");
-        });
-        minuteSpinner.getEditor().textProperty().addListener((o, o2, n) -> {
-            if (n == null)
-                return;
-            if (n.isBlank())
-                minuteSpinner.getEditor().setText("0");
-            if (!n.isBlank() && Integer.parseInt(n) > 59)
-                minuteSpinner.getEditor().setText("59");
-        });
-        secondSpinner.getEditor().textProperty().addListener((o, o2, n) -> {
-            if (n == null)
-                return;
-            if (n.isBlank())
-                secondSpinner.getEditor().setText("0");
-            if (!n.isBlank() && Integer.parseInt(n) > 59)
-                secondSpinner.getEditor().setText("59");
-        });
     }
 
     @Override
@@ -118,6 +164,7 @@ public class SchedulerController implements FXMLController, QueueObserver {
             var width = n.longValue();
             toolbar.setPrefWidth(width);
             horLine1.setPrefWidth(width);
+            horLine2.setPrefWidth(width);
         });
 
         stage.xProperty().addListener((observable, oldValue, newValue) -> {
@@ -148,6 +195,7 @@ public class SchedulerController implements FXMLController, QueueObserver {
 //        enableToggle.setSelected(selectedQueue.get().getIsScheduled());
         mainBox.setDisable(true);
         enableToggle.setSelected(false);
+        stopContainer.setDisable(true);
     }
 
 
@@ -207,4 +255,30 @@ public class SchedulerController implements FXMLController, QueueObserver {
         mainBox.setDisable(!mainBox.isDisabled());
     }
 
+    @FXML
+    private void onStopAtChecked() {
+        stopContainer.setDisable(!stopContainer.isDisabled());
+    }
+
+    @FXML
+    private void onWhenDoneChecked() {
+        powerCombo.setDisable(!powerCombo.isDisabled());
+    }
+
+    @FXML
+    private void onPowerCombo() {
+
+    }
+
+    @FXML
+    private void onReset() {
+    }
+
+    @FXML
+    private void onCancel() {
+    }
+
+    @FXML
+    private void onSave() {
+    }
 }

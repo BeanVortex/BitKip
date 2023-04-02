@@ -1,6 +1,7 @@
 package ir.darkdeveloper.bitkip.utils;
 
 import ir.darkdeveloper.bitkip.models.DownloadModel;
+import javafx.scene.control.Spinner;
 import javafx.scene.control.TextField;
 import javafx.scene.input.Clipboard;
 
@@ -94,5 +95,38 @@ public class InputValidations {
             return;
         if (clipContent.startsWith("http") || clipContent.startsWith("https"))
             urlField.setText(clipContent);
+    }
+
+    public static void validTimePickerInputs(Spinner<Integer> hourSpinner,
+                                             Spinner<Integer> minuteSpinner,
+                                             Spinner<Integer> secondSpinner) {
+        validIntInputCheck(hourSpinner.getEditor(), 15);
+        validIntInputCheck(minuteSpinner.getEditor(), 30);
+        validIntInputCheck(secondSpinner.getEditor(), 0);
+
+        hourSpinner.getEditor().textProperty().addListener((o, o2, n) -> {
+            if (n == null)
+                return;
+            if (n.isBlank())
+                hourSpinner.getEditor().setText("0");
+            if (!n.isBlank() && Integer.parseInt(n) > 23)
+                hourSpinner.getEditor().setText("23");
+        });
+        minuteSpinner.getEditor().textProperty().addListener((o, o2, n) -> {
+            if (n == null)
+                return;
+            if (n.isBlank())
+                minuteSpinner.getEditor().setText("0");
+            if (!n.isBlank() && Integer.parseInt(n) > 59)
+                minuteSpinner.getEditor().setText("59");
+        });
+        secondSpinner.getEditor().textProperty().addListener((o, o2, n) -> {
+            if (n == null)
+                return;
+            if (n.isBlank())
+                secondSpinner.getEditor().setText("0");
+            if (!n.isBlank() && Integer.parseInt(n) > 59)
+                secondSpinner.getEditor().setText("59");
+        });
     }
 }

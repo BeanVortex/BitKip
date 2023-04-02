@@ -39,21 +39,92 @@
                 <CheckBox fx:id="enableToggle" onAction="#onEnableToggle" text="Enable Scheduling" styleClass="bold"/>
             </HBox>
 
-            <HBox fx:id="horLine1" minHeight="1" styleClass="line"/>
+            <VBox styleClass="padding_10">
+                <HBox fx:id="horLine1" minHeight="1" styleClass="line"/>
+            </VBox>
 
             <VBox spacing="5" fx:id="mainBox" styleClass="padding_10">
+
                 <HBox alignment="CENTER_LEFT" spacing="10">
                     <Label text="Start download at: " styleClass="bold"/>
                     <HBox spacing="5" alignment="CENTER">
-                        <Spinner fx:id="hourSpinner" styleClass="bold" minWidth="70" prefWidth="70" prefHeight="20"/>
+                        <Spinner fx:id="startHourSpinner" styleClass="bold" minWidth="70" prefWidth="70"
+                                 prefHeight="20"/>
                         <Label text=":" styleClass="bold, title_size"/>
-                        <Spinner fx:id="minuteSpinner" styleClass="bold" minWidth="70" prefWidth="70" prefHeight="20"/>
+                        <Spinner fx:id="startMinuteSpinner" styleClass="bold" minWidth="70" prefWidth="70"
+                                 prefHeight="20"/>
                         <Label text=":" styleClass="bold, title_size"/>
-                        <Spinner fx:id="secondSpinner" styleClass="bold" minWidth="70" prefWidth="70" prefHeight="20"/>
+                        <Spinner fx:id="startSecondSpinner" styleClass="bold" minWidth="70" prefWidth="70"
+                                 prefHeight="20"/>
                     </HBox>
                 </HBox>
-            </VBox>
 
+                <HBox spacing="10" alignment="CENTER_LEFT" styleClass="padding_10">
+                    <RadioButton text="Once at: " fx:id="onceRadio"/>
+                    <DatePicker fx:id="datePicker"/>
+                </HBox>
+
+                <VBox spacing="5" alignment="CENTER_LEFT" styleClass="padding_10">
+                    <RadioButton text="Daily: " fx:id="dailyRadio"/>
+                    <GridPane fx:id="weeksContainer">
+                        <columnConstraints>
+                            <ColumnConstraints hgrow="ALWAYS"/>
+                            <ColumnConstraints hgrow="ALWAYS"/>
+                        </columnConstraints>
+                        <rowConstraints>
+                            <RowConstraints vgrow="ALWAYS"/>
+                            <RowConstraints vgrow="ALWAYS"/>
+                            <RowConstraints vgrow="ALWAYS"/>
+                        </rowConstraints>
+                        <CheckBox selected="true" fx:id="saturdayCheck" text="Saturday" GridPane.columnIndex="0"
+                                  GridPane.rowIndex="0"/>
+                        <CheckBox selected="true" fx:id="sundayCheck" text="Sunday" GridPane.columnIndex="0"
+                                  GridPane.rowIndex="1"/>
+                        <CheckBox selected="true" fx:id="mondayCheck" text="Monday" GridPane.columnIndex="0"
+                                  GridPane.rowIndex="2"/>
+                        <CheckBox selected="true" fx:id="tuesdayCheck" text="Tuesday" GridPane.columnIndex="1"
+                                  GridPane.rowIndex="0"/>
+                        <CheckBox selected="true" fx:id="wednesdayCheck" text="Wednesday" GridPane.columnIndex="1"
+                                  GridPane.rowIndex="1"/>
+                        <CheckBox selected="true" fx:id="thursdayCheck" text="Thursday" GridPane.columnIndex="1"
+                                  GridPane.rowIndex="2"/>
+                        <CheckBox selected="true" fx:id="fridayCheck" text="Friday" GridPane.columnIndex="2"
+                                  GridPane.rowIndex="0"/>
+                    </GridPane>
+                </VBox>
+
+                <HBox fx:id="horLine2" minHeight="1" styleClass="line"/>
+
+
+                <HBox alignment="CENTER_LEFT" spacing="10" styleClass="padding_10">
+                    <CheckBox text="Stop download at: " fx:id="stopAtCheck" styleClass="bold"
+                              onAction="#onStopAtChecked"/>
+                    <HBox spacing="5" alignment="CENTER" fx:id="stopContainer">
+                        <Spinner fx:id="stopHourSpinner" styleClass="bold" minWidth="70" prefWidth="70"
+                                 prefHeight="20"/>
+                        <Label text=":" styleClass="bold, title_size"/>
+                        <Spinner fx:id="stopMinuteSpinner" styleClass="bold" minWidth="70" prefWidth="70"
+                                 prefHeight="20"/>
+                        <Label text=":" styleClass="bold, title_size"/>
+                        <Spinner fx:id="stopSecondSpinner" styleClass="bold" minWidth="70" prefWidth="70"
+                                 prefHeight="20"/>
+                    </HBox>
+                </HBox>
+
+                <HBox spacing="10" alignment="CENTER_LEFT" styleClass="padding_10">
+                    <CheckBox text="When done: " fx:id="whenDoneCheck" styleClass="bold" onAction="#onWhenDoneChecked"/>
+                    <ComboBox fx:id="powerCombo" onAction="#onPowerCombo"/>
+                </HBox>
+
+
+            </VBox>
+            <Region VBox.vgrow="ALWAYS"/>
+            <HBox spacing="10" alignment="CENTER_LEFT" styleClass="padding_10">
+                <Button text="Reset" styleClass="add_btn" onAction="#onReset"/>
+                <Region HBox.hgrow="ALWAYS"/>
+                <Button text="Cancel" styleClass="cancel_btn" onAction="#onCancel"/>
+                <Button text="Save" styleClass="download_now_btn" onAction="#onSave"/>
+            </HBox>
         </VBox>
     </HBox>
 
