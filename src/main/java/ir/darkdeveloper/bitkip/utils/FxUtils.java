@@ -27,8 +27,8 @@ import static ir.darkdeveloper.bitkip.config.AppConfigs.*;
 public class FxUtils {
 
     // these constants are used to prevent these stages to show more than 1
-    private static final String SCHEDULER_STAGE = "Scheduler";
-    private static final String ABOUT_STAGE = "About";
+    public static final String SCHEDULER_STAGE = "Scheduler";
+    public static final String ABOUT_STAGE = "About";
     public static final Map<String, Stage> openStages = new LinkedHashMap<>();
 
 
@@ -109,7 +109,7 @@ public class FxUtils {
     }
 
     public static void newAboutStage() {
-        if (openStages.containsKey(ABOUT_STAGE)){
+        if (openStages.containsKey(ABOUT_STAGE)) {
             openStages.get(ABOUT_STAGE).toFront();
             return;
         }
@@ -134,7 +134,7 @@ public class FxUtils {
             stage.getIcons().add(new Image(logoPath.toExternalForm()));
         FXMLController controller = loader.getController();
         controller.setStage(stage);
-        stage.setOnCloseRequest(e-> openStages.remove(ABOUT_STAGE));
+        stage.setOnCloseRequest(e -> openStages.remove(ABOUT_STAGE));
         stage.show();
         openStages.put(ABOUT_STAGE, stage);
     }
@@ -192,7 +192,7 @@ public class FxUtils {
     }
 
     public static void newSchedulerStage(QueueModel selectedQueue) {
-        if (openStages.containsKey(SCHEDULER_STAGE)){
+        if (openStages.containsKey(SCHEDULER_STAGE)) {
             openStages.get(SCHEDULER_STAGE).toFront();
             return;
         }
@@ -217,8 +217,8 @@ public class FxUtils {
         controller.setStage(stage);
         controller.setSelectedQueue(selectedQueue);
         getQueueSubject().addObserver(controller);
-        stage.show();
         stage.setOnCloseRequest(e -> openStages.remove(SCHEDULER_STAGE));
+        stage.show();
         openStages.put(SCHEDULER_STAGE, stage);
     }
 

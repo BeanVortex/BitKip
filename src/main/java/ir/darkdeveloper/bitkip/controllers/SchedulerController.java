@@ -3,6 +3,7 @@ package ir.darkdeveloper.bitkip.controllers;
 import ir.darkdeveloper.bitkip.config.QueueObserver;
 import ir.darkdeveloper.bitkip.controllers.interfaces.FXMLController;
 import ir.darkdeveloper.bitkip.models.QueueModel;
+import ir.darkdeveloper.bitkip.utils.InputValidations;
 import ir.darkdeveloper.bitkip.utils.ResizeUtil;
 import ir.darkdeveloper.bitkip.utils.WindowUtils;
 import javafx.beans.property.ObjectProperty;
@@ -14,16 +15,30 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseButton;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
 import org.kordamp.ikonli.javafx.FontIcon;
 
 import static ir.darkdeveloper.bitkip.BitKip.getResource;
 import static ir.darkdeveloper.bitkip.config.AppConfigs.*;
+import static ir.darkdeveloper.bitkip.utils.FxUtils.SCHEDULER_STAGE;
+import static ir.darkdeveloper.bitkip.utils.FxUtils.openStages;
 
 public class SchedulerController implements FXMLController, QueueObserver {
 
-
+    @FXML
+    private HBox horLine1;
+    @FXML
+    private CheckBox enableToggle;
+    @FXML
+    private Spinner<Integer> hourSpinner;
+    @FXML
+    private Spinner<Integer> minuteSpinner;
+    @FXML
+    private Spinner<Integer> secondSpinner;
+    @FXML
+    private VBox mainBox;
     @FXML
     private HBox toolbar;
     @FXML
@@ -43,7 +58,6 @@ public class SchedulerController implements FXMLController, QueueObserver {
     private Rectangle2D bounds;
 
 
-
     @Override
     public void initialize() {
         closeBtn.setGraphic(new FontIcon());
@@ -52,10 +66,59 @@ public class SchedulerController implements FXMLController, QueueObserver {
         bounds = Screen.getPrimary().getVisualBounds();
         initQueuesList();
         selectedQueue.addListener((ob, old, newVal) -> initSelectedQueueData());
+        initSpinners();
+    }
+
+    private void initSpinners() {
+        var hourFactory = new SpinnerValueFactory.IntegerSpinnerValueFactory(0, 23, 15);
+        var minuteFactory = new SpinnerValueFactory.IntegerSpinnerValueFactory(0, 59, 30);
+        var secondFactory = new SpinnerValueFactory.IntegerSpinnerValueFactory(0, 59, 0);
+        hourSpinner.setValueFactory(hourFactory);
+        minuteSpinner.setValueFactory(minuteFactory);
+        secondSpinner.setValueFactory(secondFactory);
+
+        hourSpinner.setEditable(true);
+        minuteSpinner.setEditable(true);
+        secondSpinner.setEditable(true);
+
+        InputValidations.validIntInputCheck(hourSpinner.getEditor(), 15);
+        InputValidations.validIntInputCheck(minuteSpinner.getEditor(), 30);
+        InputValidations.validIntInputCheck(secondSpinner.getEditor(), 0);
+
+        hourSpinner.getEditor().textProperty().addListener((o, o2, n) -> {
+            if (n == null)
+                return;
+            if (n.isBlank())
+                hourSpinner.getEditor().setText("0");
+            if (!n.isBlank() && Integer.parseInt(n) > 23)
+                hourSpinner.getEditor().setText("23");
+        });
+        minuteSpinner.getEditor().textProperty().addListener((o, o2, n) -> {
+            if (n == null)
+                return;
+            if (n.isBlank())
+                minuteSpinner.getEditor().setText("0");
+            if (!n.isBlank() && Integer.parseInt(n) > 59)
+                minuteSpinner.getEditor().setText("59");
+        });
+        secondSpinner.getEditor().textProperty().addListener((o, o2, n) -> {
+            if (n == null)
+                return;
+            if (n.isBlank())
+                secondSpinner.getEditor().setText("0");
+            if (!n.isBlank() && Integer.parseInt(n) > 59)
+                secondSpinner.getEditor().setText("59");
+        });
     }
 
     @Override
     public void initAfterStage() {
+
+        stage.widthProperty().addListener((o, o2, n) -> {
+            var width = n.longValue();
+            toolbar.setPrefWidth(width);
+            horLine1.setPrefWidth(width);
+        });
 
         stage.xProperty().addListener((observable, oldValue, newValue) -> {
             if (WindowUtils.isOnPrimaryScreen(newValue.doubleValue()))
@@ -81,6 +144,10 @@ public class SchedulerController implements FXMLController, QueueObserver {
         toolbarTitle.setText("Scheduler: %s".formatted(selectedQueue.get().getName()));
         stage.setTitle("Scheduler: %s".formatted(selectedQueue.get().getName()));
         queueList.getSelectionModel().select(selectedQueue.get());
+//        mainBox.setDisable(selectedQueue.get().getIsScheduled());
+//        enableToggle.setSelected(selectedQueue.get().getIsScheduled());
+        mainBox.setDisable(true);
+        enableToggle.setSelected(false);
     }
 
 
@@ -115,6 +182,7 @@ public class SchedulerController implements FXMLController, QueueObserver {
 
     @FXML
     private void closeStage() {
+        openStages.remove(SCHEDULER_STAGE);
         stage.close();
     }
 
@@ -133,4 +201,10 @@ public class SchedulerController implements FXMLController, QueueObserver {
     public void updateQueue() {
         initQueuesList();
     }
+
+    @FXML
+    private void onEnableToggle() {
+        mainBox.setDisable(!mainBox.isDisabled());
+    }
+
 }

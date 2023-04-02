@@ -1,0 +1,15 @@
+
+
+.padding_10{
+    -fx-padding: 10;
+}
+
+.bold{
+    -fx-font-weight: bold;
+}
+.title_size{
+    -fx-font-size: 20;
+}
+.line {
+    -fx-background-color: rgba(85, 85, 85, 0.5);
+}

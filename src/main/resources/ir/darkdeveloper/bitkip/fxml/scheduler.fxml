@@ -1,13 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import java.lang.*?>
-<?import java.util.*?>
-<?import javafx.scene.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
-
 <?import java.net.URL?>
 <?import javafx.scene.image.ImageView?>
+
 <VBox minHeight="550" prefHeight="550" minWidth="600" prefWidth="600.0"
       maxHeight="600"
       xmlns="http://javafx.com/javafx/16"
@@ -15,6 +12,7 @@
     <stylesheets>
         <URL value="@../css/main.css"/>
         <URL value="@../css/newDownload.css"/>
+        <URL value="@../css/scheduler.css"/>
     </stylesheets>
 
     <HBox maxHeight="2" minHeight="2" styleClass="csm_toolbar"/>
@@ -35,6 +33,28 @@
 
     <HBox>
         <ListView prefHeight="550" minWidth="150" prefWidth="150" fx:id="queueList"/>
+
+        <VBox>
+            <HBox spacing="5" minWidth="450" alignment="CENTER_LEFT" styleClass="padding_10">
+                <CheckBox fx:id="enableToggle" onAction="#onEnableToggle" text="Enable Scheduling" styleClass="bold"/>
+            </HBox>
+
+            <HBox fx:id="horLine1" minHeight="1" styleClass="line"/>
+
+            <VBox spacing="5" fx:id="mainBox" styleClass="padding_10">
+                <HBox alignment="CENTER_LEFT" spacing="10">
+                    <Label text="Start download at: " styleClass="bold"/>
+                    <HBox spacing="5" alignment="CENTER">
+                        <Spinner fx:id="hourSpinner" styleClass="bold" minWidth="70" prefWidth="70" prefHeight="20"/>
+                        <Label text=":" styleClass="bold, title_size"/>
+                        <Spinner fx:id="minuteSpinner" styleClass="bold" minWidth="70" prefWidth="70" prefHeight="20"/>
+                        <Label text=":" styleClass="bold, title_size"/>
+                        <Spinner fx:id="secondSpinner" styleClass="bold" minWidth="70" prefWidth="70" prefHeight="20"/>
+                    </HBox>
+                </HBox>
+            </VBox>
+
+        </VBox>
     </HBox>
 
 </VBox>
