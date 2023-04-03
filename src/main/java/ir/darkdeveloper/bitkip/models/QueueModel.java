@@ -15,6 +15,8 @@ public class QueueModel {
     private boolean editable;
     private boolean canAddDownload;
 
+    private ScheduleModel scheduleModel;
+
     private CopyOnWriteArrayList<DownloadModel> downloads;
 
     public QueueModel(String name, boolean editable, boolean canAddDownload) {

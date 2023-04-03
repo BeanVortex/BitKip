@@ -3,7 +3,7 @@ package ir.darkdeveloper.bitkip.controllers;
 import ir.darkdeveloper.bitkip.config.QueueObserver;
 import ir.darkdeveloper.bitkip.controllers.interfaces.FXMLController;
 import ir.darkdeveloper.bitkip.models.QueueModel;
-import ir.darkdeveloper.bitkip.models.TurnOffModel;
+import ir.darkdeveloper.bitkip.models.TurnOffMode;
 import ir.darkdeveloper.bitkip.utils.InputValidations;
 import ir.darkdeveloper.bitkip.utils.ResizeUtil;
 import ir.darkdeveloper.bitkip.utils.WindowUtils;
@@ -31,7 +31,7 @@ import static ir.darkdeveloper.bitkip.utils.FxUtils.openStages;
 public class SchedulerController implements FXMLController, QueueObserver {
 
     @FXML
-    private ComboBox<TurnOffModel> powerCombo;
+    private ComboBox<TurnOffMode> powerCombo;
     @FXML
     private CheckBox whenDoneCheck;
     @FXML
@@ -113,7 +113,7 @@ public class SchedulerController implements FXMLController, QueueObserver {
     }
 
     private void initPowerCombo() {
-        var items = FXCollections.observableArrayList(TurnOffModel.TURN_OFF, TurnOffModel.SLEEP, TurnOffModel.HIBERNATE);
+        var items = FXCollections.observableArrayList(TurnOffMode.TURN_OFF, TurnOffMode.SLEEP, TurnOffMode.HIBERNATE);
         powerCombo.setItems(items);
         powerCombo.getSelectionModel().select(0);
         powerCombo.setDisable(true);

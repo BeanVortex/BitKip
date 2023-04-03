@@ -3,6 +3,7 @@ package ir.darkdeveloper.bitkip;
 import ir.darkdeveloper.bitkip.config.AppConfigs;
 import ir.darkdeveloper.bitkip.repo.DownloadsRepo;
 import ir.darkdeveloper.bitkip.repo.QueuesRepo;
+import ir.darkdeveloper.bitkip.repo.ScheduleRepo;
 import ir.darkdeveloper.bitkip.utils.FxUtils;
 import ir.darkdeveloper.bitkip.utils.IOUtils;
 import ir.darkdeveloper.bitkip.utils.MoreUtils;
@@ -24,6 +25,7 @@ public class BitKip extends Application {
         IOUtils.createSaveLocations();
         DownloadsRepo.createTable();
         QueuesRepo.createTableAndDefaultRecords();
+        ScheduleRepo.createSchedulesTable();
         AppConfigs.setQueues(QueuesRepo.getQueues(false));
         FxUtils.switchSceneToMain(stage);
         AppConfigs.setHostServices(getHostServices());

@@ -1,6 +1,6 @@
 package ir.darkdeveloper.bitkip.models;
 
-public enum TurnOffModel {
+public enum TurnOffMode {
     SLEEP,
     TURN_OFF,
     HIBERNATE;

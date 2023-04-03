@@ -13,11 +13,17 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import static ir.darkdeveloper.bitkip.repo.DatabaseHelper.*;
 
 public class QueuesRepo {
-    private static final DatabaseHelper dbHelper = new DatabaseHelper();
+
+    private static final String COL_ID = "id",
+            COL_NAME = "name",
+            COL_EDITABLE = "editable",
+            COL_CAN_ADD_DOWN = "can_add_download";
+    static final String COL_SCHEDULE_ID = "schedule_id";
+
 
     public static void createTableAndDefaultRecords() {
-        dbHelper.createQueuesTable();
-        dbHelper.createQueueDownloadTable();
+        createQueuesTable();
+        createQueueDownloadTable();
         FileExtensions.staticQueueNames.forEach(name -> {
             var queue = new QueueModel(name, false, false);
             if (name.equals("All Downloads"))
@@ -26,16 +32,69 @@ public class QueuesRepo {
         });
     }
 
+    private static void createQueuesTable() {
+        var sql = """
+                CREATE TABLE IF NOT EXISTS %s
+                (
+                    %s INTEGER PRIMARY KEY AUTOINCREMENT,
+                    %s VARCHAR UNIQUE,
+                    %s INTEGER,
+                    %s INTEGER,
+                    %s INTEGER,
+                    FOREIGN KEY (%s) REFERENCES %s(%s)
+                );
+                """
+                .formatted(QUEUES_TABLE_NAME,
+                        COL_ID,
+                        COL_NAME,
+                        COL_EDITABLE,
+                        COL_CAN_ADD_DOWN,
+                        COL_SCHEDULE_ID,
+                        COL_SCHEDULE_ID, SCHEDULE_TABLE_NAME, COL_ID);
+        DatabaseHelper.createTable(sql);
+    }
+
+    private static void createQueueDownloadTable() {
+        var sql = """
+                CREATE TABLE IF NOT EXISTS %s
+                (
+                    %s INTEGER,
+                    %s INTEGER,
+                    FOREIGN KEY (%s) REFERENCES %s(%s) ON DELETE CASCADE,
+                    FOREIGN KEY (%s) REFERENCES %s(%s) ON DELETE CASCADE
+                );
+                """
+                .formatted(QUEUE_DOWNLOAD_TABLE_NAME,
+                        COL_DOWNLOAD_ID, COL_QUEUE_ID,
+                        COL_DOWNLOAD_ID, DOWNLOADS_TABLE_NAME, COL_ID,
+                        COL_QUEUE_ID, QUEUES_TABLE_NAME, COL_ID);
+        DatabaseHelper.createTable(sql);
+    }
+
+
     public static void insertQueue(QueueModel queue) {
         var sql = """
-                INSERT OR IGNORE INTO queues (name,editable,can_add_download) VALUES("%s",%d,%d);
-                """.formatted(queue.getName(), queue.isEditable() ? 1 : 0, queue.isCanAddDownload() ? 1 : 0);
-        dbHelper.insertQueue(sql, queue);
+                INSERT OR IGNORE INTO %s (%s,%s,%s) VALUES("%s",%d,%d);
+                """
+                .formatted(QUEUES_TABLE_NAME, COL_NAME, COL_EDITABLE, COL_CAN_ADD_DOWN,
+                        queue.getName(), queue.isEditable() ? 1 : 0, queue.isCanAddDownload() ? 1 : 0);
+        try (var con = DatabaseHelper.openConnection();
+             var stmt = con.createStatement()) {
+            stmt.executeUpdate(sql);
+            var genKeys = stmt.getGeneratedKeys();
+            genKeys.next();
+            queue.setId(genKeys.getInt(1));
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
 
     public static QueueModel findByName(String name, boolean fetchDownloads) {
-        var sql = "SELECT * FROM queues WHERE name=\"" + name + "\";";
-        try (var con = dbHelper.openConnection();
+        var sql = """
+                SELECT * FROM %s WHERE %s="%s";
+                """
+                .formatted(QUEUES_TABLE_NAME, COL_NAME, name);
+        try (var con = DatabaseHelper.openConnection();
              var stmt = con.createStatement();
              var rs = stmt.executeQuery(sql)) {
             if (rs.next())
@@ -50,7 +109,7 @@ public class QueuesRepo {
     public static List<QueueModel> getQueues(boolean fetchDownloads) {
         var list = new ArrayList<QueueModel>();
         var sql = "SELECT * FROM " + QUEUES_TABLE_NAME + ";";
-        try (var con = dbHelper.openConnection();
+        try (var con = DatabaseHelper.openConnection();
              var stmt = con.createStatement();
              var rs = stmt.executeQuery(sql)) {
             while (rs.next())
@@ -65,14 +124,10 @@ public class QueuesRepo {
 
     public static void deleteQueue(String name) {
         var sql = """
-                DELETE FROM queues WHERE name = "%s";
-                """.formatted(name);
-        try (var con = dbHelper.openConnection();
-             var stmt = con.createStatement()) {
-            stmt.executeUpdate(sql);
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
+                DELETE FROM %s WHERE %s = "%s";
+                """
+                .formatted(QUEUES_TABLE_NAME, COL_NAME, name);
+        DatabaseHelper.executeUpdateSql(sql);
     }
 
     private static QueueModel createQueueModel(ResultSet rs, boolean fetchDownloads) throws SQLException {
@@ -83,6 +138,7 @@ public class QueuesRepo {
         CopyOnWriteArrayList<DownloadModel> downloads = null;
         if (fetchDownloads)
             downloads = new CopyOnWriteArrayList<>(DownloadsRepo.getDownloadsByQueueName(name));
-        return new QueueModel(id, name, editable, canAddDownload, downloads);
+        // TODO fetch schedule
+        return new QueueModel(id, name, editable, canAddDownload, null, downloads);
     }
 }
