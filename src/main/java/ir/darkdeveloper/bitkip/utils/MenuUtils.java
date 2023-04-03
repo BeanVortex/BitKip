@@ -150,7 +150,7 @@ public class MenuUtils {
                 });
         selectedItems
                 .filtered(dm -> staticQueueNames.stream()
-                        .anyMatch(s -> dm.getQueue().get(0).getName().equals(s)))
+                        .anyMatch(s -> dm.getQueues().get(0).getName().equals(s)))
                 .stream()
                 .findFirst()
                 .ifPresentOrElse(dm -> menuItems.get(deleteFromQueueLbl).setDisable(true),
@@ -180,7 +180,7 @@ public class MenuUtils {
         var addToQueueItems = new LinkedHashMap<MenuItem, QueueModel>();
         var startQueueItems = new LinkedHashMap<MenuItem, QueueModel>();
         var stopQueueItems = new LinkedHashMap<MenuItem, QueueModel>();
-        QueuesRepo.getQueues(false).forEach(qm -> {
+        QueuesRepo.getAllQueues(false).forEach(qm -> {
             var defaultColor = ((Label) addToQueueMenu.getGraphic()).getTextFill();
             if (staticQueueNames.stream().noneMatch(s -> qm.getName().equals(s))) {
                 var addToQueueMenuItem = createMenuItem(qm, defaultColor);
@@ -201,9 +201,9 @@ public class MenuUtils {
                     var qm = addToQueueItems.get(menuItem);
                     var notObserved = new ArrayList<>(mainTableUtils.getSelected());
                     notObserved.forEach(dm -> {
-                        if (dm.getQueue().contains(qm))
+                        if (dm.getQueues().contains(qm))
                             return;
-                        if (staticQueueNames.stream().noneMatch(s -> dm.getQueue().get(0).getName().equals(s)))
+                        if (staticQueueNames.stream().noneMatch(s -> dm.getQueues().get(0).getName().equals(s)))
                             mainTableUtils.remove(dm);
                         if (startedQueues.contains(qm))
                             startedQueues.get(startedQueues.indexOf(qm)).getDownloads().add(dm);

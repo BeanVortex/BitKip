@@ -152,7 +152,7 @@ public class BatchList implements NewDownloadFxmlController {
             dm.setChunks(lm.getChunks());
             dm.setAddDate(LocalDateTime.now());
             dm.setAddToQueueDate(LocalDateTime.now());
-            dm.setQueue(lm.getQueues());
+            dm.setQueues(lm.getQueues());
             dm.setDownloadStatus(DownloadStatus.Paused);
             downloads.add(dm);
         });

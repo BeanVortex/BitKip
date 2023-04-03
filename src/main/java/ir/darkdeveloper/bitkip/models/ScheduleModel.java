@@ -4,7 +4,6 @@ import lombok.*;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.util.LinkedHashSet;
 import java.util.Set;
 
 
@@ -22,12 +21,13 @@ public class ScheduleModel {
     private boolean onceDownload;
     private LocalDate startDate;
 
-    private final Set<Day> days = new LinkedHashSet<>();
+    private Set<Day> days;
 
     private LocalTime stopTime;
 
     private TurnOffMode turnOffMode;
 
+    private int queueId;
 
 
 }

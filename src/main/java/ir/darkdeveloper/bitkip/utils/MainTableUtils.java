@@ -129,7 +129,7 @@ public class MainTableUtils {
 
     private void initAddToQueueMenu(Menu addToQueueMenu) {
         var addQueueItems = new LinkedHashMap<MenuItem, QueueModel>();
-        QueuesRepo.getQueues(false).forEach(qm -> {
+        QueuesRepo.getAllQueues(false).forEach(qm -> {
             if (staticQueueNames.stream().noneMatch(s -> qm.getName().equals(s))) {
                 var defaultColor = ((Label) addToQueueMenu.getGraphic()).getTextFill();
                 var addToQueueMenuItem = createMenuItem(qm, defaultColor);
@@ -143,9 +143,9 @@ public class MainTableUtils {
                     var qm = addQueueItems.get(menuItem);
                     var notObserved = new ArrayList<>(getSelected());
                     notObserved.forEach(dm -> {
-                        if (dm.getQueue().contains(qm))
+                        if (dm.getQueues().contains(qm))
                             return;
-                        if (staticQueueNames.stream().noneMatch(s -> dm.getQueue().get(0).getName().equals(s)))
+                        if (staticQueueNames.stream().noneMatch(s -> dm.getQueues().get(0).getName().equals(s)))
                             remove(dm);
                         if (startedQueues.contains(qm))
                             startedQueues.get(startedQueues.indexOf(qm)).getDownloads().add(dm);
@@ -172,7 +172,7 @@ public class MainTableUtils {
         menuItems.get(lbls.get(5)).setOnAction(e ->
                 getSelected().forEach(dm -> {
                     remove(dm);
-                    dm.getQueue()
+                    dm.getQueues()
                             .stream()
                             .filter(qm -> !staticQueueNames.contains(qm.getName()))
                             .findFirst()

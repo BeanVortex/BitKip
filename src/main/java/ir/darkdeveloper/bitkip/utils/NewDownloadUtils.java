@@ -129,35 +129,35 @@ public class NewDownloadUtils {
             var compressedMatch = FileExtensions.compressedEx.stream().anyMatch(fileName::endsWith);
             if (compressedMatch) {
                 locationField.setText(AppConfigs.compressedPath);
-                dm.setQueue(new ArrayList<>(List.of(QueuesRepo.findByName(COMPRESSED_QUEUE, false))));
+                dm.setQueues(new ArrayList<>(List.of(QueuesRepo.findByName(COMPRESSED_QUEUE, false))));
                 return;
             }
             var videoMatch = FileExtensions.videoEx.stream().anyMatch(fileName::endsWith);
             if (videoMatch) {
                 locationField.setText(AppConfigs.videosPath);
-                dm.setQueue(new ArrayList<>(List.of(QueuesRepo.findByName(VIDEOS_QUEUE, false))));
+                dm.setQueues(new ArrayList<>(List.of(QueuesRepo.findByName(VIDEOS_QUEUE, false))));
                 return;
             }
             var programMatch = FileExtensions.programEx.stream().anyMatch(fileName::endsWith);
             if (programMatch) {
                 locationField.setText(AppConfigs.programsPath);
-                dm.setQueue(new ArrayList<>(List.of(QueuesRepo.findByName(PROGRAMS_QUEUE, false))));
+                dm.setQueues(new ArrayList<>(List.of(QueuesRepo.findByName(PROGRAMS_QUEUE, false))));
                 return;
             }
             var musicMatch = FileExtensions.musicEx.stream().anyMatch(fileName::endsWith);
             if (musicMatch) {
                 locationField.setText(AppConfigs.musicPath);
-                dm.setQueue(new ArrayList<>(List.of(QueuesRepo.findByName(MUSIC_QUEUE, false))));
+                dm.setQueues(new ArrayList<>(List.of(QueuesRepo.findByName(MUSIC_QUEUE, false))));
                 return;
             }
             var documentMatch = FileExtensions.documentEx.stream().anyMatch(fileName::endsWith);
             if (documentMatch) {
                 locationField.setText(AppConfigs.documentPath);
-                dm.setQueue(new ArrayList<>(List.of(QueuesRepo.findByName(DOCS_QUEUE, false))));
+                dm.setQueues(new ArrayList<>(List.of(QueuesRepo.findByName(DOCS_QUEUE, false))));
                 return;
             }
             locationField.setText(AppConfigs.othersPath);
-            dm.setQueue(new ArrayList<>(List.of(QueuesRepo.findByName(OTHERS_QUEUE, false))));
+            dm.setQueues(new ArrayList<>(List.of(QueuesRepo.findByName(OTHERS_QUEUE, false))));
         });
     }
 

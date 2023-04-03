@@ -41,7 +41,7 @@ public class QueuesRepo {
                     %s INTEGER,
                     %s INTEGER,
                     %s INTEGER,
-                    FOREIGN KEY (%s) REFERENCES %s(%s)
+                    FOREIGN KEY (%s) REFERENCES %s(%s) ON DELETE CASCADE
                 );
                 """
                 .formatted(QUEUES_TABLE_NAME,
@@ -52,6 +52,7 @@ public class QueuesRepo {
                         COL_SCHEDULE_ID,
                         COL_SCHEDULE_ID, SCHEDULE_TABLE_NAME, COL_ID);
         DatabaseHelper.createTable(sql);
+        alters();
     }
 
     private static void createQueueDownloadTable() {
@@ -106,9 +107,13 @@ public class QueuesRepo {
     }
 
 
-    public static List<QueueModel> getQueues(boolean fetchDownloads) {
-        var list = new ArrayList<QueueModel>();
+    public static List<QueueModel> getAllQueues(boolean fetchDownloads) {
         var sql = "SELECT * FROM " + QUEUES_TABLE_NAME + ";";
+        return getQueues(fetchDownloads, sql);
+    }
+
+    private static ArrayList<QueueModel> getQueues(boolean fetchDownloads, String sql) {
+        var list = new ArrayList<QueueModel>();
         try (var con = DatabaseHelper.openConnection();
              var stmt = con.createStatement();
              var rs = stmt.executeQuery(sql)) {
@@ -138,7 +143,38 @@ public class QueuesRepo {
         CopyOnWriteArrayList<DownloadModel> downloads = null;
         if (fetchDownloads)
             downloads = new CopyOnWriteArrayList<>(DownloadsRepo.getDownloadsByQueueName(name));
-        // TODO fetch schedule
-        return new QueueModel(id, name, editable, canAddDownload, null, downloads);
+        var schedule = ScheduleRepo.getSchedule(id);
+        return new QueueModel(id, name, editable, canAddDownload, schedule, downloads);
+    }
+
+
+    public static List<QueueModel> findQueuesOfADownload(int id) {
+        var sql = """
+                SELECT q.*
+                FROM %s q
+                         INNER JOIN %s qd ON q.%s = qd.%s
+                         INNER JOIN %s d ON d.%s = qd.%s
+                WHERE d.%s = %d;
+                """
+                .formatted(QUEUES_TABLE_NAME,
+                        QUEUE_DOWNLOAD_TABLE_NAME, COL_ID, COL_QUEUE_ID,
+                        DOWNLOADS_TABLE_NAME, COL_ID, COL_DOWNLOAD_ID,
+                        COL_ID, id);
+        return getQueues(false, sql);
+    }
+
+    private static void alters() {
+        var sql = """
+                ALTER TABLE %s ADD COLUMN %s INTEGER DEFAULT NULL
+                REFERENCES %s(%s) ON DELETE CASCADE;
+                """
+                .formatted(QUEUES_TABLE_NAME, COL_SCHEDULE_ID,
+                        SCHEDULE_TABLE_NAME, COL_ID);
+        try (var conn = openConnection();
+             var stmt = conn.createStatement()) {
+            stmt.executeUpdate(sql);
+        } catch (SQLException ignore) {
+        }
+
     }
 }

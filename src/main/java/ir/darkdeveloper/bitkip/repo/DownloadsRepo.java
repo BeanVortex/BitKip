@@ -85,7 +85,7 @@ public class DownloadsRepo {
             genKeys.next();
             dm.setId(genKeys.getInt(1));
             // todo check batch insert
-            dm.getQueue().forEach(queue -> {
+            dm.getQueues().forEach(queue -> {
                 var queueDownloadSql = """
                         INSERT INTO %s (%s, %s) VALUES (%d, %d);
                         """.formatted(QUEUE_DOWNLOAD_TABLE_NAME, COL_DOWNLOAD_ID, COL_QUEUE_ID, dm.getId(), queue.getId());
@@ -103,14 +103,13 @@ public class DownloadsRepo {
 
     public static List<DownloadModel> getDownloadsByQueueName(String queueName) {
         var sql = """
-                SELECT d.*, qd.%S
+                SELECT d.*
                 FROM %s d
                          INNER JOIN %s qd ON d.%s = qd.%s
                          INNER JOIN %s q ON q.%s = qd.%s
                 WHERE q.%s = "%s";
                 """
-                .formatted(COL_QUEUE_ID,
-                        DOWNLOADS_TABLE_NAME,
+                .formatted(DOWNLOADS_TABLE_NAME,
                         QUEUE_DOWNLOAD_TABLE_NAME,
                         COL_ID, COL_DOWNLOAD_ID,
                         QUEUES_TABLE_NAME,
@@ -227,14 +226,12 @@ public class DownloadsRepo {
         var url = rs.getString(COL_URL);
         var filePath = rs.getString(COL_PATH);
         var chunks = rs.getInt(COL_CHUNKS);
-        var queueId = rs.getInt(COL_QUEUE_ID);
         var showCompleteDialog = rs.getBoolean(COL_SHOW_COMPLETE_DIALOG);
         var openAfterComplete = rs.getBoolean(COL_OPEN_AFTER_COMPLETE);
-        // fetch queue with scheduler
-//        var queue = new QueueModel(queueId, queueName, queueEditable, queueCanAddDown, null);
+        var queues = QueuesRepo.findQueuesOfADownload(id);
         var addDate = rs.getString(COL_ADD_DATE);
         var addDateStr = LocalDateTime.parse(addDate);
-        var addToQueueDate = rs.getString("add_to_queue_date");
+        var addToQueueDate = rs.getString(COL_ADD_TO_QUEUE_DATE);
         var addToQueueDateStr = LocalDateTime.parse(addToQueueDate);
         var lastTryDate = rs.getString(COL_LAST_TRY_DATE);
         var lastTryDateStr = lastTryDate == null ? null : LocalDateTime.parse(lastTryDate);
@@ -243,7 +240,7 @@ public class DownloadsRepo {
         var downloadStatus = progress != 100 ? DownloadStatus.Paused : DownloadStatus.Completed;
         return DownloadModel.builder()
                 .id(id).name(name).progress(progress).downloaded(downloaded).size(size).url(url).filePath(filePath)
-                .chunks(chunks)/*.queue(new ArrayList<>(List.of(queue)))*/.addDate(addDateStr).addToQueueDate(addToQueueDateStr)
+                .chunks(chunks).queues(queues).addDate(addDateStr).addToQueueDate(addToQueueDateStr)
                 .lastTryDate(lastTryDateStr).completeDate(completeDateStr).openAfterComplete(openAfterComplete)
                 .showCompleteDialog(showCompleteDialog).downloadStatus(downloadStatus)
                 .build();

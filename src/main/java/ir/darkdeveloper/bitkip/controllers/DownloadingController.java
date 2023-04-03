@@ -138,7 +138,7 @@ public class DownloadingController implements FXMLController {
             end = 60;
         titleLbl.setText(downloadModel.getName().substring(0, end));
         nameLbl.setText("Name: " + downloadModel.getName());
-        var queues = downloadModel.getQueue().toString();
+        var queues = downloadModel.getQueues().toString();
         queueLbl.setText("Queues: " + queues.substring(1, queues.length() - 1));
         statusLbl.setText("Status: " + downloadModel.getDownloadStatus().name());
         var downloadOf = "%s / %s"

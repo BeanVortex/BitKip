@@ -26,7 +26,7 @@ public class BitKip extends Application {
         DownloadsRepo.createTable();
         QueuesRepo.createTableAndDefaultRecords();
         ScheduleRepo.createSchedulesTable();
-        AppConfigs.setQueues(QueuesRepo.getQueues(false));
+        AppConfigs.setQueues(QueuesRepo.getAllQueues(false));
         FxUtils.switchSceneToMain(stage);
         AppConfigs.setHostServices(getHostServices());
         stage.initStyle(StageStyle.UNDECORATED);

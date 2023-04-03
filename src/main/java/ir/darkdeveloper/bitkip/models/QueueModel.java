@@ -15,7 +15,7 @@ public class QueueModel {
     private boolean editable;
     private boolean canAddDownload;
 
-    private ScheduleModel scheduleModel;
+    private ScheduleModel schedule;
 
     private CopyOnWriteArrayList<DownloadModel> downloads;
 

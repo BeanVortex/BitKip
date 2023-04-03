@@ -76,7 +76,7 @@ public class BatchDownload implements NewDownloadFxmlController, QueueObserver {
         openLocation.setGraphic(new FontIcon());
         questionBtnUrl.setGraphic(new FontIcon());
         newQueue.setGraphic(new FontIcon());
-        var queues = QueuesRepo.getQueues(false).stream().filter(QueueModel::isCanAddDownload).toList();
+        var queues = QueuesRepo.getAllQueues(false).stream().filter(QueueModel::isCanAddDownload).toList();
         queueCombo.getItems().addAll(queues);
         queueCombo.setValue(queues.get(0));
         errorLabel.setVisible(false);
@@ -109,7 +109,7 @@ public class BatchDownload implements NewDownloadFxmlController, QueueObserver {
             var allDownloadsQueue = QueuesRepo.findByName(ALL_DOWNLOADS_QUEUE, false);
             links.forEach(lm -> {
                 lm.getQueues().add(allDownloadsQueue);
-                lm.getQueues().addAll(dm.getQueue());
+                lm.getQueues().addAll(dm.getQueues());
                 if (selectedQueue.getId() != allDownloadsQueue.getId())
                     lm.getQueues().add(selectedQueue);
                 lm.setPath(locationField.getText());
@@ -259,7 +259,7 @@ public class BatchDownload implements NewDownloadFxmlController, QueueObserver {
     public void updateQueue() {
         var queues = AppConfigs.getQueues();
         if (queues.isEmpty())
-            queues = QueuesRepo.getQueues(false);
+            queues = QueuesRepo.getAllQueues(false);
         queues = queues.stream().filter(QueueModel::isCanAddDownload).toList();
         queueCombo.getItems().clear();
         queueCombo.getItems().addAll(queues);
