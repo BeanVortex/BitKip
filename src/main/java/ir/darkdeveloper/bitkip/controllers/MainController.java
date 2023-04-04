@@ -141,7 +141,7 @@ public class MainController implements FXMLController, QueueObserver {
         side.getChildren().clear();
         var queues = AppConfigs.getQueues();
         if (queues.isEmpty())
-            queues = QueuesRepo.getAllQueues(false);
+            queues = QueuesRepo.getAllQueues(false, false);
         queues.forEach(queueModel -> {
             var btn = new Button(queueModel.getName());
             btn.getStyleClass().add("side_queue");

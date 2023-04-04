@@ -17,7 +17,7 @@ import static ir.darkdeveloper.bitkip.repo.DatabaseHelper.*;
 import static ir.darkdeveloper.bitkip.repo.QueuesRepo.COL_SCHEDULE_ID;
 
 public class ScheduleRepo {
-    private static final String COL_ID = "id",
+    static final String COL_ID = "id",
             COL_START_TIME = "start_time",
             COL_ONCE_DOWNLOAD = "once_download",
             COL_START_DATE = "start_date",
@@ -95,16 +95,19 @@ public class ScheduleRepo {
              var stmt = con.createStatement();
              var rs = stmt.executeQuery(sql)) {
             if (rs.next())
-                return createScheduleModel(rs);
+                return createScheduleModel(rs, -1);
         } catch (SQLException e) {
             e.printStackTrace();
         }
         return null;
     }
 
-    private static ScheduleModel createScheduleModel(ResultSet rs) throws SQLException {
-        var id = rs.getInt(COL_ID);
+    static ScheduleModel createScheduleModel(ResultSet rs, int id) throws SQLException {
+        if (id == -1)
+            id = rs.getInt(COL_ID);
         var startTime = rs.getString(COL_START_TIME);
+        if (startTime == null)
+            return null;
         var onceDownload = rs.getBoolean(COL_ONCE_DOWNLOAD);
         var startDate = rs.getString(COL_START_DATE);
         var stopTime = rs.getString(COL_STOP_TIME);

@@ -76,7 +76,10 @@ public class BatchDownload implements NewDownloadFxmlController, QueueObserver {
         openLocation.setGraphic(new FontIcon());
         questionBtnUrl.setGraphic(new FontIcon());
         newQueue.setGraphic(new FontIcon());
-        var queues = QueuesRepo.getAllQueues(false).stream().filter(QueueModel::isCanAddDownload).toList();
+        var queues = AppConfigs.getQueues();
+        if (queues.isEmpty())
+            queues = QueuesRepo.getAllQueues(false, false);
+        queues = queues.stream().filter(QueueModel::isCanAddDownload).toList();
         queueCombo.getItems().addAll(queues);
         queueCombo.setValue(queues.get(0));
         errorLabel.setVisible(false);
@@ -259,7 +262,7 @@ public class BatchDownload implements NewDownloadFxmlController, QueueObserver {
     public void updateQueue() {
         var queues = AppConfigs.getQueues();
         if (queues.isEmpty())
-            queues = QueuesRepo.getAllQueues(false);
+            queues = QueuesRepo.getAllQueues(false, false);
         queues = queues.stream().filter(QueueModel::isCanAddDownload).toList();
         queueCombo.getItems().clear();
         queueCombo.getItems().addAll(queues);

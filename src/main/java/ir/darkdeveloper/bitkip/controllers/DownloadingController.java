@@ -4,6 +4,7 @@ import ir.darkdeveloper.bitkip.controllers.interfaces.FXMLController;
 import ir.darkdeveloper.bitkip.models.DownloadModel;
 import ir.darkdeveloper.bitkip.models.DownloadStatus;
 import ir.darkdeveloper.bitkip.repo.DownloadsRepo;
+import ir.darkdeveloper.bitkip.repo.QueuesRepo;
 import ir.darkdeveloper.bitkip.task.DownloadTask;
 import ir.darkdeveloper.bitkip.utils.*;
 import javafx.application.Platform;
@@ -138,7 +139,7 @@ public class DownloadingController implements FXMLController {
             end = 60;
         titleLbl.setText(downloadModel.getName().substring(0, end));
         nameLbl.setText("Name: " + downloadModel.getName());
-        var queues = downloadModel.getQueues().toString();
+        var queues = QueuesRepo.findQueuesOfADownload(downloadModel.getId()).toString();
         queueLbl.setText("Queues: " + queues.substring(1, queues.length() - 1));
         statusLbl.setText("Status: " + downloadModel.getDownloadStatus().name());
         var downloadOf = "%s / %s"
@@ -278,7 +279,6 @@ public class DownloadingController implements FXMLController {
 
     public void onComplete(DownloadModel download) {
         if (download.getDownloadStatus() == DownloadStatus.Completed) {
-            stage.requestFocus();
             stage.toFront();
             isComplete = true;
             remainingLbl.setText("Remaining: Done");

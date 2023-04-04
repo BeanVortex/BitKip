@@ -88,7 +88,10 @@ public class SingleDownload implements NewDownloadFxmlController {
 
     @Override
     public void initialize() {
-        var queues = QueuesRepo.getAllQueues(false).stream().filter(QueueModel::isCanAddDownload).toList();
+        var queues = AppConfigs.getQueues();
+        if (queues.isEmpty())
+            queues = QueuesRepo.getAllQueues(false, false);
+        queues = queues.stream().filter(QueueModel::isCanAddDownload).toList();
         queueCombo.getItems().addAll(queues);
         queueCombo.setValue(queues.get(0));
         openLocation.setGraphic(new FontIcon());
@@ -229,7 +232,7 @@ public class SingleDownload implements NewDownloadFxmlController {
     public void updateQueue() {
         var queues = AppConfigs.getQueues();
         if (queues.isEmpty())
-            queues = QueuesRepo.getAllQueues(false);
+            queues = QueuesRepo.getAllQueues(false, false);
         queues = queues.stream().filter(QueueModel::isCanAddDownload).toList();
         queueCombo.getItems().clear();
         queueCombo.getItems().addAll(queues);

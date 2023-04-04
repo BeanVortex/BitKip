@@ -7,9 +7,12 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import static ir.darkdeveloper.bitkip.repo.DatabaseHelper.*;
+import static ir.darkdeveloper.bitkip.repo.QueuesRepo.*;
+import static ir.darkdeveloper.bitkip.repo.ScheduleRepo.*;
 
 public class DownloadsRepo {
 
@@ -103,17 +106,23 @@ public class DownloadsRepo {
 
     public static List<DownloadModel> getDownloadsByQueueName(String queueName) {
         var sql = """
-                SELECT d.*
+                SELECT d.*,
+                       qd.%s,
+                       q.%s as %s,q.%s,q.%s,q.%s,
+                       sc.%s,sc.%s,sc.%s,sc.%s,sc.%s,sc.%s
                 FROM %s d
                          INNER JOIN %s qd ON d.%s = qd.%s
                          INNER JOIN %s q ON q.%s = qd.%s
-                WHERE q.%s = "%s";
+                         LEFT JOIN %s sc on q.%s = sc.%s
+                WHERE q.%s = "%s"
                 """
-                .formatted(DOWNLOADS_TABLE_NAME,
-                        QUEUE_DOWNLOAD_TABLE_NAME,
-                        COL_ID, COL_DOWNLOAD_ID,
-                        QUEUES_TABLE_NAME,
-                        COL_ID, COL_QUEUE_ID,
+                .formatted(COL_QUEUE_ID,
+                        COL_NAME, COL_QUEUE_NAME, COL_EDITABLE, COL_CAN_ADD_DOWN, COL_SCHEDULE_ID,
+                        COL_DAYS, COL_ONCE_DOWNLOAD, COL_START_TIME, COL_START_DATE, COL_STOP_TIME, COL_TURN_OFF_MODE,
+                        DOWNLOADS_TABLE_NAME,
+                        QUEUE_DOWNLOAD_TABLE_NAME, COL_ID, COL_DOWNLOAD_ID,
+                        QUEUES_TABLE_NAME, COL_ID, COL_QUEUE_ID,
+                        SCHEDULE_TABLE_NAME, COL_SCHEDULE_ID, COL_ID,
                         COL_NAME, queueName);
         return fetchDownloads(sql);
     }
@@ -228,7 +237,6 @@ public class DownloadsRepo {
         var chunks = rs.getInt(COL_CHUNKS);
         var showCompleteDialog = rs.getBoolean(COL_SHOW_COMPLETE_DIALOG);
         var openAfterComplete = rs.getBoolean(COL_OPEN_AFTER_COMPLETE);
-        var queues = QueuesRepo.findQueuesOfADownload(id);
         var addDate = rs.getString(COL_ADD_DATE);
         var addDateStr = LocalDateTime.parse(addDate);
         var addToQueueDate = rs.getString(COL_ADD_TO_QUEUE_DATE);
@@ -238,6 +246,14 @@ public class DownloadsRepo {
         var completeDate = rs.getString(COL_COMPLETE_DATE);
         var completeDateStr = completeDate == null ? null : LocalDateTime.parse(completeDate);
         var downloadStatus = progress != 100 ? DownloadStatus.Paused : DownloadStatus.Completed;
+
+        var queueId = rs.getInt(COL_QUEUE_ID);
+        var queueName = rs.getString(COL_QUEUE_NAME);
+        var scheduleId = rs.getInt(COL_SCHEDULE_ID);
+        var schedule = createScheduleModel(rs, scheduleId);
+        var queue = QueuesRepo.createQueueModel(rs, queueId, queueName, schedule);
+        var queues = Collections.singletonList(queue);
+
         return DownloadModel.builder()
                 .id(id).name(name).progress(progress).downloaded(downloaded).size(size).url(url).filePath(filePath)
                 .chunks(chunks).queues(queues).addDate(addDateStr).addToQueueDate(addToQueueDateStr)

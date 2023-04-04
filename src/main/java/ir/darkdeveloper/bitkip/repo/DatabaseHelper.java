@@ -10,12 +10,13 @@ import java.sql.SQLException;
 public class DatabaseHelper {
 
 
-    public static final String QUEUE_DOWNLOAD_TABLE_NAME = "queue_download",
+    static final String QUEUE_DOWNLOAD_TABLE_NAME = "queue_download",
             DOWNLOADS_TABLE_NAME = "downloads",
             QUEUES_TABLE_NAME = "queues",
             SCHEDULE_TABLE_NAME = "schedules";
 
-    public static String COL_DOWNLOAD_ID = "download_id", COL_QUEUE_ID = "queue_id";
+    static String COL_DOWNLOAD_ID = "download_id",
+            COL_QUEUE_ID = "queue_id", COL_QUEUE_NAME = "queue_name";
 
 
     static Connection openConnection() throws SQLException {

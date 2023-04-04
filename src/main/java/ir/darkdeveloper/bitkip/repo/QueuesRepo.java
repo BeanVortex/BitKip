@@ -2,6 +2,7 @@ package ir.darkdeveloper.bitkip.repo;
 
 import ir.darkdeveloper.bitkip.models.DownloadModel;
 import ir.darkdeveloper.bitkip.models.QueueModel;
+import ir.darkdeveloper.bitkip.models.ScheduleModel;
 import ir.darkdeveloper.bitkip.utils.FileExtensions;
 
 import java.sql.ResultSet;
@@ -14,11 +15,11 @@ import static ir.darkdeveloper.bitkip.repo.DatabaseHelper.*;
 
 public class QueuesRepo {
 
-    private static final String COL_ID = "id",
+    static final String COL_ID = "id",
             COL_NAME = "name",
             COL_EDITABLE = "editable",
-            COL_CAN_ADD_DOWN = "can_add_download";
-    static final String COL_SCHEDULE_ID = "schedule_id";
+            COL_CAN_ADD_DOWN = "can_add_download",
+            COL_SCHEDULE_ID = "schedule_id";
 
 
     public static void createTableAndDefaultRecords() {
@@ -99,7 +100,7 @@ public class QueuesRepo {
              var stmt = con.createStatement();
              var rs = stmt.executeQuery(sql)) {
             if (rs.next())
-                return createQueueModel(rs, fetchDownloads);
+                return createQueueModel(rs, fetchDownloads, true);
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -107,18 +108,18 @@ public class QueuesRepo {
     }
 
 
-    public static List<QueueModel> getAllQueues(boolean fetchDownloads) {
+    public static List<QueueModel> getAllQueues(boolean fetchDownloads, boolean fetchSchedule) {
         var sql = "SELECT * FROM " + QUEUES_TABLE_NAME + ";";
-        return getQueues(fetchDownloads, sql);
+        return getQueues(fetchDownloads, fetchSchedule, sql);
     }
 
-    private static ArrayList<QueueModel> getQueues(boolean fetchDownloads, String sql) {
+    private static ArrayList<QueueModel> getQueues(boolean fetchDownloads, boolean fetchSchedule, String sql) {
         var list = new ArrayList<QueueModel>();
         try (var con = DatabaseHelper.openConnection();
              var stmt = con.createStatement();
              var rs = stmt.executeQuery(sql)) {
             while (rs.next())
-                list.add(createQueueModel(rs, fetchDownloads));
+                list.add(createQueueModel(rs, fetchDownloads, fetchSchedule));
             return list;
         } catch (SQLException e) {
             e.printStackTrace();
@@ -135,20 +136,8 @@ public class QueuesRepo {
         DatabaseHelper.executeUpdateSql(sql);
     }
 
-    private static QueueModel createQueueModel(ResultSet rs, boolean fetchDownloads) throws SQLException {
-        var id = rs.getInt(COL_ID);
-        var name = rs.getString(COL_NAME);
-        var editable = rs.getBoolean(COL_EDITABLE);
-        var canAddDownload = rs.getBoolean(COL_CAN_ADD_DOWN);
-        CopyOnWriteArrayList<DownloadModel> downloads = null;
-        if (fetchDownloads)
-            downloads = new CopyOnWriteArrayList<>(DownloadsRepo.getDownloadsByQueueName(name));
-        var schedule = ScheduleRepo.getSchedule(id);
-        return new QueueModel(id, name, editable, canAddDownload, schedule, downloads);
-    }
 
-
-    public static List<QueueModel> findQueuesOfADownload(int id) {
+    public static List<QueueModel> findQueuesOfADownload(int downloadId) {
         var sql = """
                 SELECT q.*
                 FROM %s q
@@ -159,8 +148,8 @@ public class QueuesRepo {
                 .formatted(QUEUES_TABLE_NAME,
                         QUEUE_DOWNLOAD_TABLE_NAME, COL_ID, COL_QUEUE_ID,
                         DOWNLOADS_TABLE_NAME, COL_ID, COL_DOWNLOAD_ID,
-                        COL_ID, id);
-        return getQueues(false, sql);
+                        COL_ID, downloadId);
+        return getQueues(false, false, sql);
     }
 
     private static void alters() {
@@ -176,5 +165,26 @@ public class QueuesRepo {
         } catch (SQLException ignore) {
         }
 
+    }
+
+    static QueueModel createQueueModel(ResultSet rs, boolean fetchDownloads, boolean fetchSchedule) throws SQLException {
+        var id = rs.getInt(COL_ID);
+        var name = rs.getString(COL_NAME);
+        var editable = rs.getBoolean(COL_EDITABLE);
+        var canAddDownload = rs.getBoolean(COL_CAN_ADD_DOWN);
+        CopyOnWriteArrayList<DownloadModel> downloads = null;
+        if (fetchDownloads)
+            downloads = new CopyOnWriteArrayList<>(DownloadsRepo.getDownloadsByQueueName(name));
+        ScheduleModel schedule = null;
+        if (fetchSchedule)
+            schedule = ScheduleRepo.getSchedule(id);
+        return new QueueModel(id, name, editable, canAddDownload, schedule, downloads);
+    }
+
+    static QueueModel createQueueModel(ResultSet rs, int queueId, String queueName,
+                                       ScheduleModel schedule) throws SQLException {
+        var editable = rs.getBoolean(COL_EDITABLE);
+        var canAddDownload = rs.getBoolean(COL_CAN_ADD_DOWN);
+        return new QueueModel(queueId, queueName, editable, canAddDownload, schedule, null);
     }
 }
