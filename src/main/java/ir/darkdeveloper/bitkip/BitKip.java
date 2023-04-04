@@ -26,6 +26,8 @@ public class BitKip extends Application {
         DownloadsRepo.createTable();
         QueuesRepo.createTableAndDefaultRecords();
         ScheduleRepo.createSchedulesTable();
+        // todo create Default schedule for null schedules.
+        // schedules must be created at queue creation
         AppConfigs.setQueues(QueuesRepo.getAllQueues(false, true));
         FxUtils.switchSceneToMain(stage);
         AppConfigs.setHostServices(getHostServices());

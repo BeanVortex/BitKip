@@ -23,6 +23,8 @@ import javafx.stage.Screen;
 import javafx.stage.Stage;
 import org.kordamp.ikonli.javafx.FontIcon;
 
+import java.time.LocalDate;
+
 import static ir.darkdeveloper.bitkip.BitKip.getResource;
 import static ir.darkdeveloper.bitkip.config.AppConfigs.*;
 import static ir.darkdeveloper.bitkip.utils.FxUtils.SCHEDULER_STAGE;
@@ -191,11 +193,47 @@ public class SchedulerController implements FXMLController, QueueObserver {
         toolbarTitle.setText("Scheduler: %s".formatted(selectedQueue.get().getName()));
         stage.setTitle("Scheduler: %s".formatted(selectedQueue.get().getName()));
         queueList.getSelectionModel().select(selectedQueue.get());
-//        mainBox.setDisable(selectedQueue.get().getIsScheduled());
-//        enableToggle.setSelected(selectedQueue.get().getIsScheduled());
-        mainBox.setDisable(true);
-        enableToggle.setSelected(false);
-        stopContainer.setDisable(true);
+        datePicker.setValue(LocalDate.now());
+
+        var schedule = selectedQueue.get().getSchedule();
+        enableToggle.setSelected(schedule.isEnabled());
+        var startTime = schedule.getStartTime();
+        startHourSpinner.getEditor().setText(startTime.getHour() + "");
+        startMinuteSpinner.getEditor().setText(startTime.getMinute() + "");
+        startSecondSpinner.getEditor().setText(startTime.getSecond() + "");
+
+        onceRadio.setSelected(schedule.isOnceDownload());
+        //todo maybe a bug in here
+        dailyRadio.setSelected(!schedule.isOnceDownload());
+
+        schedule.getDays().forEach(day -> {
+            switch (day) {
+                case SATURDAY -> saturdayCheck.setSelected(true);
+                case SUNDAY -> sundayCheck.setSelected(true);
+                case MONDAY -> mondayCheck.setSelected(true);
+                case TUESDAY -> tuesdayCheck.setSelected(true);
+                case WEDNESDAY -> wednesdayCheck.setSelected(true);
+                case THURSDAY -> thursdayCheck.setSelected(true);
+                case FRIDAY -> fridayCheck.setSelected(true);
+            }
+        });
+
+        var startDate = schedule.getStartDate();
+        if (startDate != null)
+            datePicker.setValue(startDate);
+        stopAtCheck.setSelected(schedule.isStopTimeEnabled());
+        var stopTime = schedule.getStopTime();
+        stopContainer.setDisable(stopTime == null);
+        if (stopTime != null) {
+            stopHourSpinner.getEditor().setText(stopTime.getHour() + "");
+            stopMinuteSpinner.getEditor().setText(stopTime.getMinute() + "");
+            stopSecondSpinner.getEditor().setText(stopTime.getSecond() + "");
+        }
+        whenDoneCheck.setSelected(schedule.isTurnOffEnabled());
+        if (schedule.getTurnOffMode() != null)
+            powerCombo.setValue(schedule.getTurnOffMode());
+
+
     }
 
 

@@ -15,6 +15,7 @@ import java.util.Set;
 public class ScheduleModel {
 
     private int id;
+    private boolean enabled;
     private LocalTime startTime;
 
     // if true, it means startDate should not null
@@ -23,8 +24,10 @@ public class ScheduleModel {
 
     private Set<Day> days;
 
+    private boolean stopTimeEnabled;
     private LocalTime stopTime;
 
+    private boolean turnOffEnabled;
     private TurnOffMode turnOffMode;
 
     private int queueId;

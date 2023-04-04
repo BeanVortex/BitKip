@@ -18,11 +18,14 @@ import static ir.darkdeveloper.bitkip.repo.QueuesRepo.COL_SCHEDULE_ID;
 
 public class ScheduleRepo {
     static final String COL_ID = "id",
+            COL_ENABLED = "enabled",
             COL_START_TIME = "start_time",
             COL_ONCE_DOWNLOAD = "once_download",
             COL_START_DATE = "start_date",
             COL_DAYS = "days",
+            COL_STOP_TIME_ENABLED = "stop_time_enabled",
             COL_STOP_TIME = "stop_time",
+            COL_TURN_OFF_MODE_ENABLED = "turn_off_mode_enabled",
             COL_TURN_OFF_MODE = "turn_off_mode";
 
     public static void createSchedulesTable() {
@@ -30,11 +33,14 @@ public class ScheduleRepo {
                 CREATE TABLE IF NOT EXISTS %s
                 (
                     %s INTEGER PRIMARY KEY AUTOINCREMENT,
+                    %s INTEGER NOT NULL,
                     %s VARCHAR NOT NULL,
                     %s INTEGER NOT NULL,
                     %s VARCHAR,
                     %s VARCHAR,
+                    %s INTEGER,
                     %s VARCHAR,
+                    %s INTEGER,
                     %s VARCHAR,
                     %s INTEGER,
                     FOREIGN KEY (%s) REFERENCES %s(%s)
@@ -42,11 +48,14 @@ public class ScheduleRepo {
                 """
                 .formatted(SCHEDULE_TABLE_NAME,
                         COL_ID,
+                        COL_ENABLED,
                         COL_START_TIME,
                         COL_ONCE_DOWNLOAD,
                         COL_START_DATE,
                         COL_DAYS,
+                        COL_STOP_TIME_ENABLED,
                         COL_STOP_TIME,
+                        COL_TURN_OFF_MODE_ENABLED,
                         COL_TURN_OFF_MODE,
                         COL_QUEUE_ID,
                         COL_QUEUE_ID, QUEUES_TABLE_NAME, COL_ID);
@@ -56,15 +65,20 @@ public class ScheduleRepo {
     public static void insertSchedule(ScheduleModel schedule, int queueId) {
         var m = validScheduleProperties(schedule);
         var insertToScheduleSql = """
-                INSERT OR IGNORE INTO %s (%s,%s,%s,%s,%s,%s,%s) VALUES("%s",%d,%s,%s,%s,%s,%d);
+                INSERT OR IGNORE INTO %s (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s) VALUES(%d,"%s",%d,%s,%s,%d,%s,%d,%s,%d);
                 """
-                .formatted(SCHEDULE_TABLE_NAME, COL_START_TIME,
+                .formatted(SCHEDULE_TABLE_NAME, COL_ENABLED, COL_START_TIME,
                         COL_ONCE_DOWNLOAD, COL_START_DATE, COL_DAYS,
-                        COL_STOP_TIME, COL_TURN_OFF_MODE, COL_QUEUE_ID,
+                        COL_STOP_TIME_ENABLED, COL_STOP_TIME, COL_TURN_OFF_MODE_ENABLED,
+                        COL_TURN_OFF_MODE, COL_QUEUE_ID,
+                        schedule.isEnabled() ? 1 : 0,
                         schedule.getStartTime(),
                         schedule.isOnceDownload() ? 1 : 0,
                         m.get(COL_START_DATE), m.get(COL_DAYS),
-                        m.get(COL_STOP_TIME), m.get(COL_TURN_OFF_MODE),
+                        schedule.isStopTimeEnabled() ? 1 : 0,
+                        m.get(COL_STOP_TIME),
+                        schedule.isTurnOffEnabled() ? 1 : 0,
+                        m.get(COL_TURN_OFF_MODE),
                         queueId);
 
         try (var con = DatabaseHelper.openConnection();
@@ -108,10 +122,13 @@ public class ScheduleRepo {
         var startTime = rs.getString(COL_START_TIME);
         if (startTime == null)
             return null;
+        var enabled = rs.getBoolean(COL_ENABLED);
         var onceDownload = rs.getBoolean(COL_ONCE_DOWNLOAD);
-        var startDate = rs.getString(COL_START_DATE);
-        var stopTime = rs.getString(COL_STOP_TIME);
+        var startDateString = rs.getString(COL_START_DATE);
+        var stopTimeEnabled = rs.getBoolean(COL_STOP_TIME_ENABLED);
+        var stopTimeString = rs.getString(COL_STOP_TIME);
         var daysAsString = rs.getString(COL_DAYS);
+        var turnOffEnabled = rs.getBoolean(COL_TURN_OFF_MODE_ENABLED);
         var turnOffModeString = rs.getString(COL_TURN_OFF_MODE);
         var queueId = rs.getInt(COL_QUEUE_ID);
 
@@ -119,10 +136,11 @@ public class ScheduleRepo {
         var days = Arrays.stream(vars)
                 .map(Day::valueOf)
                 .collect(Collectors.toSet());
+        var startDate = startDateString == null ? null : LocalDate.parse(startDateString);
+        var stopTime = stopTimeString == null ? null : LocalTime.parse(stopTimeString);
         var turnOffMode = TurnOffMode.valueOf(turnOffModeString);
-        return new ScheduleModel(id, LocalTime.parse(startTime),
-                onceDownload, LocalDate.parse(startDate), days,
-                LocalTime.parse(stopTime), turnOffMode, queueId);
+        return new ScheduleModel(id, enabled, LocalTime.parse(startTime), onceDownload, startDate, days,
+                stopTimeEnabled, stopTime, turnOffEnabled, turnOffMode, queueId);
     }
 
 
@@ -130,7 +148,7 @@ public class ScheduleRepo {
         var m = validScheduleProperties(schedule);
 
         var sql = """
-                UPDATE %s SET %s="%s",%s=%d,%s=%s,%s=%s,%s=%s,%s=%s
+                UPDATE %s SET %s="%s",%s=%d,%s=%s,%s=%s,%s=%s,%s=%s,%s=%d,%s=%d,%s=%d
                 WHERE %s=%d;
                 """
                 .formatted(SCHEDULE_TABLE_NAME,
@@ -140,6 +158,9 @@ public class ScheduleRepo {
                         COL_DAYS, m.get(COL_DAYS),
                         COL_STOP_TIME, m.get(COL_STOP_TIME),
                         COL_TURN_OFF_MODE, m.get(COL_TURN_OFF_MODE),
+                        COL_ENABLED, schedule.isEnabled() ? 1 :0,
+                        COL_TURN_OFF_MODE_ENABLED, schedule.isTurnOffEnabled() ? 1 :0,
+                        COL_STOP_TIME_ENABLED, schedule.isStopTimeEnabled() ? 1 :0,
                         COL_ID, schedule.getId()
                 );
         DatabaseHelper.executeUpdateSql(sql);

@@ -76,19 +76,19 @@
                             <RowConstraints vgrow="ALWAYS"/>
                             <RowConstraints vgrow="ALWAYS"/>
                         </rowConstraints>
-                        <CheckBox selected="true" fx:id="saturdayCheck" text="Saturday" GridPane.columnIndex="0"
+                        <CheckBox selected="false" fx:id="saturdayCheck" text="Saturday" GridPane.columnIndex="0"
                                   GridPane.rowIndex="0"/>
-                        <CheckBox selected="true" fx:id="sundayCheck" text="Sunday" GridPane.columnIndex="0"
+                        <CheckBox selected="false" fx:id="sundayCheck" text="Sunday" GridPane.columnIndex="0"
                                   GridPane.rowIndex="1"/>
-                        <CheckBox selected="true" fx:id="mondayCheck" text="Monday" GridPane.columnIndex="0"
+                        <CheckBox selected="false" fx:id="mondayCheck" text="Monday" GridPane.columnIndex="0"
                                   GridPane.rowIndex="2"/>
-                        <CheckBox selected="true" fx:id="tuesdayCheck" text="Tuesday" GridPane.columnIndex="1"
+                        <CheckBox selected="false" fx:id="tuesdayCheck" text="Tuesday" GridPane.columnIndex="1"
                                   GridPane.rowIndex="0"/>
-                        <CheckBox selected="true" fx:id="wednesdayCheck" text="Wednesday" GridPane.columnIndex="1"
+                        <CheckBox selected="false" fx:id="wednesdayCheck" text="Wednesday" GridPane.columnIndex="1"
                                   GridPane.rowIndex="1"/>
-                        <CheckBox selected="true" fx:id="thursdayCheck" text="Thursday" GridPane.columnIndex="1"
+                        <CheckBox selected="false" fx:id="thursdayCheck" text="Thursday" GridPane.columnIndex="1"
                                   GridPane.rowIndex="2"/>
-                        <CheckBox selected="true" fx:id="fridayCheck" text="Friday" GridPane.columnIndex="2"
+                        <CheckBox selected="false" fx:id="fridayCheck" text="Friday" GridPane.columnIndex="2"
                                   GridPane.rowIndex="0"/>
                     </GridPane>
                 </VBox>
