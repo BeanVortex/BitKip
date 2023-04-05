@@ -2,8 +2,11 @@ package ir.darkdeveloper.bitkip.controllers;
 
 import ir.darkdeveloper.bitkip.config.QueueObserver;
 import ir.darkdeveloper.bitkip.controllers.interfaces.FXMLController;
+import ir.darkdeveloper.bitkip.models.Day;
 import ir.darkdeveloper.bitkip.models.QueueModel;
+import ir.darkdeveloper.bitkip.models.ScheduleModel;
 import ir.darkdeveloper.bitkip.models.TurnOffMode;
+import ir.darkdeveloper.bitkip.repo.ScheduleRepo;
 import ir.darkdeveloper.bitkip.utils.InputValidations;
 import ir.darkdeveloper.bitkip.utils.ResizeUtil;
 import ir.darkdeveloper.bitkip.utils.WindowUtils;
@@ -24,9 +27,12 @@ import javafx.stage.Stage;
 import org.kordamp.ikonli.javafx.FontIcon;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
+import java.util.HashSet;
 
 import static ir.darkdeveloper.bitkip.BitKip.getResource;
 import static ir.darkdeveloper.bitkip.config.AppConfigs.*;
+import static ir.darkdeveloper.bitkip.models.Day.*;
 import static ir.darkdeveloper.bitkip.utils.FxUtils.SCHEDULER_STAGE;
 import static ir.darkdeveloper.bitkip.utils.FxUtils.openStages;
 
@@ -73,7 +79,7 @@ public class SchedulerController implements FXMLController, QueueObserver {
     @FXML
     private HBox horLine2;
     @FXML
-    private CheckBox enableToggle;
+    private CheckBox enableCheck;
     @FXML
     private Spinner<Integer> startHourSpinner;
     @FXML
@@ -196,11 +202,14 @@ public class SchedulerController implements FXMLController, QueueObserver {
         datePicker.setValue(LocalDate.now());
 
         var schedule = selectedQueue.get().getSchedule();
-        enableToggle.setSelected(schedule.isEnabled());
+        enableCheck.setSelected(schedule.isEnabled());
+        mainBox.setDisable(!schedule.isEnabled());
         var startTime = schedule.getStartTime();
-        startHourSpinner.getEditor().setText(startTime.getHour() + "");
-        startMinuteSpinner.getEditor().setText(startTime.getMinute() + "");
-        startSecondSpinner.getEditor().setText(startTime.getSecond() + "");
+        if (startTime != null){
+            startHourSpinner.getEditor().setText(startTime.getHour() + "");
+            startMinuteSpinner.getEditor().setText(startTime.getMinute() + "");
+            startSecondSpinner.getEditor().setText(startTime.getSecond() + "");
+        }
 
         onceRadio.setSelected(schedule.isOnceDownload());
         //todo maybe a bug in here
@@ -222,14 +231,15 @@ public class SchedulerController implements FXMLController, QueueObserver {
         if (startDate != null)
             datePicker.setValue(startDate);
         stopAtCheck.setSelected(schedule.isStopTimeEnabled());
+        stopContainer.setDisable(!schedule.isStopTimeEnabled());
         var stopTime = schedule.getStopTime();
-        stopContainer.setDisable(stopTime == null);
         if (stopTime != null) {
             stopHourSpinner.getEditor().setText(stopTime.getHour() + "");
             stopMinuteSpinner.getEditor().setText(stopTime.getMinute() + "");
             stopSecondSpinner.getEditor().setText(stopTime.getSecond() + "");
         }
         whenDoneCheck.setSelected(schedule.isTurnOffEnabled());
+        powerCombo.setDisable(!schedule.isTurnOffEnabled());
         if (schedule.getTurnOffMode() != null)
             powerCombo.setValue(schedule.getTurnOffMode());
 
@@ -289,34 +299,74 @@ public class SchedulerController implements FXMLController, QueueObserver {
     }
 
     @FXML
-    private void onEnableToggle() {
-        mainBox.setDisable(!mainBox.isDisabled());
+    private void onEnableCheck() {
+        mainBox.setDisable(!enableCheck.isSelected());
     }
 
     @FXML
     private void onStopAtChecked() {
-        stopContainer.setDisable(!stopContainer.isDisabled());
+        stopContainer.setDisable(!stopAtCheck.isSelected());
     }
 
     @FXML
     private void onWhenDoneChecked() {
-        powerCombo.setDisable(!powerCombo.isDisabled());
+        powerCombo.setDisable(!whenDoneCheck.isSelected());
     }
 
-    @FXML
-    private void onPowerCombo() {
-
-    }
 
     @FXML
     private void onReset() {
+        initSelectedQueueData();
     }
 
     @FXML
     private void onCancel() {
+        stage.close();
     }
 
     @FXML
     private void onSave() {
+        var schedule = new ScheduleModel();
+        var queue = selectedQueue.get();
+        schedule.setId(queue.getSchedule().getId());
+        var days = new HashSet<Day>();
+        if (saturdayCheck.isSelected())
+            days.add(SATURDAY);
+        if (sundayCheck.isSelected())
+            days.add(SUNDAY);
+        if (mondayCheck.isSelected())
+            days.add(MONDAY);
+        if (tuesdayCheck.isSelected())
+            days.add(TUESDAY);
+        if (wednesdayCheck.isSelected())
+            days.add(WEDNESDAY);
+        if (thursdayCheck.isSelected())
+            days.add(THURSDAY);
+        if (fridayCheck.isSelected())
+            days.add(FRIDAY);
+        schedule.setDays(days);
+        schedule.setEnabled(enableCheck.isSelected());
+        schedule.setOnceDownload(onceRadio.isSelected());
+        schedule.setQueueId(queue.getId());
+        schedule.setStartDate(datePicker.getValue());
+        var startTime = LocalTime.of(startHourSpinner.getValue(),
+                startMinuteSpinner.getValue(), startSecondSpinner.getValue());
+        schedule.setStartTime(startTime);
+        schedule.setStopTimeEnabled(stopAtCheck.isSelected());
+        var stopTime = LocalTime.of(stopHourSpinner.getValue(),
+                stopMinuteSpinner.getValue(), stopSecondSpinner.getValue());
+        schedule.setStopTime(stopTime);
+        schedule.setTurnOffEnabled(whenDoneCheck.isSelected());
+        schedule.setTurnOffMode(powerCombo.getValue());
+        ScheduleRepo.updateSchedule(schedule);
+        var updatedQueues = getQueues().stream()
+                .peek(q -> {
+                    if (q.equals(queue))
+                        q.setSchedule(schedule);
+                }).toList();
+        setQueues(updatedQueues);
+        queueList.getItems().clear();
+        queueList.getItems().addAll(updatedQueues);
+        queueList.getSelectionModel().select(queue);
     }
 }

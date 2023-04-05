@@ -36,7 +36,7 @@
 
         <VBox>
             <HBox spacing="5" minWidth="450" alignment="CENTER_LEFT" styleClass="padding_10">
-                <CheckBox fx:id="enableToggle" onAction="#onEnableToggle" text="Enable Scheduling" styleClass="bold"/>
+                <CheckBox fx:id="enableCheck" onAction="#onEnableCheck" text="Enable Scheduling" styleClass="bold"/>
             </HBox>
 
             <VBox styleClass="padding_10">
@@ -113,7 +113,7 @@
 
                 <HBox spacing="10" alignment="CENTER_LEFT" styleClass="padding_10">
                     <CheckBox text="When done: " fx:id="whenDoneCheck" styleClass="bold" onAction="#onWhenDoneChecked"/>
-                    <ComboBox fx:id="powerCombo" onAction="#onPowerCombo"/>
+                    <ComboBox fx:id="powerCombo"/>
                 </HBox>
 
 
