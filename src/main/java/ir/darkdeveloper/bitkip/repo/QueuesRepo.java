@@ -22,15 +22,19 @@ public class QueuesRepo {
             COL_SCHEDULE_ID = "schedule_id";
 
 
-    public static void createTableAndDefaultRecords() {
+    public static void createTable() {
         createQueuesTable();
         createQueueDownloadTable();
-        FileExtensions.staticQueueNames.forEach(name -> {
+    }
+
+    public static List<QueueModel> createDefaultRecords(){
+        return FileExtensions.staticQueueNames.stream().map(name -> {
             var queue = new QueueModel(name, false, false);
             if (name.equals("All Downloads"))
                 queue.setCanAddDownload(true);
             insertQueue(queue);
-        });
+            return queue;
+        }).toList();
     }
 
     private static void createQueuesTable() {
@@ -75,11 +79,18 @@ public class QueuesRepo {
 
 
     public static void insertQueue(QueueModel queue) {
+        var schedule = new ScheduleModel();
+        ScheduleRepo.insertSchedule(schedule, queue.getId());
+
         var sql = """
-                INSERT OR IGNORE INTO %s (%s,%s,%s) VALUES("%s",%d,%d);
+                INSERT OR IGNORE INTO %s (%s,%s,%s,%s) VALUES("%s",%d,%d,%d);
                 """
-                .formatted(QUEUES_TABLE_NAME, COL_NAME, COL_EDITABLE, COL_CAN_ADD_DOWN,
-                        queue.getName(), queue.isEditable() ? 1 : 0, queue.isCanAddDownload() ? 1 : 0);
+                .formatted(QUEUES_TABLE_NAME,
+                        COL_NAME, COL_EDITABLE, COL_CAN_ADD_DOWN, COL_SCHEDULE_ID,
+                        queue.getName(),
+                        queue.isEditable() ? 1 : 0,
+                        queue.isCanAddDownload() ? 1 : 0,
+                        schedule.getId());
         try (var con = DatabaseHelper.openConnection();
              var stmt = con.createStatement()) {
             stmt.executeUpdate(sql);
@@ -127,6 +138,16 @@ public class QueuesRepo {
         return list;
     }
 
+
+    public static void updateQueueScheduleId(int queueId, int scheduleId) {
+        var sql = """
+                UPDATE %s SET %s=%d WHERE %s=%d;
+                """
+                .formatted(QUEUES_TABLE_NAME,
+                        COL_SCHEDULE_ID, scheduleId,
+                        COL_ID, queueId);
+        DatabaseHelper.executeUpdateSql(sql);
+    }
 
     public static void deleteQueue(String name) {
         var sql = """

@@ -24,11 +24,13 @@ public class BitKip extends Application {
     public void start(Stage stage) {
         IOUtils.createSaveLocations();
         DownloadsRepo.createTable();
-        QueuesRepo.createTableAndDefaultRecords();
         ScheduleRepo.createSchedulesTable();
-        // todo create Default schedule for null schedules.
-        // schedules must be created at queue creation
-        AppConfigs.setQueues(QueuesRepo.getAllQueues(false, true));
+        QueuesRepo.createTable();
+        var queues = QueuesRepo.getAllQueues(false, true);
+        if (queues == null)
+            queues = QueuesRepo.createDefaultRecords();
+        queues = ScheduleRepo.createDefaultSchedulesForQueues(queues);
+        AppConfigs.setQueues(queues);
         FxUtils.switchSceneToMain(stage);
         AppConfigs.setHostServices(getHostServices());
         stage.initStyle(StageStyle.UNDECORATED);

@@ -32,5 +32,4 @@ public class ScheduleModel {
 
     private int queueId;
 
-
 }
