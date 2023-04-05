@@ -160,14 +160,6 @@ public class ScheduleRepo {
         DatabaseHelper.executeUpdateSql(sql);
     }
 
-    public static void deleteSchedule(int id) {
-        var sql = """
-                DELETE FROM %s WHERE %s = %d;
-                """
-                .formatted(SCHEDULE_TABLE_NAME, COL_ID, id);
-        DatabaseHelper.executeUpdateSql(sql);
-    }
-
     // for removal in future
     public static List<QueueModel> createDefaultSchedulesForQueues(List<QueueModel> queues) {
         return queues.stream().peek(queue -> {
