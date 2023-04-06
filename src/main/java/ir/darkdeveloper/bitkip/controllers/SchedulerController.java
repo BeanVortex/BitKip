@@ -29,15 +29,19 @@ import org.kordamp.ikonli.javafx.FontIcon;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.HashSet;
+import java.util.concurrent.Executors;
 
 import static ir.darkdeveloper.bitkip.BitKip.getResource;
 import static ir.darkdeveloper.bitkip.config.AppConfigs.*;
 import static ir.darkdeveloper.bitkip.models.Day.*;
 import static ir.darkdeveloper.bitkip.utils.FxUtils.SCHEDULER_STAGE;
 import static ir.darkdeveloper.bitkip.utils.FxUtils.openStages;
+import static ir.darkdeveloper.bitkip.utils.IOUtils.getBytesFromString;
 
 public class SchedulerController implements FXMLController, QueueObserver {
 
+    @FXML
+    private Label savedLabel;
     @FXML
     private VBox rightContainer;
     @FXML
@@ -384,6 +388,8 @@ public class SchedulerController implements FXMLController, QueueObserver {
         schedule.setStopTime(stopTime);
         schedule.setTurnOffEnabled(whenDoneCheck.isSelected());
         schedule.setTurnOffMode(powerCombo.getValue());
+        schedule.setSpeed(getBytesFromString(speedField.getText()));
+        schedule.setSimultaneouslyDownload(simulDownloadSpinner.getValue());
         ScheduleRepo.updateSchedule(schedule);
         var updatedQueues = getQueues().stream()
                 .peek(q -> {
@@ -394,5 +400,14 @@ public class SchedulerController implements FXMLController, QueueObserver {
         queueList.getItems().clear();
         queueList.getItems().addAll(updatedQueues);
         queueList.getSelectionModel().select(queue);
+        var executor = Executors.newCachedThreadPool();
+        executor.submit(() -> {
+            try {
+                savedLabel.setVisible(true);
+                Thread.sleep(1500);
+                savedLabel.setVisible(false);
+            } catch (InterruptedException ignore) {
+            }
+        });
     }
 }

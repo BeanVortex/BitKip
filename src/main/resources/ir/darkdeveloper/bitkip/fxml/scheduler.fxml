@@ -124,6 +124,8 @@
 
 
                 </VBox>
+
+                <Label text="Successfully Saved" styleClass="padding_10, success_label" fx:id="savedLabel" visible="false"/>
                 <Region VBox.vgrow="ALWAYS"/>
                 <HBox spacing="10" alignment="CENTER_LEFT" styleClass="padding_10">
                     <Button text="Reset" styleClass="add_btn" onAction="#onReset"/>

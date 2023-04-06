@@ -25,7 +25,9 @@ public class ScheduleRepo {
             COL_STOP_TIME_ENABLED = "stop_time_enabled",
             COL_STOP_TIME = "stop_time",
             COL_TURN_OFF_MODE_ENABLED = "turn_off_mode_enabled",
-            COL_TURN_OFF_MODE = "turn_off_mode";
+            COL_TURN_OFF_MODE = "turn_off_mode",
+            COL_SPEED_LIMIT = "speed_limit",
+            COL_SIMUL_DOWNLOAD = "simultaneously_download";
 
     public static final Set<Day> DAYS = Set.of(SATURDAY, SUNDAY, MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY);
 
@@ -45,6 +47,8 @@ public class ScheduleRepo {
                     %s INTEGER,
                     %s VARCHAR,
                     %s INTEGER,
+                    %s INTEGER,
+                    %s INTEGER,
                     FOREIGN KEY (%s) REFERENCES %s(%s)
                     );
                 """
@@ -59,6 +63,8 @@ public class ScheduleRepo {
                         COL_STOP_TIME,
                         COL_TURN_OFF_MODE_ENABLED,
                         COL_TURN_OFF_MODE,
+                        COL_SIMUL_DOWNLOAD,
+                        COL_SPEED_LIMIT,
                         COL_QUEUE_ID,
                         COL_QUEUE_ID, QUEUES_TABLE_NAME, COL_ID);
         DatabaseHelper.createTable(sql);
@@ -67,12 +73,12 @@ public class ScheduleRepo {
     public static void insertSchedule(ScheduleModel schedule, int queueId) {
         var m = validScheduleProperties(schedule);
         var insertToScheduleSql = """
-                INSERT INTO %s (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s) VALUES(%d,%s,%d,%s,%s,%d,%s,%d,%s,%d);
+                INSERT INTO %s (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s) VALUES(%d,%s,%d,%s,%s,%d,%s,%d,%s,%d,%d,%d);
                 """
                 .formatted(SCHEDULE_TABLE_NAME, COL_ENABLED, COL_START_TIME,
                         COL_ONCE_DOWNLOAD, COL_START_DATE, COL_DAYS,
                         COL_STOP_TIME_ENABLED, COL_STOP_TIME, COL_TURN_OFF_MODE_ENABLED,
-                        COL_TURN_OFF_MODE, COL_QUEUE_ID,
+                        COL_TURN_OFF_MODE, COL_SIMUL_DOWNLOAD, COL_SPEED_LIMIT, COL_QUEUE_ID,
                         schedule.isEnabled() ? 1 : 0,
                         m.get(COL_START_TIME),
                         schedule.isOnceDownload() ? 1 : 0,
@@ -81,6 +87,8 @@ public class ScheduleRepo {
                         m.get(COL_STOP_TIME),
                         schedule.isTurnOffEnabled() ? 1 : 0,
                         m.get(COL_TURN_OFF_MODE),
+                        schedule.getSimultaneouslyDownload(),
+                        schedule.getSpeed(),
                         queueId);
 
         try (var con = DatabaseHelper.openConnection();
@@ -118,6 +126,8 @@ public class ScheduleRepo {
         var enabled = rs.getBoolean(COL_ENABLED);
         var onceDownload = rs.getBoolean(COL_ONCE_DOWNLOAD);
         var startDateString = rs.getString(COL_START_DATE);
+        var speed = rs.getLong(COL_SPEED_LIMIT);
+        var simulDownload = rs.getInt(COL_SIMUL_DOWNLOAD);
         var stopTimeEnabled = rs.getBoolean(COL_STOP_TIME_ENABLED);
         var stopTimeString = rs.getString(COL_STOP_TIME);
         var daysAsString = rs.getString(COL_DAYS);
@@ -133,7 +143,7 @@ public class ScheduleRepo {
         var startDate = startDateString == null ? null : LocalDate.parse(startDateString);
         var stopTime = stopTimeString == null ? null : LocalTime.parse(stopTimeString);
         var turnOffMode = turnOffModeString == null ? null : TurnOffMode.valueOf(turnOffModeString);
-        return new ScheduleModel(id, enabled, startTime, onceDownload, startDate, days,
+        return new ScheduleModel(id, enabled, startTime, onceDownload, startDate, days, speed, simulDownload,
                 stopTimeEnabled, stopTime, turnOffEnabled, turnOffMode, queueId);
     }
 
@@ -142,7 +152,7 @@ public class ScheduleRepo {
         var m = validScheduleProperties(schedule);
 
         var sql = """
-                UPDATE %s SET %s=%s,%s=%d,%s=%s,%s=%s,%s=%s,%s=%s,%s=%d,%s=%d,%s=%d
+                UPDATE %s SET %s=%s,%s=%d,%s=%s,%s=%s,%s=%s,%s=%s,%s=%d,%s=%d,%s=%d,%s=%d,%s=%d
                 WHERE %s=%d;
                 """
                 .formatted(SCHEDULE_TABLE_NAME,
@@ -155,6 +165,8 @@ public class ScheduleRepo {
                         COL_ENABLED, schedule.isEnabled() ? 1 : 0,
                         COL_TURN_OFF_MODE_ENABLED, schedule.isTurnOffEnabled() ? 1 : 0,
                         COL_STOP_TIME_ENABLED, schedule.isStopTimeEnabled() ? 1 : 0,
+                        COL_SIMUL_DOWNLOAD, schedule.getSimultaneouslyDownload(),
+                        COL_SPEED_LIMIT, schedule.getSpeed(),
                         COL_ID, schedule.getId()
                 );
         DatabaseHelper.executeUpdateSql(sql);

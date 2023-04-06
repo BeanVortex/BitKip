@@ -109,7 +109,7 @@ public class DownloadsRepo {
                 SELECT d.*,
                        qd.%s,
                        q.%s as %s,q.%s,q.%s,q.%s,
-                       sc.%s,sc.%s,sc.%s,sc.%s,sc.%s,sc.%s,sc.%s,sc.%s,sc.%s
+                       sc.%s,sc.%s,sc.%s,sc.%s,sc.%s,sc.%s,sc.%s,sc.%s,sc.%s,sc.%s,sc.%s
                 FROM %s d
                          INNER JOIN %s qd ON d.%s = qd.%s
                          INNER JOIN %s q ON q.%s = qd.%s
@@ -120,6 +120,7 @@ public class DownloadsRepo {
                         COL_NAME, COL_QUEUE_NAME, COL_EDITABLE, COL_CAN_ADD_DOWN, COL_SCHEDULE_ID,
                         COL_ENABLED, COL_DAYS, COL_ONCE_DOWNLOAD, COL_START_TIME, COL_START_DATE,
                         COL_STOP_TIME_ENABLED, COL_STOP_TIME, COL_TURN_OFF_MODE_ENABLED, COL_TURN_OFF_MODE,
+                        COL_SPEED_LIMIT, COL_SIMUL_DOWNLOAD,
                         DOWNLOADS_TABLE_NAME,
                         QUEUE_DOWNLOAD_TABLE_NAME, COL_ID, COL_DOWNLOAD_ID,
                         QUEUES_TABLE_NAME, COL_ID, COL_QUEUE_ID,

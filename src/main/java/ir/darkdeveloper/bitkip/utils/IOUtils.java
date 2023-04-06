@@ -42,6 +42,10 @@ public class IOUtils {
         return new DecimalFormat("#,##0.#").format(bytes / Math.pow(1024, digitGroups)) + " " + units[digitGroups];
     }
 
+    public static long getBytesFromString(String mb) {
+        var mbVal = Double.parseDouble(mb);
+        return (long) (mbVal * Math.pow(2, 20));
+    }
 
     public static boolean mergeFiles(DownloadModel dm, int chunks, List<Path> filePaths) throws IOException {
         var currentFileSize = 0L;

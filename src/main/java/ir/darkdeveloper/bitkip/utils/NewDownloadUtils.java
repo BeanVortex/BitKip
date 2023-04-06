@@ -31,6 +31,7 @@ import java.util.concurrent.Executors;
 import static ir.darkdeveloper.bitkip.config.AppConfigs.currentDownloadings;
 import static ir.darkdeveloper.bitkip.config.AppConfigs.showCompleteDialog;
 import static ir.darkdeveloper.bitkip.utils.FileExtensions.*;
+import static ir.darkdeveloper.bitkip.utils.IOUtils.getBytesFromString;
 
 public class NewDownloadUtils {
 
@@ -235,11 +236,6 @@ public class NewDownloadUtils {
         else
             executor.submit(downloadTask);
 
-    }
-
-    private static long getBytesFromString(String mb) {
-        var mbVal = Double.parseDouble(mb);
-        return (long) (mbVal * Math.pow(2, 20));
     }
 
 
