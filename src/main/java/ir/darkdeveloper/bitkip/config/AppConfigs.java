@@ -53,7 +53,7 @@ public class AppConfigs {
 
 
     private static final QueueSubject queueSubject = new QueueSubject();
-    private static List<QueueModel> queues = new ArrayList<>();
+    private static final List<QueueModel> queues = new ArrayList<>();
 
     public static void addQueue(QueueModel queue) {
         queues.add(queue);
@@ -69,8 +69,9 @@ public class AppConfigs {
         return queues;
     }
 
-    public static void setQueues(List<QueueModel> queues) {
-        AppConfigs.queues = queues;
+    public static void addAllQueues(List<QueueModel> queues) {
+        AppConfigs.queues.clear();
+        AppConfigs.queues.addAll(queues);
         queueSubject.notifyAllObservers();
     }
 

@@ -12,34 +12,34 @@
 
 
     <HBox spacing="20" alignment="CENTER">
-        <Label text="URL :" minWidth="60" styleClass="field-label"/>
+        <Label text="URL :" minWidth="60" styleClass="bold"/>
         <TextField fx:id="urlField" HBox.hgrow="ALWAYS"/>
         <Button fx:id="questionBtnUrl"/>
     </HBox>
 
     <HBox alignment="BASELINE_LEFT">
         <HBox spacing="20" alignment="CENTER">
-            <Label text="Start :" minWidth="60" styleClass="field-label"/>
+            <Label text="Start :" minWidth="60" styleClass="bold"/>
             <TextField fx:id="startField" text="0"/>
         </HBox>
     </HBox>
 
     <HBox alignment="BASELINE_LEFT">
         <HBox spacing="20" alignment="CENTER">
-            <Label text="End :" minWidth="60" styleClass="field-label"/>
+            <Label text="End :" minWidth="60" styleClass="bold"/>
             <TextField fx:id="endField" text="0"/>
         </HBox>
     </HBox>
 
     <HBox spacing="15" alignment="CENTER">
-        <Label text="Location :" minWidth="60" styleClass="field-label"/>
+        <Label text="Location :" minWidth="60" styleClass="bold"/>
         <TextField fx:id="locationField" HBox.hgrow="ALWAYS"/>
         <Button fx:id="openLocation" onAction="#onSelectLocation"/>
     </HBox>
 
     <HBox alignment="BASELINE_LEFT">
         <HBox spacing="20" alignment="CENTER">
-            <Label text="Queue :" minWidth="60" styleClass="field-label"/>
+            <Label text="Queue :" minWidth="60" styleClass="bold"/>
             <ComboBox fx:id="queueCombo" />
             <Button fx:id="newQueue" onAction="#onNewQueue"/>
         </HBox>
@@ -48,7 +48,7 @@
 
     <HBox alignment="BASELINE_LEFT">
         <HBox spacing="20" alignment="CENTER">
-            <Label text="chunks :" minWidth="60" styleClass="field-label"/>
+            <Label text="chunks :" minWidth="60" styleClass="bold"/>
             <TextField fx:id="chunksField" text="0"/>
             <Button fx:id="questionBtnChunks"/>
         </HBox>
@@ -56,7 +56,7 @@
 
     <HBox alignment="BASELINE_LEFT">
         <HBox spacing="20" alignment="CENTER">
-            <Label fx:id="errorLabel" styleClass="field-label"/>
+            <Label fx:id="errorLabel" styleClass="bold"/>
         </HBox>
     </HBox>
 

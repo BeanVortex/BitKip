@@ -1,14 +1,17 @@
 package ir.darkdeveloper.bitkip.controllers;
 
 import ir.darkdeveloper.bitkip.config.AppConfigs;
-import ir.darkdeveloper.bitkip.config.QueueObserver;
 import ir.darkdeveloper.bitkip.controllers.interfaces.FXMLController;
 import ir.darkdeveloper.bitkip.models.QueueModel;
+import ir.darkdeveloper.bitkip.models.ScheduleModel;
 import ir.darkdeveloper.bitkip.repo.QueuesRepo;
+import ir.darkdeveloper.bitkip.repo.ScheduleRepo;
+import ir.darkdeveloper.bitkip.utils.IOUtils;
 import ir.darkdeveloper.bitkip.utils.WindowUtils;
 import javafx.fxml.FXML;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.control.Button;
+import javafx.scene.control.CheckBox;
 import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
@@ -19,8 +22,10 @@ import org.kordamp.ikonli.javafx.FontIcon;
 
 import static ir.darkdeveloper.bitkip.BitKip.getResource;
 
-public class NewQueueController implements FXMLController, QueueObserver {
+public class NewQueueController implements FXMLController {
 
+    @FXML
+    private CheckBox hasFolderCheck;
     @FXML
     private ImageView logoImg;
     @FXML
@@ -45,7 +50,6 @@ public class NewQueueController implements FXMLController, QueueObserver {
     public Stage getStage() {
         return stage;
     }
-
 
 
     @Override
@@ -81,12 +85,17 @@ public class NewQueueController implements FXMLController, QueueObserver {
         queueModel.setName(queueName);
         queueModel.setEditable(true);
         queueModel.setCanAddDownload(true);
+        queueModel.setHasFolder(hasFolderCheck.isSelected());
+        if (hasFolderCheck.isSelected())
+            IOUtils.createFolderInSaveLocation(queueName);
+        var schedule = new ScheduleModel();
+        ScheduleRepo.insertSchedule(schedule, -1);
+        queueModel.setSchedule(schedule);
         QueuesRepo.insertQueue(queueModel);
+        schedule.setQueueId(queueModel.getId());
+        ScheduleRepo.updateScheduleQueueId(schedule.getId(), schedule.getQueueId());
         AppConfigs.addQueue(queueModel);
         stage.close();
     }
 
-    @Override
-    public void updateQueue() {
-    }
 }

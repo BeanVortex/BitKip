@@ -29,34 +29,34 @@
 
 
     <VBox spacing="10" style="-fx-padding: 8">
-        <Label fx:id="nameLbl" text="fileName" styleClass="field-label"/>
-        <Label fx:id="queueLbl" text="queueName" styleClass="field-label"/>
-        <Label fx:id="statusLbl" text="status" styleClass="field-label"/>
+        <Label fx:id="nameLbl" text="fileName" styleClass="bold"/>
+        <Label fx:id="queueLbl" text="queueName" styleClass="bold"/>
+        <Label fx:id="statusLbl" text="status" styleClass="bold"/>
         <VBox spacing="5" style="-fx-padding: 10 0 10 0">
             <HBox>
-                <Label fx:id="speedLbl" text="0 MB/s" styleClass="field-label"/>
+                <Label fx:id="speedLbl" text="0 MB/s" styleClass="bold"/>
                 <Region HBox.hgrow="ALWAYS"/>
-                <Label fx:id="downloadedOfLbl" text="0 MB / 0 MB" styleClass="field-label"/>
+                <Label fx:id="downloadedOfLbl" text="0 MB / 0 MB" styleClass="bold"/>
             </HBox>
             <ProgressBar fx:id="downloadProgress" prefWidth="Infinity"/>
         </VBox>
-        <Label fx:id="progressLbl" text="progress" styleClass="field-label"/>
-        <Label fx:id="remainingLbl" text="remaining time" styleClass="field-label"/>
+        <Label fx:id="progressLbl" text="progress" styleClass="bold"/>
+        <Label fx:id="remainingLbl" text="remaining time" styleClass="bold"/>
         <Accordion>
             <panes>
                 <TitledPane id="titledPane" animated="false" text="Advanced" fx:id="advancedPane">
                     <VBox spacing="10" fx:id="advancedVbox">
-                        <ToggleSwitch text="Open after complete" fx:id="openSwitch" styleClass="field-label"/>
-                        <ToggleSwitch text="Show complete dialog" fx:id="showSwitch" styleClass="field-label"/>
+                        <ToggleSwitch text="Open after complete" fx:id="openSwitch" styleClass="bold"/>
+                        <ToggleSwitch text="Show complete dialog" fx:id="showSwitch" styleClass="bold"/>
                         <HBox alignment="BASELINE_LEFT">
                             <HBox spacing="20" alignment="CENTER">
-                                <Label text="Speed limit (MB) :" minWidth="60" styleClass="field-label"/>
+                                <Label text="Speed limit (MB) :" minWidth="60" styleClass="bold"/>
                                 <TextField fx:id="speedField" text="0"/>
                             </HBox>
                         </HBox>
 
                         <HBox spacing="15" alignment="BASELINE_LEFT">
-                            <Label text="Download till :" minWidth="60" styleClass="field-label"/>
+                            <Label text="Download till :" minWidth="60" styleClass="bold"/>
                             <TextField fx:id="bytesField"/>
                         </HBox>
                     </VBox>

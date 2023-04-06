@@ -396,7 +396,7 @@ public class SchedulerController implements FXMLController, QueueObserver {
                     if (q.equals(queue))
                         q.setSchedule(schedule);
                 }).toList();
-        setQueues(updatedQueues);
+        addAllQueues(updatedQueues);
         queueList.getItems().clear();
         queueList.getItems().addAll(updatedQueues);
         queueList.getSelectionModel().select(queue);

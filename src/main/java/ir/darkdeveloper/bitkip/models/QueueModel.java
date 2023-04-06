@@ -14,14 +14,12 @@ public class QueueModel {
     private String name;
     private boolean editable;
     private boolean canAddDownload;
-
+    private boolean hasFolder;
     private ScheduleModel schedule;
-
     private CopyOnWriteArrayList<DownloadModel> downloads;
 
-    public QueueModel(String name, boolean editable, boolean canAddDownload) {
+    public QueueModel(String name, boolean canAddDownload) {
         this.name = name;
-        this.editable = editable;
         this.canAddDownload = canAddDownload;
     }
 
@@ -42,5 +40,9 @@ public class QueueModel {
     @Override
     public int hashCode() {
         return Objects.hash(id, name, editable, canAddDownload);
+    }
+
+    public boolean hasFolder() {
+        return hasFolder;
     }
 }

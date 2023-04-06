@@ -6,6 +6,7 @@
 <?import javafx.scene.layout.*?>
 <?import java.net.URL?>
 <?import javafx.scene.image.ImageView?>
+<?import javafx.scene.control.CheckBox?>
 <VBox xmlns="http://javafx.com/javafx"
       xmlns:fx="http://javafx.com/fxml"
       fx:controller="ir.darkdeveloper.bitkip.controllers.NewQueueController"
@@ -32,9 +33,12 @@
 
     <VBox spacing="10" styleClass="new_queue" alignment="CENTER">
         <HBox spacing="20" alignment="CENTER">
-            <Label text="Name :" minWidth="60" styleClass="field-label"/>
+            <Label text="Name :" minWidth="60" styleClass="bold"/>
             <TextField fx:id="queueField" HBox.hgrow="ALWAYS"/>
         </HBox>
+
+        <CheckBox fx:id="hasFolderCheck" text="Create dedicated folder" styleClass="bold"/>
+
         <Button text="Add" onAction="#onSaveQueue" styleClass="add_btn"/>
     </VBox>
 

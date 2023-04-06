@@ -39,12 +39,13 @@ public class DatabaseHelper {
         }
     }
 
-    static void executeUpdateSql(String sql) {
+    static void executeUpdateSql(String sql, boolean ignoreStackTrace) {
         try (var conn = openConnection();
              var stmt = conn.createStatement()) {
             stmt.executeUpdate(sql);
         } catch (SQLException e) {
-            e.printStackTrace();
+            if (!ignoreStackTrace)
+                e.printStackTrace();
         }
     }
 

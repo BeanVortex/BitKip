@@ -108,7 +108,7 @@ public class DownloadsRepo {
         var sql = """
                 SELECT d.*,
                        qd.%s,
-                       q.%s as %s,q.%s,q.%s,q.%s,
+                       q.%s as %s,q.%s,q.%s,q.%s,q.%s,
                        sc.%s,sc.%s,sc.%s,sc.%s,sc.%s,sc.%s,sc.%s,sc.%s,sc.%s,sc.%s,sc.%s
                 FROM %s d
                          INNER JOIN %s qd ON d.%s = qd.%s
@@ -117,7 +117,7 @@ public class DownloadsRepo {
                 WHERE q.%s = "%s"
                 """
                 .formatted(COL_QUEUE_ID,
-                        COL_NAME, COL_QUEUE_NAME, COL_EDITABLE, COL_CAN_ADD_DOWN, COL_SCHEDULE_ID,
+                        COL_NAME, COL_QUEUE_NAME, COL_EDITABLE, COL_CAN_ADD_DOWN, COL_HAS_FOLDER, COL_SCHEDULE_ID,
                         COL_ENABLED, COL_DAYS, COL_ONCE_DOWNLOAD, COL_START_TIME, COL_START_DATE,
                         COL_STOP_TIME_ENABLED, COL_STOP_TIME, COL_TURN_OFF_MODE_ENABLED, COL_TURN_OFF_MODE,
                         COL_SPEED_LIMIT, COL_SIMUL_DOWNLOAD,
@@ -217,7 +217,7 @@ public class DownloadsRepo {
                 DELETE FROM %s WHERE %s=%d;
                 """
                 .formatted(DOWNLOADS_TABLE_NAME, COL_ID, download.getId());
-        DatabaseHelper.executeUpdateSql(sql);
+        DatabaseHelper.executeUpdateSql(sql, false);
     }
 
     public static void deleteDownloadQueue(int downloadId, int queueId) {
@@ -225,7 +225,7 @@ public class DownloadsRepo {
                 DELETE FROM %s WHERE %s = %d AND %s = %d;
                 """
                 .formatted(QUEUE_DOWNLOAD_TABLE_NAME, COL_DOWNLOAD_ID, downloadId, COL_QUEUE_ID, queueId);
-        DatabaseHelper.executeUpdateSql(sql);
+        DatabaseHelper.executeUpdateSql(sql, false);
     }
 
     private static DownloadModel createDownload(ResultSet rs) throws SQLException {
@@ -273,7 +273,7 @@ public class DownloadsRepo {
                         COL_PROGRESS, dm.getProgress(),
                         COL_DOWNLOADED, dm.getDownloaded(),
                         COL_ID, dm.getId());
-        DatabaseHelper.executeUpdateSql(sql);
+        DatabaseHelper.executeUpdateSql(sql, false);
     }
 
     public static void updateDownloadCompleteDate(DownloadModel dm) {
@@ -283,7 +283,7 @@ public class DownloadsRepo {
                 .formatted(DOWNLOADS_TABLE_NAME,
                         COL_COMPLETE_DATE, dm.getCompleteDate(),
                         COL_ID, dm.getId());
-        DatabaseHelper.executeUpdateSql(sql);
+        DatabaseHelper.executeUpdateSql(sql, false);
     }
 
     public static void updateDownloadLastTryDate(DownloadModel dm) {
@@ -293,7 +293,7 @@ public class DownloadsRepo {
                 .formatted(DOWNLOADS_TABLE_NAME,
                         COL_LAST_TRY_DATE, dm.getLastTryDate(),
                         COL_ID, dm.getId());
-        DatabaseHelper.executeUpdateSql(sql);
+        DatabaseHelper.executeUpdateSql(sql, false);
     }
 
     public static void updateDownloadOpenAfterComplete(DownloadModel dm) {
@@ -303,7 +303,7 @@ public class DownloadsRepo {
                 .formatted(DOWNLOADS_TABLE_NAME,
                         COL_OPEN_AFTER_COMPLETE, dm.isOpenAfterComplete() ? 1 : 0,
                         COL_ID, dm.getId());
-        DatabaseHelper.executeUpdateSql(sql);
+        DatabaseHelper.executeUpdateSql(sql, false);
     }
 
     public static void updateDownloadShowCompleteDialog(DownloadModel dm) {
@@ -313,7 +313,7 @@ public class DownloadsRepo {
                 .formatted(DOWNLOADS_TABLE_NAME,
                         COL_SHOW_COMPLETE_DIALOG, dm.isShowCompleteDialog() ? 1 : 0,
                         COL_ID, dm.getId());
-        DatabaseHelper.executeUpdateSql(sql);
+        DatabaseHelper.executeUpdateSql(sql, false);
     }
 
     public static void updateTableStatus(DownloadModel dm) {
@@ -333,7 +333,7 @@ public class DownloadsRepo {
                         COL_COMPLETE_DATE, completeDate,
                         COL_LAST_TRY_DATE, lastTryDate,
                         COL_ID, dm.getId());
-        DatabaseHelper.executeUpdateSql(sql);
+        DatabaseHelper.executeUpdateSql(sql, false);
     }
 
     public static void insertDownloads(List<DownloadModel> dms) {

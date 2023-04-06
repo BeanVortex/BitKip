@@ -73,7 +73,7 @@ public class ScheduleRepo {
     public static void insertSchedule(ScheduleModel schedule, int queueId) {
         var m = validScheduleProperties(schedule);
         var insertToScheduleSql = """
-                INSERT INTO %s (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s) VALUES(%d,%s,%d,%s,%s,%d,%s,%d,%s,%d,%d,%d);
+                INSERT INTO %s (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s) VALUES(%d,%s,%d,%s,%s,%d,%s,%d,%s,%d,%d,%s);
                 """
                 .formatted(SCHEDULE_TABLE_NAME, COL_ENABLED, COL_START_TIME,
                         COL_ONCE_DOWNLOAD, COL_START_DATE, COL_DAYS,
@@ -89,7 +89,7 @@ public class ScheduleRepo {
                         m.get(COL_TURN_OFF_MODE),
                         schedule.getSimultaneouslyDownload(),
                         schedule.getSpeed(),
-                        queueId);
+                        queueId == -1 ? "NULL" : queueId);
 
         try (var con = DatabaseHelper.openConnection();
              var stmt = con.createStatement()) {
@@ -147,7 +147,6 @@ public class ScheduleRepo {
                 stopTimeEnabled, stopTime, turnOffEnabled, turnOffMode, queueId);
     }
 
-
     public static void updateSchedule(ScheduleModel schedule) {
         var m = validScheduleProperties(schedule);
 
@@ -169,7 +168,15 @@ public class ScheduleRepo {
                         COL_SPEED_LIMIT, schedule.getSpeed(),
                         COL_ID, schedule.getId()
                 );
-        DatabaseHelper.executeUpdateSql(sql);
+        DatabaseHelper.executeUpdateSql(sql, false);
+    }
+
+    public static void updateScheduleQueueId(int scheduleId, int queueId) {
+        var sql = """
+                UPDATE %s SET %s=%d WHERE %s=%d;
+                """
+                .formatted(SCHEDULE_TABLE_NAME, COL_QUEUE_ID, queueId, COL_ID, scheduleId);
+        DatabaseHelper.executeUpdateSql(sql, false);
     }
 
     // for removal in future

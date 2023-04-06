@@ -19,7 +19,8 @@ public class QueuesRepo {
             COL_NAME = "name",
             COL_EDITABLE = "editable",
             COL_CAN_ADD_DOWN = "can_add_download",
-            COL_SCHEDULE_ID = "schedule_id";
+            COL_SCHEDULE_ID = "schedule_id",
+            COL_HAS_FOLDER = "has_folder";
 
 
     public static void createTable() {
@@ -27,11 +28,14 @@ public class QueuesRepo {
         createQueueDownloadTable();
     }
 
-    public static List<QueueModel> createDefaultRecords(){
+    public static List<QueueModel> createDefaultRecords() {
         return FileExtensions.staticQueueNames.stream().map(name -> {
-            var queue = new QueueModel(name, false, false);
+            var queue = new QueueModel(name, false);
             if (name.equals("All Downloads"))
                 queue.setCanAddDownload(true);
+            var schedule = new ScheduleModel();
+            ScheduleRepo.insertSchedule(schedule, queue.getId());
+            queue.setSchedule(schedule);
             insertQueue(queue);
             return queue;
         }).toList();
@@ -46,6 +50,7 @@ public class QueuesRepo {
                     %s INTEGER,
                     %s INTEGER,
                     %s INTEGER,
+                    %s INTEGER,
                     FOREIGN KEY (%s) REFERENCES %s(%s) ON DELETE CASCADE
                 );
                 """
@@ -54,6 +59,7 @@ public class QueuesRepo {
                         COL_NAME,
                         COL_EDITABLE,
                         COL_CAN_ADD_DOWN,
+                        COL_HAS_FOLDER,
                         COL_SCHEDULE_ID,
                         COL_SCHEDULE_ID, SCHEDULE_TABLE_NAME, COL_ID);
         DatabaseHelper.createTable(sql);
@@ -79,18 +85,16 @@ public class QueuesRepo {
 
 
     public static void insertQueue(QueueModel queue) {
-        var schedule = new ScheduleModel();
-        ScheduleRepo.insertSchedule(schedule, queue.getId());
-
         var sql = """
-                INSERT OR IGNORE INTO %s (%s,%s,%s,%s) VALUES("%s",%d,%d,%d);
+                INSERT OR IGNORE INTO %s (%s,%s,%s,%s,%s) VALUES("%s",%d,%d,%d,%d);
                 """
                 .formatted(QUEUES_TABLE_NAME,
-                        COL_NAME, COL_EDITABLE, COL_CAN_ADD_DOWN, COL_SCHEDULE_ID,
+                        COL_NAME, COL_EDITABLE, COL_CAN_ADD_DOWN, COL_HAS_FOLDER, COL_SCHEDULE_ID,
                         queue.getName(),
                         queue.isEditable() ? 1 : 0,
                         queue.isCanAddDownload() ? 1 : 0,
-                        schedule.getId());
+                        queue.hasFolder() ? 1 : 0,
+                        queue.getSchedule().getId());
         try (var con = DatabaseHelper.openConnection();
              var stmt = con.createStatement()) {
             stmt.executeUpdate(sql);
@@ -146,7 +150,7 @@ public class QueuesRepo {
                 .formatted(QUEUES_TABLE_NAME,
                         COL_SCHEDULE_ID, scheduleId,
                         COL_ID, queueId);
-        DatabaseHelper.executeUpdateSql(sql);
+        DatabaseHelper.executeUpdateSql(sql, false);
     }
 
     public static void deleteQueue(String name) {
@@ -154,7 +158,7 @@ public class QueuesRepo {
                 DELETE FROM %s WHERE %s = "%s";
                 """
                 .formatted(QUEUES_TABLE_NAME, COL_NAME, name);
-        DatabaseHelper.executeUpdateSql(sql);
+        DatabaseHelper.executeUpdateSql(sql, false);
     }
 
 
@@ -174,18 +178,20 @@ public class QueuesRepo {
     }
 
     private static void alters() {
-        var sql = """
-                ALTER TABLE %s ADD COLUMN %s INTEGER DEFAULT NULL
-                REFERENCES %s(%s) ON DELETE CASCADE;
+        var addScheduleIdSql = """
+                ALTER TABLE %s
+                ADD COLUMN %s INTEGER DEFAULT NULL REFERENCES %s(%s) ON DELETE CASCADE
                 """
                 .formatted(QUEUES_TABLE_NAME, COL_SCHEDULE_ID,
-                        SCHEDULE_TABLE_NAME, COL_ID);
-        try (var conn = openConnection();
-             var stmt = conn.createStatement()) {
-            stmt.executeUpdate(sql);
-        } catch (SQLException ignore) {
-        }
+                        SCHEDULE_TABLE_NAME, COL_ID
+                );
+        var addHasFolderSql = """
+                ALTER TABLE %s ADD COLUMN %s INTEGER DEFAULT 0;
+                """
+                .formatted(QUEUES_TABLE_NAME, COL_HAS_FOLDER);
 
+        DatabaseHelper.executeUpdateSql(addHasFolderSql, true);
+        DatabaseHelper.executeUpdateSql(addScheduleIdSql, true);
     }
 
     static QueueModel createQueueModel(ResultSet rs, boolean fetchDownloads, boolean fetchSchedule) throws SQLException {
@@ -193,19 +199,21 @@ public class QueuesRepo {
         var name = rs.getString(COL_NAME);
         var editable = rs.getBoolean(COL_EDITABLE);
         var canAddDownload = rs.getBoolean(COL_CAN_ADD_DOWN);
+        var hasFolder = rs.getBoolean(COL_HAS_FOLDER);
         CopyOnWriteArrayList<DownloadModel> downloads = null;
         if (fetchDownloads)
             downloads = new CopyOnWriteArrayList<>(DownloadsRepo.getDownloadsByQueueName(name));
         ScheduleModel schedule = null;
         if (fetchSchedule)
             schedule = ScheduleRepo.getSchedule(id);
-        return new QueueModel(id, name, editable, canAddDownload, schedule, downloads);
+        return new QueueModel(id, name, editable, canAddDownload, hasFolder, schedule, downloads);
     }
 
     static QueueModel createQueueModel(ResultSet rs, int queueId, String queueName,
                                        ScheduleModel schedule) throws SQLException {
         var editable = rs.getBoolean(COL_EDITABLE);
         var canAddDownload = rs.getBoolean(COL_CAN_ADD_DOWN);
-        return new QueueModel(queueId, queueName, editable, canAddDownload, schedule, null);
+        var hasFolder = rs.getBoolean(COL_HAS_FOLDER);
+        return new QueueModel(queueId, queueName, editable, canAddDownload, hasFolder, schedule, null);
     }
 }

@@ -92,4 +92,9 @@ public class IOUtils {
             throw new RuntimeException(e);
         }
     }
+
+    public static void createFolderInSaveLocation(String queueName) {
+        var folder = new File(downloadPath + File.separator + queueName);
+        folder.mkdir();
+    }
 }

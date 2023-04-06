@@ -20,6 +20,8 @@ import static ir.darkdeveloper.bitkip.config.AppConfigs.startedQueues;
 
 public class BitKip extends Application {
 
+    // todo: if a queue has a folder, in new download stage, location should change
+
     @Override
     public void start(Stage stage) {
         IOUtils.createSaveLocations();
@@ -30,7 +32,7 @@ public class BitKip extends Application {
         if (queues == null)
             queues = QueuesRepo.createDefaultRecords();
         queues = ScheduleRepo.createDefaultSchedulesForQueues(queues);
-        AppConfigs.setQueues(queues);
+        AppConfigs.addAllQueues(queues);
         FxUtils.switchSceneToMain(stage);
         AppConfigs.setHostServices(getHostServices());
         stage.initStyle(StageStyle.UNDECORATED);

@@ -104,7 +104,6 @@ public class FxUtils {
         stage.setTitle("New Queue");
         NewQueueController controller = loader.getController();
         controller.setStage(stage);
-        getQueueSubject().addObserver(controller);
         stage.showAndWait();
     }
 
