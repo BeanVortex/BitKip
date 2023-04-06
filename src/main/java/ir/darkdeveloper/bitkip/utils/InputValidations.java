@@ -88,6 +88,29 @@ public class InputValidations {
         });
     }
 
+    public static void validIntInputCheck(TextField field, long defaultVal, long minValue, long maxValue) {
+        if (field == null)
+            return;
+        field.textProperty().addListener((o, old, newValue) -> {
+            if (!newValue.matches("\\d*")) {
+                field.setText(newValue.replaceAll("\\D", ""));
+                if (field.getText().isBlank())
+                    field.setText("" + defaultVal);
+            } else {
+                if (newValue.isBlank())
+                    return;
+                if (Long.parseLong(newValue) > maxValue)
+                    field.setText("" + maxValue);
+                if (Long.parseLong(newValue) < minValue)
+                    field.setText("" + minValue);
+            }
+        });
+        field.focusedProperty().addListener((o, old, newValue) -> {
+            if (!newValue && field.getText().isBlank())
+                field.setText("" + defaultVal);
+        });
+    }
+
     public static void prepareLinkFromClipboard(TextField urlField) {
         var clip = Clipboard.getSystemClipboard();
         var clipContent = clip.getString();

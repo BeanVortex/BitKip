@@ -39,6 +39,14 @@ import static ir.darkdeveloper.bitkip.utils.FxUtils.openStages;
 public class SchedulerController implements FXMLController, QueueObserver {
 
     @FXML
+    private VBox rightContainer;
+    @FXML
+    private ScrollPane scrollPane;
+    @FXML
+    private Spinner<Integer> simulDownloadSpinner;
+    @FXML
+    private TextField speedField;
+    @FXML
     private ComboBox<TurnOffMode> powerCombo;
     @FXML
     private CheckBox whenDoneCheck;
@@ -79,6 +87,8 @@ public class SchedulerController implements FXMLController, QueueObserver {
     @FXML
     private HBox horLine2;
     @FXML
+    private HBox horLine3;
+    @FXML
     private CheckBox enableCheck;
     @FXML
     private Spinner<Integer> startHourSpinner;
@@ -115,7 +125,7 @@ public class SchedulerController implements FXMLController, QueueObserver {
         bounds = Screen.getPrimary().getVisualBounds();
         initQueuesList();
         selectedQueue.addListener((ob, old, newVal) -> initSelectedQueueData());
-        initSpinners();
+        initInputs();
         initRadios();
         initPowerCombo();
     }
@@ -142,16 +152,19 @@ public class SchedulerController implements FXMLController, QueueObserver {
         dailyRadio.setSelected(true);
     }
 
-    private void initSpinners() {
+    private void initInputs() {
+        var simulDownloadFactory = new SpinnerValueFactory.IntegerSpinnerValueFactory(1, 5, 1);
         var hourFactory = new SpinnerValueFactory.IntegerSpinnerValueFactory(0, 23, 15);
         var minuteFactory = new SpinnerValueFactory.IntegerSpinnerValueFactory(0, 59, 30);
         var secondFactory = new SpinnerValueFactory.IntegerSpinnerValueFactory(0, 59, 0);
+
         startHourSpinner.setValueFactory(hourFactory);
         startMinuteSpinner.setValueFactory(minuteFactory);
         startSecondSpinner.setValueFactory(secondFactory);
         stopHourSpinner.setValueFactory(hourFactory);
         stopMinuteSpinner.setValueFactory(minuteFactory);
         stopSecondSpinner.setValueFactory(secondFactory);
+        simulDownloadSpinner.setValueFactory(simulDownloadFactory);
 
         startHourSpinner.setEditable(true);
         startMinuteSpinner.setEditable(true);
@@ -159,9 +172,13 @@ public class SchedulerController implements FXMLController, QueueObserver {
         stopHourSpinner.setEditable(true);
         stopMinuteSpinner.setEditable(true);
         stopSecondSpinner.setEditable(true);
+        simulDownloadSpinner.setEditable(true);
 
         InputValidations.validTimePickerInputs(startHourSpinner, startMinuteSpinner, startSecondSpinner);
         InputValidations.validTimePickerInputs(stopHourSpinner, stopMinuteSpinner, stopSecondSpinner);
+        InputValidations.validSpeedInputChecks(speedField);
+        InputValidations.validIntInputCheck(simulDownloadSpinner.getEditor(), 1, 1, 5);
+
 
     }
 
@@ -173,6 +190,15 @@ public class SchedulerController implements FXMLController, QueueObserver {
             toolbar.setPrefWidth(width);
             horLine1.setPrefWidth(width);
             horLine2.setPrefWidth(width);
+            horLine3.setPrefWidth(width);
+            scrollPane.setPrefWidth(width);
+            rightContainer.setPrefWidth(width - queueList.getPrefWidth() - 10);
+        });
+
+        stage.heightProperty().addListener((o, o2, n) -> {
+            var height = n.longValue();
+            queueList.setPrefHeight(height);
+            rightContainer.setPrefHeight(height - 32 - 10);
         });
 
         stage.xProperty().addListener((observable, oldValue, newValue) -> {
@@ -205,7 +231,7 @@ public class SchedulerController implements FXMLController, QueueObserver {
         enableCheck.setSelected(schedule.isEnabled());
         mainBox.setDisable(!schedule.isEnabled());
         var startTime = schedule.getStartTime();
-        if (startTime != null){
+        if (startTime != null) {
             startHourSpinner.getEditor().setText(startTime.getHour() + "");
             startMinuteSpinner.getEditor().setText(startTime.getMinute() + "");
             startSecondSpinner.getEditor().setText(startTime.getSecond() + "");
