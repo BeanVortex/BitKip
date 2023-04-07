@@ -4,7 +4,6 @@ import ir.darkdeveloper.bitkip.config.AppConfigs;
 import ir.darkdeveloper.bitkip.models.DownloadModel;
 import ir.darkdeveloper.bitkip.models.DownloadStatus;
 import ir.darkdeveloper.bitkip.models.QueueModel;
-import ir.darkdeveloper.bitkip.repo.DownloadsRepo;
 import ir.darkdeveloper.bitkip.repo.QueuesRepo;
 import javafx.collections.ObservableList;
 import javafx.event.EventHandler;
@@ -16,13 +15,11 @@ import javafx.util.Callback;
 import org.apache.commons.lang3.time.DurationFormatUtils;
 
 import java.text.DecimalFormat;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 
 import static ir.darkdeveloper.bitkip.config.AppConfigs.currentDownloadings;
-import static ir.darkdeveloper.bitkip.config.AppConfigs.startedQueues;
 import static ir.darkdeveloper.bitkip.utils.FileExtensions.staticQueueNames;
 import static ir.darkdeveloper.bitkip.utils.MenuUtils.createMenuItem;
 import static ir.darkdeveloper.bitkip.utils.ShortcutUtils.*;
@@ -129,7 +126,7 @@ public class MainTableUtils {
     }
 
     private void initAddToQueueMenu(Menu addToQueueMenu) {
-        var addQueueItems = new LinkedHashMap<MenuItem, QueueModel>();
+        var addToQueueItems = new LinkedHashMap<MenuItem, QueueModel>();
         var queues = AppConfigs.getQueues();
         if (queues.isEmpty())
             queues = QueuesRepo.getAllQueues(false, false);
@@ -137,26 +134,13 @@ public class MainTableUtils {
             if (staticQueueNames.stream().noneMatch(s -> qm.getName().equals(s))) {
                 var defaultColor = ((Label) addToQueueMenu.getGraphic()).getTextFill();
                 var addToQueueMenuItem = createMenuItem(qm, defaultColor);
-                addQueueItems.put(addToQueueMenuItem, qm);
+                addToQueueItems.put(addToQueueMenuItem, qm);
             }
         });
-        addToQueueMenu.getItems().addAll(addQueueItems.keySet());
-
-        addToQueueMenu.getItems().forEach(menuItem ->
-                menuItem.setOnAction(event -> {
-                    var qm = addQueueItems.get(menuItem);
-                    var notObserved = new ArrayList<>(getSelected());
-                    notObserved.forEach(dm -> {
-                        if (dm.getQueues().contains(qm))
-                            return;
-                        if (staticQueueNames.stream().noneMatch(s -> dm.getQueues().get(0).getName().equals(s)))
-                            remove(dm);
-                        if (startedQueues.contains(qm))
-                            startedQueues.get(startedQueues.indexOf(qm)).getDownloads().add(dm);
-                        DownloadsRepo.updateDownloadQueue(dm.getId(), qm.getId());
-                    });
-                }));
+        addToQueueMenu.getItems().addAll(addToQueueItems.keySet());
+        MenuUtils.initAddToQueueMenu(addToQueueMenu, this, addToQueueItems);
     }
+
 
     // sequence is important where labels defined
     private void menuItemOperations(LinkedHashMap<Label, MenuItem> menuItems, List<Label> lbls) {
@@ -173,25 +157,13 @@ public class MainTableUtils {
         menuItems.get(lbls.get(4)).setOnAction(e ->
                 getSelected().forEach(dm -> FxUtils.newDownloadingStage(dm, this)));
         // DELETE FROM QUEUE
-        menuItems.get(lbls.get(5)).setOnAction(e ->
-                getSelected().forEach(dm -> {
-                    remove(dm);
-                    dm.getQueues()
-                            .stream()
-                            .filter(qm -> !staticQueueNames.contains(qm.getName()))
-                            .findFirst()
-                            .ifPresent(qm -> {
-                                if (startedQueues.contains(qm))
-                                    startedQueues.get(startedQueues.indexOf(qm)).getDownloads().remove(dm);
-                                DownloadsRepo.deleteDownloadQueue(dm.getId(), qm.getId());
-                            });
-
-                }));
+        menuItems.get(lbls.get(5)).setOnAction(e -> MenuUtils.deleteFromQueue(this));
         // DELETE
         menuItems.get(lbls.get(6)).setOnAction(e -> DownloadOpUtils.deleteDownloads(this, false));
         // DELETE WITH FILE
         menuItems.get(lbls.get(7)).setOnAction(ev -> DownloadOpUtils.deleteDownloads(this, true));
     }
+
 
     private EventHandler<? super MouseEvent> onItemsClicked() {
         return event -> {

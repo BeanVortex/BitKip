@@ -9,6 +9,8 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.text.DecimalFormat;
 import java.util.List;
 import java.util.logging.Logger;
@@ -24,6 +26,7 @@ public class IOUtils {
     public static void createSaveLocations() {
         List.of(downloadPath, videosPath, programsPath, compressedPath, musicPath, othersPath, documentPath, dataPath)
                 .forEach(IOUtils::mkdir);
+        QueueUtils.createFolders();
     }
 
     private static void mkdir(String dirPath) {
@@ -96,5 +99,15 @@ public class IOUtils {
     public static void createFolderInSaveLocation(String queueName) {
         var folder = new File(downloadPath + File.separator + queueName);
         folder.mkdir();
+    }
+
+    public static void moveFile(String oldFilePath, String newFilePath) {
+        try {
+            var file = new File(oldFilePath);
+            if (file.exists())
+                Files.move(Paths.get(oldFilePath), Paths.get(newFilePath), StandardCopyOption.REPLACE_EXISTING);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }

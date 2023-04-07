@@ -23,6 +23,7 @@ import java.time.LocalDateTime;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executors;
 
+import static ir.darkdeveloper.bitkip.config.AppConfigs.downloadPath;
 import static ir.darkdeveloper.bitkip.utils.FileExtensions.ALL_DOWNLOADS_QUEUE;
 
 public class SingleDownload implements NewDownloadFxmlController {
@@ -237,5 +238,17 @@ public class SingleDownload implements NewDownloadFxmlController {
         queueCombo.getItems().clear();
         queueCombo.getItems().addAll(queues);
         queueCombo.setValue(queues.get(0));
+    }
+
+    @FXML
+    private void onQueueChanged() {
+        var selectedQueue = queueCombo.getSelectionModel().getSelectedItem();
+        if (selectedQueue.hasFolder())
+        {
+            var folder = new File(downloadPath + File.separator + selectedQueue.getName());
+            if (!folder.exists())
+                folder.mkdir();
+            locationField.setText(folder.getAbsolutePath());
+        }
     }
 }

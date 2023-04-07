@@ -18,11 +18,13 @@ import javafx.scene.control.TextField;
 import javafx.stage.Stage;
 import org.kordamp.ikonli.javafx.FontIcon;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executors;
 
+import static ir.darkdeveloper.bitkip.config.AppConfigs.downloadPath;
 import static ir.darkdeveloper.bitkip.utils.FileExtensions.ALL_DOWNLOADS_QUEUE;
 
 public class BatchDownload implements NewDownloadFxmlController, QueueObserver {
@@ -267,6 +269,18 @@ public class BatchDownload implements NewDownloadFxmlController, QueueObserver {
         queueCombo.getItems().clear();
         queueCombo.getItems().addAll(queues);
         queueCombo.setValue(queues.get(0));
+    }
+
+    @FXML
+    private void onQueueChanged() {
+        var selectedQueue = queueCombo.getSelectionModel().getSelectedItem();
+        if (selectedQueue.hasFolder())
+        {
+            var folder = new File(downloadPath + File.separator + selectedQueue.getName());
+            if (!folder.exists())
+                folder.mkdir();
+            locationField.setText(folder.getAbsolutePath());
+        }
     }
 
     @Override

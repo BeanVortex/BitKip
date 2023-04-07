@@ -25,12 +25,12 @@ public class DownloadsRepo {
             COL_OPEN_AFTER_COMPLETE = "open_after_complete",
             COL_SHOW_COMPLETE_DIALOG = "show_complete_dialog",
             COL_URL = "url",
-            COL_PATH = "path",
             COL_CHUNKS = "chunks",
             COL_ADD_DATE = "add_date",
             COL_ADD_TO_QUEUE_DATE = "add_to_queue_date",
             COL_LAST_TRY_DATE = "last_try_date",
             COL_COMPLETE_DATE = "complete_date";
+    public static final String COL_PATH = "path";
 
     public static void createTable() {
         var sql = "CREATE TABLE IF NOT EXISTS " + DOWNLOADS_TABLE_NAME + "("
@@ -338,5 +338,15 @@ public class DownloadsRepo {
 
     public static void insertDownloads(List<DownloadModel> dms) {
         dms.forEach(DownloadsRepo::insertDownload);
+    }
+
+    public static void updateDownloadProperty(String column, String value, int downloadId) {
+        var sql = """
+                UPDATE %s SET %s = %s WHERE %s = %s;
+                """
+                .formatted(DOWNLOADS_TABLE_NAME,
+                        column, value,
+                        COL_ID, downloadId);
+        DatabaseHelper.executeUpdateSql(sql, false);
     }
 }

@@ -14,6 +14,7 @@ public class FileExtensions {
 
     public static final List<String> staticQueueNames = List.of(ALL_DOWNLOADS_QUEUE, COMPRESSED_QUEUE,
             MUSIC_QUEUE, VIDEOS_QUEUE, PROGRAMS_QUEUE, DOCS_QUEUE, OTHERS_QUEUE);
+
     public static final List<String> musicEx = List.of("mp3", "ogg", "wav", "mpa",
             "cda", "aif", "mid", "midi", "wma", "wpl");
     public static final List<String> compressedEx = List.of("rar", "zip", "7z", "deb",

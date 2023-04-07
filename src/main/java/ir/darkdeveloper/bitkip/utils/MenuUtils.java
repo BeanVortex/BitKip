@@ -3,6 +3,7 @@ package ir.darkdeveloper.bitkip.utils;
 import ir.darkdeveloper.bitkip.config.AppConfigs;
 import ir.darkdeveloper.bitkip.models.DownloadModel;
 import ir.darkdeveloper.bitkip.models.DownloadStatus;
+import ir.darkdeveloper.bitkip.models.FileType;
 import ir.darkdeveloper.bitkip.models.QueueModel;
 import ir.darkdeveloper.bitkip.repo.DownloadsRepo;
 import ir.darkdeveloper.bitkip.repo.QueuesRepo;
@@ -13,12 +14,12 @@ import javafx.scene.control.*;
 import javafx.scene.input.KeyCodeCombination;
 import javafx.scene.paint.Paint;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.LinkedHashMap;
-import java.util.List;
+import java.io.File;
+import java.util.*;
 
+import static ir.darkdeveloper.bitkip.config.AppConfigs.downloadPath;
 import static ir.darkdeveloper.bitkip.config.AppConfigs.startedQueues;
+import static ir.darkdeveloper.bitkip.repo.DownloadsRepo.COL_PATH;
 import static ir.darkdeveloper.bitkip.utils.FileExtensions.staticQueueNames;
 import static ir.darkdeveloper.bitkip.utils.ShortcutUtils.*;
 
@@ -104,6 +105,29 @@ public class MenuUtils {
         menuItems.get(deleteLbl).setOnAction(e -> DownloadOpUtils.deleteDownloads(mainTableUtils, false));
         menuItems.get(deleteWithFileLbl).setOnAction(e -> DownloadOpUtils.deleteDownloads(mainTableUtils, true));
         menuItems.get(newQueueLbl).setOnAction(e -> FxUtils.newQueueStage());
+        menuItems.get(deleteFromQueueLbl).setOnAction(e -> deleteFromQueue(mainTableUtils));
+    }
+
+    public static void deleteFromQueue(MainTableUtils mainTableUtils) {
+        var notObserved = new ArrayList<>(mainTableUtils.getSelected());
+        var moveFiles = askToMoveFiles(notObserved, null);
+        for (DownloadModel dm : notObserved) {
+            mainTableUtils.remove(dm);
+            dm.getQueues()
+                    .stream()
+                    .filter(qm -> !staticQueueNames.contains(qm.getName()))
+                    .findFirst()
+                    .ifPresent(qm -> {
+                        if (startedQueues.contains(qm))
+                            startedQueues.get(startedQueues.indexOf(qm)).getDownloads().remove(dm);
+                        DownloadsRepo.deleteDownloadQueue(dm.getId(), qm.getId());
+                    });
+            if (moveFiles) {
+                var newFilePath = FileType.determineFileType(dm.getName()).getPath() + dm.getName();
+                IOUtils.moveFile(dm.getFilePath(), newFilePath);
+                DownloadsRepo.updateDownloadProperty(COL_PATH, "\"" + newFilePath + "\"", dm.getId());
+            }
+        }
     }
 
     private static void disableEnableStartStopQueue(Menu startQueueMenu, Menu stopQueueMenu) {
@@ -200,20 +224,7 @@ public class MenuUtils {
         startQueueMenu.getItems().addAll(startQueueItems.keySet());
         stopQueueMenu.getItems().addAll(stopQueueItems.keySet());
 
-        addToQueueMenu.getItems().forEach(menuItem ->
-                menuItem.setOnAction(e -> {
-                    var qm = addToQueueItems.get(menuItem);
-                    var notObserved = new ArrayList<>(mainTableUtils.getSelected());
-                    notObserved.forEach(dm -> {
-                        if (dm.getQueues().contains(qm))
-                            return;
-                        if (staticQueueNames.stream().noneMatch(s -> dm.getQueues().get(0).getName().equals(s)))
-                            mainTableUtils.remove(dm);
-                        if (startedQueues.contains(qm))
-                            startedQueues.get(startedQueues.indexOf(qm)).getDownloads().add(dm);
-                        DownloadsRepo.updateDownloadQueue(dm.getId(), qm.getId());
-                    });
-                }));
+        initAddToQueueMenu(addToQueueMenu, mainTableUtils, addToQueueItems);
 
         startQueueMenu.getItems().forEach(startItem -> startItem.setOnAction(e ->
                 stopQueueItems.keySet()
@@ -234,6 +245,54 @@ public class MenuUtils {
                         .ifPresent(startItem -> QueueUtils.stopQueue(stopQueueItems.get(stopItem), startItem,
                                 stopItem, mainTableUtils))
         ));
+    }
+
+    public static void initAddToQueueMenu(Menu addToQueueMenu, MainTableUtils mainTableUtils,
+                                          LinkedHashMap<MenuItem, QueueModel> addToQueueItems) {
+        addToQueueMenu.getItems().forEach(menuItem ->
+                menuItem.setOnAction(e -> {
+                    var qm = addToQueueItems.get(menuItem);
+                    var notObserved = new ArrayList<>(mainTableUtils.getSelected());
+                    var moveFiles = askToMoveFiles(notObserved, qm);
+                    notObserved.forEach(dm -> {
+                        if (dm.getQueues().contains(qm))
+                            return;
+                        if (staticQueueNames.stream().noneMatch(s -> dm.getQueues().get(0).getName().equals(s)))
+                            mainTableUtils.remove(dm);
+                        if (startedQueues.contains(qm))
+                            startedQueues.get(startedQueues.indexOf(qm)).getDownloads().add(dm);
+                        if (moveFiles) {
+                            var newFilePath = downloadPath + File.separator + qm.getName() + File.separator + dm.getName();
+                            IOUtils.moveFile(dm.getFilePath(), newFilePath);
+                            DownloadsRepo.updateDownloadProperty(COL_PATH, "\"" + newFilePath + "\"", dm.getId());
+                        }
+
+                        DownloadsRepo.updateDownloadQueue(dm.getId(), qm.getId());
+                    });
+                }));
+    }
+
+    private static boolean askToMoveFiles(ArrayList<DownloadModel> queues, QueueModel desQueue) {
+        var downloadsHasFolder = queues.stream().filter(dm ->
+                !dm.getQueues().stream().filter(QueueModel::hasFolder).toList().isEmpty()
+        ).toList();
+
+        if (downloadsHasFolder.isEmpty()) {
+            if (desQueue != null) {
+                if (!desQueue.hasFolder())
+                    return false;
+
+                if (!desQueue.hasFolder() && !staticQueueNames.contains(desQueue.getName()))
+                    return false;
+            } else return false;
+        }
+
+        var yes = new ButtonType("Yes", ButtonBar.ButtonData.YES);
+        var no = new ButtonType("No", ButtonBar.ButtonData.NO);
+        var alert = new Alert(Alert.AlertType.CONFIRMATION,
+                "Would you also like to move download files to the new location?", yes, no);
+        var res = alert.showAndWait();
+        return res.orElse(no) == yes;
     }
 
 

@@ -4,10 +4,7 @@ import ir.darkdeveloper.bitkip.config.AppConfigs;
 import ir.darkdeveloper.bitkip.repo.DownloadsRepo;
 import ir.darkdeveloper.bitkip.repo.QueuesRepo;
 import ir.darkdeveloper.bitkip.repo.ScheduleRepo;
-import ir.darkdeveloper.bitkip.utils.FxUtils;
-import ir.darkdeveloper.bitkip.utils.IOUtils;
-import ir.darkdeveloper.bitkip.utils.MoreUtils;
-import ir.darkdeveloper.bitkip.utils.ResizeUtil;
+import ir.darkdeveloper.bitkip.utils.*;
 import javafx.application.Application;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
@@ -20,11 +17,8 @@ import static ir.darkdeveloper.bitkip.config.AppConfigs.startedQueues;
 
 public class BitKip extends Application {
 
-    // todo: if a queue has a folder, in new download stage, location should change
-
     @Override
     public void start(Stage stage) {
-        IOUtils.createSaveLocations();
         DownloadsRepo.createTable();
         ScheduleRepo.createSchedulesTable();
         QueuesRepo.createTable();
@@ -33,6 +27,7 @@ public class BitKip extends Application {
             queues = QueuesRepo.createDefaultRecords();
         queues = ScheduleRepo.createDefaultSchedulesForQueues(queues);
         AppConfigs.addAllQueues(queues);
+        IOUtils.createSaveLocations();
         FxUtils.switchSceneToMain(stage);
         AppConfigs.setHostServices(getHostServices());
         stage.initStyle(StageStyle.UNDECORATED);
