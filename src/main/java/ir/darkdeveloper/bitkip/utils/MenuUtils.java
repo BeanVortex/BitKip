@@ -124,7 +124,11 @@ public class MenuUtils {
                     });
             if (moveFiles) {
                 var newFilePath = FileType.determineFileType(dm.getName()).getPath() + dm.getName();
-                IOUtils.moveFile(dm.getFilePath(), newFilePath);
+                if (dm.getProgress() != 100) {
+                    for (int i = 0; i < dm.getChunks(); i++)
+                        IOUtils.moveFile(dm.getFilePath() + "#" + i, newFilePath + "#" + i);
+                } else
+                    IOUtils.moveFile(dm.getFilePath(), newFilePath );
                 DownloadsRepo.updateDownloadProperty(COL_PATH, "\"" + newFilePath + "\"", dm.getId());
             }
         }
@@ -263,7 +267,11 @@ public class MenuUtils {
                             startedQueues.get(startedQueues.indexOf(qm)).getDownloads().add(dm);
                         if (moveFiles) {
                             var newFilePath = downloadPath + File.separator + qm.getName() + File.separator + dm.getName();
-                            IOUtils.moveFile(dm.getFilePath(), newFilePath);
+                            if (dm.getProgress() != 100) {
+                                for (int i = 0; i < dm.getChunks(); i++)
+                                    IOUtils.moveFile(dm.getFilePath() + "#" + i, newFilePath + "#" + i);
+                            } else
+                                IOUtils.moveFile(dm.getFilePath(), newFilePath );
                             DownloadsRepo.updateDownloadProperty(COL_PATH, "\"" + newFilePath + "\"", dm.getId());
                         }
 

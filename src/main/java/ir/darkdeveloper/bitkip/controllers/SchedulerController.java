@@ -242,7 +242,6 @@ public class SchedulerController implements FXMLController, QueueObserver {
         }
 
         onceRadio.setSelected(schedule.isOnceDownload());
-        //todo maybe a bug in here
         dailyRadio.setSelected(!schedule.isOnceDownload());
 
         schedule.getDays().forEach(day -> {
