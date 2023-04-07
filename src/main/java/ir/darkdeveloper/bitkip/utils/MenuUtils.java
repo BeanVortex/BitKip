@@ -299,6 +299,8 @@ public class MenuUtils {
         var no = new ButtonType("No", ButtonBar.ButtonData.NO);
         var alert = new Alert(Alert.AlertType.CONFIRMATION,
                 "Would you also like to move download files to the new location?", yes, no);
+        alert.setTitle("Confirmation");
+        alert.setHeaderText("Move files?");
         var res = alert.showAndWait();
         return res.orElse(no) == yes;
     }
