@@ -37,7 +37,7 @@
     <HBox alignment="BASELINE_LEFT">
         <HBox spacing="20" alignment="CENTER">
             <Label text="chunks :" minWidth="60" styleClass="bold"/>
-            <TextField fx:id="chunksField" text="0"/>
+            <TextField fx:id="chunksField"/>
             <Button fx:id="questionBtnChunks"/>
         </HBox>
     </HBox>

@@ -18,6 +18,7 @@ public class InputValidations {
                                               TextField speedField, DownloadModel dm) {
         if (bytesField == null || speedField == null)
             return;
+        bytesField.setDisable(true);
         speedField.textProperty().addListener((o, old, newValue) -> bytesField.setDisable(!newValue.equals("0")));
         if (chunksField != null)
             chunksField.textProperty().addListener((o, old, newValue) -> bytesField.setDisable(!newValue.equals("0")));
@@ -53,14 +54,15 @@ public class InputValidations {
     public static void validChunksInputChecks(TextField chunksField) {
         if (chunksField == null)
             return;
+        var threads = Runtime.getRuntime().availableProcessors() * 2;
+        chunksField.setText(threads + "");
         chunksField.textProperty().addListener((o, old, newValue) -> {
             if (!newValue.matches("\\d*"))
                 chunksField.setText(newValue.replaceAll("\\D", ""));
             if (!chunksField.getText().isBlank()) {
                 var chunks = Integer.parseInt(chunksField.getText());
-                var cores = Runtime.getRuntime().availableProcessors();
-                if (chunks > cores * 2)
-                    chunks = cores * 2;
+                if (chunks > threads)
+                    chunks = threads;
                 if (chunks == 1)
                     chunks = 2;
                 chunksField.setText(chunks + "");
@@ -68,7 +70,7 @@ public class InputValidations {
         });
         chunksField.focusedProperty().addListener((o, old, newValue) -> {
             if (!newValue && chunksField.getText().isBlank())
-                chunksField.setText("0");
+                chunksField.setText(threads + "");
         });
     }
 
