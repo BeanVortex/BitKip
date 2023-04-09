@@ -2,6 +2,7 @@ package ir.darkdeveloper.bitkip.models;
 
 import lombok.*;
 
+import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.Set;
@@ -22,7 +23,7 @@ public class ScheduleModel {
     private boolean onceDownload;
     private LocalDate startDate;
 
-    private Set<Day> days;
+    private Set<DayOfWeek> days;
 
     private long speed;
     private int simultaneouslyDownload;

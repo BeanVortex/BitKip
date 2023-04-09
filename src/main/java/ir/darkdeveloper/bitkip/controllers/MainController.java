@@ -208,7 +208,7 @@ public class MainController implements FXMLController, QueueObserver {
                         QueueUtils.startQueue(qm, menuItems.get(startQueueLbl), menuItems.get(stopQueueLbl), mainTableUtils));
                 menuItems.get(stopQueueLbl).setOnAction(e ->
                         QueueUtils.stopQueue(qm, menuItems.get(startQueueLbl), menuItems.get(stopQueueLbl), mainTableUtils));
-                menuItems.get(scheduleLbl).setOnAction(e -> FxUtils.newSchedulerStage(qm));
+                menuItems.get(scheduleLbl).setOnAction(e -> FxUtils.newSchedulerStage(qm, mainTableUtils));
                 if (menuItems.containsKey(deleteLbl))
                     menuItems.get(deleteLbl).setOnAction(e -> {
                         QueuesRepo.deleteQueue(btn.getText());

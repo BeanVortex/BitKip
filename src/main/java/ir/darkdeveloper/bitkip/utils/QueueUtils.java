@@ -49,6 +49,9 @@ public class QueueUtils {
                 if (startedQueues.contains(qm))
                     queueDoneNotification(qm);
                 startedQueues.remove(qm);
+                if (qm.getSchedule().isTurnOffEnabled()) {
+                    System.out.println("turn off");
+                }
                 executor.shutdown();
             });
         }

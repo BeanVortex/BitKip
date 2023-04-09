@@ -25,6 +25,9 @@ import static ir.darkdeveloper.bitkip.utils.ShortcutUtils.*;
 
 public class MenuUtils {
 
+    public static Menu startQueueMenu;
+    public static Menu stopQueueMenu;
+
 
     public static void initFileMenu(Button menuFile, MainTableUtils mainTableUtils) {
         var c = new ContextMenu();
@@ -76,9 +79,12 @@ public class MenuUtils {
 
         var startQueueMenu = new Menu();
         startQueueMenu.setGraphic(startQueueLbl);
+        MenuUtils.startQueueMenu = startQueueMenu;
 
         var stopQueueMenu = new Menu();
         stopQueueMenu.setGraphic(stopQueueLbl);
+        MenuUtils.stopQueueMenu = stopQueueMenu;
+
 
         initQueueMenuList(addToQueueMenu, startQueueMenu, stopQueueMenu, mainTableUtils);
 
@@ -128,7 +134,7 @@ public class MenuUtils {
                     for (int i = 0; i < dm.getChunks(); i++)
                         IOUtils.moveFile(dm.getFilePath() + "#" + i, newFilePath + "#" + i);
                 } else
-                    IOUtils.moveFile(dm.getFilePath(), newFilePath );
+                    IOUtils.moveFile(dm.getFilePath(), newFilePath);
                 DownloadsRepo.updateDownloadProperty(COL_PATH, "\"" + newFilePath + "\"", dm.getId());
             }
         }
@@ -271,7 +277,7 @@ public class MenuUtils {
                                 for (int i = 0; i < dm.getChunks(); i++)
                                     IOUtils.moveFile(dm.getFilePath() + "#" + i, newFilePath + "#" + i);
                             } else
-                                IOUtils.moveFile(dm.getFilePath(), newFilePath );
+                                IOUtils.moveFile(dm.getFilePath(), newFilePath);
                             DownloadsRepo.updateDownloadProperty(COL_PATH, "\"" + newFilePath + "\"", dm.getId());
                         }
 

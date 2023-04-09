@@ -1,19 +1,19 @@
 package ir.darkdeveloper.bitkip.repo;
 
-import ir.darkdeveloper.bitkip.models.Day;
 import ir.darkdeveloper.bitkip.models.QueueModel;
 import ir.darkdeveloper.bitkip.models.ScheduleModel;
 import ir.darkdeveloper.bitkip.models.TurnOffMode;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static ir.darkdeveloper.bitkip.models.Day.*;
 import static ir.darkdeveloper.bitkip.repo.DatabaseHelper.*;
+import static java.time.DayOfWeek.*;
 
 public class ScheduleRepo {
     static final String COL_ID = "id",
@@ -29,7 +29,7 @@ public class ScheduleRepo {
             COL_SPEED_LIMIT = "speed_limit",
             COL_SIMUL_DOWNLOAD = "simultaneously_download";
 
-    public static final Set<Day> DAYS = Set.of(SATURDAY, SUNDAY, MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY);
+    public static final Set<DayOfWeek> DAYS = Set.of(SATURDAY, SUNDAY, MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY);
 
 
     public static void createSchedulesTable() {
@@ -137,7 +137,7 @@ public class ScheduleRepo {
 
         var vars = daysAsString.split(",");
         var days = Arrays.stream(vars)
-                .map(Day::valueOf)
+                .map(DayOfWeek::valueOf)
                 .collect(Collectors.toSet());
         var startTime = startTimeString == null ? null : LocalTime.parse(startTimeString);
         var startDate = startDateString == null ? null : LocalDate.parse(startDateString);

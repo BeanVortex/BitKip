@@ -2,12 +2,13 @@ package ir.darkdeveloper.bitkip.controllers;
 
 import ir.darkdeveloper.bitkip.config.QueueObserver;
 import ir.darkdeveloper.bitkip.controllers.interfaces.FXMLController;
-import ir.darkdeveloper.bitkip.models.Day;
 import ir.darkdeveloper.bitkip.models.QueueModel;
 import ir.darkdeveloper.bitkip.models.ScheduleModel;
 import ir.darkdeveloper.bitkip.models.TurnOffMode;
 import ir.darkdeveloper.bitkip.repo.ScheduleRepo;
+import ir.darkdeveloper.bitkip.task.ScheduleTask;
 import ir.darkdeveloper.bitkip.utils.InputValidations;
+import ir.darkdeveloper.bitkip.utils.MainTableUtils;
 import ir.darkdeveloper.bitkip.utils.ResizeUtil;
 import ir.darkdeveloper.bitkip.utils.WindowUtils;
 import javafx.beans.property.ObjectProperty;
@@ -26,6 +27,7 @@ import javafx.stage.Screen;
 import javafx.stage.Stage;
 import org.kordamp.ikonli.javafx.FontIcon;
 
+import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.HashSet;
@@ -33,10 +35,10 @@ import java.util.concurrent.Executors;
 
 import static ir.darkdeveloper.bitkip.BitKip.getResource;
 import static ir.darkdeveloper.bitkip.config.AppConfigs.*;
-import static ir.darkdeveloper.bitkip.models.Day.*;
 import static ir.darkdeveloper.bitkip.utils.FxUtils.SCHEDULER_STAGE;
 import static ir.darkdeveloper.bitkip.utils.FxUtils.openStages;
 import static ir.darkdeveloper.bitkip.utils.IOUtils.getBytesFromString;
+import static java.time.DayOfWeek.*;
 
 public class SchedulerController implements FXMLController, QueueObserver {
 
@@ -116,9 +118,11 @@ public class SchedulerController implements FXMLController, QueueObserver {
     private Button closeBtn;
     @FXML
     private ListView<QueueModel> queueList;
+
     private Stage stage;
     private final ObjectProperty<QueueModel> selectedQueue = new SimpleObjectProperty<>();
     private Rectangle2D bounds;
+    private MainTableUtils mainTableUtils;
 
 
     @Override
@@ -158,16 +162,20 @@ public class SchedulerController implements FXMLController, QueueObserver {
 
     private void initInputs() {
         var simulDownloadFactory = new SpinnerValueFactory.IntegerSpinnerValueFactory(1, 5, 1);
-        var hourFactory = new SpinnerValueFactory.IntegerSpinnerValueFactory(0, 23, 15);
-        var minuteFactory = new SpinnerValueFactory.IntegerSpinnerValueFactory(0, 59, 30);
-        var secondFactory = new SpinnerValueFactory.IntegerSpinnerValueFactory(0, 59, 0);
+        var startHourFactory = new SpinnerValueFactory.IntegerSpinnerValueFactory(0, 23, 15);
+        var startMinuteFactory = new SpinnerValueFactory.IntegerSpinnerValueFactory(0, 59, 30);
+        var startSecondFactory = new SpinnerValueFactory.IntegerSpinnerValueFactory(0, 59, 0);
 
-        startHourSpinner.setValueFactory(hourFactory);
-        startMinuteSpinner.setValueFactory(minuteFactory);
-        startSecondSpinner.setValueFactory(secondFactory);
-        stopHourSpinner.setValueFactory(hourFactory);
-        stopMinuteSpinner.setValueFactory(minuteFactory);
-        stopSecondSpinner.setValueFactory(secondFactory);
+        var stopHourFactory = new SpinnerValueFactory.IntegerSpinnerValueFactory(0, 23, 15);
+        var stopMinuteFactory = new SpinnerValueFactory.IntegerSpinnerValueFactory(0, 59, 30);
+        var stopSecondFactory = new SpinnerValueFactory.IntegerSpinnerValueFactory(0, 59, 0);
+
+        startHourSpinner.setValueFactory(startHourFactory);
+        startMinuteSpinner.setValueFactory(startMinuteFactory);
+        startSecondSpinner.setValueFactory(startSecondFactory);
+        stopHourSpinner.setValueFactory(stopHourFactory);
+        stopMinuteSpinner.setValueFactory(stopMinuteFactory);
+        stopSecondSpinner.setValueFactory(stopSecondFactory);
         simulDownloadSpinner.setValueFactory(simulDownloadFactory);
 
         startHourSpinner.setEditable(true);
@@ -311,6 +319,10 @@ public class SchedulerController implements FXMLController, QueueObserver {
         stage.close();
     }
 
+    public void setMainTableUtils(MainTableUtils mainTableUtils) {
+        this.mainTableUtils = mainTableUtils;
+    }
+
     @FXML
     private void hideStage() {
         stage.setIconified(true);
@@ -358,7 +370,7 @@ public class SchedulerController implements FXMLController, QueueObserver {
         var schedule = new ScheduleModel();
         var queue = selectedQueue.get();
         schedule.setId(queue.getSchedule().getId());
-        var days = new HashSet<Day>();
+        var days = new HashSet<DayOfWeek>();
         if (saturdayCheck.isSelected())
             days.add(SATURDAY);
         if (sundayCheck.isSelected())
@@ -407,6 +419,8 @@ public class SchedulerController implements FXMLController, QueueObserver {
                 savedLabel.setVisible(false);
             } catch (InterruptedException ignore) {
             }
+            executor.shutdown();
         });
+        new ScheduleTask(schedule, queue, mainTableUtils).start();
     }
 }
