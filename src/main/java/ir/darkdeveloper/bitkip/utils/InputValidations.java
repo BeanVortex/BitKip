@@ -74,18 +74,18 @@ public class InputValidations {
         });
     }
 
-    public static void validIntInputCheck(TextField field, long defaultVal) {
+    public static void validIntInputCheck(TextField field, Long defaultVal) {
         if (field == null)
             return;
         field.textProperty().addListener((o, old, newValue) -> {
             if (!newValue.matches("\\d*")) {
                 field.setText(newValue.replaceAll("\\D", ""));
-                if (field.getText().isBlank())
+                if (defaultVal != null && field.getText().isBlank())
                     field.setText("" + defaultVal);
             }
         });
         field.focusedProperty().addListener((o, old, newValue) -> {
-            if (!newValue && field.getText().isBlank())
+            if (defaultVal != null && !newValue && field.getText().isBlank())
                 field.setText("" + defaultVal);
         });
     }
@@ -125,9 +125,9 @@ public class InputValidations {
     public static void validTimePickerInputs(Spinner<Integer> hourSpinner,
                                              Spinner<Integer> minuteSpinner,
                                              Spinner<Integer> secondSpinner) {
-        validIntInputCheck(hourSpinner.getEditor(), 15);
-        validIntInputCheck(minuteSpinner.getEditor(), 30);
-        validIntInputCheck(secondSpinner.getEditor(), 0);
+        validIntInputCheck(hourSpinner.getEditor(), null);
+        validIntInputCheck(minuteSpinner.getEditor(), null);
+        validIntInputCheck(secondSpinner.getEditor(), null);
 
         hourSpinner.getEditor().textProperty().addListener((o, o2, n) -> {
             if (n == null)

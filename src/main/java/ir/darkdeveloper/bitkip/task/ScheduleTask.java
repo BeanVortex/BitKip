@@ -49,20 +49,20 @@ public class ScheduleTask {
             long initialDelay = Math.max(duration.toMillis(), 0);
             scheduler.schedule(task, initialDelay, TimeUnit.MILLISECONDS);
         } else {
-            var a = calculateInitialDate();
+            var initialDelay = calculateInitialDate();
             scheduler.scheduleAtFixedRate(() -> {
                 if (!schedule.getDays().contains(LocalDate.now().getDayOfWeek()))
                     return;
-                System.out.println("period");
-            }, a, 24 * 60 * 60 * 1000, TimeUnit.MILLISECONDS);
+                System.out.println("period " + LocalDate.now().getDayOfWeek());
+            }, initialDelay , TimeUnit.DAYS.toMillis(1), TimeUnit.MILLISECONDS);
         }
 
 
     }
 
     private long calculateInitialDate() {
-        var startTime = schedule.getStartTime();
         var nowTime = LocalTime.now();
+        var startTime = schedule.getStartTime();
         // today
         if (startTime.isAfter(nowTime)) {
             var zone = ZoneId.systemDefault();

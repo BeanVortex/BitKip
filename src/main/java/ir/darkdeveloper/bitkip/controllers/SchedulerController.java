@@ -244,9 +244,9 @@ public class SchedulerController implements FXMLController, QueueObserver {
         mainBox.setDisable(!schedule.isEnabled());
         var startTime = schedule.getStartTime();
         if (startTime != null) {
-            startHourSpinner.getEditor().setText(startTime.getHour() + "");
-            startMinuteSpinner.getEditor().setText(startTime.getMinute() + "");
-            startSecondSpinner.getEditor().setText(startTime.getSecond() + "");
+            startHourSpinner.getValueFactory().setValue(startTime.getHour());
+            startMinuteSpinner.getValueFactory().setValue(startTime.getMinute());
+            startSecondSpinner.getValueFactory().setValue(startTime.getSecond());
         }
 
         onceRadio.setSelected(schedule.isOnceDownload());
@@ -271,9 +271,9 @@ public class SchedulerController implements FXMLController, QueueObserver {
         stopContainer.setDisable(!schedule.isStopTimeEnabled());
         var stopTime = schedule.getStopTime();
         if (stopTime != null) {
-            stopHourSpinner.getEditor().setText(stopTime.getHour() + "");
-            stopMinuteSpinner.getEditor().setText(stopTime.getMinute() + "");
-            stopSecondSpinner.getEditor().setText(stopTime.getSecond() + "");
+            stopHourSpinner.getValueFactory().setValue(stopTime.getHour());
+            stopMinuteSpinner.getValueFactory().setValue(stopTime.getMinute());
+            stopSecondSpinner.getValueFactory().setValue(stopTime.getSecond());
         }
         whenDoneCheck.setSelected(schedule.isTurnOffEnabled());
         powerCombo.setDisable(!schedule.isTurnOffEnabled());
