@@ -14,7 +14,7 @@ import java.util.Map;
 
 public class AppConfigs {
 
-    public static final String VERSION = "0.1.0";
+    public static final String VERSION = "0.2.0";
 
     public static String downloadPath = System.getProperty("user.home")
             + File.separator + "Downloads"

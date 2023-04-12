@@ -63,8 +63,9 @@ public class ScheduleTask {
         Runnable run = () -> QueueUtils.startQueue(queue, startItem, stopItem, mainTableUtils);
         createSchedule(run, false);
 
+        var sm = currentSchedules.get(schedule.getId());
         if (isThereSchedule)
-            currentSchedules.get(schedule.getId()).getStartScheduler().shutdown();
+            sm.getStartScheduler().shutdown();
     }
 
     private void stopSchedule(boolean isThereSchedule) {
@@ -78,16 +79,18 @@ public class ScheduleTask {
 
     private void createSchedule(Runnable run, boolean isStop) {
         var scheduler = Executors.newScheduledThreadPool(1);
-        if (isStop)
+        var specifiedTime = schedule.getStartTime();
+        if (isStop) {
             schedule.setStopScheduler(scheduler);
-        else
+            specifiedTime = schedule.getStopTime();
+        } else
             schedule.setStartScheduler(scheduler);
 
         if (schedule.isOnceDownload()) {
             var initialDelay = calculateOnceInitialDelay(isStop);
             scheduler.schedule(run, initialDelay, TimeUnit.MILLISECONDS);
         } else {
-            var initialDelay = calculateDailyInitialDelay();
+            var initialDelay = calculateDailyInitialDelay(specifiedTime);
             scheduler.scheduleAtFixedRate(() -> {
                 if (!schedule.getDays().contains(LocalDate.now().getDayOfWeek()))
                     return;
@@ -113,20 +116,19 @@ public class ScheduleTask {
         return Math.max(duration.toMillis(), 0);
     }
 
-    private long calculateDailyInitialDelay() {
+    private long calculateDailyInitialDelay(LocalTime specifiedTime) {
         var nowTime = LocalTime.now();
-        var startTime = schedule.getStartTime();
         // today
-        if (startTime.isAfter(nowTime)) {
+        if (specifiedTime.isAfter(nowTime)) {
             var zone = ZoneId.systemDefault();
-            var zonedDateTime = startTime.atDate(LocalDate.now()).atZone(zone);
+            var zonedDateTime = specifiedTime.atDate(LocalDate.now()).atZone(zone);
             var duration = Duration.between(ZonedDateTime.now(), zonedDateTime);
             return Math.max(duration.toMillis(), 0);
         }
         // next day
         else {
             var zone = ZoneId.systemDefault();
-            var zonedDateTime = startTime.atDate(LocalDate.now().plusDays(1)).atZone(zone);
+            var zonedDateTime = specifiedTime.atDate(LocalDate.now().plusDays(1)).atZone(zone);
             var duration = Duration.between(ZonedDateTime.now(), zonedDateTime);
             return Math.max(duration.toMillis(), 0);
         }
