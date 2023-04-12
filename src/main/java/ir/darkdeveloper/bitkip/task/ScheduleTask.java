@@ -2,7 +2,7 @@ package ir.darkdeveloper.bitkip.task;
 
 import ir.darkdeveloper.bitkip.models.QueueModel;
 import ir.darkdeveloper.bitkip.models.ScheduleModel;
-import ir.darkdeveloper.bitkip.utils.MainTableUtils;
+import ir.darkdeveloper.bitkip.repo.ScheduleRepo;
 import ir.darkdeveloper.bitkip.utils.MenuUtils;
 import ir.darkdeveloper.bitkip.utils.QueueUtils;
 import javafx.scene.control.Label;
@@ -12,72 +12,56 @@ import java.time.*;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
-import static ir.darkdeveloper.bitkip.config.AppConfigs.currentSchedules;
+import static ir.darkdeveloper.bitkip.config.AppConfigs.*;
 
 
 public class ScheduleTask {
 
-    private final ScheduleModel schedule;
-    private final QueueModel queue;
-    private final MainTableUtils mainTableUtils;
-    private final MenuItem stopItem, startItem;
-
-    public ScheduleTask(ScheduleModel schedule, QueueModel queue, MainTableUtils mainTableUtils) {
-        this.schedule = schedule;
-        this.queue = queue;
-        this.mainTableUtils = mainTableUtils;
-        this.stopItem = MenuUtils.stopQueueMenu.getItems().stream()
-                .filter(m -> ((Label) m.getGraphic()).getText().equals(queue.getName()))
-                .findFirst().orElse(null);
-        this.startItem = MenuUtils.startQueueMenu.getItems().stream()
-                .filter(m -> ((Label) m.getGraphic()).getText().equals(queue.getName()))
-                .findFirst().orElse(null);
+    public static void startSchedules() {
+        getQueues().forEach(ScheduleTask::schedule);
     }
 
-    public void schedule() {
+    public static void schedule(QueueModel queue) {
+        var schedule = queue.getSchedule();
         var isThereSchedule = currentSchedules.keySet().stream().anyMatch(id -> id == schedule.getId());
-        if (isThereSchedule) {
-            var areAllScheduleFieldSame = currentSchedules.values().stream().anyMatch(s -> s.equals(schedule));
-            if (areAllScheduleFieldSame)
-                return;
-        }
+        if (validateScheduleModel(schedule, isThereSchedule)) return;
 
-        if (!schedule.isEnabled()) {
-            if (isThereSchedule) {
-                var sm = currentSchedules.get(schedule.getId());
-                sm.getStartScheduler().shutdown();
-                if (sm.getStopScheduler() != null)
-                    sm.getStopScheduler().shutdown();
-                currentSchedules.remove(sm.getId());
-            }
-            return;
-        }
+        var stopItem = MenuUtils.stopQueueMenu.getItems().stream()
+                .filter(m -> ((Label) m.getGraphic()).getText().equals(queue.getName()))
+                .findFirst().orElse(null);
 
-        startSchedule(isThereSchedule);
+        var startItem = MenuUtils.startQueueMenu.getItems().stream()
+                .filter(m -> ((Label) m.getGraphic()).getText().equals(queue.getName()))
+                .findFirst().orElse(null);
+
+
+        startSchedule(isThereSchedule, queue, schedule, startItem, stopItem);
         if (schedule.isStopTimeEnabled())
-            stopSchedule(isThereSchedule);
+            stopSchedule(isThereSchedule, queue, schedule, startItem, stopItem);
         currentSchedules.put(schedule.getId(), schedule);
     }
 
-    private void startSchedule(boolean isThereSchedule) {
+    private static void startSchedule(boolean isThereSchedule, QueueModel queue, ScheduleModel schedule,
+                                      MenuItem startItem, MenuItem stopItem) {
         Runnable run = () -> QueueUtils.startQueue(queue, startItem, stopItem, mainTableUtils);
-        createSchedule(run, false);
+        createSchedule(run, schedule, false);
 
         var sm = currentSchedules.get(schedule.getId());
         if (isThereSchedule)
             sm.getStartScheduler().shutdown();
     }
 
-    private void stopSchedule(boolean isThereSchedule) {
+    private static void stopSchedule(boolean isThereSchedule, QueueModel queue, ScheduleModel schedule,
+                                     MenuItem startItem, MenuItem stopItem) {
         Runnable run = () -> QueueUtils.stopQueue(queue, startItem, stopItem, mainTableUtils);
-        createSchedule(run, true);
+        createSchedule(run, schedule, true);
 
         var sm = currentSchedules.get(schedule.getId());
         if (isThereSchedule && sm.getStopScheduler() != null)
             sm.getStopScheduler().shutdown();
     }
 
-    private void createSchedule(Runnable run, boolean isStop) {
+    private static void createSchedule(Runnable run, ScheduleModel schedule, boolean isStop) {
         var scheduler = Executors.newScheduledThreadPool(1);
         var specifiedTime = schedule.getStartTime();
         if (isStop) {
@@ -87,7 +71,7 @@ public class ScheduleTask {
             schedule.setStartScheduler(scheduler);
 
         if (schedule.isOnceDownload()) {
-            var initialDelay = calculateOnceInitialDelay(isStop);
+            var initialDelay = calculateOnceInitialDelay(isStop, schedule);
             scheduler.schedule(run, initialDelay, TimeUnit.MILLISECONDS);
         } else {
             var initialDelay = calculateDailyInitialDelay(specifiedTime);
@@ -99,8 +83,7 @@ public class ScheduleTask {
         }
     }
 
-
-    private long calculateOnceInitialDelay(boolean isStop) {
+    private static long calculateOnceInitialDelay(boolean isStop, ScheduleModel schedule) {
         var startDate = schedule.getStartDate();
         var startTime = schedule.getStartTime();
         var dateTime = LocalDateTime.of(startDate, startTime);
@@ -116,7 +99,7 @@ public class ScheduleTask {
         return Math.max(duration.toMillis(), 0);
     }
 
-    private long calculateDailyInitialDelay(LocalTime specifiedTime) {
+    private static long calculateDailyInitialDelay(LocalTime specifiedTime) {
         var nowTime = LocalTime.now();
         // today
         if (specifiedTime.isAfter(nowTime)) {
@@ -132,5 +115,35 @@ public class ScheduleTask {
             var duration = Duration.between(ZonedDateTime.now(), zonedDateTime);
             return Math.max(duration.toMillis(), 0);
         }
+    }
+
+    private static boolean validateScheduleModel(ScheduleModel schedule, boolean isThereSchedule) {
+        boolean shouldReturn = false;
+        if (isThereSchedule) {
+            var areAllScheduleFieldSame = currentSchedules.values().stream().anyMatch(s -> s.equals(schedule));
+            if (areAllScheduleFieldSame)
+                shouldReturn = true;
+        }
+
+        if (!schedule.isEnabled()) {
+            if (isThereSchedule) {
+                var sm = currentSchedules.get(schedule.getId());
+                sm.getStartScheduler().shutdown();
+                if (sm.getStopScheduler() != null)
+                    sm.getStopScheduler().shutdown();
+                currentSchedules.remove(sm.getId());
+            }
+            shouldReturn = true;
+        } else {
+            if (schedule.isOnceDownload()){
+                var scheduledTime = schedule.getStartDate().atTime(schedule.getStartTime());
+                if (scheduledTime.isBefore(LocalDateTime.now())){
+                    schedule.setEnabled(false);
+                    ScheduleRepo.updateScheduleEnabled(schedule.getId(), schedule.isEnabled());
+                    shouldReturn = true;
+                }
+            }
+        }
+        return shouldReturn;
     }
 }

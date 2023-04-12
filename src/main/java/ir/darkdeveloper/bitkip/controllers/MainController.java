@@ -87,6 +87,7 @@ public class MainController implements FXMLController, QueueObserver {
     @Override
     public void initAfterStage() {
         mainTableUtils = new MainTableUtils(contentTable);
+        AppConfigs.mainTableUtils = mainTableUtils;
         mainTableUtils.tableInits();
         var downloadList = DownloadsRepo.getDownloadsByQueueName(ALL_DOWNLOADS_QUEUE).stream()
                 .peek(dm -> {
@@ -208,7 +209,7 @@ public class MainController implements FXMLController, QueueObserver {
                         QueueUtils.startQueue(qm, menuItems.get(startQueueLbl), menuItems.get(stopQueueLbl), mainTableUtils));
                 menuItems.get(stopQueueLbl).setOnAction(e ->
                         QueueUtils.stopQueue(qm, menuItems.get(startQueueLbl), menuItems.get(stopQueueLbl), mainTableUtils));
-                menuItems.get(scheduleLbl).setOnAction(e -> FxUtils.newSchedulerStage(qm, mainTableUtils));
+                menuItems.get(scheduleLbl).setOnAction(e -> FxUtils.newSchedulerStage(qm));
                 if (menuItems.containsKey(deleteLbl))
                     menuItems.get(deleteLbl).setOnAction(e -> {
                         QueuesRepo.deleteQueue(btn.getText());

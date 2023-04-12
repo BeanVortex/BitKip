@@ -126,8 +126,7 @@
                 </VBox>
 
                 <HBox alignment="CENTER_LEFT" styleClass="padding_10">
-                    <Label text="Successfully Saved" styleClass="success_label"
-                           fx:id="savedLabel" visible="false"/>
+                    <Label styleClass="bold" fx:id="savedLabel" visible="false"/>
                 </HBox>
                 <Region VBox.vgrow="ALWAYS"/>
                 <HBox spacing="10" alignment="CENTER_LEFT" styleClass="padding_10">

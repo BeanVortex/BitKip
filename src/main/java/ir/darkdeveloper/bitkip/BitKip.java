@@ -4,6 +4,7 @@ import ir.darkdeveloper.bitkip.config.AppConfigs;
 import ir.darkdeveloper.bitkip.repo.DownloadsRepo;
 import ir.darkdeveloper.bitkip.repo.QueuesRepo;
 import ir.darkdeveloper.bitkip.repo.ScheduleRepo;
+import ir.darkdeveloper.bitkip.task.ScheduleTask;
 import ir.darkdeveloper.bitkip.utils.*;
 import javafx.application.Application;
 import javafx.stage.Stage;
@@ -29,6 +30,7 @@ public class BitKip extends Application {
         AppConfigs.addAllQueues(queues);
         IOUtils.createSaveLocations();
         FxUtils.switchSceneToMain(stage);
+        ScheduleTask.startSchedules();
         AppConfigs.setHostServices(getHostServices());
         stage.initStyle(StageStyle.UNDECORATED);
         stage.setResizable(true);

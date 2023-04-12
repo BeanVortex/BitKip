@@ -190,7 +190,7 @@ public class FxUtils {
         stage.show();
     }
 
-    public static void newSchedulerStage(QueueModel selectedQueue, MainTableUtils mainTableUtils) {
+    public static void newSchedulerStage(QueueModel selectedQueue) {
         if (openStages.containsKey(SCHEDULER_STAGE)) {
             openStages.get(SCHEDULER_STAGE).toFront();
             return;
@@ -215,7 +215,6 @@ public class FxUtils {
         SchedulerController controller = loader.getController();
         controller.setStage(stage);
         controller.setSelectedQueue(selectedQueue);
-        controller.setMainTableUtils(mainTableUtils);
         getQueueSubject().addObserver(controller);
         stage.setOnCloseRequest(e -> openStages.remove(SCHEDULER_STAGE));
         stage.show();

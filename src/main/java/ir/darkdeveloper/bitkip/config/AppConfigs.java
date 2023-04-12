@@ -4,6 +4,7 @@ import ir.darkdeveloper.bitkip.controllers.DownloadingController;
 import ir.darkdeveloper.bitkip.models.DownloadModel;
 import ir.darkdeveloper.bitkip.models.QueueModel;
 import ir.darkdeveloper.bitkip.models.ScheduleModel;
+import ir.darkdeveloper.bitkip.utils.MainTableUtils;
 import javafx.application.HostServices;
 
 import java.io.File;
@@ -48,6 +49,7 @@ public class AppConfigs {
     public static final List<QueueModel> startedQueues = new ArrayList<>();
     public static final List<DownloadingController> openDownloadings = new ArrayList<>();
     public static final Map<Integer, ScheduleModel> currentSchedules = new HashMap<>();
+    public static MainTableUtils mainTableUtils;
 
     public static boolean showCompleteDialog = true;
 

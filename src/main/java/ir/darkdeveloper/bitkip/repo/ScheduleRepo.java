@@ -171,6 +171,17 @@ public class ScheduleRepo {
         DatabaseHelper.executeUpdateSql(sql, false);
     }
 
+    public static void updateScheduleEnabled(int id, boolean enabled) {
+        var sql = """
+                UPDATE %s SET %s=%d
+                WHERE %s=%d;
+                """
+                .formatted(SCHEDULE_TABLE_NAME,
+                        COL_ENABLED, enabled ? 1 : 0,
+                        COL_ID, id);
+        DatabaseHelper.executeUpdateSql(sql, false);
+    }
+
     public static void updateScheduleQueueId(int scheduleId, int queueId) {
         var sql = """
                 UPDATE %s SET %s=%d WHERE %s=%d;

@@ -152,7 +152,6 @@ public class DownloadInChunksTask extends DownloadTask {
                 } catch (IOException | InterruptedException e) {
                     e.printStackTrace();
                     this.pause();
-                    throw new RuntimeException(e);
                 }
             }, executor);
         }

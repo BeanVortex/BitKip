@@ -8,9 +8,9 @@ import ir.darkdeveloper.bitkip.models.TurnOffMode;
 import ir.darkdeveloper.bitkip.repo.ScheduleRepo;
 import ir.darkdeveloper.bitkip.task.ScheduleTask;
 import ir.darkdeveloper.bitkip.utils.InputValidations;
-import ir.darkdeveloper.bitkip.utils.MainTableUtils;
 import ir.darkdeveloper.bitkip.utils.ResizeUtil;
 import ir.darkdeveloper.bitkip.utils.WindowUtils;
+import javafx.application.Platform;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
@@ -23,14 +23,17 @@ import javafx.scene.input.MouseButton;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
+import javafx.scene.paint.Paint;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
 import org.kordamp.ikonli.javafx.FontIcon;
 
 import java.time.DayOfWeek;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.HashSet;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import static ir.darkdeveloper.bitkip.BitKip.getResource;
@@ -122,7 +125,6 @@ public class SchedulerController implements FXMLController, QueueObserver {
     private Stage stage;
     private final ObjectProperty<QueueModel> selectedQueue = new SimpleObjectProperty<>();
     private Rectangle2D bounds;
-    private MainTableUtils mainTableUtils;
 
 
     @Override
@@ -192,6 +194,16 @@ public class SchedulerController implements FXMLController, QueueObserver {
         InputValidations.validIntInputCheck(simulDownloadSpinner.getEditor(), 1, 1, 5);
 
 
+        datePicker.setDayCellFactory(dp -> new DateCell() {
+            @Override
+            public void updateItem(LocalDate date, boolean empty) {
+                super.updateItem(date, empty);
+                if (date.isBefore(LocalDate.now())) {
+                    setDisable(true);
+                    setStyle("-fx-background-color: #ffc0cb;");
+                }
+            }
+        });
     }
 
     @Override
@@ -319,9 +331,6 @@ public class SchedulerController implements FXMLController, QueueObserver {
         stage.close();
     }
 
-    public void setMainTableUtils(MainTableUtils mainTableUtils) {
-        this.mainTableUtils = mainTableUtils;
-    }
 
     @FXML
     private void hideStage() {
@@ -367,53 +376,77 @@ public class SchedulerController implements FXMLController, QueueObserver {
 
     @FXML
     private void onSave() {
-        var schedule = new ScheduleModel();
-        var queue = selectedQueue.get();
-        schedule.setId(queue.getSchedule().getId());
-        var days = new HashSet<DayOfWeek>();
-        if (saturdayCheck.isSelected())
-            days.add(SATURDAY);
-        if (sundayCheck.isSelected())
-            days.add(SUNDAY);
-        if (mondayCheck.isSelected())
-            days.add(MONDAY);
-        if (tuesdayCheck.isSelected())
-            days.add(TUESDAY);
-        if (wednesdayCheck.isSelected())
-            days.add(WEDNESDAY);
-        if (thursdayCheck.isSelected())
-            days.add(THURSDAY);
-        if (fridayCheck.isSelected())
-            days.add(FRIDAY);
-        schedule.setDays(days);
-        schedule.setEnabled(enableCheck.isSelected());
-        schedule.setOnceDownload(onceRadio.isSelected());
-        schedule.setQueueId(queue.getId());
-        schedule.setStartDate(datePicker.getValue());
-        var startTime = LocalTime.of(startHourSpinner.getValue(),
-                startMinuteSpinner.getValue(), startSecondSpinner.getValue());
-        schedule.setStartTime(startTime);
-        schedule.setStopTimeEnabled(stopAtCheck.isSelected());
-        var stopTime = LocalTime.of(stopHourSpinner.getValue(),
-                stopMinuteSpinner.getValue(), stopSecondSpinner.getValue());
-        schedule.setStopTime(stopTime);
-        schedule.setTurnOffEnabled(whenDoneCheck.isSelected());
-        schedule.setTurnOffMode(powerCombo.getValue());
-        schedule.setSpeed(getBytesFromString(speedField.getText()));
-        schedule.setSimultaneouslyDownload(simulDownloadSpinner.getValue());
-        ScheduleRepo.updateSchedule(schedule);
-        var updatedQueues = getQueues().stream()
-                .peek(q -> {
-                    if (q.equals(queue))
-                        q.setSchedule(schedule);
-                }).toList();
-        addAllQueues(updatedQueues);
-        queueList.getItems().clear();
-        queueList.getItems().addAll(updatedQueues);
-        queueList.getSelectionModel().select(queue);
         var executor = Executors.newCachedThreadPool();
+        try {
+            var schedule = new ScheduleModel();
+            var queue = selectedQueue.get();
+            schedule.setId(queue.getSchedule().getId());
+            var days = new HashSet<DayOfWeek>();
+            if (saturdayCheck.isSelected())
+                days.add(SATURDAY);
+            if (sundayCheck.isSelected())
+                days.add(SUNDAY);
+            if (mondayCheck.isSelected())
+                days.add(MONDAY);
+            if (tuesdayCheck.isSelected())
+                days.add(TUESDAY);
+            if (wednesdayCheck.isSelected())
+                days.add(WEDNESDAY);
+            if (thursdayCheck.isSelected())
+                days.add(THURSDAY);
+            if (fridayCheck.isSelected())
+                days.add(FRIDAY);
+            schedule.setDays(days);
+            schedule.setEnabled(enableCheck.isSelected());
+            schedule.setOnceDownload(onceRadio.isSelected());
+            schedule.setQueueId(queue.getId());
+            schedule.setStartDate(datePicker.getValue());
+            var startTime = LocalTime.of(startHourSpinner.getValue(),
+                    startMinuteSpinner.getValue(), startSecondSpinner.getValue());
+            schedule.setStartTime(startTime);
+            schedule.setStopTimeEnabled(stopAtCheck.isSelected());
+            var stopTime = LocalTime.of(stopHourSpinner.getValue(),
+                    stopMinuteSpinner.getValue(), stopSecondSpinner.getValue());
+            schedule.setStopTime(stopTime);
+            schedule.setTurnOffEnabled(whenDoneCheck.isSelected());
+            schedule.setTurnOffMode(powerCombo.getValue());
+            schedule.setSpeed(getBytesFromString(speedField.getText()));
+            schedule.setSimultaneouslyDownload(simulDownloadSpinner.getValue());
+            var startDate = schedule.getStartDate();
+            if (schedule.isOnceDownload() && startDate != null) {
+                var d = startDate.atTime(schedule.getStartTime());
+                boolean before = d.isBefore(LocalDateTime.now());
+                if (before)
+                    throw new IllegalArgumentException("Can't schedule in past");
+            }
+
+            ScheduleRepo.updateSchedule(schedule);
+            queue.setSchedule(schedule);
+            var updatedQueues = getQueues().stream()
+                    .peek(q -> {
+                        if (q.equals(queue))
+                            q.setSchedule(schedule);
+                    }).toList();
+            addAllQueues(updatedQueues);
+            queueList.getItems().clear();
+            queueList.getItems().addAll(updatedQueues);
+            queueList.getSelectionModel().select(queue);
+
+            ScheduleTask.schedule(queue);
+            showResultMessage("Successfully Saved", SaveStatus.SUCCESS, executor);
+        } catch (IllegalArgumentException e) {
+            showResultMessage(e.getMessage(), SaveStatus.ERROR, executor);
+        }
+
+    }
+
+    private void showResultMessage(String message, SaveStatus saveStatus, ExecutorService executor) {
         executor.submit(() -> {
             try {
+                Platform.runLater(() -> savedLabel.setText(message));
+                savedLabel.setTextFill(Paint.valueOf("#009688"));
+                if (saveStatus == SaveStatus.ERROR)
+                    savedLabel.setTextFill(Paint.valueOf("#EF5350"));
                 savedLabel.setVisible(true);
                 Thread.sleep(1500);
                 savedLabel.setVisible(false);
@@ -421,6 +454,10 @@ public class SchedulerController implements FXMLController, QueueObserver {
             }
             executor.shutdown();
         });
-        new ScheduleTask(schedule, queue, mainTableUtils).schedule();
+    }
+
+    enum SaveStatus {
+        ERROR,
+        SUCCESS
     }
 }

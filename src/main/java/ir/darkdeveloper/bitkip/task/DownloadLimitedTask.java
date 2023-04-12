@@ -49,11 +49,16 @@ public class DownloadLimitedTask extends DownloadTask {
 
 
     @Override
-    protected Long call() throws IOException, InterruptedException {
+    protected Long call() throws IOException {
         file = new File(downloadModel.getFilePath());
         if (file.exists() && isCompleted(downloadModel, file, mainTableUtils))
             return 0L;
-        performDownload();
+        try {
+            performDownload();
+        }catch (IOException | InterruptedException e){
+            e.printStackTrace();
+            this.pause();
+        }
         return getCurrentFileSize(file);
     }
 
