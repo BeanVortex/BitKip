@@ -90,3 +90,6 @@
 .bold {
     -fx-font-weight: bold;
 }
+.title-opacity{
+    -fx-opacity: 0.8;
+}

@@ -17,6 +17,8 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
+import javafx.scene.paint.Paint;
+import javafx.scene.text.Text;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
 import org.apache.commons.lang3.time.DurationFormatUtils;
@@ -50,6 +52,8 @@ public class DownloadingController implements FXMLController {
     private Label titleLbl;
     @FXML
     private Label progressLbl;
+    @FXML
+    private Label resumeableLbl;
     @FXML
     private ProgressBar downloadProgress;
     @FXML
@@ -147,6 +151,9 @@ public class DownloadingController implements FXMLController {
                         IOUtils.formatBytes(downloadModel.getSize()));
         downloadedOfLbl.setText(downloadOf);
         progressLbl.setText("Progress: %.2f%%".formatted(downloadModel.getProgress()));
+        var resumeableText = new Text(downloadModel.isResumeable() ? "Yes" : "No");
+        resumeableText.setFill(downloadModel.isResumeable() ? Paint.valueOf("#388E3C") : Paint.valueOf("#EF5350"));
+        resumeableLbl.setGraphic(new HBox(new Text("Resumeable: "), resumeableText));
         openSwitch.setSelected(downloadModel.isOpenAfterComplete());
         showSwitch.setSelected(downloadModel.isShowCompleteDialog());
         onComplete(downloadModel);

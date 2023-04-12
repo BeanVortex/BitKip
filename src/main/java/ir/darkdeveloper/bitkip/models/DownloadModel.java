@@ -4,7 +4,6 @@ import ir.darkdeveloper.bitkip.task.DownloadTask;
 import ir.darkdeveloper.bitkip.utils.IOUtils;
 import lombok.*;
 
-import java.text.DecimalFormat;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
@@ -38,6 +37,7 @@ public class DownloadModel {
     private LocalDateTime completeDate;
     private boolean openAfterComplete;
     private boolean showCompleteDialog;
+    private boolean resumeable;
 
     private String sizeString;
     private String downloadedString;

@@ -5,7 +5,7 @@
 <?import javafx.scene.layout.*?>
 <?import org.controlsfx.control.ToggleSwitch?>
 <?import java.net.URL?>
-<VBox minHeight="350" minWidth="600" prefHeight="350" prefWidth="600" xmlns="http://javafx.com/javafx/19"
+<VBox minHeight="370" minWidth="600" prefHeight="370" prefWidth="600" xmlns="http://javafx.com/javafx/19"
       xmlns:fx="http://javafx.com/fxml/1" fx:controller="ir.darkdeveloper.bitkip.controllers.DownloadingController">
     <stylesheets>
         <URL value="@../css/main.css"/>
@@ -38,10 +38,11 @@
                 <Region HBox.hgrow="ALWAYS"/>
                 <Label fx:id="downloadedOfLbl" text="0 MB / 0 MB" styleClass="bold"/>
             </HBox>
-            <ProgressBar fx:id="downloadProgress" prefWidth="Infinity"/>
+            <ProgressBar fx:id="downloadProgress" prefWidth="Infinity" minHeight="20"/>
         </VBox>
         <Label fx:id="progressLbl" text="progress" styleClass="bold"/>
         <Label fx:id="remainingLbl" text="remaining time" styleClass="bold"/>
+        <Label fx:id="resumeableLbl" styleClass="bold, title-opacity"/>
         <Accordion>
             <panes>
                 <TitledPane id="titledPane" animated="false" text="Advanced" fx:id="advancedPane">

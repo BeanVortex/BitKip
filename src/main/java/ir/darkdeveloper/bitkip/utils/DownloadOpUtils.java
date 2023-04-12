@@ -35,9 +35,6 @@ public class DownloadOpUtils {
                 });
     }
 
-    /*
-     * Starts or Resumes download non-blocking
-     * */
     public static void startDownload(MainTableUtils mainTableUtils, DownloadModel dm, String speedLimit,
                                      String byteLimit, boolean resume, boolean blocking, ExecutorService executor) {
         if (!currentDownloadings.contains(dm)) {
