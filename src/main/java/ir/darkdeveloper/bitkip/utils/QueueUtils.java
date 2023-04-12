@@ -51,11 +51,10 @@ public class QueueUtils {
                 if (startedQueues.contains(qm))
                     queueDoneNotification(qm);
                 startedQueues.remove(qm);
-                if (schedule.isEnabled() && schedule.isTurnOffEnabled()) {
-                    System.out.println("turn off");
-                }
                 shutdownSchedulersOnOnceDownload(schedule);
                 executor.shutdown();
+                if (schedule.isEnabled() && schedule.isTurnOffEnabled())
+                    PowerUtils.turnOff(schedule.getTurnOffMode());
             });
         } else if (schedule.isEnabled() && schedule.isOnceDownload())
             currentSchedules.get(schedule.getId()).getStartScheduler().shutdown();
@@ -75,6 +74,9 @@ public class QueueUtils {
 
             startedQueues.remove(qm);
             queueDoneNotification(qm);
+            var schedule = qm.getSchedule();
+            if (schedule.isEnabled() && schedule.isTurnOffEnabled())
+                PowerUtils.turnOff(schedule.getTurnOffMode());
         }
     }
 
