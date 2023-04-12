@@ -9,9 +9,10 @@ import javafx.scene.control.Label;
 import javafx.scene.control.MenuItem;
 
 import java.time.*;
-import java.util.TimerTask;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+
+import static ir.darkdeveloper.bitkip.config.AppConfigs.currentSchedules;
 
 
 public class ScheduleTask {
@@ -33,34 +34,86 @@ public class ScheduleTask {
                 .findFirst().orElse(null);
     }
 
-    public void start() {
-        if (!schedule.isEnabled())
+    public void schedule() {
+        var isThereSchedule = currentSchedules.keySet().stream().anyMatch(id -> id == schedule.getId());
+        if (isThereSchedule) {
+            var areAllScheduleFieldSame = currentSchedules.values().stream().anyMatch(s -> s.equals(schedule));
+            if (areAllScheduleFieldSame)
+                return;
+        }
+
+        if (!schedule.isEnabled()) {
+            if (isThereSchedule) {
+                var sm = currentSchedules.get(schedule.getId());
+                sm.getStartScheduler().shutdown();
+                if (sm.getStopScheduler() != null)
+                    sm.getStopScheduler().shutdown();
+                currentSchedules.remove(sm.getId());
+            }
             return;
+        }
+
+        startSchedule(isThereSchedule);
+        if (schedule.isStopTimeEnabled())
+            stopSchedule(isThereSchedule);
+        currentSchedules.put(schedule.getId(), schedule);
+    }
+
+    private void startSchedule(boolean isThereSchedule) {
+        Runnable run = () -> QueueUtils.startQueue(queue, startItem, stopItem, mainTableUtils);
+        createSchedule(run, false);
+
+        if (isThereSchedule)
+            currentSchedules.get(schedule.getId()).getStartScheduler().shutdown();
+    }
+
+    private void stopSchedule(boolean isThereSchedule) {
+        Runnable run = () -> QueueUtils.stopQueue(queue, startItem, stopItem, mainTableUtils);
+        createSchedule(run, true);
+
+        var sm = currentSchedules.get(schedule.getId());
+        if (isThereSchedule && sm.getStopScheduler() != null)
+            sm.getStopScheduler().shutdown();
+    }
+
+    private void createSchedule(Runnable run, boolean isStop) {
         var scheduler = Executors.newScheduledThreadPool(1);
+        if (isStop)
+            schedule.setStopScheduler(scheduler);
+        else
+            schedule.setStartScheduler(scheduler);
 
         if (schedule.isOnceDownload()) {
-            var startDate = schedule.getStartDate();
-            var startTime = schedule.getStartTime();
-            var dateTime = LocalDateTime.of(startDate, startTime);
-            Runnable task = () -> System.out.println("Task executed at specific time.");
-            var zone = ZoneId.systemDefault();
-            var zonedDateTime = dateTime.atZone(zone);
-            var duration = Duration.between(ZonedDateTime.now(), zonedDateTime);
-            long initialDelay = Math.max(duration.toMillis(), 0);
-            scheduler.schedule(task, initialDelay, TimeUnit.MILLISECONDS);
+            var initialDelay = calculateOnceInitialDelay(isStop);
+            scheduler.schedule(run, initialDelay, TimeUnit.MILLISECONDS);
         } else {
-            var initialDelay = calculateInitialDate();
+            var initialDelay = calculateDailyInitialDelay();
             scheduler.scheduleAtFixedRate(() -> {
                 if (!schedule.getDays().contains(LocalDate.now().getDayOfWeek()))
                     return;
-                System.out.println("period " + LocalDate.now().getDayOfWeek());
-            }, initialDelay , TimeUnit.DAYS.toMillis(1), TimeUnit.MILLISECONDS);
+                run.run();
+            }, initialDelay, TimeUnit.DAYS.toMillis(1), TimeUnit.MILLISECONDS);
         }
-
-
     }
 
-    private long calculateInitialDate() {
+
+    private long calculateOnceInitialDelay(boolean isStop) {
+        var startDate = schedule.getStartDate();
+        var startTime = schedule.getStartTime();
+        var dateTime = LocalDateTime.of(startDate, startTime);
+        if (isStop) {
+            var stopTime = schedule.getStopTime();
+            if (stopTime.isBefore(startTime))
+                startDate = startDate.plusDays(1);
+            dateTime = LocalDateTime.of(startDate, stopTime);
+        }
+        var zone = ZoneId.systemDefault();
+        var zonedDateTime = dateTime.atZone(zone);
+        var duration = Duration.between(ZonedDateTime.now(), zonedDateTime);
+        return Math.max(duration.toMillis(), 0);
+    }
+
+    private long calculateDailyInitialDelay() {
         var nowTime = LocalTime.now();
         var startTime = schedule.getStartTime();
         // today
@@ -76,14 +129,6 @@ public class ScheduleTask {
             var zonedDateTime = startTime.atDate(LocalDate.now().plusDays(1)).atZone(zone);
             var duration = Duration.between(ZonedDateTime.now(), zonedDateTime);
             return Math.max(duration.toMillis(), 0);
-        }
-    }
-
-
-    private class StopTask extends TimerTask {
-        public void run() {
-            System.out.println("stop");
-            QueueUtils.stopQueue(queue, startItem, stopItem, mainTableUtils);
         }
     }
 }

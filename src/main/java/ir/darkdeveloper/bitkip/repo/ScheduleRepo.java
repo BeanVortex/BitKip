@@ -144,7 +144,7 @@ public class ScheduleRepo {
         var stopTime = stopTimeString == null ? null : LocalTime.parse(stopTimeString);
         var turnOffMode = turnOffModeString == null ? null : TurnOffMode.valueOf(turnOffModeString);
         return new ScheduleModel(id, enabled, startTime, onceDownload, startDate, days, speed, simulDownload,
-                stopTimeEnabled, stopTime, turnOffEnabled, turnOffMode, queueId);
+                stopTimeEnabled, stopTime, turnOffEnabled, turnOffMode, queueId, null, null);
     }
 
     public static void updateSchedule(ScheduleModel schedule) {

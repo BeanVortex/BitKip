@@ -3,11 +3,14 @@ package ir.darkdeveloper.bitkip.config;
 import ir.darkdeveloper.bitkip.controllers.DownloadingController;
 import ir.darkdeveloper.bitkip.models.DownloadModel;
 import ir.darkdeveloper.bitkip.models.QueueModel;
+import ir.darkdeveloper.bitkip.models.ScheduleModel;
 import javafx.application.HostServices;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class AppConfigs {
 
@@ -44,6 +47,7 @@ public class AppConfigs {
     public static final List<DownloadModel> currentDownloadings = new ArrayList<>();
     public static final List<QueueModel> startedQueues = new ArrayList<>();
     public static final List<DownloadingController> openDownloadings = new ArrayList<>();
+    public static final Map<Integer, ScheduleModel> currentSchedules = new HashMap<>();
 
     public static boolean showCompleteDialog = true;
 

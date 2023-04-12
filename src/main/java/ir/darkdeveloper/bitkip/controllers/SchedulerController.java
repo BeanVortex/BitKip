@@ -421,6 +421,6 @@ public class SchedulerController implements FXMLController, QueueObserver {
             }
             executor.shutdown();
         });
-        new ScheduleTask(schedule, queue, mainTableUtils).start();
+        new ScheduleTask(schedule, queue, mainTableUtils).schedule();
     }
 }
