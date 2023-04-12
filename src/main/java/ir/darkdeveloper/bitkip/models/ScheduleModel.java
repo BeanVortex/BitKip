@@ -24,7 +24,7 @@ public class ScheduleModel {
     private LocalDate startDate;
     private Set<DayOfWeek> days;
     private long speed;
-    private int simultaneouslyDownload;
+    private int simultaneouslyDownload = 1;
     private boolean stopTimeEnabled;
     private LocalTime stopTime;
     private boolean turnOffEnabled;
