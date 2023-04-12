@@ -243,8 +243,7 @@ public class SingleDownload implements NewDownloadFxmlController {
     @FXML
     private void onQueueChanged() {
         var selectedQueue = queueCombo.getSelectionModel().getSelectedItem();
-        if (selectedQueue.hasFolder())
-        {
+        if (selectedQueue.hasFolder()) {
             var folder = new File(downloadPath + File.separator + selectedQueue.getName());
             if (!folder.exists())
                 folder.mkdir();

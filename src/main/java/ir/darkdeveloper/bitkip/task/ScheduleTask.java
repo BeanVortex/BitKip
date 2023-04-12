@@ -118,32 +118,33 @@ public class ScheduleTask {
     }
 
     private static boolean validateScheduleModel(ScheduleModel schedule, boolean isThereSchedule) {
-        boolean shouldReturn = false;
         if (isThereSchedule) {
             var areAllScheduleFieldSame = currentSchedules.values().stream().anyMatch(s -> s.equals(schedule));
             if (areAllScheduleFieldSame)
-                shouldReturn = true;
+                return true;
         }
 
+        var sm = currentSchedules.get(schedule.getId());
         if (!schedule.isEnabled()) {
             if (isThereSchedule) {
-                var sm = currentSchedules.get(schedule.getId());
                 sm.getStartScheduler().shutdown();
                 if (sm.getStopScheduler() != null)
                     sm.getStopScheduler().shutdown();
                 currentSchedules.remove(sm.getId());
             }
-            shouldReturn = true;
+            return true;
         } else {
-            if (schedule.isOnceDownload()){
+            if (schedule.isOnceDownload()) {
                 var scheduledTime = schedule.getStartDate().atTime(schedule.getStartTime());
-                if (scheduledTime.isBefore(LocalDateTime.now())){
+                if (scheduledTime.isBefore(LocalDateTime.now())) {
                     schedule.setEnabled(false);
                     ScheduleRepo.updateScheduleEnabled(schedule.getId(), schedule.isEnabled());
-                    shouldReturn = true;
+                    return true;
                 }
             }
+            if (sm != null && sm.getStartScheduler() != null) sm.getStartScheduler().shutdown();
+            if (sm != null && sm.getStopScheduler() != null) sm.getStopScheduler().shutdown();
         }
-        return shouldReturn;
+        return false;
     }
 }

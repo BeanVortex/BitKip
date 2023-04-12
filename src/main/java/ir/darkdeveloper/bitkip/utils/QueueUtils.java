@@ -3,6 +3,7 @@ package ir.darkdeveloper.bitkip.utils;
 import ir.darkdeveloper.bitkip.models.DownloadModel;
 import ir.darkdeveloper.bitkip.models.DownloadStatus;
 import ir.darkdeveloper.bitkip.models.QueueModel;
+import ir.darkdeveloper.bitkip.models.ScheduleModel;
 import ir.darkdeveloper.bitkip.repo.QueuesRepo;
 import javafx.application.Platform;
 import javafx.scene.control.MenuItem;
@@ -17,6 +18,7 @@ import static ir.darkdeveloper.bitkip.config.AppConfigs.*;
 
 public class QueueUtils {
     public static void startQueue(QueueModel qm, MenuItem startItem, MenuItem stopItem, MainTableUtils mainTableUtils) {
+        var schedule = qm.getSchedule();
         if (!startedQueues.contains(qm)) {
             var downloadsByQueue = QueuesRepo.findByName(qm.getName(), true)
                     .getDownloads()
@@ -49,12 +51,15 @@ public class QueueUtils {
                 if (startedQueues.contains(qm))
                     queueDoneNotification(qm);
                 startedQueues.remove(qm);
-                if (qm.getSchedule().isTurnOffEnabled()) {
+                if (schedule.isEnabled() && schedule.isTurnOffEnabled()) {
                     System.out.println("turn off");
                 }
+                shutdownSchedulersOnOnceDownload(schedule);
                 executor.shutdown();
             });
-        }
+        } else if (schedule.isEnabled() && schedule.isOnceDownload())
+            currentSchedules.get(schedule.getId()).getStartScheduler().shutdown();
+
     }
 
 
@@ -67,8 +72,17 @@ public class QueueUtils {
                 dm = mainTableUtils.getObservedDownload(dm);
                 DownloadOpUtils.pauseDownload(dm);
             });
+
             startedQueues.remove(qm);
             queueDoneNotification(qm);
+        }
+    }
+
+    private static void shutdownSchedulersOnOnceDownload(ScheduleModel schedule) {
+        if (schedule.isEnabled() && schedule.isOnceDownload()) {
+            currentSchedules.get(schedule.getId()).getStartScheduler().shutdown();
+            var stopScheduler = currentSchedules.get(schedule.getId()).getStopScheduler();
+            if (stopScheduler != null) stopScheduler.shutdownNow();
         }
     }
 
