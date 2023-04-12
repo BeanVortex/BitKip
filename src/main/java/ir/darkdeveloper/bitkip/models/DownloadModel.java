@@ -10,6 +10,8 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Objects;
 
+import static ir.darkdeveloper.bitkip.utils.MainTableUtils.dFormat;
+
 @Getter
 @Setter
 @ToString
@@ -39,12 +41,14 @@ public class DownloadModel {
 
     private String sizeString;
     private String downloadedString;
-    private String progressString;
+    private String downloadStatusString;
     private String speedString;
     private String addDateString;
     private String addToQueueDateString;
     private String lastTryDateString;
     private String completeDateString;
+
+
 
 
     public static final String DATE_FORMAT = "yyyy/MM/dd - HH:mm:ss";
@@ -93,15 +97,11 @@ public class DownloadModel {
         return IOUtils.formatBytes(downloaded);
     }
 
-    public String getProgressString() {
-        return new DecimalFormat("##.#").format(progress) + " %";
-    }
-
     public String getSpeedString() {
         return IOUtils.formatBytes(speed);
     }
 
-    public void setDownloadStatus(DownloadStatus downloadStatus) {
-        this.downloadStatus = downloadStatus;
+    public String getDownloadStatusString() {
+        return "%s (%s)".formatted(downloadStatus, dFormat.format(progress) + " %");
     }
 }

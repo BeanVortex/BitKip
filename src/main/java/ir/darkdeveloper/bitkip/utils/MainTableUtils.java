@@ -27,11 +27,12 @@ import static ir.darkdeveloper.bitkip.utils.ShortcutUtils.*;
 
 public class MainTableUtils {
 
+    public static final DecimalFormat dFormat = new DecimalFormat("##.#");
+
 
     private final TableView<DownloadModel> contentTable;
 
     private final TableColumn<DownloadModel, String> nameColumn = new TableColumn<>("Name");
-    private final TableColumn<DownloadModel, String> progressColumn = new TableColumn<>("Progress");
     private final TableColumn<DownloadModel, String> speedColumn = new TableColumn<>("Speed");
     private final TableColumn<DownloadModel, String> downloadedColumn = new TableColumn<>("Downloaded");
     private final TableColumn<DownloadModel, String> sizeColumn = new TableColumn<>("Size");
@@ -59,16 +60,15 @@ public class MainTableUtils {
         lastTryColumn.setPrefWidth(150);
         completeColumn.setPrefWidth(150);
 
-        List<TableColumn<DownloadModel, ?>> listOfColumns = List.of(nameColumn, progressColumn, speedColumn,
+        List<TableColumn<DownloadModel, ?>> listOfColumns = List.of(nameColumn, speedColumn,
                 downloadedColumn, sizeColumn, statusColumn, remainingColumn, chunksColumn, addDateColumn,
                 lastTryColumn, completeColumn, addToQueueDateColumn);
         contentTable.getColumns().addAll(listOfColumns);
         nameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
-        progressColumn.setCellValueFactory(new PropertyValueFactory<>("progressString"));
         speedColumn.setCellValueFactory(new PropertyValueFactory<>("speedString"));
         downloadedColumn.setCellValueFactory(new PropertyValueFactory<>("downloadedString"));
         sizeColumn.setCellValueFactory(new PropertyValueFactory<>("sizeString"));
-        statusColumn.setCellValueFactory(new PropertyValueFactory<>("downloadStatus"));
+        statusColumn.setCellValueFactory(new PropertyValueFactory<>("downloadStatusString"));
         remainingColumn.setCellValueFactory(new PropertyValueFactory<>("remainingTime"));
         chunksColumn.setCellValueFactory(new PropertyValueFactory<>("chunks"));
         addDateColumn.setCellValueFactory(new PropertyValueFactory<>("addDateString"));
@@ -223,7 +223,6 @@ public class MainTableUtils {
                 i.setDownloadStatus(DownloadStatus.Downloading);
                 if (progress == 100)
                     i.setDownloadStatus(DownloadStatus.Completed);
-                i.setProgressString(new DecimalFormat("##.#").format(progress) + " %");
             }
         }
         refreshTable();
