@@ -47,7 +47,7 @@ public class ScheduleRepo {
                     %s INTEGER,
                     %s VARCHAR,
                     %s INTEGER,
-                    %s INTEGER,
+                    %s VARCHAR DEFAULT 0,
                     %s INTEGER,
                     FOREIGN KEY (%s) REFERENCES %s(%s)
                     );
@@ -73,7 +73,7 @@ public class ScheduleRepo {
     public static void insertSchedule(ScheduleModel schedule, int queueId) {
         var m = validScheduleProperties(schedule);
         var insertToScheduleSql = """
-                INSERT INTO %s (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s) VALUES(%d,%s,%d,%s,%s,%d,%s,%d,%s,%d,%d,%s);
+                INSERT INTO %s (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s) VALUES(%d,%s,%d,%s,%s,%d,%s,%d,%s,%d,%s,%s);
                 """
                 .formatted(SCHEDULE_TABLE_NAME, COL_ENABLED, COL_START_TIME,
                         COL_ONCE_DOWNLOAD, COL_START_DATE, COL_DAYS,
@@ -126,7 +126,7 @@ public class ScheduleRepo {
         var enabled = rs.getBoolean(COL_ENABLED);
         var onceDownload = rs.getBoolean(COL_ONCE_DOWNLOAD);
         var startDateString = rs.getString(COL_START_DATE);
-        var speed = rs.getLong(COL_SPEED_LIMIT);
+        var speed = rs.getString(COL_SPEED_LIMIT);
         var simulDownload = rs.getInt(COL_SIMUL_DOWNLOAD);
         var stopTimeEnabled = rs.getBoolean(COL_STOP_TIME_ENABLED);
         var stopTimeString = rs.getString(COL_STOP_TIME);
@@ -151,7 +151,7 @@ public class ScheduleRepo {
         var m = validScheduleProperties(schedule);
 
         var sql = """
-                UPDATE %s SET %s=%s,%s=%d,%s=%s,%s=%s,%s=%s,%s=%s,%s=%d,%s=%d,%s=%d,%s=%d,%s=%d
+                UPDATE %s SET %s=%s,%s=%d,%s=%s,%s=%s,%s=%s,%s=%s,%s=%d,%s=%d,%s=%d,%s=%d,%s=%s
                 WHERE %s=%d;
                 """
                 .formatted(SCHEDULE_TABLE_NAME,

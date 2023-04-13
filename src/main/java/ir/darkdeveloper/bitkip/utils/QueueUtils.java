@@ -39,7 +39,10 @@ public class QueueUtils {
                     var dm = qm.getDownloads().get(i);
                     if (dm.getDownloadStatus() == DownloadStatus.Paused) {
                         dm = mainTableUtils.getObservedDownload(dm);
-                        DownloadOpUtils.startDownload(mainTableUtils, dm, null, null, true,
+                        String speedLimit = null;
+                        if (schedule.isEnabled() && schedule.getSpeed() != null)
+                            speedLimit = schedule.getSpeed();
+                        DownloadOpUtils.startDownload(mainTableUtils, dm, speedLimit, null, true,
                                 true, executor);
                     }
 

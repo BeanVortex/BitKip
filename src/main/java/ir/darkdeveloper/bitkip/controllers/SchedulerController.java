@@ -40,7 +40,6 @@ import static ir.darkdeveloper.bitkip.BitKip.getResource;
 import static ir.darkdeveloper.bitkip.config.AppConfigs.*;
 import static ir.darkdeveloper.bitkip.utils.FxUtils.SCHEDULER_STAGE;
 import static ir.darkdeveloper.bitkip.utils.FxUtils.openStages;
-import static ir.darkdeveloper.bitkip.utils.IOUtils.getBytesFromString;
 import static java.time.DayOfWeek.*;
 
 public class SchedulerController implements FXMLController, QueueObserver {
@@ -279,6 +278,10 @@ public class SchedulerController implements FXMLController, QueueObserver {
         var startDate = schedule.getStartDate();
         if (startDate != null)
             datePicker.setValue(startDate);
+
+        speedField.setText(schedule.getSpeed());
+        simulDownloadSpinner.getValueFactory().setValue(schedule.getSimultaneouslyDownload());
+
         stopAtCheck.setSelected(schedule.isStopTimeEnabled());
         stopContainer.setDisable(!schedule.isStopTimeEnabled());
         var stopTime = schedule.getStopTime();
@@ -410,7 +413,7 @@ public class SchedulerController implements FXMLController, QueueObserver {
             schedule.setStopTime(stopTime);
             schedule.setTurnOffEnabled(whenDoneCheck.isSelected());
             schedule.setTurnOffMode(powerCombo.getValue());
-            schedule.setSpeed(getBytesFromString(speedField.getText()));
+            schedule.setSpeed(speedField.getText());
             schedule.setSimultaneouslyDownload(simulDownloadSpinner.getValue());
             var startDate = schedule.getStartDate();
             if (schedule.isOnceDownload() && startDate != null) {

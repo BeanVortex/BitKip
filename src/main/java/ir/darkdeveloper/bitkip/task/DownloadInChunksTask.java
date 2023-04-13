@@ -140,9 +140,7 @@ public class DownloadInChunksTask extends DownloadTask {
                 try {
                     performLimitedDownload(url, fromContinue, finalFrom, finalTo, partFile, fileSize);
                 } catch (IOException | InterruptedException e) {
-                    e.printStackTrace();
                     this.pause();
-                    throw new RuntimeException(e);
                 }
             }, executor);
         } else {
@@ -150,7 +148,6 @@ public class DownloadInChunksTask extends DownloadTask {
                 try {
                     performDownload(url, fromContinue, finalFrom, finalTo, partFile, fileSize);
                 } catch (IOException | InterruptedException e) {
-                    e.printStackTrace();
                     this.pause();
                 }
             }, executor);
@@ -191,8 +188,8 @@ public class DownloadInChunksTask extends DownloadTask {
 
 
     private void performLimitedDownload(URL url, long fromContinue, long from, long to, File partFile, long existingFileSize)
-            throws IOException, InterruptedException {
-        if (retries != downloadRetryCount) {
+           throws IOException, InterruptedException {
+       if (retries != downloadRetryCount) {
             try {
                 var bytesToDownloadEachInCycle = limit / chunks;
                 var con = (HttpURLConnection) url.openConnection();
@@ -204,7 +201,7 @@ public class DownloadInChunksTask extends DownloadTask {
                 fileChannels.add(fileChannel);
                 var byteChannel = Channels.newChannel(con.getInputStream());
                 long finalExistingFileSize = existingFileSize;
-                while (from + finalExistingFileSize < to) {
+                while (fromContinue + finalExistingFileSize < to) {
                     fileChannel.transferFrom(byteChannel, finalExistingFileSize, bytesToDownloadEachInCycle);
                     finalExistingFileSize += bytesToDownloadEachInCycle;
                     Thread.sleep(ONE_SEC);

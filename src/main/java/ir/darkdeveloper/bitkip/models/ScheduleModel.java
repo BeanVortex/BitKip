@@ -23,7 +23,7 @@ public class ScheduleModel {
     private boolean onceDownload;
     private LocalDate startDate;
     private Set<DayOfWeek> days;
-    private long speed;
+    private String speed = "0";
     private int simultaneouslyDownload = 1;
     private boolean stopTimeEnabled;
     private LocalTime stopTime;
@@ -40,7 +40,7 @@ public class ScheduleModel {
         if (o == null || getClass() != o.getClass()) return false;
         ScheduleModel that = (ScheduleModel) o;
         return id == that.id && enabled == that.enabled && onceDownload == that.onceDownload &&
-                speed == that.speed && simultaneouslyDownload == that.simultaneouslyDownload &&
+                Objects.equals(speed, that.speed) && simultaneouslyDownload == that.simultaneouslyDownload &&
                 stopTimeEnabled == that.stopTimeEnabled && turnOffEnabled == that.turnOffEnabled &&
                 queueId == that.queueId && Objects.equals(startTime, that.startTime) &&
                 Objects.equals(startDate, that.startDate) && days.equals(that.days) &&

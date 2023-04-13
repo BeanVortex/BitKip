@@ -341,8 +341,8 @@ public class DownloadsRepo {
         if (dm.getCompleteDate() != null)
             completeDate = "\"" + dm.getCompleteDate() + "\"";
         var sql = """
-                UPDATE %s SET %s = %f, %s = %d, %s = "%s",
-                    %s = "%s" WHERE %s = %d
+                UPDATE %s SET %s = %f, %s = %d, %s = %s,
+                    %s = %s WHERE %s = %d
                 """
                 .formatted(DOWNLOADS_TABLE_NAME,
                         COL_PROGRESS, dm.getProgress(),
