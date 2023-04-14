@@ -28,8 +28,10 @@ import javafx.stage.Stage;
 import javafx.util.Duration;
 import org.kordamp.ikonli.javafx.FontIcon;
 
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.ResourceBundle;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static ir.darkdeveloper.bitkip.BitKip.getResource;
@@ -117,7 +119,7 @@ public class MainController implements FXMLController, QueueObserver {
 
 
     @Override
-    public void initialize() {
+    public void initialize(URL location, ResourceBundle resources) {
         closeBtn.setGraphic(new FontIcon());
         fullWindowBtn.setGraphic(new FontIcon());
         hideBtn.setGraphic(new FontIcon());

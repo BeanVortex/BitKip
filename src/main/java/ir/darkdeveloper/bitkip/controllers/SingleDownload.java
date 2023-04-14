@@ -19,7 +19,9 @@ import javafx.stage.Stage;
 import org.kordamp.ikonli.javafx.FontIcon;
 
 import java.io.File;
+import java.net.URL;
 import java.time.LocalDateTime;
+import java.util.ResourceBundle;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executors;
 
@@ -88,7 +90,7 @@ public class SingleDownload implements NewDownloadFxmlController {
     }
 
     @Override
-    public void initialize() {
+    public void initialize(URL location, ResourceBundle resources) {
         var queues = AppConfigs.getQueues();
         if (queues.isEmpty())
             queues = QueuesRepo.getAllQueues(false, false);

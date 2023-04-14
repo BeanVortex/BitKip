@@ -29,11 +29,13 @@ import javafx.stage.Stage;
 import org.kordamp.ikonli.javafx.FontIcon;
 
 import java.io.File;
+import java.net.URL;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.HashSet;
+import java.util.ResourceBundle;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -127,7 +129,7 @@ public class QueueSetting implements FXMLController, QueueObserver {
 
 
     @Override
-    public void initialize() {
+    public void initialize(URL location, ResourceBundle resources) {
         closeBtn.setGraphic(new FontIcon());
         fullWindowBtn.setGraphic(new FontIcon());
         hideBtn.setGraphic(new FontIcon());

@@ -19,6 +19,8 @@ import javafx.stage.Stage;
 import org.kordamp.ikonli.javafx.FontIcon;
 
 import java.io.IOException;
+import java.net.URL;
+import java.util.ResourceBundle;
 
 import static ir.darkdeveloper.bitkip.BitKip.getResource;
 import static ir.darkdeveloper.bitkip.config.AppConfigs.newDownloadMinHeight;
@@ -103,7 +105,7 @@ public class NewDownload implements NewDownloadFxmlController {
     }
 
     @Override
-    public void initialize() {
+    public void initialize(URL location, ResourceBundle resources) {
         closeBtn.setGraphic(new FontIcon());
         fullWindowBtn.setGraphic(new FontIcon());
         hideBtn.setGraphic(new FontIcon());

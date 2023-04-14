@@ -14,6 +14,9 @@ import javafx.scene.image.ImageView;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
+import java.net.URL;
+import java.util.ResourceBundle;
+
 public class AboutController implements FXMLController {
 
 
@@ -31,7 +34,7 @@ public class AboutController implements FXMLController {
 
 
     @Override
-    public void initialize() {
+    public void initialize(URL location, ResourceBundle resources) {
 //        labels = FxUtils.getAllNodes(parent, Label.class);
         var image = new Image(BitKip.getResource("icons/logo.png").toExternalForm());
         logoImg.setImage(image);
@@ -81,4 +84,5 @@ public class AboutController implements FXMLController {
     private void checkForUpdates() {
         MoreUtils.checkUpdates(true);
     }
+
 }

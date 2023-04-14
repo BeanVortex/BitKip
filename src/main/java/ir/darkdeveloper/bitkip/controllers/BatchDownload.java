@@ -19,8 +19,10 @@ import javafx.stage.Stage;
 import org.kordamp.ikonli.javafx.FontIcon;
 
 import java.io.File;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.ResourceBundle;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executors;
 
@@ -71,7 +73,7 @@ public class BatchDownload implements NewDownloadFxmlController, QueueObserver {
     }
 
     @Override
-    public void initialize() {
+    public void initialize(URL location, ResourceBundle resources) {
         addBtn.setGraphic(new FontIcon());
         cancelBtn.setGraphic(new FontIcon());
         questionBtnChunks.setGraphic(new FontIcon());

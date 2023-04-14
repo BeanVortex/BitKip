@@ -1,12 +1,10 @@
 package ir.darkdeveloper.bitkip.controllers.interfaces;
 
-import javafx.fxml.FXML;
+import javafx.fxml.Initializable;
 import javafx.stage.Stage;
 
-public interface FXMLController {
+public interface FXMLController extends Initializable {
 
-    @FXML
-    void initialize();
 
     void initAfterStage();
 

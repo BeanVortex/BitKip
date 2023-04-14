@@ -21,6 +21,8 @@ import javafx.stage.Stage;
 import org.kordamp.ikonli.javafx.FontIcon;
 
 import java.io.File;
+import java.net.URL;
+import java.util.ResourceBundle;
 
 import static ir.darkdeveloper.bitkip.BitKip.getResource;
 
@@ -70,7 +72,7 @@ public class NewQueueController implements FXMLController {
     }
 
     @Override
-    public void initialize() {
+    public void initialize(URL location, ResourceBundle resources) {
         closeBtn.setGraphic(new FontIcon());
         bounds = Screen.getPrimary().getVisualBounds();
     }

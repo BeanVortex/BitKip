@@ -22,10 +22,12 @@ import javafx.stage.Stage;
 import org.kordamp.ikonli.javafx.FontIcon;
 
 import java.io.File;
+import java.net.URL;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.ResourceBundle;
 import java.util.concurrent.Executors;
 
 import static ir.darkdeveloper.bitkip.BitKip.getResource;
@@ -51,7 +53,7 @@ public class BatchList implements NewDownloadFxmlController {
 
 
     @Override
-    public void initialize() {
+    public void initialize(URL location, ResourceBundle resources) {
         closeBtn.setGraphic(new FontIcon());
         addBtn.requestFocus();
         addBtn.setDisable(true);
