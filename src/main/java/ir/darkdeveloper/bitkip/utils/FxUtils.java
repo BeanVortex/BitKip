@@ -247,6 +247,10 @@ public class FxUtils {
                 "Would you also like to move download files to the new location?", yes, no);
         alert.setTitle("Confirmation");
         alert.setHeaderText("Move files?");
+        var stage = (Stage) alert.getDialogPane().getScene().getWindow();
+        var logoPath = getResource("icons/logo.png");
+        if (logoPath != null)
+            stage.getIcons().add(new Image(logoPath.toExternalForm()));
         var res = alert.showAndWait();
         return res.orElse(no) == yes;
     }
