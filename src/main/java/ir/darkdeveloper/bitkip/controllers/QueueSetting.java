@@ -132,8 +132,8 @@ public class QueueSetting implements FXMLController, QueueObserver {
         fullWindowBtn.setGraphic(new FontIcon());
         hideBtn.setGraphic(new FontIcon());
         bounds = Screen.getPrimary().getVisualBounds();
-        initQueuesList();
         selectedQueue.addListener((ob, old, newVal) -> initSelectedQueueData());
+        initQueuesList();
         initInputs();
         initRadios();
         initPowerCombo();
@@ -215,7 +215,7 @@ public class QueueSetting implements FXMLController, QueueObserver {
             horLine2.setPrefWidth(width);
             rightContainer.setPrefWidth(width - queueList.getPrefWidth());
         });
-
+        selectedQueue.set(getQueues().get(0));
         stage.heightProperty().addListener((o, o2, n) -> {
             var height = n.longValue();
             queueList.setPrefHeight(height);
@@ -239,7 +239,8 @@ public class QueueSetting implements FXMLController, QueueObserver {
     }
 
     public void setSelectedQueue(QueueModel selectedQueue) {
-        this.selectedQueue.set(selectedQueue);
+        if (selectedQueue != null)
+            this.selectedQueue.set(selectedQueue);
     }
 
     private void initSelectedQueueData() {

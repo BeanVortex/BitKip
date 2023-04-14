@@ -60,6 +60,7 @@ public class MenuUtils {
         var addToQueueLbl = new Label("Add to queue");
         var startQueueLbl = new Label("Start queue");
         var stopQueueLbl = new Label("Stop queue");
+        var queueSettingLbl = new Label("Queue settings");
 
         var lbls = List.of(openLbl, resumeLbl, pauseLbl, restartLbl, deleteLbl, deleteWithFileLbl);
         var keyCodes = List.of(OPEN_KEY, RESUME_KEY, PAUSE_KEY, RESTART_KEY, DELETE_KEY, DELETE_FILE_KEY);
@@ -84,12 +85,15 @@ public class MenuUtils {
         stopQueueMenu.setGraphic(stopQueueLbl);
         MenuUtils.stopQueueMenu = stopQueueMenu;
 
+        var queueSettingItem = new MenuItem();
+        queueSettingItem.setGraphic(queueSettingLbl);
 
         initQueueMenuList(addToQueueMenu, startQueueMenu, stopQueueMenu, mainTableUtils);
 
         menuItems.put(addToQueueLbl, addToQueueMenu);
         menuItems.put(startQueueLbl, startQueueMenu);
         menuItems.put(stopQueueLbl, stopQueueMenu);
+        menuItems.put(queueSettingLbl, queueSettingItem);
         c.getItems().addAll(menuItems.values());
         operationMenu.setContextMenu(c);
 
@@ -111,6 +115,7 @@ public class MenuUtils {
         menuItems.get(deleteWithFileLbl).setOnAction(e -> DownloadOpUtils.deleteDownloads(mainTableUtils, true));
         menuItems.get(newQueueLbl).setOnAction(e -> FxUtils.newQueueStage());
         menuItems.get(deleteFromQueueLbl).setOnAction(e -> deleteFromQueue(mainTableUtils));
+        menuItems.get(queueSettingLbl).setOnAction(e-> FxUtils.newQueueSettingStage(null));
     }
 
     private static void disableEnableStartStopQueue(Menu startQueueMenu, Menu stopQueueMenu) {

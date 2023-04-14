@@ -26,6 +26,7 @@ import java.util.Map;
 
 import static ir.darkdeveloper.bitkip.BitKip.getResource;
 import static ir.darkdeveloper.bitkip.config.AppConfigs.*;
+import static ir.darkdeveloper.bitkip.utils.FileExtensions.ALL_DOWNLOADS_QUEUE;
 import static ir.darkdeveloper.bitkip.utils.FileExtensions.staticQueueNames;
 
 public class FxUtils {
@@ -215,7 +216,10 @@ public class FxUtils {
         stage.setMinWidth(root.getPrefWidth());
         stage.setMinHeight(root.getPrefHeight());
         stage.initStyle(StageStyle.TRANSPARENT);
-        stage.setTitle("Scheduler: %s".formatted(selectedQueue.getName()));
+        var queueName = ALL_DOWNLOADS_QUEUE;
+        if (selectedQueue != null)
+            queueName = selectedQueue.getName();
+        stage.setTitle("Scheduler: %s".formatted(queueName));
         QueueSetting controller = loader.getController();
         controller.setStage(stage);
         controller.setSelectedQueue(selectedQueue);
