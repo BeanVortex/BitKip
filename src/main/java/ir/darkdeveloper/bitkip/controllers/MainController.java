@@ -5,49 +5,39 @@ import ir.darkdeveloper.bitkip.config.QueueObserver;
 import ir.darkdeveloper.bitkip.controllers.interfaces.FXMLController;
 import ir.darkdeveloper.bitkip.models.DownloadModel;
 import ir.darkdeveloper.bitkip.models.DownloadStatus;
-import ir.darkdeveloper.bitkip.models.QueueModel;
-import ir.darkdeveloper.bitkip.repo.DownloadsRepo;
 import ir.darkdeveloper.bitkip.repo.QueuesRepo;
 import ir.darkdeveloper.bitkip.utils.*;
 import javafx.animation.TranslateTransition;
 import javafx.application.Platform;
-import javafx.event.EventHandler;
 import javafx.fxml.FXML;
-import javafx.geometry.*;
+import javafx.geometry.Pos;
+import javafx.geometry.Rectangle2D;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.input.MouseButton;
-import javafx.scene.input.MouseEvent;
 import javafx.scene.input.ScrollEvent;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
-import javafx.scene.layout.VBox;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 import org.kordamp.ikonli.javafx.FontIcon;
 
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.ResourceBundle;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static ir.darkdeveloper.bitkip.BitKip.getResource;
 import static ir.darkdeveloper.bitkip.config.AppConfigs.*;
 import static ir.darkdeveloper.bitkip.utils.FileExtensions.ALL_DOWNLOADS_QUEUE;
-import static ir.darkdeveloper.bitkip.utils.FileExtensions.staticQueueNames;
 
 
 public class MainController implements FXMLController, QueueObserver {
 
     @FXML
+    private TreeView<String> sideTree;
+    @FXML
     private ImageView logoImg;
-    @FXML
-    private ScrollPane sideScrollPane;
-    @FXML
-    private VBox side;
     @FXML
     private Button operationMenu;
     @FXML
@@ -97,7 +87,7 @@ public class MainController implements FXMLController, QueueObserver {
             toolbar.setPrefWidth(n.longValue());
         });
         stage.heightProperty().addListener((ob, o, n) ->
-                sideScrollPane.setPrefHeight(n.doubleValue() - toolbar.getPrefHeight()));
+                sideTree.setPrefHeight(n.doubleValue() - toolbar.getPrefHeight()));
 
         stage.xProperty().addListener((observable, oldValue, newValue) -> {
             if (WindowUtils.isOnPrimaryScreen(newValue.doubleValue()))
@@ -140,89 +130,12 @@ public class MainController implements FXMLController, QueueObserver {
                 .toList();
         selectedQueue = allDownloadsQueue;
         mainTableUtils.setDownloads(downloadList, true);
-        sideScrollPane.setVbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
-        sideScrollPane.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
-        var queueButtons = new ArrayList<Button>();
-        side.getChildren().clear();
         var queues = AppConfigs.getQueues();
         if (queues.isEmpty())
             queues = QueuesRepo.getAllQueues(false, false);
-        queues.forEach(queueModel -> {
-            var btn = new Button(queueModel.getName());
-            btn.getStyleClass().add("side_queue");
-            if (queueModel.equals(selectedQueue))
-                btn.getStyleClass().add("selected_queue");
-            btn.setPrefWidth(side.getPrefWidth());
-            btn.setPrefHeight(60);
-            btn.setMinHeight(60);
-            queueButtons.add(btn);
-            btn.setOnMouseClicked(onSideQueueClicked(queueButtons, queueModel, btn));
-            side.getChildren().add(btn);
-        });
-        if (!queues.contains(selectedQueue))
-            initSides();
+        SideUtils.prepareSideTree(sideTree, queues, mainTableUtils);
+
     }
-
-    private EventHandler<MouseEvent> onSideQueueClicked(ArrayList<Button> queueButtons, QueueModel qm, Button btn) {
-        return event -> {
-            if (event.getClickCount() == 2)
-                return;
-            if (event.getButton().equals(MouseButton.PRIMARY)) {
-                currentDownloadings.forEach(DownloadsRepo::updateTableStatus);
-                var downloadsData = DownloadsRepo.getDownloadsByQueueName(qm.getName())
-                        .stream().peek(downloadModel -> {
-                            downloadModel.setDownloadStatus(DownloadStatus.Paused);
-                            if (downloadModel.getProgress() == 100)
-                                downloadModel.setDownloadStatus(DownloadStatus.Completed);
-                        }).map(dm -> {
-                            // this will make downloads in currentDownloadings, observed by table
-                            if (currentDownloadings.contains(dm))
-                                return currentDownloadings.get(currentDownloadings.indexOf(dm));
-                            return dm;
-                        }).toList();
-                selectedQueue = qm;
-                mainTableUtils.setDownloads(downloadsData, staticQueueNames.contains(qm.getName()));
-                if (!queueButtons.isEmpty() && !btn.getStyleClass().contains("selected_queue")) {
-                    btn.getStyleClass().add("selected_queue");
-                    queueButtons.forEach(otherBtn -> {
-                        if (!btn.equals(otherBtn))
-                            otherBtn.getStyleClass().remove("selected_queue");
-                    });
-                }
-            } else if (event.getButton().equals(MouseButton.SECONDARY)) {
-                var cMenu = btn.getContextMenu();
-                if (cMenu == null)
-                    cMenu = new ContextMenu();
-                cMenu.getItems().clear();
-                var startQueueLbl = new Label("Start queue");
-                var stopQueueLbl = new Label("Stop queue");
-                var scheduleLbl = new Label("Settings");
-                var deleteLbl = new Label("Delete");
-
-                List<Label> lbls;
-                if (FileExtensions.staticQueueNames.stream().anyMatch(s -> qm.getName().equals(s)))
-                    lbls = List.of(startQueueLbl, stopQueueLbl, scheduleLbl);
-                else
-                    lbls = List.of(startQueueLbl, stopQueueLbl, scheduleLbl, deleteLbl);
-                var menuItems = MenuUtils.createMapMenuItems(lbls, null);
-                cMenu.getItems().addAll(menuItems.values());
-                btn.setContextMenu(cMenu);
-
-                menuItems.get(startQueueLbl).setDisable(startedQueues.contains(qm));
-                menuItems.get(stopQueueLbl).setDisable(!startedQueues.contains(qm));
-
-                menuItems.get(startQueueLbl).setOnAction(e ->
-                        QueueUtils.startQueue(qm, menuItems.get(startQueueLbl), menuItems.get(stopQueueLbl), mainTableUtils));
-                menuItems.get(stopQueueLbl).setOnAction(e ->
-                        QueueUtils.stopQueue(qm, menuItems.get(startQueueLbl), menuItems.get(stopQueueLbl), mainTableUtils));
-                menuItems.get(scheduleLbl).setOnAction(e -> FxUtils.newQueueSettingStage(qm));
-                if (menuItems.containsKey(deleteLbl))
-                    menuItems.get(deleteLbl).setOnAction(e -> QueueUtils.deleteQueue(btn.getText()));
-                cMenu.show(btn, Side.BOTTOM, 0, 0);
-            }
-        };
-    }
-
 
     private void newDownloadBtnInits() {
         var transition = new TranslateTransition(Duration.millis(300), newDownloadBtn);
@@ -283,7 +196,15 @@ public class MainController implements FXMLController, QueueObserver {
 
     @Override
     public void updateQueue() {
-        initSides();
+        var queues = AppConfigs.getQueues();
+        if (queues.isEmpty())
+            queues = QueuesRepo.getAllQueues(false, false);
+        if (!queues.contains(selectedQueue))
+            // when delete happens
+            initSides();
+        else
+            // when add happens
+            SideUtils.prepareSideTree(sideTree, queues, mainTableUtils);
         MenuUtils.initOperationMenu(operationMenu, mainTableUtils);
     }
 }

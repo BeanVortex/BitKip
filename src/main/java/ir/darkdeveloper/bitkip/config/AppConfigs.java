@@ -33,8 +33,8 @@ public class AppConfigs {
     public static final String othersPath = downloadPath + File.separator + "Others" + File.separator;
     public static final String queuesPath = downloadPath + File.separator + "Queues" + File.separator;
 
-    public static final double mainMinWidth = 883;
-    public static final double mainPrefWidth = 1000;
+    public static final double mainMinWidth = 933;
+    public static final double mainPrefWidth = 1050;
     public static final double mainMinHeight = 515;
     public static final double mainPrefHeight = 600;
     public static final double newDownloadMinWidth = 600;

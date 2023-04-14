@@ -5,7 +5,7 @@
 
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.image.ImageView?>
-<VBox minHeight="515" prefHeight="600" minWidth="883" prefWidth="1000" stylesheets="@../css/main.css"
+<VBox minHeight="515" prefHeight="600" minWidth="933" prefWidth="1050" stylesheets="@../css/main.css"
       xmlns="http://javafx.com/javafx/16"
       xmlns:fx="http://javafx.com/fxml/1" fx:controller="ir.darkdeveloper.bitkip.controllers.MainController">
 
@@ -30,10 +30,7 @@
     <HBox fx:id="mainBox">
         <StackPane>
             <HBox>
-                <ScrollPane prefWidth="130" minWidth="130" fx:id="sideScrollPane"  styleClass="side">
-                    <VBox prefWidth="130" minWidth="100" styleClass="side" fx:id="side"
-                          alignment="TOP_CENTER"/>
-                </ScrollPane>
+                <TreeView prefWidth="180" minWidth="160" fx:id="sideTree"/>
                 <TableView minWidth="750" prefWidth="Infinity" fx:id="contentTable"/>
             </HBox>
             <Button fx:id="newDownloadBtn" onAction="#onNewDownload">
