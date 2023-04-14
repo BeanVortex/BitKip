@@ -61,19 +61,27 @@ public class DownloadOpUtils {
 
     public static void deleteDownloads(MainTableUtils mainTableUtils, boolean withFiles) {
         var selectedItems = mainTableUtils.getSelected();
-        selectedItems.forEach(dm -> {
-            currentDownloadings.stream().filter(c -> c.equals(dm))
-                    .findFirst()
-                    .ifPresent(dm2 -> dm2.getDownloadTask().pause());
-            DownloadsRepo.deleteDownload(dm);
-            if (withFiles)
-                IOUtils.deleteDownload(dm);
-            var openDownloadingsCopy = new ArrayList<>(openDownloadings);
-            openDownloadingsCopy.stream().filter(dc -> dc.getDownloadModel().equals(dm))
-                    .forEach(DownloadingController::closeStage);
-        });
+        var header = "Delete selected downloads?";
+        if (selectedItems.size() == 1)
+            header = "Delete " + selectedItems.get(0).getName();
+        var content = "Are you sure you want to delete selected download(s)?";
+        if (withFiles)
+            content += "\nFiles are deleted";
+        if (FxUtils.askWarning(header, content)){
+            selectedItems.forEach(dm -> {
+                currentDownloadings.stream().filter(c -> c.equals(dm))
+                        .findFirst()
+                        .ifPresent(dm2 -> dm2.getDownloadTask().pause());
+                DownloadsRepo.deleteDownload(dm);
+                if (withFiles)
+                    IOUtils.deleteDownload(dm);
+                var openDownloadingsCopy = new ArrayList<>(openDownloadings);
+                openDownloadingsCopy.stream().filter(dc -> dc.getDownloadModel().equals(dm))
+                        .forEach(DownloadingController::closeStage);
+            });
 
-        mainTableUtils.remove(selectedItems);
+            mainTableUtils.remove(selectedItems);
+        }
     }
 
     public static void newDownload(MainTableUtils mainTableUtils, boolean isSingle) {

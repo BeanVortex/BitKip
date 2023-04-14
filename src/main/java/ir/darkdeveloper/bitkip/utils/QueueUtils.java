@@ -5,12 +5,7 @@ import ir.darkdeveloper.bitkip.models.*;
 import ir.darkdeveloper.bitkip.repo.DownloadsRepo;
 import ir.darkdeveloper.bitkip.repo.QueuesRepo;
 import javafx.application.Platform;
-import javafx.scene.control.Alert;
-import javafx.scene.control.ButtonBar;
-import javafx.scene.control.ButtonType;
 import javafx.scene.control.MenuItem;
-import javafx.scene.image.Image;
-import javafx.stage.Stage;
 import org.controlsfx.control.Notifications;
 
 import java.io.File;
@@ -20,7 +15,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static ir.darkdeveloper.bitkip.BitKip.getResource;
 import static ir.darkdeveloper.bitkip.config.AppConfigs.*;
 
 public class QueueUtils {
@@ -180,27 +174,13 @@ public class QueueUtils {
     }
 
     public static void deleteQueue(String name) {
-        if (askToDeleteQueue(name)) {
+        var content = "Are you sure you want to delete '" + name + "' queue?\nFiles are not deleted";
+        var header = "Delete '" + name + "' ?";
+        if (FxUtils.askWarning(header, content)) {
             moveFilesAndDeleteQueueFolder(name);
             QueuesRepo.deleteQueue(name);
             AppConfigs.deleteQueue(name);
         }
-    }
-
-    private static boolean askToDeleteQueue(String queueName) {
-        var yes = new ButtonType("Yes", ButtonBar.ButtonData.YES);
-        var no = new ButtonType("No", ButtonBar.ButtonData.NO);
-        var alert = new Alert(Alert.AlertType.WARNING,
-                "Are you sure you want to delete '" + queueName + "' queue?\nFiles are not deleted",
-                yes, no);
-        alert.setTitle("Warning");
-        alert.setHeaderText("Delete '" + queueName + "' ?");
-        var stage = (Stage) alert.getDialogPane().getScene().getWindow();
-        var logoPath = getResource("icons/logo.png");
-        if (logoPath != null)
-            stage.getIcons().add(new Image(logoPath.toExternalForm()));
-        var res = alert.showAndWait();
-        return res.orElse(no) == yes;
     }
 
 

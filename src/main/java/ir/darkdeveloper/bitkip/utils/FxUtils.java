@@ -254,5 +254,20 @@ public class FxUtils {
         var res = alert.showAndWait();
         return res.orElse(no) == yes;
     }
+
+    public static boolean askWarning(String header, String content) {
+        var yes = new ButtonType("Yes", ButtonBar.ButtonData.YES);
+        var no = new ButtonType("No", ButtonBar.ButtonData.NO);
+        var alert = new Alert(Alert.AlertType.WARNING, content, yes, no);
+        alert.setTitle("Warning");
+        alert.setHeaderText(header);
+        var stage = (Stage) alert.getDialogPane().getScene().getWindow();
+        var logoPath = getResource("icons/logo.png");
+        if (logoPath != null)
+            stage.getIcons().add(new Image(logoPath.toExternalForm()));
+        var res = alert.showAndWait();
+        return res.orElse(no) == yes;
+
+    }
 }
 
