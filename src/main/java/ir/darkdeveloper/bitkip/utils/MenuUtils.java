@@ -19,7 +19,6 @@ import java.util.*;
 
 import static ir.darkdeveloper.bitkip.config.AppConfigs.downloadPath;
 import static ir.darkdeveloper.bitkip.config.AppConfigs.startedQueues;
-import static ir.darkdeveloper.bitkip.repo.DownloadsRepo.COL_PATH;
 import static ir.darkdeveloper.bitkip.utils.FileExtensions.staticQueueNames;
 import static ir.darkdeveloper.bitkip.utils.ShortcutUtils.*;
 
@@ -112,32 +111,6 @@ public class MenuUtils {
         menuItems.get(deleteWithFileLbl).setOnAction(e -> DownloadOpUtils.deleteDownloads(mainTableUtils, true));
         menuItems.get(newQueueLbl).setOnAction(e -> FxUtils.newQueueStage());
         menuItems.get(deleteFromQueueLbl).setOnAction(e -> deleteFromQueue(mainTableUtils));
-    }
-
-    public static void deleteFromQueue(MainTableUtils mainTableUtils) {
-        var notObserved = new ArrayList<>(mainTableUtils.getSelected());
-        var moveFiles = askToMoveFiles(notObserved, null);
-        for (DownloadModel dm : notObserved) {
-            mainTableUtils.remove(dm);
-            dm.getQueues()
-                    .stream()
-                    .filter(qm -> !staticQueueNames.contains(qm.getName()))
-                    .findFirst()
-                    .ifPresent(qm -> {
-                        if (startedQueues.contains(qm))
-                            startedQueues.get(startedQueues.indexOf(qm)).getDownloads().remove(dm);
-                        DownloadsRepo.deleteDownloadQueue(dm.getId(), qm.getId());
-                    });
-            if (moveFiles) {
-                var newFilePath = FileType.determineFileType(dm.getName()).getPath() + dm.getName();
-                if (dm.getProgress() != 100) {
-                    for (int i = 0; i < dm.getChunks(); i++)
-                        IOUtils.moveFile(dm.getFilePath() + "#" + i, newFilePath + "#" + i);
-                } else
-                    IOUtils.moveFile(dm.getFilePath(), newFilePath);
-                DownloadsRepo.updateDownloadProperty(COL_PATH, "\"" + newFilePath + "\"", dm.getId());
-            }
-        }
     }
 
     private static void disableEnableStartStopQueue(Menu startQueueMenu, Menu stopQueueMenu) {
@@ -257,13 +230,34 @@ public class MenuUtils {
         ));
     }
 
+    public static void deleteFromQueue(MainTableUtils mainTableUtils) {
+        var notObserved = new ArrayList<>(mainTableUtils.getSelected());
+        var moveFiles = FxUtils.askToMoveFiles(notObserved, null);
+        for (DownloadModel dm : notObserved) {
+            mainTableUtils.remove(dm);
+            dm.getQueues()
+                    .stream()
+                    .filter(qm -> !staticQueueNames.contains(qm.getName()))
+                    .findFirst()
+                    .ifPresent(qm -> {
+                        if (startedQueues.contains(qm))
+                            startedQueues.get(startedQueues.indexOf(qm)).getDownloads().remove(dm);
+                        DownloadsRepo.deleteDownloadQueue(dm.getId(), qm.getId());
+                    });
+            if (moveFiles) {
+                var newFilePath = FileType.determineFileType(dm.getName()).getPath() + dm.getName();
+                DownloadOpUtils.moveFiles(dm, newFilePath);
+            }
+        }
+    }
+
     public static void initAddToQueueMenu(Menu addToQueueMenu, MainTableUtils mainTableUtils,
                                           LinkedHashMap<MenuItem, QueueModel> addToQueueItems) {
         addToQueueMenu.getItems().forEach(menuItem ->
                 menuItem.setOnAction(e -> {
                     var qm = addToQueueItems.get(menuItem);
                     var notObserved = new ArrayList<>(mainTableUtils.getSelected());
-                    var moveFiles = askToMoveFiles(notObserved, qm);
+                    var moveFiles = FxUtils.askToMoveFiles(notObserved, qm);
                     notObserved.forEach(dm -> {
                         if (dm.getQueues().contains(qm))
                             return;
@@ -272,43 +266,14 @@ public class MenuUtils {
                         if (startedQueues.contains(qm))
                             startedQueues.get(startedQueues.indexOf(qm)).getDownloads().add(dm);
                         if (moveFiles) {
-                            var newFilePath = downloadPath + File.separator + qm.getName() + File.separator + dm.getName();
-                            if (dm.getProgress() != 100) {
-                                for (int i = 0; i < dm.getChunks(); i++)
-                                    IOUtils.moveFile(dm.getFilePath() + "#" + i, newFilePath + "#" + i);
-                            } else
-                                IOUtils.moveFile(dm.getFilePath(), newFilePath);
-                            DownloadsRepo.updateDownloadProperty(COL_PATH, "\"" + newFilePath + "\"", dm.getId());
+                            var newFilePath = downloadPath + File.separator + "Queues" + File.separator +
+                                    qm.getName() + File.separator + dm.getName();
+                            DownloadOpUtils.moveFiles(dm, newFilePath);
                         }
 
                         DownloadsRepo.updateDownloadQueue(dm.getId(), qm.getId());
                     });
                 }));
-    }
-
-    private static boolean askToMoveFiles(ArrayList<DownloadModel> queues, QueueModel desQueue) {
-        var downloadsHasFolder = queues.stream().filter(dm ->
-                !dm.getQueues().stream().filter(QueueModel::hasFolder).toList().isEmpty()
-        ).toList();
-
-        if (downloadsHasFolder.isEmpty()) {
-            if (desQueue != null) {
-                if (!desQueue.hasFolder())
-                    return false;
-
-                if (!desQueue.hasFolder() && !staticQueueNames.contains(desQueue.getName()))
-                    return false;
-            } else return false;
-        }
-
-        var yes = new ButtonType("Yes", ButtonBar.ButtonData.YES);
-        var no = new ButtonType("No", ButtonBar.ButtonData.NO);
-        var alert = new Alert(Alert.AlertType.CONFIRMATION,
-                "Would you also like to move download files to the new location?", yes, no);
-        alert.setTitle("Confirmation");
-        alert.setHeaderText("Move files?");
-        var res = alert.showAndWait();
-        return res.orElse(no) == yes;
     }
 
 

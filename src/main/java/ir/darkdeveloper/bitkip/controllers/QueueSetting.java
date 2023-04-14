@@ -2,14 +2,15 @@ package ir.darkdeveloper.bitkip.controllers;
 
 import ir.darkdeveloper.bitkip.config.QueueObserver;
 import ir.darkdeveloper.bitkip.controllers.interfaces.FXMLController;
+import ir.darkdeveloper.bitkip.models.FileType;
 import ir.darkdeveloper.bitkip.models.QueueModel;
 import ir.darkdeveloper.bitkip.models.ScheduleModel;
 import ir.darkdeveloper.bitkip.models.TurnOffMode;
+import ir.darkdeveloper.bitkip.repo.DownloadsRepo;
+import ir.darkdeveloper.bitkip.repo.QueuesRepo;
 import ir.darkdeveloper.bitkip.repo.ScheduleRepo;
 import ir.darkdeveloper.bitkip.task.ScheduleTask;
-import ir.darkdeveloper.bitkip.utils.InputValidations;
-import ir.darkdeveloper.bitkip.utils.ResizeUtil;
-import ir.darkdeveloper.bitkip.utils.WindowUtils;
+import ir.darkdeveloper.bitkip.utils.*;
 import javafx.application.Platform;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
@@ -28,6 +29,7 @@ import javafx.stage.Screen;
 import javafx.stage.Stage;
 import org.kordamp.ikonli.javafx.FontIcon;
 
+import java.io.File;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -38,18 +40,19 @@ import java.util.concurrent.Executors;
 
 import static ir.darkdeveloper.bitkip.BitKip.getResource;
 import static ir.darkdeveloper.bitkip.config.AppConfigs.*;
+import static ir.darkdeveloper.bitkip.repo.QueuesRepo.*;
 import static ir.darkdeveloper.bitkip.utils.FxUtils.SCHEDULER_STAGE;
 import static ir.darkdeveloper.bitkip.utils.FxUtils.openStages;
 import static java.time.DayOfWeek.*;
 
-public class SchedulerController implements FXMLController, QueueObserver {
+public class QueueSetting implements FXMLController, QueueObserver {
 
     @FXML
-    private Label savedLabel;
+    private CheckBox hasFolderCheck;
     @FXML
     private VBox rightContainer;
     @FXML
-    private ScrollPane scrollPane;
+    private Label savedLabel;
     @FXML
     private Spinner<Integer> simulDownloadSpinner;
     @FXML
@@ -94,8 +97,6 @@ public class SchedulerController implements FXMLController, QueueObserver {
     private HBox horLine1;
     @FXML
     private HBox horLine2;
-    @FXML
-    private HBox horLine3;
     @FXML
     private CheckBox enableCheck;
     @FXML
@@ -213,9 +214,7 @@ public class SchedulerController implements FXMLController, QueueObserver {
             toolbar.setPrefWidth(width);
             horLine1.setPrefWidth(width);
             horLine2.setPrefWidth(width);
-            horLine3.setPrefWidth(width);
-            scrollPane.setPrefWidth(width);
-            rightContainer.setPrefWidth(width - queueList.getPrefWidth() - 10);
+            rightContainer.setPrefWidth(width - queueList.getPrefWidth());
         });
 
         stage.heightProperty().addListener((o, o2, n) -> {
@@ -245,8 +244,13 @@ public class SchedulerController implements FXMLController, QueueObserver {
     }
 
     private void initSelectedQueueData() {
-        toolbarTitle.setText("Scheduler: %s".formatted(selectedQueue.get().getName()));
-        stage.setTitle("Scheduler: %s".formatted(selectedQueue.get().getName()));
+
+        speedField.setText(selectedQueue.get().getSpeed());
+        simulDownloadSpinner.getValueFactory().setValue(selectedQueue.get().getSimultaneouslyDownload());
+        hasFolderCheck.setSelected(selectedQueue.get().hasFolder());
+
+        toolbarTitle.setText("Queue Setting: %s".formatted(selectedQueue.get().getName()));
+        stage.setTitle("Queue Setting: %s".formatted(selectedQueue.get().getName()));
         queueList.getSelectionModel().select(selectedQueue.get());
         datePicker.setValue(LocalDate.now());
 
@@ -278,9 +282,6 @@ public class SchedulerController implements FXMLController, QueueObserver {
         var startDate = schedule.getStartDate();
         if (startDate != null)
             datePicker.setValue(startDate);
-
-        speedField.setText(schedule.getSpeed());
-        simulDownloadSpinner.getValueFactory().setValue(schedule.getSimultaneouslyDownload());
 
         stopAtCheck.setSelected(schedule.isStopTimeEnabled());
         stopContainer.setDisable(!schedule.isStopTimeEnabled());
@@ -413,8 +414,6 @@ public class SchedulerController implements FXMLController, QueueObserver {
             schedule.setStopTime(stopTime);
             schedule.setTurnOffEnabled(whenDoneCheck.isSelected());
             schedule.setTurnOffMode(powerCombo.getValue());
-            schedule.setSpeed(speedField.getText());
-            schedule.setSimultaneouslyDownload(simulDownloadSpinner.getValue());
             var startDate = schedule.getStartDate();
             if (schedule.isOnceDownload() && startDate != null) {
                 var d = startDate.atTime(schedule.getStartTime());
@@ -423,8 +422,15 @@ public class SchedulerController implements FXMLController, QueueObserver {
                     throw new IllegalArgumentException("Can't schedule in past");
             }
 
-            ScheduleRepo.updateSchedule(schedule);
+            queue.setSpeed(speedField.getText());
+            queue.setSimultaneouslyDownload(simulDownloadSpinner.getValue());
+            queue.setHasFolder(hasFolderCheck.isSelected());
             queue.setSchedule(schedule);
+            String[] qCols = {COL_SPEED_LIMIT, COL_SIMUL_DOWNLOAD, COL_HAS_FOLDER};
+            String[] qValues = {queue.getSpeed(), queue.getSimultaneouslyDownload() + "", (queue.hasFolder() ? 1 : 0) + ""};
+            QueuesRepo.updateQueue(qCols, qValues, queue.getId());
+            createOrDeleteFolder(queue.hasFolder(), queue);
+            ScheduleRepo.updateSchedule(schedule);
             var updatedQueues = getQueues().stream()
                     .peek(q -> {
                         if (q.equals(queue))
@@ -441,6 +447,29 @@ public class SchedulerController implements FXMLController, QueueObserver {
             showResultMessage(e.getMessage(), SaveStatus.ERROR, executor);
         }
 
+    }
+
+    private void createOrDeleteFolder(boolean hasFolder, QueueModel queue) {
+        if (hasFolder) {
+            var res = IOUtils.createFolder("Queues" + File.separator + queue.getName());
+            if (res) {
+                var downloadsByQueueName = DownloadsRepo.getDownloadsByQueueName(queue.getName());
+                if (FxUtils.askToMoveFiles(downloadsByQueueName, queue)) {
+                    downloadsByQueueName.forEach(dm -> {
+                        var newFilePath = downloadPath + File.separator + "Queues" +
+                                File.separator + queue.getName() + File.separator + dm.getName();
+                        DownloadOpUtils.moveFiles(dm, newFilePath);
+                    });
+                }
+            }
+        } else {
+            var downloadsByQueueName = DownloadsRepo.getDownloadsByQueueName(queue.getName());
+            downloadsByQueueName.forEach(dm -> {
+                var newFilePath = FileType.determineFileType(dm.getName()).getPath() + dm.getName();
+                DownloadOpUtils.moveFiles(dm, newFilePath);
+            });
+            IOUtils.removeFolder("Queues" + File.separator + queue.getName());
+        }
     }
 
     private void showResultMessage(String message, SaveStatus saveStatus, ExecutorService executor) {

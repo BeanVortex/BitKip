@@ -1,6 +1,7 @@
 package ir.darkdeveloper.bitkip.utils;
 
 import ir.darkdeveloper.bitkip.models.DownloadModel;
+import ir.darkdeveloper.bitkip.models.FileType;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -12,11 +13,11 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.text.DecimalFormat;
+import java.util.Arrays;
 import java.util.List;
 import java.util.logging.Logger;
 
-import static ir.darkdeveloper.bitkip.config.AppConfigs.dataPath;
-import static ir.darkdeveloper.bitkip.config.AppConfigs.*;
+import static ir.darkdeveloper.bitkip.config.AppConfigs.downloadPath;
 
 
 public class IOUtils {
@@ -24,8 +25,7 @@ public class IOUtils {
 
 
     public static void createSaveLocations() {
-        List.of(downloadPath, videosPath, programsPath, compressedPath, musicPath, othersPath, documentPath, dataPath)
-                .forEach(IOUtils::mkdir);
+        Arrays.stream(FileType.values()).forEach(fileType -> IOUtils.mkdir(fileType.getPath()));
         QueueUtils.createFolders();
     }
 
@@ -109,5 +109,20 @@ public class IOUtils {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    public static boolean createFolder(String name) {
+        var dir = new File(downloadPath + File.separator + name);
+        if (!dir.exists()) {
+            dir.mkdir();
+            return true;
+        }
+        return false;
+    }
+
+    public static void removeFolder(String name) {
+        var dir = new File(downloadPath + File.separator + name);
+        if (dir.exists())
+            dir.delete();
     }
 }

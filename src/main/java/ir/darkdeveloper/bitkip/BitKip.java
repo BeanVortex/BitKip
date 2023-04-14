@@ -18,6 +18,8 @@ import static ir.darkdeveloper.bitkip.config.AppConfigs.startedQueues;
 
 public class BitKip extends Application {
 
+    // todo bean for selected queue in side
+
     @Override
     public void start(Stage stage) {
         DownloadsRepo.createTable();

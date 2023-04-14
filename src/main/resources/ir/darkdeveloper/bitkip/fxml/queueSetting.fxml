@@ -1,0 +1,158 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import java.net.URL?>
+<?import javafx.scene.image.ImageView?>
+
+<VBox minHeight="670" prefHeight="670" minWidth="620" prefWidth="620.0"
+      xmlns="http://javafx.com/javafx/16" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="ir.darkdeveloper.bitkip.controllers.QueueSetting">
+    <stylesheets>
+        <URL value="@../css/main.css"/>
+        <URL value="@../css/newDownload.css"/>
+        <URL value="@../css/scheduler.css"/>
+    </stylesheets>
+
+    <HBox maxHeight="2" minHeight="2" styleClass="csm_toolbar"/>
+
+    <HBox styleClass="csm_toolbar" minWidth="620" prefWidth="620">
+        <HBox maxWidth="2" minWidth="2" styleClass="csm_toolbar"/>
+        <HBox minWidth="616" prefWidth="616" fx:id="toolbar" alignment="CENTER" maxHeight="32" minHeight="32"
+              spacing="10">
+            <ImageView fx:id="logoImg" fitWidth="30" fitHeight="30"/>
+            <Label fx:id="toolbarTitle" styleClass="bold"/>
+            <Region HBox.hgrow="ALWAYS"/>
+            <Button fx:id="hideBtn" onAction="#hideStage"/>
+            <Button fx:id="fullWindowBtn" onAction="#toggleStageSize"/>
+            <Button fx:id="closeBtn" onAction="#closeStage"/>
+        </HBox>
+        <HBox maxWidth="2" minWidth="2" styleClass="csm_toolbar"/>
+    </HBox>
+
+    <HBox>
+        <ListView prefHeight="628" prefWidth="150" minWidth="150" maxWidth="150" fx:id="queueList"/>
+        <VBox prefWidth="465" minWidth="465" prefHeight="628" fx:id="rightContainer">
+            <TabPane>
+                <Tab text="General" closable="false">
+                    <VBox spacing="5" styleClass="padding_10">
+                        <HBox spacing="10" alignment="CENTER_LEFT" styleClass="padding_10">
+                            <Label text="Speed Limit (MB) :" styleClass="bold"/>
+                            <TextField fx:id="speedField" text="0"/>
+                        </HBox>
+
+                        <HBox spacing="10" alignment="CENTER_LEFT" styleClass="padding_10">
+                            <Label text="Simultaneously Downloads :" styleClass="bold"/>
+                            <Spinner fx:id="simulDownloadSpinner" minWidth="70" prefHeight="20"/>
+                        </HBox>
+
+                        <HBox alignment="CENTER_LEFT" styleClass="padding_10">
+                            <CheckBox text="Has folder" styleClass="bold" fx:id="hasFolderCheck"/>
+                        </HBox>
+                    </VBox>
+                </Tab>
+
+                <Tab text="Scheduler" closable="false">
+                    <VBox spacing="5" styleClass="padding_10">
+                        <HBox spacing="5" alignment="CENTER_LEFT" styleClass="padding_10">
+                            <CheckBox fx:id="enableCheck" onAction="#onEnableCheck" text="Enable Scheduling"
+                                      styleClass="bold"/>
+                        </HBox>
+
+                        <VBox styleClass="padding_10">
+                            <HBox fx:id="horLine1" minHeight="1" styleClass="line"/>
+                        </VBox>
+
+                        <VBox spacing="5" fx:id="mainBox" styleClass="padding_10">
+
+                            <HBox alignment="CENTER_LEFT" spacing="10">
+                                <Label text="Start download at: " styleClass="bold"/>
+                                <HBox spacing="5" alignment="CENTER">
+                                    <Spinner fx:id="startHourSpinner" minWidth="70" prefWidth="70" prefHeight="20"/>
+                                    <Label text=":" styleClass="bold, title_size"/>
+                                    <Spinner fx:id="startMinuteSpinner" minWidth="70" prefWidth="70" prefHeight="20"/>
+                                    <Label text=":" styleClass="bold, title_size"/>
+                                    <Spinner fx:id="startSecondSpinner" minWidth="70" prefWidth="70" prefHeight="20"/>
+                                </HBox>
+                            </HBox>
+
+                            <HBox spacing="10" alignment="CENTER_LEFT" styleClass="padding_10">
+                                <RadioButton text="Once at: " fx:id="onceRadio" styleClass="bold"/>
+                                <DatePicker fx:id="datePicker"/>
+                            </HBox>
+
+                            <VBox spacing="5" alignment="CENTER_LEFT" styleClass="padding_10">
+                                <RadioButton text="Daily: " fx:id="dailyRadio" styleClass="bold"/>
+                                <GridPane fx:id="weeksContainer">
+                                    <columnConstraints>
+                                        <ColumnConstraints hgrow="ALWAYS"/>
+                                        <ColumnConstraints hgrow="ALWAYS"/>
+                                    </columnConstraints>
+                                    <rowConstraints>
+                                        <RowConstraints vgrow="ALWAYS"/>
+                                        <RowConstraints vgrow="ALWAYS"/>
+                                        <RowConstraints vgrow="ALWAYS"/>
+                                    </rowConstraints>
+                                    <CheckBox fx:id="saturdayCheck" text="Saturday" GridPane.columnIndex="0"
+                                              GridPane.rowIndex="0"/>
+                                    <CheckBox fx:id="sundayCheck" text="Sunday" GridPane.columnIndex="0"
+                                              GridPane.rowIndex="1"/>
+                                    <CheckBox fx:id="mondayCheck" text="Monday" GridPane.columnIndex="0"
+                                              GridPane.rowIndex="2"/>
+                                    <CheckBox fx:id="tuesdayCheck" text="Tuesday" GridPane.columnIndex="1"
+                                              GridPane.rowIndex="0"/>
+                                    <CheckBox fx:id="wednesdayCheck" text="Wednesday" GridPane.columnIndex="1"
+                                              GridPane.rowIndex="1"/>
+                                    <CheckBox fx:id="thursdayCheck" text="Thursday" GridPane.columnIndex="1"
+                                              GridPane.rowIndex="2"/>
+                                    <CheckBox fx:id="fridayCheck" text="Friday" GridPane.columnIndex="2"
+                                              GridPane.rowIndex="0"/>
+                                </GridPane>
+                            </VBox>
+
+                            <HBox fx:id="horLine2" minHeight="1" styleClass="line"/>
+
+                            <HBox alignment="CENTER_LEFT" spacing="10" styleClass="padding_10">
+                                <CheckBox text="Stop download at: " fx:id="stopAtCheck" styleClass="bold"
+                                          onAction="#onStopAtChecked"/>
+                                <HBox spacing="5" alignment="CENTER" fx:id="stopContainer">
+                                    <Spinner fx:id="stopHourSpinner" styleClass="bold" minWidth="70" prefWidth="70"
+                                             prefHeight="20"/>
+                                    <Label text=":" styleClass="bold, title_size"/>
+                                    <Spinner fx:id="stopMinuteSpinner" styleClass="bold" minWidth="70" prefWidth="70"
+                                             prefHeight="20"/>
+                                    <Label text=":" styleClass="bold, title_size"/>
+                                    <Spinner fx:id="stopSecondSpinner" styleClass="bold" minWidth="70" prefWidth="70"
+                                             prefHeight="20"/>
+                                </HBox>
+                            </HBox>
+
+                            <HBox spacing="10" alignment="CENTER_LEFT" styleClass="padding_10">
+                                <CheckBox text="When done: " fx:id="whenDoneCheck" styleClass="bold"
+                                          onAction="#onWhenDoneChecked"/>
+                                <ComboBox fx:id="powerCombo"/>
+                            </HBox>
+
+
+                        </VBox>
+                    </VBox>
+
+                </Tab>
+            </TabPane>
+            <HBox alignment="CENTER_LEFT" styleClass="padding_10">
+                <Label styleClass="bold" fx:id="savedLabel" visible="false"/>
+            </HBox>
+            <Region VBox.vgrow="ALWAYS"/>
+            <HBox spacing="10" alignment="CENTER_LEFT" styleClass="padding_10">
+                <Button text="Reset" styleClass="add_btn" onAction="#onReset"/>
+                <Region HBox.hgrow="ALWAYS"/>
+                <Button text="Cancel" styleClass="cancel_btn" onAction="#onCancel"/>
+                <Button text="Save" styleClass="download_now_btn" onAction="#onSave"/>
+            </HBox>
+        </VBox>
+        <HBox maxWidth="2" minWidth="2" styleClass="csm_toolbar"/>
+    </HBox>
+
+    <HBox maxHeight="2" minHeight="2" styleClass="csm_toolbar"/>
+
+</VBox>

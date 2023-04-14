@@ -11,7 +11,8 @@ public enum FileType {
     PROGRAM(FileExtensions.programEx, AppConfigs.programsPath),
     MUSIC(FileExtensions.musicEx, AppConfigs.musicPath),
     DOCUMENT(FileExtensions.documentEx, AppConfigs.documentPath),
-    OTHER(List.of(), AppConfigs.othersPath);
+    OTHER(List.of(), AppConfigs.othersPath),
+    QUEUES(List.of(), AppConfigs.queuesPath);
 
     private final List<String> extensions;
     private final String path;

@@ -70,10 +70,10 @@ public class QueueUtils {
                 if (dm.getDownloadStatus() == DownloadStatus.Paused) {
                     dm = mainTableUtils.getObservedDownload(dm);
                     String speedLimit = null;
-                    var sDownloads = schedule.getSimultaneouslyDownload();
-                    if (schedule.getSpeed() != null)
-                        speedLimit = schedule.getSpeed();
-                    if (schedule.getSimultaneouslyDownload() > 1) {
+                    var sDownloads = qm.getSimultaneouslyDownload();
+                    if (qm.getSpeed() != null)
+                        speedLimit = qm.getSpeed();
+                    if (sDownloads > 1) {
                         if (simulDownloads.get() < sDownloads) {
                             DownloadOpUtils.startDownload(mainTableUtils, dm, speedLimit,
                                     null, true, false, null);
@@ -171,10 +171,7 @@ public class QueueUtils {
 
     public static void createFolders() {
         getQueues().stream().filter(QueueModel::hasFolder)
-                .forEach(qm -> {
-                    var dir = new File(downloadPath + File.separator + qm.getName());
-                    if (!dir.exists())
-                        dir.mkdir();
-                });
+                .forEach(qm -> IOUtils.createFolder("Queues" + File.separator + qm.getName()));
     }
+
 }

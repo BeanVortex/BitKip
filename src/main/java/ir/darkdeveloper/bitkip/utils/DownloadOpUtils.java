@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.concurrent.ExecutorService;
 
 import static ir.darkdeveloper.bitkip.config.AppConfigs.*;
+import static ir.darkdeveloper.bitkip.repo.DownloadsRepo.COL_PATH;
 
 public class DownloadOpUtils {
 
@@ -99,4 +100,15 @@ public class DownloadOpUtils {
     }
 
 
+    public static void moveFiles(DownloadModel dm, String newFilePath) {
+        if (dm.getProgress() != 100) {
+            if (dm.getChunks() != 0)
+                for (int i = 0; i < dm.getChunks(); i++)
+                    IOUtils.moveFile(dm.getFilePath() + "#" + i, newFilePath + "#" + i);
+            else
+                IOUtils.moveFile(dm.getFilePath(), newFilePath);
+        } else
+            IOUtils.moveFile(dm.getFilePath(), newFilePath);
+        DownloadsRepo.updateDownloadProperty(COL_PATH, "\"" + newFilePath + "\"", dm.getId());
+    }
 }

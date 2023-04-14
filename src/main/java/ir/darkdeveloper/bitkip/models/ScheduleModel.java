@@ -23,8 +23,6 @@ public class ScheduleModel {
     private boolean onceDownload;
     private LocalDate startDate;
     private Set<DayOfWeek> days;
-    private String speed = "0";
-    private int simultaneouslyDownload = 1;
     private boolean stopTimeEnabled;
     private LocalTime stopTime;
     private boolean turnOffEnabled;
@@ -40,7 +38,6 @@ public class ScheduleModel {
         if (o == null || getClass() != o.getClass()) return false;
         ScheduleModel that = (ScheduleModel) o;
         return id == that.id && enabled == that.enabled && onceDownload == that.onceDownload &&
-                Objects.equals(speed, that.speed) && simultaneouslyDownload == that.simultaneouslyDownload &&
                 stopTimeEnabled == that.stopTimeEnabled && turnOffEnabled == that.turnOffEnabled &&
                 queueId == that.queueId && Objects.equals(startTime, that.startTime) &&
                 Objects.equals(startDate, that.startDate) && days.equals(that.days) &&
@@ -50,7 +47,6 @@ public class ScheduleModel {
     @Override
     public int hashCode() {
         return Objects.hash(id, enabled, startTime, onceDownload, startDate, days,
-                speed, simultaneouslyDownload, stopTimeEnabled, stopTime,
-                turnOffEnabled, turnOffMode, queueId);
+                stopTimeEnabled, stopTime, turnOffEnabled, turnOffMode, queueId);
     }
 }

@@ -31,6 +31,7 @@ public class AppConfigs {
     public static final String musicPath = downloadPath + File.separator + "Music" + File.separator;
     public static final String documentPath = downloadPath + File.separator + "Documents" + File.separator;
     public static final String othersPath = downloadPath + File.separator + "Others" + File.separator;
+    public static final String queuesPath = downloadPath + File.separator + "Queues" + File.separator;
 
     public static final double mainMinWidth = 883;
     public static final double mainPrefWidth = 1000;

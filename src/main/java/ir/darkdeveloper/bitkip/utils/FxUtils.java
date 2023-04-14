@@ -11,6 +11,9 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.control.Alert;
+import javafx.scene.control.ButtonBar;
+import javafx.scene.control.ButtonType;
 import javafx.scene.image.Image;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
@@ -23,6 +26,7 @@ import java.util.Map;
 
 import static ir.darkdeveloper.bitkip.BitKip.getResource;
 import static ir.darkdeveloper.bitkip.config.AppConfigs.*;
+import static ir.darkdeveloper.bitkip.utils.FileExtensions.staticQueueNames;
 
 public class FxUtils {
 
@@ -190,7 +194,7 @@ public class FxUtils {
         stage.show();
     }
 
-    public static void newSchedulerStage(QueueModel selectedQueue) {
+    public static void newQueueSettingStage(QueueModel selectedQueue) {
         if (openStages.containsKey(SCHEDULER_STAGE)) {
             openStages.get(SCHEDULER_STAGE).toFront();
             return;
@@ -199,7 +203,7 @@ public class FxUtils {
         Stage stage = new Stage();
         VBox root;
         try {
-            loader = new FXMLLoader(getResource("fxml/scheduler.fxml"));
+            loader = new FXMLLoader(getResource("fxml/queueSetting.fxml"));
             root = loader.load();
         } catch (IOException e) {
             e.printStackTrace();
@@ -212,7 +216,7 @@ public class FxUtils {
         stage.setMinHeight(root.getPrefHeight());
         stage.initStyle(StageStyle.TRANSPARENT);
         stage.setTitle("Scheduler: %s".formatted(selectedQueue.getName()));
-        SchedulerController controller = loader.getController();
+        QueueSetting controller = loader.getController();
         controller.setStage(stage);
         controller.setSelectedQueue(selectedQueue);
         getQueueSubject().addObserver(controller);
@@ -221,5 +225,30 @@ public class FxUtils {
         openStages.put(SCHEDULER_STAGE, stage);
     }
 
+
+    public static boolean askToMoveFiles(List<DownloadModel> downloads, QueueModel desQueue) {
+        var downloadsHasFolder = downloads.stream().filter(dm ->
+                !dm.getQueues().stream().filter(QueueModel::hasFolder).toList().isEmpty()
+        ).toList();
+
+        if (downloadsHasFolder.isEmpty()) {
+            if (desQueue != null) {
+                if (!desQueue.hasFolder())
+                    return false;
+
+                if (!desQueue.hasFolder() && !staticQueueNames.contains(desQueue.getName()))
+                    return false;
+            } else return false;
+        }
+
+        var yes = new ButtonType("Yes", ButtonBar.ButtonData.YES);
+        var no = new ButtonType("No", ButtonBar.ButtonData.NO);
+        var alert = new Alert(Alert.AlertType.CONFIRMATION,
+                "Would you also like to move download files to the new location?", yes, no);
+        alert.setTitle("Confirmation");
+        alert.setHeaderText("Move files?");
+        var res = alert.showAndWait();
+        return res.orElse(no) == yes;
+    }
 }
 
