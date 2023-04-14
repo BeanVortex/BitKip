@@ -89,14 +89,7 @@ public class MainController implements FXMLController, QueueObserver {
         mainTableUtils = new MainTableUtils(contentTable);
         AppConfigs.mainTableUtils = mainTableUtils;
         mainTableUtils.tableInits();
-        var downloadList = DownloadsRepo.getDownloadsByQueueName(ALL_DOWNLOADS_QUEUE).stream()
-                .peek(dm -> {
-                    dm.setDownloadStatus(DownloadStatus.Paused);
-                    if (dm.getProgress() == 100)
-                        dm.setDownloadStatus(DownloadStatus.Completed);
-                })
-                .toList();
-        mainTableUtils.setDownloads(downloadList, true);
+        initSides();
         stage.widthProperty().addListener((ob, o, n) -> {
             contentTable.setPrefWidth(n.doubleValue() + 90);
             toolbar.setPrefWidth(n.longValue());
@@ -132,10 +125,19 @@ public class MainController implements FXMLController, QueueObserver {
         StackPane.setAlignment(newDownloadBtn, Pos.BOTTOM_RIGHT);
         bounds = Screen.getPrimary().getVisualBounds();
         mainBox.setPrefHeight(bounds.getHeight());
-        initSides();
     }
 
     private void initSides() {
+        var allDownloadsQueue = QueuesRepo.findByName(ALL_DOWNLOADS_QUEUE, true);
+        var downloadList = allDownloadsQueue.getDownloads().stream()
+                .peek(dm -> {
+                    dm.setDownloadStatus(DownloadStatus.Paused);
+                    if (dm.getProgress() == 100)
+                        dm.setDownloadStatus(DownloadStatus.Completed);
+                })
+                .toList();
+        selectedQueue = allDownloadsQueue;
+        mainTableUtils.setDownloads(downloadList, true);
         sideScrollPane.setVbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
         sideScrollPane.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
         var queueButtons = new ArrayList<Button>();
@@ -146,7 +148,7 @@ public class MainController implements FXMLController, QueueObserver {
         queues.forEach(queueModel -> {
             var btn = new Button(queueModel.getName());
             btn.getStyleClass().add("side_queue");
-            if (queueModel.getName().equals("All Downloads"))
+            if (queueModel.equals(selectedQueue))
                 btn.getStyleClass().add("selected_queue");
             btn.setPrefWidth(side.getPrefWidth());
             btn.setPrefHeight(60);
@@ -155,7 +157,8 @@ public class MainController implements FXMLController, QueueObserver {
             btn.setOnMouseClicked(onSideQueueClicked(queueButtons, queueModel, btn));
             side.getChildren().add(btn);
         });
-
+        if (!queues.contains(selectedQueue))
+            initSides();
     }
 
     private EventHandler<MouseEvent> onSideQueueClicked(ArrayList<Button> queueButtons, QueueModel qm, Button btn) {
@@ -175,6 +178,7 @@ public class MainController implements FXMLController, QueueObserver {
                                 return currentDownloadings.get(currentDownloadings.indexOf(dm));
                             return dm;
                         }).toList();
+                selectedQueue = qm;
                 mainTableUtils.setDownloads(downloadsData, staticQueueNames.contains(qm.getName()));
                 if (!queueButtons.isEmpty() && !btn.getStyleClass().contains("selected_queue")) {
                     btn.getStyleClass().add("selected_queue");
@@ -190,7 +194,7 @@ public class MainController implements FXMLController, QueueObserver {
                 cMenu.getItems().clear();
                 var startQueueLbl = new Label("Start queue");
                 var stopQueueLbl = new Label("Stop queue");
-                var scheduleLbl = new Label("Change schedule");
+                var scheduleLbl = new Label("Settings");
                 var deleteLbl = new Label("Delete");
 
                 List<Label> lbls;
@@ -211,11 +215,7 @@ public class MainController implements FXMLController, QueueObserver {
                         QueueUtils.stopQueue(qm, menuItems.get(startQueueLbl), menuItems.get(stopQueueLbl), mainTableUtils));
                 menuItems.get(scheduleLbl).setOnAction(e -> FxUtils.newQueueSettingStage(qm));
                 if (menuItems.containsKey(deleteLbl))
-                    menuItems.get(deleteLbl).setOnAction(e -> {
-                        QueuesRepo.deleteQueue(btn.getText());
-                        AppConfigs.deleteQueue(btn.getText());
-                        initialize();
-                    });
+                    menuItems.get(deleteLbl).setOnAction(e -> QueueUtils.deleteQueue(btn.getText()));
                 cMenu.show(btn, Side.BOTTOM, 0, 0);
             }
         };

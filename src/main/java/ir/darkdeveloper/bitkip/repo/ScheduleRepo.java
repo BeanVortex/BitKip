@@ -46,7 +46,7 @@ public class ScheduleRepo {
                     %s INTEGER,
                     %s VARCHAR,
                     %s INTEGER,
-                    FOREIGN KEY (%s) REFERENCES %s(%s)
+                    FOREIGN KEY (%s) REFERENCES %s(%s) ON DELETE CASCADE
                     );
                 """
                 .formatted(SCHEDULE_TABLE_NAME,

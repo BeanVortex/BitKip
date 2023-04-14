@@ -51,13 +51,13 @@ public class AppConfigs {
     public static final List<DownloadingController> openDownloadings = new ArrayList<>();
     public static final Map<Integer, ScheduleModel> currentSchedules = new HashMap<>();
     public static MainTableUtils mainTableUtils;
-
+    public static QueueModel selectedQueue;
     public static boolean showCompleteDialog = true;
+
 
     public static void setHostServices(HostServices hostServices) {
         AppConfigs.hostServices = hostServices;
     }
-
 
     private static final QueueSubject queueSubject = new QueueSubject();
     private static final List<QueueModel> queues = new ArrayList<>();

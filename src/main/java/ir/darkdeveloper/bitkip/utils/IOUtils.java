@@ -96,9 +96,13 @@ public class IOUtils {
         }
     }
 
-    public static void createFolderInSaveLocation(String queueName) {
-        var folder = new File(downloadPath + File.separator + queueName);
-        folder.mkdir();
+    public static boolean createFolderInSaveLocation(String name) {
+        var dir = new File(downloadPath + File.separator + name);
+        if (!dir.exists()) {
+            dir.mkdir();
+            return true;
+        }
+        return false;
     }
 
     public static void moveFile(String oldFilePath, String newFilePath) {
@@ -109,15 +113,6 @@ public class IOUtils {
         } catch (IOException e) {
             e.printStackTrace();
         }
-    }
-
-    public static boolean createFolder(String name) {
-        var dir = new File(downloadPath + File.separator + name);
-        if (!dir.exists()) {
-            dir.mkdir();
-            return true;
-        }
-        return false;
     }
 
     public static void removeFolder(String name) {

@@ -37,7 +37,9 @@
             <TextField fx:id="queueField" HBox.hgrow="ALWAYS"/>
         </HBox>
 
-        <CheckBox fx:id="hasFolderCheck" text="Create dedicated folder" styleClass="bold"/>
+        <HBox alignment="CENTER_LEFT">
+            <CheckBox fx:id="hasFolderCheck" text="Create dedicated folder" styleClass="bold"/>
+        </HBox>
 
         <Button text="Add" onAction="#onSaveQueue" styleClass="add_btn"/>
     </VBox>

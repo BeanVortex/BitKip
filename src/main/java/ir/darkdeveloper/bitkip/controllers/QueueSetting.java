@@ -2,7 +2,6 @@ package ir.darkdeveloper.bitkip.controllers;
 
 import ir.darkdeveloper.bitkip.config.QueueObserver;
 import ir.darkdeveloper.bitkip.controllers.interfaces.FXMLController;
-import ir.darkdeveloper.bitkip.models.FileType;
 import ir.darkdeveloper.bitkip.models.QueueModel;
 import ir.darkdeveloper.bitkip.models.ScheduleModel;
 import ir.darkdeveloper.bitkip.models.TurnOffMode;
@@ -451,7 +450,7 @@ public class QueueSetting implements FXMLController, QueueObserver {
 
     private void createOrDeleteFolder(boolean hasFolder, QueueModel queue) {
         if (hasFolder) {
-            var res = IOUtils.createFolder("Queues" + File.separator + queue.getName());
+            var res = IOUtils.createFolderInSaveLocation("Queues" + File.separator + queue.getName());
             if (res) {
                 var downloadsByQueueName = DownloadsRepo.getDownloadsByQueueName(queue.getName());
                 if (FxUtils.askToMoveFiles(downloadsByQueueName, queue)) {
@@ -462,14 +461,9 @@ public class QueueSetting implements FXMLController, QueueObserver {
                     });
                 }
             }
-        } else {
-            var downloadsByQueueName = DownloadsRepo.getDownloadsByQueueName(queue.getName());
-            downloadsByQueueName.forEach(dm -> {
-                var newFilePath = FileType.determineFileType(dm.getName()).getPath() + dm.getName();
-                DownloadOpUtils.moveFiles(dm, newFilePath);
-            });
-            IOUtils.removeFolder("Queues" + File.separator + queue.getName());
-        }
+        } else
+            QueueUtils.moveFilesAndDeleteQueueFolder(queue.getName());
+
     }
 
     private void showResultMessage(String message, SaveStatus saveStatus, ExecutorService executor) {

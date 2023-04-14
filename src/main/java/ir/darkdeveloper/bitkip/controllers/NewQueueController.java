@@ -20,6 +20,8 @@ import javafx.stage.Screen;
 import javafx.stage.Stage;
 import org.kordamp.ikonli.javafx.FontIcon;
 
+import java.io.File;
+
 import static ir.darkdeveloper.bitkip.BitKip.getResource;
 
 public class NewQueueController implements FXMLController {
@@ -87,7 +89,7 @@ public class NewQueueController implements FXMLController {
         queueModel.setCanAddDownload(true);
         queueModel.setHasFolder(hasFolderCheck.isSelected());
         if (hasFolderCheck.isSelected())
-            IOUtils.createFolderInSaveLocation(queueName);
+            IOUtils.createFolderInSaveLocation("Queues" + File.separator + queueName);
         var schedule = new ScheduleModel();
         ScheduleRepo.insertSchedule(schedule, -1);
         queueModel.setSchedule(schedule);

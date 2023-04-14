@@ -1,9 +1,8 @@
 package ir.darkdeveloper.bitkip.utils;
 
-import ir.darkdeveloper.bitkip.models.DownloadModel;
-import ir.darkdeveloper.bitkip.models.DownloadStatus;
-import ir.darkdeveloper.bitkip.models.QueueModel;
-import ir.darkdeveloper.bitkip.models.ScheduleModel;
+import ir.darkdeveloper.bitkip.config.AppConfigs;
+import ir.darkdeveloper.bitkip.models.*;
+import ir.darkdeveloper.bitkip.repo.DownloadsRepo;
 import ir.darkdeveloper.bitkip.repo.QueuesRepo;
 import javafx.application.Platform;
 import javafx.scene.control.MenuItem;
@@ -171,7 +170,23 @@ public class QueueUtils {
 
     public static void createFolders() {
         getQueues().stream().filter(QueueModel::hasFolder)
-                .forEach(qm -> IOUtils.createFolder("Queues" + File.separator + qm.getName()));
+                .forEach(qm -> IOUtils.createFolderInSaveLocation("Queues" + File.separator + qm.getName()));
+    }
+
+    public static void deleteQueue(String name) {
+        moveFilesAndDeleteQueueFolder(name);
+        QueuesRepo.deleteQueue(name);
+        AppConfigs.deleteQueue(name);
+    }
+
+
+    public static void moveFilesAndDeleteQueueFolder(String queueName) {
+        var downloadsByQueueName = DownloadsRepo.getDownloadsByQueueName(queueName);
+        downloadsByQueueName.forEach(dm -> {
+            var newFilePath = FileType.determineFileType(dm.getName()).getPath() + dm.getName();
+            DownloadOpUtils.moveFiles(dm, newFilePath);
+        });
+        IOUtils.removeFolder("Queues" + File.separator + queueName);
     }
 
 }
