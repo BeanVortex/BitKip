@@ -417,7 +417,7 @@ public class QueueSetting implements FXMLController, QueueObserver {
             schedule.setTurnOffEnabled(whenDoneCheck.isSelected());
             schedule.setTurnOffMode(powerCombo.getValue());
             var startDate = schedule.getStartDate();
-            if (schedule.isOnceDownload() && startDate != null) {
+            if (schedule.isEnabled() && schedule.isOnceDownload() && startDate != null) {
                 var d = startDate.atTime(schedule.getStartTime());
                 boolean before = d.isBefore(LocalDateTime.now());
                 if (before)

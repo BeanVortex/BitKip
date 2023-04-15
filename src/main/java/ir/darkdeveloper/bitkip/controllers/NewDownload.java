@@ -1,9 +1,8 @@
 package ir.darkdeveloper.bitkip.controllers;
 
-import ir.darkdeveloper.bitkip.config.AppConfigs;
 import ir.darkdeveloper.bitkip.controllers.interfaces.NewDownloadFxmlController;
-import ir.darkdeveloper.bitkip.utils.ResizeUtil;
 import ir.darkdeveloper.bitkip.utils.MainTableUtils;
+import ir.darkdeveloper.bitkip.utils.ResizeUtil;
 import ir.darkdeveloper.bitkip.utils.WindowUtils;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -23,8 +22,7 @@ import java.net.URL;
 import java.util.ResourceBundle;
 
 import static ir.darkdeveloper.bitkip.BitKip.getResource;
-import static ir.darkdeveloper.bitkip.config.AppConfigs.newDownloadMinHeight;
-import static ir.darkdeveloper.bitkip.config.AppConfigs.newDownloadMinWidth;
+import static ir.darkdeveloper.bitkip.config.AppConfigs.*;
 
 public class NewDownload implements NewDownloadFxmlController {
     @FXML
@@ -45,6 +43,8 @@ public class NewDownload implements NewDownloadFxmlController {
 
     private MainTableUtils mainTableUtils;
     private Rectangle2D bounds;
+
+    private NewDownloadFxmlController prevController;
 
     private boolean isSingle = true;
 
@@ -83,7 +83,7 @@ public class NewDownload implements NewDownloadFxmlController {
         });
 
         var logoPath = getResource("icons/logo.png");
-        if (logoPath != null){
+        if (logoPath != null) {
             var img = new Image(logoPath.toExternalForm());
             logoImg.setImage(img);
             stage.getIcons().add(img);
@@ -126,6 +126,8 @@ public class NewDownload implements NewDownloadFxmlController {
     @FXML
     private void closeStage() {
         stage.close();
+        getQueueSubject().removeObserver(this);
+        getQueueSubject().removeObserver(prevController);
     }
 
     @FXML
@@ -166,12 +168,16 @@ public class NewDownload implements NewDownloadFxmlController {
                 return node.getId().equals("download_details");
             });
             NewDownloadFxmlController controller = loader.getController();
+            if (prevController != null)
+                getQueueSubject().removeObserver(prevController);
+
             var box = new VBox();
             box.getChildren().add(details);
             box.setId("download_details");
             controller.setStage(stage);
             controller.setMainTableUtils(mainTableUtils);
-            AppConfigs.getQueueSubject().addObserver(controller);
+            getQueueSubject().addObserver(controller);
+            prevController = controller;
             rootChildren.add(box);
         } catch (IOException e) {
             throw new RuntimeException(e);

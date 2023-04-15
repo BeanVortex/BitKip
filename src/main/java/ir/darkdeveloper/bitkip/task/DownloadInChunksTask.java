@@ -172,7 +172,6 @@ public class DownloadInChunksTask extends DownloadTask {
                 fileChannel.close();
                 con.disconnect();
             } catch (SocketTimeoutException | UnknownHostException s) {
-                s.printStackTrace();
                 retries++;
                 if (!paused) {
                     Thread.sleep(2000);

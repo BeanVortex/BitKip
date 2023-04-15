@@ -175,6 +175,7 @@ public class SingleDownload implements NewDownloadFxmlController {
     }
 
 
+
     @FXML
     private void onSelectLocation(ActionEvent e) {
         NewDownloadUtils.selectLocation(e, locationField);

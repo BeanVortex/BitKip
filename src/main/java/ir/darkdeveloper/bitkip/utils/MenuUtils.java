@@ -221,7 +221,7 @@ public class MenuUtils {
                                 .equals(((Label) startItem.getGraphic()).getText()))
                         .findFirst()
                         .ifPresent(stopItem -> QueueUtils.startQueue(startQueueItems.get(startItem), startItem,
-                                stopItem, mainTableUtils))
+                                stopItem))
         ));
 
         stopQueueMenu.getItems().forEach(stopItem -> stopItem.setOnAction(e ->

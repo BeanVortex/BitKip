@@ -132,7 +132,7 @@ public class MainController implements FXMLController, QueueObserver {
         mainTableUtils.setDownloads(downloadList, true);
         var queues = AppConfigs.getQueues();
         if (queues.isEmpty())
-            queues = QueuesRepo.getAllQueues(false, false);
+            queues = QueuesRepo.getAllQueues(false, true);
         SideUtils.prepareSideTree(sideTree, queues, mainTableUtils);
 
     }
@@ -198,7 +198,7 @@ public class MainController implements FXMLController, QueueObserver {
     public void updateQueue() {
         var queues = AppConfigs.getQueues();
         if (queues.isEmpty())
-            queues = QueuesRepo.getAllQueues(false, false);
+            queues = QueuesRepo.getAllQueues(false, true);
         if (!queues.contains(selectedQueue))
             // when delete happens
             initSides();

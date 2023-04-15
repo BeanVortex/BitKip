@@ -224,7 +224,10 @@ public class FxUtils {
         controller.setStage(stage);
         controller.setSelectedQueue(selectedQueue);
         getQueueSubject().addObserver(controller);
-        stage.setOnCloseRequest(e -> openStages.remove(SCHEDULER_STAGE));
+        stage.setOnCloseRequest(e -> {
+            openStages.remove(SCHEDULER_STAGE);
+            getQueueSubject().removeObserver(controller);
+        });
         stage.show();
         openStages.put(SCHEDULER_STAGE, stage);
     }

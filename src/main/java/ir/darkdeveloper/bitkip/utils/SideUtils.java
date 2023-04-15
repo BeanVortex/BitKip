@@ -120,7 +120,7 @@ public class SideUtils {
                 menuItems.get(stopQueueLbl).setDisable(!startedQueues.contains(qm));
 
                 menuItems.get(startQueueLbl).setOnAction(e ->
-                        QueueUtils.startQueue(qm, menuItems.get(startQueueLbl), menuItems.get(stopQueueLbl), mainTableUtils));
+                        QueueUtils.startQueue(qm, menuItems.get(startQueueLbl), menuItems.get(stopQueueLbl)));
                 menuItems.get(stopQueueLbl).setOnAction(e ->
                         QueueUtils.stopQueue(qm, menuItems.get(startQueueLbl), menuItems.get(stopQueueLbl), mainTableUtils));
                 menuItems.get(scheduleLbl).setOnAction(e -> FxUtils.newQueueSettingStage(qm));

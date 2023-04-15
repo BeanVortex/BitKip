@@ -35,15 +35,16 @@ public class ScheduleTask {
                 .findFirst().orElse(null);
 
 
-        startSchedule(isThereSchedule, queue, schedule, startItem, stopItem);
+        startSchedule(isThereSchedule, queue, startItem, stopItem);
         if (schedule.isStopTimeEnabled())
-            stopSchedule(isThereSchedule, queue, schedule, startItem, stopItem);
+            stopSchedule(isThereSchedule, queue, startItem, stopItem);
         currentSchedules.put(schedule.getId(), schedule);
     }
 
-    private static void startSchedule(boolean isThereSchedule, QueueModel queue, ScheduleModel schedule,
+    private static void startSchedule(boolean isThereSchedule, QueueModel queue,
                                       MenuItem startItem, MenuItem stopItem) {
-        Runnable run = () -> QueueUtils.startQueue(queue, startItem, stopItem, mainTableUtils);
+        Runnable run = () -> QueueUtils.startQueue(queue, startItem, stopItem);
+        var schedule = queue.getSchedule();
         createSchedule(run, schedule, false);
 
         var sm = currentSchedules.get(schedule.getId());
@@ -51,9 +52,10 @@ public class ScheduleTask {
             sm.getStartScheduler().shutdown();
     }
 
-    private static void stopSchedule(boolean isThereSchedule, QueueModel queue, ScheduleModel schedule,
+    private static void stopSchedule(boolean isThereSchedule, QueueModel queue,
                                      MenuItem startItem, MenuItem stopItem) {
         Runnable run = () -> QueueUtils.stopQueue(queue, startItem, stopItem, mainTableUtils);
+        var schedule = queue.getSchedule();
         createSchedule(run, schedule, true);
 
         var sm = currentSchedules.get(schedule.getId());
@@ -127,9 +129,9 @@ public class ScheduleTask {
         var sm = currentSchedules.get(schedule.getId());
         if (!schedule.isEnabled()) {
             if (isThereSchedule) {
-                sm.getStartScheduler().shutdown();
+                sm.getStartScheduler().shutdownNow();
                 if (sm.getStopScheduler() != null)
-                    sm.getStopScheduler().shutdown();
+                    sm.getStopScheduler().shutdownNow();
                 currentSchedules.remove(sm.getId());
             }
             return true;
