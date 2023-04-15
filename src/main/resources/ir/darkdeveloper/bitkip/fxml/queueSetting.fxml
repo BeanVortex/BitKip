@@ -11,7 +11,7 @@
     <stylesheets>
         <URL value="@../css/main.css"/>
         <URL value="@../css/newDownload.css"/>
-        <URL value="@../css/scheduler.css"/>
+        <URL value="@../css/queueSetting.css"/>
     </stylesheets>
 
     <HBox maxHeight="2" minHeight="2" styleClass="csm_toolbar"/>

@@ -10,6 +10,8 @@ import javafx.geometry.Side;
 import javafx.scene.control.*;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.paint.Paint;
+import org.kordamp.ikonli.javafx.FontIcon;
 
 import java.util.List;
 import java.util.function.Predicate;
@@ -24,21 +26,29 @@ public class SideUtils {
     public static void prepareSideTree(TreeView<String> sideTree,
                                        List<QueueModel> queues, MainTableUtils mainTableUtils) {
 
-        var allItem = new TreeItem<>("");
+        var finishedIcon = createIcon("fas-check-square", "#81C784");
+        var unFinishedIcon = createIcon("fas-pause-circle", "#FB8C00");
+
+        var allItem = new TreeItem<>("All");
         allItem.setExpanded(true);
+        allItem.setGraphic(createFolderIcon());
         var categoryItem = new TreeItem<>("Categories");
+        categoryItem.setGraphic(createFolderIcon());
         categoryItem.getChildren().addAll(createCategoryItemsForTree());
         categoryItem.setExpanded(true);
         var finishedItem = new TreeItem<>("Finished");
+        finishedItem.setGraphic(finishedIcon);
         finishedItem.getChildren().addAll(createCategoryItemsForTree());
         var unfinishedItem = new TreeItem<>("Unfinished");
+        unfinishedItem.setGraphic(unFinishedIcon);
         unfinishedItem.getChildren().addAll(createCategoryItemsForTree());
 
         var queuesItem = new TreeItem<>("Queues");
         queuesItem.setExpanded(true);
+        queuesItem.setGraphic(createFolderIcon());
         var treeQueueItems = queues.stream()
                 .filter(q -> !staticQueueNames.contains(q.getName()))
-                .map(q -> new TreeItem<>(q.getName())).toList();
+                .map(SideUtils::createQueueItem).toList();
         queuesItem.getChildren().addAll(treeQueueItems);
 
         allItem.getChildren().addAll(List.of(categoryItem, finishedItem, unfinishedItem, queuesItem));
@@ -55,8 +65,7 @@ public class SideUtils {
             if (selectedItem == null)
                 return;
             var itemName = selectedItem.getValue();
-            System.out.println(itemName);
-            if (itemName.equals("") || itemName.equals("Queues")) {
+            if (itemName.equals("All") || itemName.equals("Queues")) {
                 sideTree.setContextMenu(null);
                 return;
             }
@@ -142,22 +151,50 @@ public class SideUtils {
     }
 
     private static List<TreeItem<String>> createCategoryItemsForTree() {
+        var allDownloadsIcon = createIcon("fas-file-download", "#00BFA5");
+        var compressedIcon = createIcon("fas-file-archive", "#00BFA5");
+        var musicIcon = createIcon("fas-file-audio", "#00BFA5");
+        var videoIcon = createIcon("fas-file-video", "#00BFA5");
+        var programIcon = createIcon("fas-file-code", "#00BFA5");
+        var docsIcon = createIcon("fas-file-invoice", "#00BFA5");
+        var othersIcon = createIcon("fas-file", "#00BFA5");
+
+
         var allDownloads = new TreeItem<>(ALL_DOWNLOADS_QUEUE);
-        allDownloads.setGraphic(new Label());
+        allDownloads.setGraphic(allDownloadsIcon);
         var compressed = new TreeItem<>(COMPRESSED_QUEUE);
-        compressed.setGraphic(new Label());
+        compressed.setGraphic(compressedIcon);
         var music = new TreeItem<>(MUSIC_QUEUE);
-        music.setGraphic(new Label());
+        music.setGraphic(musicIcon);
         var video = new TreeItem<>(VIDEOS_QUEUE);
-        video.setGraphic(new Label());
+        video.setGraphic(videoIcon);
         var program = new TreeItem<>(PROGRAMS_QUEUE);
-        program.setGraphic(new Label());
+        program.setGraphic(programIcon);
         var docs = new TreeItem<>(DOCS_QUEUE);
-        docs.setGraphic(new Label());
+        docs.setGraphic(docsIcon);
         var others = new TreeItem<>(OTHERS_QUEUE);
-        others.setGraphic(new Label());
+        others.setGraphic(othersIcon);
         return List.of(allDownloads, compressed, music, video, program, docs, others);
     }
 
+    private static FontIcon createIcon(String iconCode, String value) {
+        var icon = new FontIcon(iconCode);
+        icon.setIconSize(15);
+        icon.setFill(Paint.valueOf(value));
+        return icon;
+    }
+
+    private static FontIcon createFolderIcon() {
+        return createIcon("fas-folder", "#FFC107");
+    }
+
+    private static TreeItem<String> createQueueItem(QueueModel q) {
+        var tree = new TreeItem<>(q.getName());
+        if (q.getSchedule().isEnabled())
+            tree.setGraphic(createIcon("fas-clock", "#FF6D00"));
+        else
+            tree.setGraphic(createIcon("fas-th-list", "#0091EA"));
+        return tree;
+    }
 
 }

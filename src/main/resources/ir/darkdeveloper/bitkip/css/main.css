@@ -66,7 +66,7 @@
     -fx-min-width: 50;
     -fx-min-height: 50;
     -fx-border-color: transparent;
-    -fx-background-color: #4CAF50;
+    -fx-background-color: #009688;
     -fx-background-radius: 40px;
     -fx-cursor: hand;
     -fx-effect: dropshadow(one-pass-box, rgba(55, 71, 79, 0.35), 5, 0, 0, 2);
@@ -74,7 +74,7 @@
 }
 
 #newDownloadBtn:hover {
-    -fx-background-color: #388E3C;
+    -fx-background-color: #018377;
 }
 
 #newDownloadBtn:pressed {
