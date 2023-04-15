@@ -55,8 +55,11 @@ public class SideUtils {
             if (selectedItem == null)
                 return;
             var itemName = selectedItem.getValue();
-            if (itemName.equals("") || itemName.equals("Queues"))
+            System.out.println(itemName);
+            if (itemName.equals("") || itemName.equals("Queues")) {
+                sideTree.setContextMenu(null);
                 return;
+            }
             if (event.getButton().equals(MouseButton.PRIMARY)) {
                 // updates status of current downloading before changing queue
                 currentDownloadings.forEach(DownloadsRepo::updateTableStatus);
@@ -84,8 +87,10 @@ public class SideUtils {
                 var downloadsData = fetchDownloadsOfQueue(queueToFetch, condition);
                 mainTableUtils.setDownloads(downloadsData, staticQueueNames.contains(itemName));
             } else if (event.getButton().equals(MouseButton.SECONDARY)) {
-                if (itemName.equals("Finished") || itemName.equals("Unfinished") || itemName.equals("Categories"))
+                if (itemName.equals("Finished") || itemName.equals("Unfinished") || itemName.equals("Categories")) {
+                    sideTree.setContextMenu(null);
                     return;
+                }
                 var cMenu = new ContextMenu();
                 cMenu.getItems().clear();
                 var startQueueLbl = new Label("Start queue");
