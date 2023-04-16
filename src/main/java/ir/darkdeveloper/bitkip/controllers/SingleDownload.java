@@ -67,8 +67,6 @@ public class SingleDownload implements QueueObserver {
     private final DownloadModel dm = new DownloadModel();
 
 
-
-
     @Override
     public void setStage(Stage stage) {
         this.stage = stage;
@@ -170,7 +168,6 @@ public class SingleDownload implements QueueObserver {
     }
 
 
-
     @FXML
     private void onSelectLocation(ActionEvent e) {
         NewDownloadUtils.selectLocation(e, locationField);
@@ -243,7 +240,7 @@ public class SingleDownload implements QueueObserver {
     private void onQueueChanged() {
         var selectedQueue = queueCombo.getSelectionModel().getSelectedItem();
         if (selectedQueue.hasFolder()) {
-            var folder = new File(downloadPath + File.separator + selectedQueue.getName());
+            var folder = new File(queuesPath + selectedQueue.getName());
             if (!folder.exists())
                 folder.mkdir();
             locationField.setText(folder.getAbsolutePath());

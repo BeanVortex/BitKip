@@ -97,7 +97,7 @@ public class IOUtils {
     }
 
     public static boolean createFolderInSaveLocation(String name) {
-        var dir = new File(downloadPath + File.separator + name);
+        var dir = new File(downloadPath + name);
         if (!dir.exists()) {
             dir.mkdir();
             return true;
@@ -116,7 +116,7 @@ public class IOUtils {
     }
 
     public static void removeFolder(String name) {
-        var dir = new File(downloadPath + File.separator + name);
+        var dir = new File(downloadPath + name);
         if (dir.exists())
             dir.delete();
     }

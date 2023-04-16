@@ -2,7 +2,6 @@ package ir.darkdeveloper.bitkip.repo;
 
 import ir.darkdeveloper.bitkip.config.AppConfigs;
 
-import java.io.File;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
@@ -20,7 +19,7 @@ public class DatabaseHelper {
 
 
     static Connection openConnection() throws SQLException {
-        var path = AppConfigs.dataPath + File.separator + "bitkip.db";
+        var path = AppConfigs.dataPath + "bitkip.db";
         var conn = DriverManager.getConnection("jdbc:sqlite:" + path);
         conn.createStatement().execute("PRAGMA foreign_keys=ON;");
         return conn;

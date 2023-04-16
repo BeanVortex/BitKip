@@ -27,7 +27,7 @@ import java.util.ResourceBundle;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executors;
 
-import static ir.darkdeveloper.bitkip.config.AppConfigs.downloadPath;
+import static ir.darkdeveloper.bitkip.config.AppConfigs.queuesPath;
 import static ir.darkdeveloper.bitkip.utils.FileExtensions.ALL_DOWNLOADS_QUEUE;
 
 public class BatchDownload implements QueueObserver {
@@ -276,9 +276,8 @@ public class BatchDownload implements QueueObserver {
     @FXML
     private void onQueueChanged() {
         var selectedQueue = queueCombo.getSelectionModel().getSelectedItem();
-        if (selectedQueue.hasFolder())
-        {
-            var folder = new File(downloadPath + File.separator + selectedQueue.getName());
+        if (selectedQueue.hasFolder()) {
+            var folder = new File(queuesPath + selectedQueue.getName());
             if (!folder.exists())
                 folder.mkdir();
             locationField.setText(folder.getAbsolutePath());

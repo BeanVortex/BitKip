@@ -19,19 +19,20 @@ public class AppConfigs {
 
     public static String downloadPath = System.getProperty("user.home")
             + File.separator + "Downloads"
-            + File.separator + "BitKip";
+            + File.separator + "BitKip" + File.separator;
+
 
     public static final String dataPath = System.getProperty("user.home")
             + File.separator + "Documents"
-            + File.separator + "BitKip";
+            + File.separator + "BitKip" + File.separator;
 
-    public static final String videosPath = downloadPath + File.separator + "Videos" + File.separator;
-    public static final String programsPath = downloadPath + File.separator + "Programs" + File.separator;
-    public static final String compressedPath = downloadPath + File.separator + "Compressed" + File.separator;
-    public static final String musicPath = downloadPath + File.separator + "Music" + File.separator;
-    public static final String documentPath = downloadPath + File.separator + "Documents" + File.separator;
-    public static final String othersPath = downloadPath + File.separator + "Others" + File.separator;
-    public static final String queuesPath = downloadPath + File.separator + "Queues" + File.separator;
+    public static final String videosPath = downloadPath + "Videos" + File.separator;
+    public static final String programsPath = downloadPath + "Programs" + File.separator;
+    public static final String compressedPath = downloadPath + "Compressed" + File.separator;
+    public static final String musicPath = downloadPath + "Music" + File.separator;
+    public static final String documentPath = downloadPath + "Documents" + File.separator;
+    public static final String othersPath = downloadPath + "Others" + File.separator;
+    public static final String queuesPath = downloadPath + "Queues" + File.separator;
 
     public static int downloadRetryCount = 2;
     public static HostServices hostServices;
