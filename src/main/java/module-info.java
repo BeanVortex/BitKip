@@ -18,6 +18,7 @@ module ir.darkdeveloper.bitkip {
     requires org.junit.platform.commons;
     requires reactor.core;
     requires org.jsoup;
+    requires java.desktop;
 
     opens ir.darkdeveloper.bitkip to javafx.fxml, javafx.controls;
     opens ir.darkdeveloper.bitkip.controllers to javafx.fxml, javafx.base;

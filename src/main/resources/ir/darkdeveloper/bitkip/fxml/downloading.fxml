@@ -54,6 +54,7 @@
 
         <HBox alignment="BOTTOM_CENTER" spacing="20" style="-fx-padding: 10 0 5 0">
             <Button onAction="#onClose" styleClass="cancel_btn" text="Close"/>
+            <Button fx:id="openFolderBtn" onAction="#onFolderOpen" visible="false" styleClass="add_btn"/>
             <Button fx:id="controlBtn" onAction="#onControl" styleClass="download_now_btn" text="Pause"/>
         </HBox>
 

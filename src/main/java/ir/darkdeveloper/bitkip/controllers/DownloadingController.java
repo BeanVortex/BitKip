@@ -14,6 +14,9 @@ import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.input.Clipboard;
 import javafx.scene.input.ClipboardContent;
@@ -27,16 +30,21 @@ import org.controlsfx.control.Notifications;
 import org.controlsfx.control.PopOver;
 import org.controlsfx.control.ToggleSwitch;
 
+import java.awt.*;
 import java.io.File;
+import java.io.IOException;
 import java.net.URL;
 import java.util.List;
 import java.util.ResourceBundle;
 
 import static ir.darkdeveloper.bitkip.BitKip.getResource;
 import static ir.darkdeveloper.bitkip.config.AppConfigs.*;
+import static ir.darkdeveloper.bitkip.utils.OSUtils.*;
 
 public class DownloadingController implements FXMLController {
 
+    @FXML
+    private Button openFolderBtn;
     @FXML
     private Hyperlink link;
     @FXML
@@ -280,6 +288,7 @@ public class DownloadingController implements FXMLController {
             isComplete = true;
             remainingLbl.setText("Remaining: Done");
             controlBtn.setText("Open");
+            openFolderBtn.setText("Open folder");
             downloadProgress.setProgress(100);
             statusLbl.setText("Status: Complete");
             progressLbl.setText("Progress: 100%");
@@ -289,6 +298,7 @@ public class DownloadingController implements FXMLController {
             downloadedOfLbl.setText(downloadOf);
             bytesField.setDisable(true);
             speedField.setDisable(true);
+            openFolderBtn.setVisible(true);
         }
     }
 
@@ -302,4 +312,23 @@ public class DownloadingController implements FXMLController {
     }
 
 
+    @FXML
+    private void onFolderOpen() throws IOException {
+        var desktop = Desktop.getDesktop();
+        File file = new File(downloadModel.getFilePath());
+        if (desktop.isSupported(Desktop.Action.OPEN)) {
+            if (isWindows())
+                Runtime.getRuntime().exec(new String[]{"explorer", "/select,", file.getAbsolutePath()});
+            else if (isUnix())
+                Runtime.getRuntime().exec(new String[]{"xdg-open", "--select", file.getAbsolutePath()});
+            else if (isMac())
+                Runtime.getRuntime().exec(new String[]{"osascript", "-e",
+                        "tell app \"Finder\" to reveal POSIX file \"" + file.getAbsolutePath() + "\""});
+        } else
+            Notifications.create()
+                    .title("Not Supported")
+                    .text("Your operating system does not support this action")
+                    .showError();
+
+    }
 }
