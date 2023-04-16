@@ -232,6 +232,7 @@ public class DownloadingController implements FXMLController {
         });
         linkPopover.setAnimated(true);
         linkPopover.setContentNode(new Label("Copied"));
+        link.setOnMouseExited(event -> linkPopover.hide());
     }
 
     @FXML
@@ -274,7 +275,6 @@ public class DownloadingController implements FXMLController {
         var content = new ClipboardContent();
         content.putString(link.getText());
         clip.setContent(content);
-
         linkPopover.show(link);
     }
 
@@ -304,6 +304,7 @@ public class DownloadingController implements FXMLController {
 
     public void closeStage() {
         openDownloadings.remove(this);
+        linkPopover.hide();
         stage.close();
     }
 
