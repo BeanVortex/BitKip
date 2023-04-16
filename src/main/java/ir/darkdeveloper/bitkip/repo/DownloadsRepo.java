@@ -9,6 +9,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import static ir.darkdeveloper.bitkip.repo.DatabaseHelper.*;
 import static ir.darkdeveloper.bitkip.repo.QueuesRepo.*;
@@ -271,7 +272,7 @@ public class DownloadsRepo {
         var scheduleId = rs.getInt(COL_SCHEDULE_ID);
         var schedule = createScheduleModel(rs, scheduleId);
         var queue = QueuesRepo.createQueueModel(rs, queueId, queueName, schedule);
-        var queues = Collections.singletonList(queue);
+        var queues = new CopyOnWriteArrayList<>(Collections.singletonList(queue));
 
         return DownloadModel.builder()
                 .id(id).name(name).progress(progress).downloaded(downloaded).size(size).url(url).filePath(filePath)

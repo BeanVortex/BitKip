@@ -28,6 +28,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.ResourceBundle;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.Executors;
 
 import static ir.darkdeveloper.bitkip.BitKip.getResource;
@@ -154,7 +155,7 @@ public class BatchList implements NewDownloadFxmlController {
             dm.setChunks(lm.getChunks());
             dm.setAddDate(LocalDateTime.now());
             dm.setAddToQueueDate(LocalDateTime.now());
-            dm.setQueues(lm.getQueues());
+            dm.setQueues(new CopyOnWriteArrayList<>(lm.getQueues()));
             dm.setDownloadStatus(DownloadStatus.Paused);
             downloads.add(dm);
         });

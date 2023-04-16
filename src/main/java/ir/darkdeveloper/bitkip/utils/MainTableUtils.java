@@ -53,7 +53,7 @@ public class MainTableUtils {
         speedColumn.setPrefWidth(100);
         downloadedColumn.setPrefWidth(90);
         sizeColumn.setPrefWidth(90);
-        statusColumn.setPrefWidth(120);
+        statusColumn.setPrefWidth(140);
         remainingColumn.setPrefWidth(80);
         addDateColumn.setPrefWidth(150);
         addToQueueDateColumn.setPrefWidth(150);

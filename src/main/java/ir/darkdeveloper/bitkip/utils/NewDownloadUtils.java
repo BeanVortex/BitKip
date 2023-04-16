@@ -20,13 +20,9 @@ import java.io.File;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.Executor;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.concurrent.*;
 
 import static ir.darkdeveloper.bitkip.config.AppConfigs.currentDownloadings;
 import static ir.darkdeveloper.bitkip.config.AppConfigs.showCompleteDialog;
@@ -131,35 +127,35 @@ public class NewDownloadUtils {
             var compressedMatch = FileExtensions.compressedEx.stream().anyMatch(fileName::endsWith);
             if (compressedMatch) {
                 locationField.setText(AppConfigs.compressedPath);
-                dm.setQueues(new ArrayList<>(List.of(QueuesRepo.findByName(COMPRESSED_QUEUE, false))));
+                dm.setQueues(new CopyOnWriteArrayList<>(List.of(QueuesRepo.findByName(COMPRESSED_QUEUE, false))));
                 return;
             }
             var videoMatch = FileExtensions.videoEx.stream().anyMatch(fileName::endsWith);
             if (videoMatch) {
                 locationField.setText(AppConfigs.videosPath);
-                dm.setQueues(new ArrayList<>(List.of(QueuesRepo.findByName(VIDEOS_QUEUE, false))));
+                dm.setQueues(new CopyOnWriteArrayList<>(List.of(QueuesRepo.findByName(VIDEOS_QUEUE, false))));
                 return;
             }
             var programMatch = FileExtensions.programEx.stream().anyMatch(fileName::endsWith);
             if (programMatch) {
                 locationField.setText(AppConfigs.programsPath);
-                dm.setQueues(new ArrayList<>(List.of(QueuesRepo.findByName(PROGRAMS_QUEUE, false))));
+                dm.setQueues(new CopyOnWriteArrayList<>(List.of(QueuesRepo.findByName(PROGRAMS_QUEUE, false))));
                 return;
             }
             var musicMatch = FileExtensions.musicEx.stream().anyMatch(fileName::endsWith);
             if (musicMatch) {
                 locationField.setText(AppConfigs.musicPath);
-                dm.setQueues(new ArrayList<>(List.of(QueuesRepo.findByName(MUSIC_QUEUE, false))));
+                dm.setQueues(new CopyOnWriteArrayList<>(List.of(QueuesRepo.findByName(MUSIC_QUEUE, false))));
                 return;
             }
             var documentMatch = FileExtensions.documentEx.stream().anyMatch(fileName::endsWith);
             if (documentMatch) {
                 locationField.setText(AppConfigs.documentPath);
-                dm.setQueues(new ArrayList<>(List.of(QueuesRepo.findByName(DOCS_QUEUE, false))));
+                dm.setQueues(new CopyOnWriteArrayList<>(List.of(QueuesRepo.findByName(DOCS_QUEUE, false))));
                 return;
             }
             locationField.setText(AppConfigs.othersPath);
-            dm.setQueues(new ArrayList<>(List.of(QueuesRepo.findByName(OTHERS_QUEUE, false))));
+            dm.setQueues(new CopyOnWriteArrayList<>(List.of(QueuesRepo.findByName(OTHERS_QUEUE, false))));
         });
     }
 

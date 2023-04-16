@@ -94,7 +94,9 @@ public class SideUtils {
                     }
                 }
                 var downloadsData = fetchDownloadsOfQueue(queueToFetch, condition);
-                mainTableUtils.setDownloads(downloadsData, staticQueueNames.contains(itemName));
+                var addDateSort = staticQueueNames.contains(itemName) || itemName.equals("Categories")
+                        || itemName.equals("Finished") || itemName.equals("Unfinished");
+                mainTableUtils.setDownloads(downloadsData, addDateSort);
             } else if (event.getButton().equals(MouseButton.SECONDARY)) {
                 if (itemName.equals("Finished") || itemName.equals("Unfinished") || itemName.equals("Categories")) {
                     sideTree.setContextMenu(null);

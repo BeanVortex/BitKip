@@ -6,8 +6,8 @@ import lombok.*;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import static ir.darkdeveloper.bitkip.utils.MainTableUtils.dFormat;
 
@@ -26,7 +26,7 @@ public class DownloadModel {
     private String url;
     private String filePath;
     private String remainingTime;
-    private List<QueueModel> queues;
+    private CopyOnWriteArrayList<QueueModel> queues;
     private int chunks;
     private long speed;
     private DownloadStatus downloadStatus;

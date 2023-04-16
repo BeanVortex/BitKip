@@ -52,6 +52,8 @@ public class QueueUtils {
                 var dm = qm.getDownloads().get(i);
                 if (dm.getDownloadStatus() == DownloadStatus.Paused) {
                     dm = mainTableUtils.getObservedDownload(dm);
+                    if (!dm.getQueues().contains(qm))
+                        dm.getQueues().add(qm);
                     String speedLimit = null;
                     if (qm.getSpeed() != null)
                         speedLimit = qm.getSpeed();
@@ -79,7 +81,7 @@ public class QueueUtils {
         } else {
             while (true) {
                 var count = currentDownloadings.stream().filter(d -> d.getQueues().contains(qm)).count();
-                if (!(count >= simulDownloads.get())) {
+                if (count < simulDownloads.get()) {
                     simulDownloads.set((int) count);
                     i--;
                     break;
