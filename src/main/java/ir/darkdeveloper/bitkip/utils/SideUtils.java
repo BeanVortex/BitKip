@@ -19,6 +19,7 @@ import java.util.function.Predicate;
 import static ir.darkdeveloper.bitkip.config.AppConfigs.*;
 import static ir.darkdeveloper.bitkip.utils.FileExtensions.*;
 import static ir.darkdeveloper.bitkip.utils.FileExtensions.OTHERS_QUEUE;
+import static ir.darkdeveloper.bitkip.utils.ShortcutUtils.NEW_QUEUE_KEY;
 
 public class SideUtils {
 
@@ -64,12 +65,16 @@ public class SideUtils {
             if (selectedItem == null)
                 return;
             var itemName = selectedItem.getValue();
-            if (itemName.equals("All") || itemName.equals("Queues")) {
+            if (itemName.equals("All")) {
                 sideTree.setContextMenu(null);
                 return;
             }
             if (event.getButton().equals(MouseButton.PRIMARY)) {
                 // updates status of current downloading before changing queue
+                if (itemName.equals("Queues")) {
+                    sideTree.setContextMenu(null);
+                    return;
+                }
                 currentDownloadings.forEach(DownloadsRepo::updateTableStatus);
                 Predicate<DownloadModel> condition = null;
                 String queueToFetch = itemName;
@@ -101,35 +106,56 @@ public class SideUtils {
                     sideTree.setContextMenu(null);
                     return;
                 }
-                var cMenu = new ContextMenu();
-                cMenu.getItems().clear();
-                var startQueueLbl = new Label("Start queue");
-                var stopQueueLbl = new Label("Stop queue");
-                var scheduleLbl = new Label("Settings");
-                var deleteLbl = new Label("Delete");
-
-                List<Label> lbls;
-                if (FileExtensions.staticQueueNames.stream().anyMatch(itemName::equals))
-                    lbls = List.of(startQueueLbl, stopQueueLbl, scheduleLbl);
+                ContextMenu cMenu;
+                if (itemName.equals("Queues"))
+                    cMenu = createNewQueueMenu();
                 else
-                    lbls = List.of(startQueueLbl, stopQueueLbl, scheduleLbl, deleteLbl);
-                var menuItems = MenuUtils.createMapMenuItems(lbls, null);
-                cMenu.getItems().addAll(menuItems.values());
+                    cMenu = createTreeMenu(itemName);
                 sideTree.setContextMenu(cMenu);
-                var qm = QueuesRepo.findByName(itemName, false);
-                menuItems.get(startQueueLbl).setDisable(startedQueues.contains(qm));
-                menuItems.get(stopQueueLbl).setDisable(!startedQueues.contains(qm));
-
-                menuItems.get(startQueueLbl).setOnAction(e ->
-                        QueueUtils.startQueue(qm, menuItems.get(startQueueLbl), menuItems.get(stopQueueLbl)));
-                menuItems.get(stopQueueLbl).setOnAction(e ->
-                        QueueUtils.stopQueue(qm, menuItems.get(startQueueLbl), menuItems.get(stopQueueLbl)));
-                menuItems.get(scheduleLbl).setOnAction(e -> FxUtils.newQueueSettingStage(qm));
-                if (menuItems.containsKey(deleteLbl))
-                    menuItems.get(deleteLbl).setOnAction(e -> QueueUtils.deleteQueue(itemName));
                 cMenu.show(selectedItem.getGraphic(), Side.BOTTOM, 0, 0);
+
             }
         };
+    }
+
+    private static ContextMenu createNewQueueMenu() {
+        var cMenu = new ContextMenu();
+        var newQueueLbl = new Label("New queue");
+        newQueueLbl.setPrefWidth(150);
+        var menuItem = new MenuItem();
+        menuItem.setGraphic(newQueueLbl);
+        menuItem.setAccelerator(NEW_QUEUE_KEY);
+        cMenu.getItems().add(menuItem);
+        menuItem.setOnAction(e -> FxUtils.newQueueStage());
+        return cMenu;
+    }
+
+    private static ContextMenu createTreeMenu(String itemName) {
+        var cMenu = new ContextMenu();
+        var startQueueLbl = new Label("Start queue");
+        var stopQueueLbl = new Label("Stop  queue");
+        var scheduleLbl = new Label("Settings");
+        var deleteLbl = new Label("Delete");
+
+        List<Label> lbls;
+        if (FileExtensions.staticQueueNames.stream().anyMatch(itemName::equals))
+            lbls = List.of(startQueueLbl, stopQueueLbl, scheduleLbl);
+        else
+            lbls = List.of(startQueueLbl, stopQueueLbl, scheduleLbl, deleteLbl);
+        var menuItems = MenuUtils.createMapMenuItems(lbls, null);
+        cMenu.getItems().addAll(menuItems.values());
+        var qm = QueuesRepo.findByName(itemName, false);
+        menuItems.get(startQueueLbl).setDisable(startedQueues.contains(qm));
+        menuItems.get(stopQueueLbl).setDisable(!startedQueues.contains(qm));
+
+        menuItems.get(startQueueLbl).setOnAction(e ->
+                QueueUtils.startQueue(qm, menuItems.get(startQueueLbl), menuItems.get(stopQueueLbl)));
+        menuItems.get(stopQueueLbl).setOnAction(e ->
+                QueueUtils.stopQueue(qm, menuItems.get(startQueueLbl), menuItems.get(stopQueueLbl)));
+        menuItems.get(scheduleLbl).setOnAction(e -> FxUtils.newQueueSettingStage(qm));
+        if (menuItems.containsKey(deleteLbl))
+            menuItems.get(deleteLbl).setOnAction(e -> QueueUtils.deleteQueue(itemName));
+        return cMenu;
     }
 
     private static List<DownloadModel> fetchDownloadsOfQueue(String queueName, Predicate<? super DownloadModel> condition) {
