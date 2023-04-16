@@ -6,7 +6,8 @@
 <?import java.net.URL?>
 
 <VBox minHeight="370" minWidth="600" prefHeight="370" prefWidth="600" xmlns="http://javafx.com/javafx/19"
-      xmlns:fx="http://javafx.com/fxml/1" fx:controller="ir.darkdeveloper.bitkip.controllers.DownloadingController">
+      xmlns:fx="http://javafx.com/fxml/1" fx:controller="ir.darkdeveloper.bitkip.controllers.DownloadingController"
+      fx:id="rootBox">
     <stylesheets>
         <URL value="@../css/main.css"/>
         <URL value="@../css/newDownload.css"/>

@@ -7,12 +7,12 @@
     -fx-border-style: none;
     -fx-font-weight: bold;
     -fx-text-fill: #FAFAFA;
-    -fx-background-color: #78909C;
+    -fx-background-color: #4a677c;
     -fx-border-insets: 0;
 }
 
 .tab_btn_selected {
-    -fx-background-color: #4CAF50;
+    -fx-background-color: #009688;
 }
 
 .new_down_details {
@@ -21,13 +21,13 @@
 
 #openLocation .ikonli-font-icon {
     -fx-icon-code: "far-folder-open";
-    -fx-icon-color: #78909C;
+    -fx-icon-color: #4a677c;
     -fx-icon-size: 20;
 }
 
 #newQueue .ikonli-font-icon {
     -fx-icon-code: "fas-plus";
-    -fx-icon-color: #78909C;
+    -fx-icon-color: #4a677c;
     -fx-icon-size: 20;
 }
 
@@ -36,13 +36,13 @@
 #questionBtnUrl .ikonli-font-icon,
 #questionBtnBytes .ikonli-font-icon {
     -fx-icon-code: "far-question-circle";
-    -fx-icon-color: #03A9F4;
+    -fx-icon-color: #009688;
     -fx-icon-size: 20;
 }
 
 #newQueue,
 #openLocation {
-    -fx-border-color: #78909C;
+    -fx-border-color: #4a677c;
     -fx-background-color: transparent;
     -fx-background-radius: 5;
     -fx-border-radius: 5;
@@ -91,13 +91,13 @@
 
 .cancel_btn {
     -fx-padding: 5 13 5 13;
-    -fx-border-radius: 10;
-    -fx-background-radius: 10;
+    -fx-border-radius: 7;
+    -fx-background-radius: 7;
     -fx-background-color: #FFEBEE;
     -fx-text-fill: #F44336;
     -fx-cursor: hand;
     -fx-font-size: 16;
-    -fx-effect: dropshadow(one-pass-box, rgba(244, 67, 54, 0.35), 5, 0, 0, 1);
+    -fx-effect: dropshadow(one-pass-box, rgba(244, 67, 54, 0.35), 7, 0, 0, 1);
 }
 
 .cancel_btn:hover {
@@ -111,45 +111,44 @@
 
 .add_btn {
     -fx-padding: 5 13 5 13;
-    -fx-border-radius: 10;
-    -fx-background-radius: 10;
-    -fx-background-color: #E1F5FE;
-    -fx-text-fill: #03A9F4;
+    -fx-border-radius: 7;
+    -fx-background-radius: 7;
+    -fx-background-color: #c9d4d9;
+    -fx-text-fill: #051C2D;
     -fx-cursor: hand;
     -fx-font-size: 16;
-    -fx-effect: dropshadow(one-pass-box, rgba(3, 169, 244, 0.35), 5, 0, 0, 1);
+    -fx-effect: dropshadow(one-pass-box, rgba(3, 169, 244, 0.2), 7, 0, 0, 1);
 }
 
 .add_btn:hover {
-    -fx-background-color: #B3E5FC;
+    -fx-background-color: #a1b2be;
 }
 
-.add_btn:pressed{
-    -fx-background-color: #03A9F4;
+.add_btn:pressed {
+    -fx-background-color: #051C2D;
     -fx-text-fill: #fafafa;
 }
 
 .download_now_btn {
     -fx-padding: 5 13 5 13;
-    -fx-border-radius: 10;
-    -fx-background-radius: 10;
-    -fx-background-color: #E8F5E9;
-    -fx-text-fill: #4CAF50;
+    -fx-border-radius: 7;
+    -fx-background-radius: 7;
+    -fx-background-color: #B2DFDB;
+    -fx-text-fill: #009688;
     -fx-cursor: hand;
     -fx-font-size: 16;
-    -fx-effect: dropshadow(one-pass-box, rgba(76, 175, 80, 0.35), 5, 0, 0, 1);
+    -fx-effect: dropshadow(one-pass-box, rgba(3, 169, 244, 0.2), 7, 0, 0, 1);
 }
 
 .download_now_btn:hover {
-    -fx-background-color: #C8E6C9;
+    -fx-background-color: #80CBC4;
 }
 
 .download_now_btn:pressed {
-    -fx-background-color: #4CAF50;
+    -fx-background-color: #009688;
     -fx-text-fill: #fafafa;
 }
 
 .new_queue {
     -fx-padding: 10;
 }
-

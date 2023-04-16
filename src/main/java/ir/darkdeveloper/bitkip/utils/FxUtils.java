@@ -10,7 +10,6 @@ import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
-import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonBar;
@@ -40,13 +39,13 @@ public class FxUtils {
     public static void startMainStage(Stage stage) {
         try {
             var loader = new FXMLLoader(getResource("fxml/main.fxml"));
-            Parent root = loader.load();
+            VBox root = loader.load();
             var scene = new Scene(root, stage.getWidth(), stage.getHeight());
             MainController controller = loader.getController();
             getQueueSubject().addObserver(controller);
             stage.setScene(scene);
-            stage.setMinWidth(mainMinWidth);
-            stage.setMinHeight(mainMinHeight);
+            stage.setMinWidth(root.getMinWidth());
+            stage.setMinHeight(root.getMinHeight());
             controller.setStage(stage);
             stage.setTitle("BitKip");
             // todo change in future due to having tray icons
@@ -79,8 +78,8 @@ public class FxUtils {
         }
         var scene = new Scene(root);
         stage.setScene(scene);
-        stage.setMinWidth(newDownloadMinWidth);
-        stage.setMinHeight(newDownloadMinHeight);
+        stage.setMinWidth(root.getMinWidth());
+        stage.setMinHeight(root.getMinHeight());
         stage.setWidth(root.getPrefWidth());
         stage.setHeight(root.getPrefHeight());
         stage.setTitle("New Download");

@@ -35,6 +35,8 @@ import static ir.darkdeveloper.bitkip.config.AppConfigs.*;
 public class DownloadingController implements FXMLController {
 
     @FXML
+    private VBox rootBox;
+    @FXML
     private VBox advancedVbox;
     @FXML
     private TextField speedField;
@@ -83,9 +85,9 @@ public class DownloadingController implements FXMLController {
 
         advancedPane.expandedProperty().addListener((observable, oldValue, newValue) -> {
             if (newValue)
-                stage.setHeight(downloadingMinHeight + advancedVbox.getHeight());
+                stage.setHeight(rootBox.getMinHeight() + advancedVbox.getHeight());
             else
-                stage.setHeight(downloadingMinHeight);
+                stage.setHeight(rootBox.getMinHeight());
         });
     }
 
