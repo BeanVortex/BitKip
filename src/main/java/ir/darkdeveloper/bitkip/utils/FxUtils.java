@@ -164,7 +164,7 @@ public class FxUtils {
         controller.setStage(stage);
         openDownloadings.add(controller);
         controller.setDownloadModel(dm);
-        stage.setOnCloseRequest(e -> openDownloadings.add(controller));
+        stage.setOnCloseRequest(e -> openDownloadings.remove(controller));
         stage.show();
     }
 

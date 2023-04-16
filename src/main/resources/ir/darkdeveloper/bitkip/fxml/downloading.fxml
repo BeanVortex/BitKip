@@ -5,7 +5,7 @@
 <?import org.controlsfx.control.ToggleSwitch?>
 <?import java.net.URL?>
 
-<VBox minHeight="370" minWidth="600" prefHeight="370" prefWidth="600" xmlns="http://javafx.com/javafx/19"
+<VBox minHeight="410" minWidth="600" prefHeight="410" prefWidth="600" xmlns="http://javafx.com/javafx/19"
       xmlns:fx="http://javafx.com/fxml/1" fx:controller="ir.darkdeveloper.bitkip.controllers.DownloadingController"
       fx:id="rootBox">
     <stylesheets>
@@ -13,10 +13,8 @@
         <URL value="@../css/newDownload.css"/>
     </stylesheets>
 
-    <HBox maxHeight="2" minHeight="2" styleClass="csm_toolbar"/>
-
-
     <VBox spacing="10" style="-fx-padding: 8">
+        <Hyperlink fx:id="link" onAction="#copyLink"/>
         <Label fx:id="nameLbl" text="fileName" styleClass="bold"/>
         <Label fx:id="queueLbl" text="queueName" styleClass="bold"/>
         <Label fx:id="statusLbl" text="status" styleClass="bold"/>
@@ -56,7 +54,7 @@
 
         <HBox alignment="BOTTOM_CENTER" spacing="20" style="-fx-padding: 10 0 5 0">
             <Button onAction="#onClose" styleClass="cancel_btn" text="Close"/>
-            <Button fx:id="controlBtn" onAction="#onControl" styleClass="add_btn" text="Pause"/>
+            <Button fx:id="controlBtn" onAction="#onControl" styleClass="download_now_btn" text="Pause"/>
         </HBox>
 
     </VBox>

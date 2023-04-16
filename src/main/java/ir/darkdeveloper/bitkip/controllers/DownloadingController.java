@@ -15,6 +15,8 @@ import javafx.beans.property.SimpleBooleanProperty;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
+import javafx.scene.input.Clipboard;
+import javafx.scene.input.ClipboardContent;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Paint;
@@ -22,6 +24,7 @@ import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import org.apache.commons.lang3.time.DurationFormatUtils;
 import org.controlsfx.control.Notifications;
+import org.controlsfx.control.PopOver;
 import org.controlsfx.control.ToggleSwitch;
 
 import java.io.File;
@@ -34,6 +37,8 @@ import static ir.darkdeveloper.bitkip.config.AppConfigs.*;
 
 public class DownloadingController implements FXMLController {
 
+    @FXML
+    private Hyperlink link;
     @FXML
     private VBox rootBox;
     @FXML
@@ -71,8 +76,9 @@ public class DownloadingController implements FXMLController {
 
     private Stage stage;
     private DownloadModel downloadModel;
-    private final BooleanProperty isPaused = new SimpleBooleanProperty(true);
     private boolean isComplete = false;
+    private final BooleanProperty isPaused = new SimpleBooleanProperty(true);
+    private final PopOver linkPopover = new PopOver();
 
 
     @Override
@@ -94,7 +100,6 @@ public class DownloadingController implements FXMLController {
     @Override
     public void setStage(Stage stage) {
         this.stage = stage;
-        stage.setOnCloseRequest(event -> closeStage());
         initAfterStage();
     }
 
@@ -112,6 +117,7 @@ public class DownloadingController implements FXMLController {
     private void initDownloadData() {
         InputValidations.validInputChecks(null, bytesField, speedField, downloadModel);
         bytesField.setText(downloadModel.getSize() + "");
+        link.setText(downloadModel.getUrl());
         var end = downloadModel.getName().length();
         if (end > 60)
             end = 60;
@@ -125,6 +131,7 @@ public class DownloadingController implements FXMLController {
                         IOUtils.formatBytes(downloadModel.getSize()));
         downloadedOfLbl.setText(downloadOf);
         progressLbl.setText("Progress: %.2f%%".formatted(downloadModel.getProgress()));
+        downloadProgress.setProgress(downloadModel.getProgress() / 100);
         var resumeableText = new Text(downloadModel.isResumeable() ? "Yes" : "No");
         resumeableText.setFill(downloadModel.isResumeable() ? Paint.valueOf("#388E3C") : Paint.valueOf("#EF5350"));
         resumeableLbl.setGraphic(new HBox(new Text("Resumeable: "), resumeableText));
@@ -215,6 +222,8 @@ public class DownloadingController implements FXMLController {
             downloadModel.setShowCompleteDialog(newVal);
             DownloadsRepo.updateDownloadShowCompleteDialog(downloadModel);
         });
+        linkPopover.setAnimated(true);
+        linkPopover.setContentNode(new Label("Copied"));
     }
 
     @FXML
@@ -251,6 +260,16 @@ public class DownloadingController implements FXMLController {
 
     }
 
+    @FXML
+    public void copyLink() {
+        var clip = Clipboard.getSystemClipboard();
+        var content = new ClipboardContent();
+        content.putString(link.getText());
+        clip.setContent(content);
+
+        linkPopover.show(link);
+    }
+
     public void onPause() {
         Platform.runLater(() -> isPaused.set(true));
     }
@@ -281,5 +300,6 @@ public class DownloadingController implements FXMLController {
     public DownloadModel getDownloadModel() {
         return downloadModel;
     }
+
 
 }
