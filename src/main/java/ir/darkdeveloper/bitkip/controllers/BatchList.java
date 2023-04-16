@@ -1,25 +1,17 @@
 package ir.darkdeveloper.bitkip.controllers;
 
-import ir.darkdeveloper.bitkip.controllers.interfaces.NewDownloadFxmlController;
+import ir.darkdeveloper.bitkip.controllers.interfaces.FXMLController;
 import ir.darkdeveloper.bitkip.models.DownloadModel;
 import ir.darkdeveloper.bitkip.models.DownloadStatus;
 import ir.darkdeveloper.bitkip.models.LinkModel;
 import ir.darkdeveloper.bitkip.repo.DownloadsRepo;
 import ir.darkdeveloper.bitkip.task.LinkDataTask;
 import ir.darkdeveloper.bitkip.utils.LinkTableUtils;
-import ir.darkdeveloper.bitkip.utils.MainTableUtils;
-import ir.darkdeveloper.bitkip.utils.ResizeUtil;
-import ir.darkdeveloper.bitkip.utils.WindowUtils;
 import javafx.fxml.FXML;
-import javafx.geometry.Rectangle2D;
 import javafx.scene.control.Button;
 import javafx.scene.control.TableView;
 import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
-import javafx.scene.layout.HBox;
-import javafx.stage.Screen;
 import javafx.stage.Stage;
-import org.kordamp.ikonli.javafx.FontIcon;
 
 import java.io.File;
 import java.net.URL;
@@ -32,35 +24,23 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.Executors;
 
 import static ir.darkdeveloper.bitkip.BitKip.getResource;
+import static ir.darkdeveloper.bitkip.config.AppConfigs.mainTableUtils;
 
-public class BatchList implements NewDownloadFxmlController {
+public class BatchList implements FXMLController {
     @FXML
     private Button addBtn;
     @FXML
-    private HBox toolbar;
-    @FXML
-    private ImageView logoImg;
-    @FXML
-    private Button closeBtn;
-    @FXML
-    private HBox mainBox;
-    @FXML
     private TableView<LinkModel> linkTable;
-    private Stage stage;
 
+    private Stage stage;
     private LinkTableUtils linkTableUtils;
-    private Rectangle2D bounds;
-    private MainTableUtils mainTableUtils;
 
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        closeBtn.setGraphic(new FontIcon());
         addBtn.requestFocus();
         addBtn.setDisable(true);
-        bounds = Screen.getPrimary().getVisualBounds();
-        mainBox.setPrefHeight(bounds.getHeight());
-        linkTable.setPrefWidth(bounds.getWidth());
+
     }
 
 
@@ -95,21 +75,12 @@ public class BatchList implements NewDownloadFxmlController {
 
     @Override
     public void initAfterStage() {
-        stage.widthProperty().addListener((ob, o, n) -> {
-            linkTable.setPrefWidth(n.doubleValue() + 90);
-            toolbar.setPrefWidth(n.longValue());
-        });
-        stage.xProperty().addListener((o) -> bounds = Screen.getPrimary().getVisualBounds());
+        stage.widthProperty().addListener((ob, o, n) -> linkTable.setPrefWidth(n.doubleValue() + 90));
         var logoPath = getResource("icons/logo.png");
         if (logoPath != null) {
             var img = new Image(logoPath.toExternalForm());
-            logoImg.setImage(img);
             stage.getIcons().add(img);
         }
-        int minHeight = 400;
-        int minWidth = 800;
-        WindowUtils.toolbarInits(toolbar, stage, bounds, minWidth, minHeight);
-        ResizeUtil.addResizeListener(stage);
     }
 
     @Override
@@ -118,13 +89,8 @@ public class BatchList implements NewDownloadFxmlController {
     }
 
     @FXML
-    private void close() {
-        stage.close();
-    }
-
-    @FXML
     private void onCancel() {
-        close();
+        stage.close();
     }
 
     @FXML
@@ -161,14 +127,4 @@ public class BatchList implements NewDownloadFxmlController {
         });
         return downloads;
     }
-
-    @Override
-    public void updateQueue() {
-    }
-
-    @Override
-    public void setMainTableUtils(MainTableUtils mainTableUtils) {
-        this.mainTableUtils = mainTableUtils;
-    }
-
 }

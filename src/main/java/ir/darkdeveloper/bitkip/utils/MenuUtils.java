@@ -17,8 +17,7 @@ import javafx.scene.paint.Paint;
 import java.io.File;
 import java.util.*;
 
-import static ir.darkdeveloper.bitkip.config.AppConfigs.downloadPath;
-import static ir.darkdeveloper.bitkip.config.AppConfigs.startedQueues;
+import static ir.darkdeveloper.bitkip.config.AppConfigs.*;
 import static ir.darkdeveloper.bitkip.utils.FileExtensions.staticQueueNames;
 import static ir.darkdeveloper.bitkip.utils.ShortcutUtils.*;
 
@@ -28,7 +27,7 @@ public class MenuUtils {
     public static Menu stopQueueMenu;
 
 
-    public static void initFileMenu(Button menuFile, MainTableUtils mainTableUtils) {
+    public static void initFileMenu(Button menuFile) {
         var c = new ContextMenu();
         var addLink = new Label("New download");
         var batchDownload = new Label("New batch download");
@@ -40,14 +39,14 @@ public class MenuUtils {
         c.getItems().addAll(menuItems.values());
         menuFile.setContextMenu(c);
         menuFile.setOnMouseClicked(event -> c.show(menuFile, Side.BOTTOM, 0, 0));
-        menuItems.get(addLink).setOnAction(e -> DownloadOpUtils.newDownload(mainTableUtils, true));
-        menuItems.get(batchDownload).setOnAction(e -> DownloadOpUtils.newDownload(mainTableUtils, false));
+        menuItems.get(addLink).setOnAction(e -> DownloadOpUtils.newDownload(true));
+        menuItems.get(batchDownload).setOnAction(e -> DownloadOpUtils.newDownload(false));
         menuItems.get(settings).setOnAction(e -> System.out.println("settings"));
         menuItems.get(exit).setOnAction(e -> Platform.exit());
     }
 
 
-    public static void initOperationMenu(Button operationMenu, MainTableUtils mainTableUtils) {
+    public static void initOperationMenu(Button operationMenu) {
         var c = new ContextMenu();
         var openLbl = new Label("Open");
         var resumeLbl = new Label("Resume");
@@ -88,7 +87,7 @@ public class MenuUtils {
         var queueSettingItem = new MenuItem();
         queueSettingItem.setGraphic(queueSettingLbl);
 
-        initQueueMenuList(addToQueueMenu, startQueueMenu, stopQueueMenu, mainTableUtils);
+        initQueueMenuList(addToQueueMenu, startQueueMenu, stopQueueMenu);
 
         menuItems.put(addToQueueLbl, addToQueueMenu);
         menuItems.put(startQueueLbl, startQueueMenu);
@@ -107,15 +106,15 @@ public class MenuUtils {
         });
 
         menuItems.get(openLbl).setOnAction(e -> DownloadOpUtils.openFiles(mainTableUtils.getSelected()));
-        menuItems.get(resumeLbl).setOnAction(e -> DownloadOpUtils.resumeDownloads(mainTableUtils,
+        menuItems.get(resumeLbl).setOnAction(e -> DownloadOpUtils.resumeDownloads(
                 mainTableUtils.getSelected(), null, null));
-        menuItems.get(pauseLbl).setOnAction(e -> DownloadOpUtils.pauseDownloads(mainTableUtils));
+        menuItems.get(pauseLbl).setOnAction(e -> DownloadOpUtils.pauseDownloads());
         menuItems.get(restartLbl).setOnAction(e -> System.out.println("restartLbl"));
-        menuItems.get(deleteLbl).setOnAction(e -> DownloadOpUtils.deleteDownloads(mainTableUtils, false));
-        menuItems.get(deleteWithFileLbl).setOnAction(e -> DownloadOpUtils.deleteDownloads(mainTableUtils, true));
+        menuItems.get(deleteLbl).setOnAction(e -> DownloadOpUtils.deleteDownloads(false));
+        menuItems.get(deleteWithFileLbl).setOnAction(e -> DownloadOpUtils.deleteDownloads(true));
         menuItems.get(newQueueLbl).setOnAction(e -> FxUtils.newQueueStage());
-        menuItems.get(deleteFromQueueLbl).setOnAction(e -> deleteFromQueue(mainTableUtils));
-        menuItems.get(queueSettingLbl).setOnAction(e-> FxUtils.newQueueSettingStage(null));
+        menuItems.get(deleteFromQueueLbl).setOnAction(e -> deleteFromQueue());
+        menuItems.get(queueSettingLbl).setOnAction(e -> FxUtils.newQueueSettingStage(null));
     }
 
     private static void disableEnableStartStopQueue(Menu startQueueMenu, Menu stopQueueMenu) {
@@ -188,8 +187,7 @@ public class MenuUtils {
         menuItems.get(aboutLbl).setOnAction(e -> FxUtils.newAboutStage());
     }
 
-    private static void initQueueMenuList(Menu addToQueueMenu, Menu startQueueMenu,
-                                          Menu stopQueueMenu, MainTableUtils mainTableUtils) {
+    private static void initQueueMenuList(Menu addToQueueMenu, Menu startQueueMenu, Menu stopQueueMenu) {
         var addToQueueItems = new LinkedHashMap<MenuItem, QueueModel>();
         var startQueueItems = new LinkedHashMap<MenuItem, QueueModel>();
         var stopQueueItems = new LinkedHashMap<MenuItem, QueueModel>();
@@ -212,7 +210,7 @@ public class MenuUtils {
         startQueueMenu.getItems().addAll(startQueueItems.keySet());
         stopQueueMenu.getItems().addAll(stopQueueItems.keySet());
 
-        initAddToQueueMenu(addToQueueMenu, mainTableUtils, addToQueueItems);
+        initAddToQueueMenu(addToQueueMenu, addToQueueItems);
 
         startQueueMenu.getItems().forEach(startItem -> startItem.setOnAction(e ->
                 stopQueueItems.keySet()
@@ -230,12 +228,11 @@ public class MenuUtils {
                         .filter(startItem -> ((Label) startItem.getGraphic()).getText()
                                 .equals(((Label) stopItem.getGraphic()).getText()))
                         .findFirst()
-                        .ifPresent(startItem -> QueueUtils.stopQueue(stopQueueItems.get(stopItem), startItem,
-                                stopItem, mainTableUtils))
+                        .ifPresent(startItem -> QueueUtils.stopQueue(stopQueueItems.get(stopItem), startItem, stopItem))
         ));
     }
 
-    public static void deleteFromQueue(MainTableUtils mainTableUtils) {
+    public static void deleteFromQueue() {
         var notObserved = new ArrayList<>(mainTableUtils.getSelected());
         var moveFiles = FxUtils.askToMoveFiles(notObserved, null);
         for (DownloadModel dm : notObserved) {
@@ -256,8 +253,7 @@ public class MenuUtils {
         }
     }
 
-    public static void initAddToQueueMenu(Menu addToQueueMenu, MainTableUtils mainTableUtils,
-                                          LinkedHashMap<MenuItem, QueueModel> addToQueueItems) {
+    public static void initAddToQueueMenu(Menu addToQueueMenu, LinkedHashMap<MenuItem, QueueModel> addToQueueItems) {
         addToQueueMenu.getItems().forEach(menuItem ->
                 menuItem.setOnAction(e -> {
                     var qm = addToQueueItems.get(menuItem);

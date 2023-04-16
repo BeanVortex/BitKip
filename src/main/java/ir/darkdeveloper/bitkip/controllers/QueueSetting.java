@@ -15,18 +15,14 @@ import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
-import javafx.geometry.Rectangle2D;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseButton;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Paint;
-import javafx.stage.Screen;
 import javafx.stage.Stage;
-import org.kordamp.ikonli.javafx.FontIcon;
 
 import java.io.File;
 import java.net.URL;
@@ -42,8 +38,6 @@ import java.util.concurrent.Executors;
 import static ir.darkdeveloper.bitkip.BitKip.getResource;
 import static ir.darkdeveloper.bitkip.config.AppConfigs.*;
 import static ir.darkdeveloper.bitkip.repo.QueuesRepo.*;
-import static ir.darkdeveloper.bitkip.utils.FxUtils.SCHEDULER_STAGE;
-import static ir.darkdeveloper.bitkip.utils.FxUtils.openStages;
 import static java.time.DayOfWeek.*;
 
 public class QueueSetting implements FXMLController, QueueObserver {
@@ -108,32 +102,16 @@ public class QueueSetting implements FXMLController, QueueObserver {
     private Spinner<Integer> startSecondSpinner;
     @FXML
     private VBox mainBox;
-    @FXML
-    private HBox toolbar;
-    @FXML
-    private ImageView logoImg;
-    @FXML
-    private Label toolbarTitle;
-    @FXML
-    private Button hideBtn;
-    @FXML
-    private Button fullWindowBtn;
-    @FXML
-    private Button closeBtn;
+
     @FXML
     private ListView<QueueModel> queueList;
 
     private Stage stage;
     private final ObjectProperty<QueueModel> selectedQueue = new SimpleObjectProperty<>();
-    private Rectangle2D bounds;
 
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        closeBtn.setGraphic(new FontIcon());
-        fullWindowBtn.setGraphic(new FontIcon());
-        hideBtn.setGraphic(new FontIcon());
-        bounds = Screen.getPrimary().getVisualBounds();
         selectedQueue.addListener((ob, old, newVal) -> initSelectedQueueData());
         initQueuesList();
         initInputs();
@@ -212,7 +190,6 @@ public class QueueSetting implements FXMLController, QueueObserver {
 
         stage.widthProperty().addListener((o, o2, n) -> {
             var width = n.longValue();
-            toolbar.setPrefWidth(width);
             horLine1.setPrefWidth(width);
             horLine2.setPrefWidth(width);
             rightContainer.setPrefWidth(width - queueList.getPrefWidth());
@@ -224,20 +201,12 @@ public class QueueSetting implements FXMLController, QueueObserver {
             rightContainer.setPrefHeight(height - 32 - 10);
         });
 
-        stage.xProperty().addListener((observable, oldValue, newValue) -> {
-            if (WindowUtils.isOnPrimaryScreen(newValue.doubleValue()))
-                bounds = Screen.getPrimary().getVisualBounds();
-        });
         var logoPath = getResource("icons/logo.png");
         if (logoPath != null) {
             var img = new Image(logoPath.toExternalForm());
-            logoImg.setImage(img);
             stage.getIcons().add(img);
         }
 
-        WindowUtils.toolbarInits(toolbar, stage, bounds, newDownloadMinWidth, newDownloadMinHeight);
-        WindowUtils.onToolbarDoubleClicked(toolbar, stage, null, bounds, null, newDownloadMinWidth, newDownloadMinHeight);
-        ResizeUtil.addResizeListener(stage);
     }
 
     public void setSelectedQueue(QueueModel selectedQueue) {
@@ -251,7 +220,6 @@ public class QueueSetting implements FXMLController, QueueObserver {
         simulDownloadSpinner.getValueFactory().setValue(selectedQueue.get().getSimultaneouslyDownload());
         hasFolderCheck.setSelected(selectedQueue.get().hasFolder());
 
-        toolbarTitle.setText("Queue Setting: %s".formatted(selectedQueue.get().getName()));
         stage.setTitle("Queue Setting: %s".formatted(selectedQueue.get().getName()));
         queueList.getSelectionModel().select(selectedQueue.get());
         datePicker.setValue(LocalDate.now());
@@ -329,23 +297,6 @@ public class QueueSetting implements FXMLController, QueueObserver {
     @Override
     public Stage getStage() {
         return stage;
-    }
-
-    @FXML
-    private void closeStage() {
-        openStages.remove(SCHEDULER_STAGE);
-        stage.close();
-    }
-
-
-    @FXML
-    private void hideStage() {
-        stage.setIconified(true);
-    }
-
-    @FXML
-    private void toggleStageSize() {
-        bounds = WindowUtils.toggleWindowSize(stage, bounds, newDownloadMinWidth, newDownloadMinHeight);
     }
 
 

@@ -21,35 +21,33 @@ public class DownloadOpUtils {
     /*
      * Resumes downloads non-blocking
      * */
-    public static void resumeDownloads(MainTableUtils mainTableUtils, List<DownloadModel> modelList,
-                                       String speedLimit, String byteLimit) {
+    public static void resumeDownloads(List<DownloadModel> modelList, String speedLimit, String byteLimit) {
         modelList.stream().filter(dm -> !currentDownloadings.contains(dm))
                 .forEach(dm -> {
                     dm.setLastTryDate(LocalDateTime.now());
                     dm.setDownloadStatus(DownloadStatus.Trying);
                     DownloadsRepo.updateDownloadLastTryDate(dm);
                     mainTableUtils.refreshTable();
-                    NewDownloadUtils.startDownload(dm, mainTableUtils, speedLimit, byteLimit,
-                            true, false, null);
+                    NewDownloadUtils.startDownload(dm, speedLimit, byteLimit, true, false, null);
                     openDownloadings.stream().filter(dc -> dc.getDownloadModel().equals(dm))
                             .forEach(DownloadingController::initDownloadListeners);
                 });
     }
 
-    public static void startDownload(MainTableUtils mainTableUtils, DownloadModel dm, String speedLimit,
-                                     String byteLimit, boolean resume, boolean blocking, ExecutorService executor) {
+    public static void startDownload(DownloadModel dm, String speedLimit, String byteLimit, boolean resume,
+                                     boolean blocking, ExecutorService executor) {
         if (!currentDownloadings.contains(dm)) {
             dm.setLastTryDate(LocalDateTime.now());
             dm.setDownloadStatus(DownloadStatus.Trying);
             DownloadsRepo.updateDownloadLastTryDate(dm);
             mainTableUtils.refreshTable();
-            NewDownloadUtils.startDownload(dm, mainTableUtils, speedLimit, byteLimit, resume, blocking, executor);
+            NewDownloadUtils.startDownload(dm, speedLimit, byteLimit, resume, blocking, executor);
             openDownloadings.stream().filter(dc -> dc.getDownloadModel().equals(dm))
                     .forEach(DownloadingController::initDownloadListeners);
         }
     }
 
-    public static void pauseDownloads(MainTableUtils mainTableUtils) {
+    public static void pauseDownloads() {
         mainTableUtils.getSelected().forEach(DownloadOpUtils::pauseDownload);
     }
 
@@ -59,7 +57,7 @@ public class DownloadOpUtils {
                 .findFirst().ifPresent(dm2 -> dm2.getDownloadTask().pause());
     }
 
-    public static void deleteDownloads(MainTableUtils mainTableUtils, boolean withFiles) {
+    public static void deleteDownloads(boolean withFiles) {
         var selectedItems = mainTableUtils.getSelected();
         var header = "Delete selected downloads?";
         if (selectedItems.size() == 1)
@@ -84,13 +82,13 @@ public class DownloadOpUtils {
         }
     }
 
-    public static void newDownload(MainTableUtils mainTableUtils, boolean isSingle) {
+    public static void newDownload(boolean isSingle) {
         mainTableUtils.clearSelection();
-        FxUtils.newDownloadStage(mainTableUtils, isSingle);
+        FxUtils.newDownloadStage(isSingle);
     }
 
-    public static void openDownloadingStage(DownloadModel dm, MainTableUtils mainTableUtils) {
-        FxUtils.newDownloadingStage(dm, mainTableUtils);
+    public static void openDownloadingStage(DownloadModel dm) {
+        FxUtils.newDownloadingStage(dm);
     }
 
     public static void openFiles(ObservableList<DownloadModel> selected) {

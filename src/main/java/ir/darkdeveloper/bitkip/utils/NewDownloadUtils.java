@@ -24,8 +24,7 @@ import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.*;
 
-import static ir.darkdeveloper.bitkip.config.AppConfigs.currentDownloadings;
-import static ir.darkdeveloper.bitkip.config.AppConfigs.showCompleteDialog;
+import static ir.darkdeveloper.bitkip.config.AppConfigs.*;
 import static ir.darkdeveloper.bitkip.utils.FileExtensions.*;
 import static ir.darkdeveloper.bitkip.utils.IOUtils.getBytesFromString;
 
@@ -179,32 +178,31 @@ public class NewDownloadUtils {
      * @param blocking of course, it should be done in concurrent environment otherwise it will block the main thread.
      *                 mostly using for queue downloading
      */
-    public static void startDownload(DownloadModel dm, MainTableUtils mainTableUtils,
-                                     String speed, String bytes, boolean resume, boolean blocking,
+    public static void startDownload(DownloadModel dm, String speed, String bytes, boolean resume, boolean blocking,
                                      ExecutorService executor) {
         if (!dm.isResumeable())
             return;
-        DownloadTask downloadTask = new DownloadLimitedTask(dm, Long.MAX_VALUE, false, mainTableUtils);
+        DownloadTask downloadTask = new DownloadLimitedTask(dm, Long.MAX_VALUE, false);
         if (dm.getChunks() == 0) {
             if (speed != null) {
                 if (speed.equals("0")) {
                     if (bytes != null) {
                         if (bytes.equals(dm.getSize() + ""))
-                            downloadTask = new DownloadLimitedTask(dm, Long.MAX_VALUE, false, mainTableUtils);
+                            downloadTask = new DownloadLimitedTask(dm, Long.MAX_VALUE, false);
                         else
-                            downloadTask = new DownloadLimitedTask(dm, Long.parseLong(bytes), false, mainTableUtils);
+                            downloadTask = new DownloadLimitedTask(dm, Long.parseLong(bytes), false);
                     }
                 } else
-                    downloadTask = new DownloadLimitedTask(dm, getBytesFromString(speed), true, mainTableUtils);
+                    downloadTask = new DownloadLimitedTask(dm, getBytesFromString(speed), true);
             }
         } else {
             if (speed != null) {
                 if (speed.equals("0"))
-                    downloadTask = new DownloadInChunksTask(dm, mainTableUtils, null);
+                    downloadTask = new DownloadInChunksTask(dm, null);
                 else
-                    downloadTask = new DownloadInChunksTask(dm, mainTableUtils, getBytesFromString(speed));
+                    downloadTask = new DownloadInChunksTask(dm, getBytesFromString(speed));
             } else
-                downloadTask = new DownloadInChunksTask(dm, mainTableUtils, null);
+                downloadTask = new DownloadInChunksTask(dm, null);
         }
 
         downloadTask.valueProperty().addListener((observable, oldValue, newValue) -> {

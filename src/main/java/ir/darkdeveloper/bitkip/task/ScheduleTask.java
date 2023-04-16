@@ -54,7 +54,7 @@ public class ScheduleTask {
 
     private static void stopSchedule(boolean isThereSchedule, QueueModel queue,
                                      MenuItem startItem, MenuItem stopItem) {
-        Runnable run = () -> QueueUtils.stopQueue(queue, startItem, stopItem, mainTableUtils);
+        Runnable run = () -> QueueUtils.stopQueue(queue, startItem, stopItem);
         var schedule = queue.getSchedule();
         createSchedule(run, schedule, true);
 
