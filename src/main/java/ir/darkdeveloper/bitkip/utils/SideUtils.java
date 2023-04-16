@@ -23,8 +23,7 @@ import static ir.darkdeveloper.bitkip.utils.FileExtensions.OTHERS_QUEUE;
 public class SideUtils {
 
 
-    public static void prepareSideTree(TreeView<String> sideTree,
-                                       List<QueueModel> queues, MainTableUtils mainTableUtils) {
+    public static void prepareSideTree(TreeView<String> sideTree, List<QueueModel> queues) {
 
         var finishedIcon = createIcon("fas-check-square", "#81C784");
         var unFinishedIcon = createIcon("fas-pause-circle", "#FB8C00");
@@ -55,11 +54,11 @@ public class SideUtils {
         sideTree.setRoot(allItem);
         sideTree.setShowRoot(true);
         sideTree.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
-        sideTree.setOnMouseClicked(SideUtils.onSideClicked(sideTree, mainTableUtils));
+        sideTree.setOnMouseClicked(SideUtils.onSideClicked(sideTree));
     }
 
 
-    private static EventHandler<? super MouseEvent> onSideClicked(TreeView<String> sideTree, MainTableUtils mainTableUtils) {
+    private static EventHandler<? super MouseEvent> onSideClicked(TreeView<String> sideTree) {
         return event -> {
             TreeItem<String> selectedItem = sideTree.getSelectionModel().getSelectedItem();
             if (selectedItem == null)
@@ -124,7 +123,7 @@ public class SideUtils {
                 menuItems.get(startQueueLbl).setOnAction(e ->
                         QueueUtils.startQueue(qm, menuItems.get(startQueueLbl), menuItems.get(stopQueueLbl)));
                 menuItems.get(stopQueueLbl).setOnAction(e ->
-                        QueueUtils.stopQueue(qm, menuItems.get(startQueueLbl), menuItems.get(stopQueueLbl), mainTableUtils));
+                        QueueUtils.stopQueue(qm, menuItems.get(startQueueLbl), menuItems.get(stopQueueLbl)));
                 menuItems.get(scheduleLbl).setOnAction(e -> FxUtils.newQueueSettingStage(qm));
                 if (menuItems.containsKey(deleteLbl))
                     menuItems.get(deleteLbl).setOnAction(e -> QueueUtils.deleteQueue(itemName));

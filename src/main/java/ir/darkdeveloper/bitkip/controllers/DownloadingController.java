@@ -6,25 +6,23 @@ import ir.darkdeveloper.bitkip.models.DownloadStatus;
 import ir.darkdeveloper.bitkip.repo.DownloadsRepo;
 import ir.darkdeveloper.bitkip.repo.QueuesRepo;
 import ir.darkdeveloper.bitkip.task.DownloadTask;
-import ir.darkdeveloper.bitkip.utils.*;
+import ir.darkdeveloper.bitkip.utils.DownloadOpUtils;
+import ir.darkdeveloper.bitkip.utils.IOUtils;
+import ir.darkdeveloper.bitkip.utils.InputValidations;
 import javafx.application.Platform;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.fxml.FXML;
-import javafx.geometry.Rectangle2D;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Paint;
 import javafx.scene.text.Text;
-import javafx.stage.Screen;
 import javafx.stage.Stage;
 import org.apache.commons.lang3.time.DurationFormatUtils;
 import org.controlsfx.control.Notifications;
 import org.controlsfx.control.ToggleSwitch;
-import org.kordamp.ikonli.javafx.FontIcon;
 
 import java.io.File;
 import java.net.URL;
@@ -49,10 +47,6 @@ public class DownloadingController implements FXMLController {
     @FXML
     private TitledPane advancedPane;
     @FXML
-    private ImageView logoImg;
-    @FXML
-    private Label titleLbl;
-    @FXML
     private Label progressLbl;
     @FXML
     private Label resumeableLbl;
@@ -72,40 +66,20 @@ public class DownloadingController implements FXMLController {
     private Label remainingLbl;
     @FXML
     private Button controlBtn;
-    @FXML
-    private HBox toolbar;
-    @FXML
-    private Button hideBtn;
-    @FXML
-    private Button closeBtn;
 
     private Stage stage;
     private DownloadModel downloadModel;
-    private Rectangle2D bounds;
-
     private final BooleanProperty isPaused = new SimpleBooleanProperty(true);
     private boolean isComplete = false;
-    private MainTableUtils mainTableUtils;
 
 
     @Override
     public void initAfterStage() {
-        stage.widthProperty().addListener((ob, o, n) -> toolbar.setPrefWidth(n.longValue()));
-
         var logoPath = getResource("icons/logo.png");
         if (logoPath != null) {
             var img = new Image(logoPath.toExternalForm());
-            logoImg.setImage(img);
             stage.getIcons().add(img);
         }
-
-        stage.xProperty().addListener((observable, oldValue, newValue) -> {
-            if (WindowUtils.isOnPrimaryScreen(newValue.doubleValue()))
-                bounds = Screen.getPrimary().getVisualBounds();
-        });
-
-        WindowUtils.toolbarInits(toolbar, stage, bounds, downloadingMinWidth, downloadingMinHeight);
-        ResizeUtil.addResizeListener(stage);
 
         advancedPane.expandedProperty().addListener((observable, oldValue, newValue) -> {
             if (newValue)
@@ -127,10 +101,6 @@ public class DownloadingController implements FXMLController {
         return stage;
     }
 
-    public void setMainTableUtils(MainTableUtils mainTableUtils) {
-        this.mainTableUtils = mainTableUtils;
-    }
-
     public void setDownloadModel(DownloadModel downloadModel) {
         this.downloadModel = downloadModel;
         initDownloadData();
@@ -143,7 +113,7 @@ public class DownloadingController implements FXMLController {
         var end = downloadModel.getName().length();
         if (end > 60)
             end = 60;
-        titleLbl.setText(downloadModel.getName().substring(0, end));
+        stage.setTitle(downloadModel.getName().substring(0, end));
         nameLbl.setText("Name: " + downloadModel.getName());
         var queues = QueuesRepo.findQueuesOfADownload(downloadModel.getId()).toString();
         queueLbl.setText("Queues: " + queues.substring(1, queues.length() - 1));
@@ -216,9 +186,6 @@ public class DownloadingController implements FXMLController {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        closeBtn.setGraphic(new FontIcon());
-        hideBtn.setGraphic(new FontIcon());
-        bounds = Screen.getPrimary().getVisualBounds();
         controlBtn.setText(isPaused.get() ? "Resume" : "Pause");
         remainingLbl.setText("Remaining: Paused");
         isPaused.addListener((o, ol, newValue) -> {
@@ -270,7 +237,7 @@ public class DownloadingController implements FXMLController {
 
         if (isPaused.get()) {
             statusLbl.setText("Status: " + DownloadStatus.Trying);
-            DownloadOpUtils.resumeDownloads(mainTableUtils, List.of(downloadModel),
+            DownloadOpUtils.resumeDownloads(List.of(downloadModel),
                     speedField.getText(), bytesField.getText());
             isPaused.set(false);
         } else {
@@ -304,12 +271,6 @@ public class DownloadingController implements FXMLController {
         }
     }
 
-    @FXML
-    private void hideWindowApp() {
-        stage.setIconified(true);
-    }
-
-    @FXML
     public void closeStage() {
         openDownloadings.remove(this);
         stage.close();

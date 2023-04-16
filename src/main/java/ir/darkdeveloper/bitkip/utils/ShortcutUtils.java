@@ -18,9 +18,5 @@ public class ShortcutUtils {
     public static final KeyCodeCombination DELETE_FILE_KEY = new KeyCodeCombination(KeyCode.DELETE, KeyCombination.CONTROL_DOWN);
     public static final KeyCodeCombination DELETE_KEY = new KeyCodeCombination(KeyCode.DELETE);
     public static final KeyCodeCombination NEW_QUEUE_KEY = new KeyCodeCombination(KeyCode.N, KeyCombination.SHIFT_DOWN);
-    public static final KeyCodeCombination START_QUEUE_KEY = new KeyCodeCombination(KeyCode.S, KeyCombination.SHIFT_DOWN);
-    public static final KeyCodeCombination ADD_QUEUE_KEY = new KeyCodeCombination(KeyCode.A, KeyCombination.SHIFT_DOWN);
-    public static final KeyCodeCombination STOP_QUEUE_KEY = new KeyCodeCombination(KeyCode.D, KeyCombination.SHIFT_DOWN);
-
 
 }

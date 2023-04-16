@@ -138,7 +138,7 @@ public class MainTableUtils {
             }
         });
         addToQueueMenu.getItems().addAll(addToQueueItems.keySet());
-        MenuUtils.initAddToQueueMenu(addToQueueMenu, this, addToQueueItems);
+        MenuUtils.initAddToQueueMenu(addToQueueMenu, addToQueueItems);
     }
 
 
@@ -148,20 +148,20 @@ public class MainTableUtils {
         menuItems.get(lbls.get(0)).setOnAction(e -> DownloadOpUtils.openFiles(getSelected()));
         // RESUME
         menuItems.get(lbls.get(1)).setOnAction(e ->
-                DownloadOpUtils.resumeDownloads(this, getSelected(), null, null));
+                DownloadOpUtils.resumeDownloads(getSelected(), null, null));
         // PAUSE
-        menuItems.get(lbls.get(2)).setOnAction(e -> DownloadOpUtils.pauseDownloads(this));
+        menuItems.get(lbls.get(2)).setOnAction(e -> DownloadOpUtils.pauseDownloads());
         // RESTART
         menuItems.get(lbls.get(3)).setOnAction(e -> System.out.println("restart"));
         // DETAILS
         menuItems.get(lbls.get(4)).setOnAction(e ->
-                getSelected().forEach(dm -> FxUtils.newDownloadingStage(dm, this)));
+                getSelected().forEach(FxUtils::newDownloadingStage));
         // DELETE FROM QUEUE
-        menuItems.get(lbls.get(5)).setOnAction(e -> MenuUtils.deleteFromQueue(this));
+        menuItems.get(lbls.get(5)).setOnAction(e -> MenuUtils.deleteFromQueue());
         // DELETE
-        menuItems.get(lbls.get(6)).setOnAction(e -> DownloadOpUtils.deleteDownloads(this, false));
+        menuItems.get(lbls.get(6)).setOnAction(e -> DownloadOpUtils.deleteDownloads(false));
         // DELETE WITH FILE
-        menuItems.get(lbls.get(7)).setOnAction(ev -> DownloadOpUtils.deleteDownloads(this, true));
+        menuItems.get(lbls.get(7)).setOnAction(ev -> DownloadOpUtils.deleteDownloads(true));
     }
 
 
@@ -169,7 +169,7 @@ public class MainTableUtils {
         return event -> {
             if (event.getButton().equals(MouseButton.PRIMARY) && event.getClickCount() == 2) {
                 var dm = getSelected().get(0);
-                DownloadOpUtils.openDownloadingStage(dm, this);
+                DownloadOpUtils.openDownloadingStage(dm);
             }
         };
     }

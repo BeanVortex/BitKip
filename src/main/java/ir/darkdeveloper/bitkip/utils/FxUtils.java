@@ -6,6 +6,7 @@ import ir.darkdeveloper.bitkip.controllers.interfaces.FXMLController;
 import ir.darkdeveloper.bitkip.models.DownloadModel;
 import ir.darkdeveloper.bitkip.models.LinkModel;
 import ir.darkdeveloper.bitkip.models.QueueModel;
+import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
@@ -17,7 +18,6 @@ import javafx.scene.control.ButtonType;
 import javafx.scene.image.Image;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
-import javafx.stage.StageStyle;
 
 import java.io.IOException;
 import java.util.LinkedHashMap;
@@ -32,12 +32,12 @@ import static ir.darkdeveloper.bitkip.utils.FileExtensions.staticQueueNames;
 public class FxUtils {
 
     // these constants are used to prevent these stages to show more than 1
-    public static final String SCHEDULER_STAGE = "Scheduler";
-    public static final String ABOUT_STAGE = "About";
-    public static final Map<String, Stage> openStages = new LinkedHashMap<>();
+    private static final String QUEUE_SETTING_STAGE = "QueueSetting";
+    private static final String ABOUT_STAGE = "About";
+    private static final Map<String, Stage> openStages = new LinkedHashMap<>();
 
 
-    public static void switchSceneToMain(Stage stage) {
+    public static void startMainStage(Stage stage) {
         try {
             var loader = new FXMLLoader(getResource("fxml/main.fxml"));
             Parent root = loader.load();
@@ -49,6 +49,9 @@ public class FxUtils {
             stage.setMinHeight(mainMinHeight);
             controller.setStage(stage);
             stage.setTitle("BitKip");
+            // todo change in future due to having tray icons
+            stage.setOnCloseRequest(e -> Platform.exit());
+            stage.show();
         } catch (IOException ex) {
             ex.printStackTrace();
         }
@@ -63,7 +66,7 @@ public class FxUtils {
         return null;
     }
 
-    public static void newDownloadStage(MainTableUtils mainTableUtils, boolean isSingle) {
+    public static void newDownloadStage(boolean isSingle) {
         FXMLLoader loader;
         Stage stage = new Stage();
         VBox root;
@@ -80,13 +83,11 @@ public class FxUtils {
         stage.setMinHeight(newDownloadMinHeight);
         stage.setWidth(root.getPrefWidth());
         stage.setHeight(root.getPrefHeight());
-        stage.initStyle(StageStyle.TRANSPARENT);
         stage.setTitle("New Download");
         NewDownload controller = loader.getController();
         controller.setStage(stage);
-        controller.setMainTableUtils(mainTableUtils);
         controller.setIsSingle(isSingle);
-        getQueueSubject().addObserver(controller);
+        // onclose request has set in controller
         stage.show();
     }
 
@@ -105,7 +106,6 @@ public class FxUtils {
         stage.setScene(scene);
         stage.setMinWidth(root.getPrefWidth());
         stage.setMinHeight(root.getPrefHeight());
-        stage.initStyle(StageStyle.TRANSPARENT);
         stage.setTitle("New Queue");
         NewQueueController controller = loader.getController();
         controller.setStage(stage);
@@ -131,9 +131,8 @@ public class FxUtils {
         stage.setScene(scene);
         stage.setMinWidth(root.getPrefWidth());
         stage.setMinHeight(root.getPrefHeight());
-//        stage.initStyle(StageStyle.TRANSPARENT);
         stage.setTitle("About");
-        var logoPath = getResource("images/logo.png");
+        var logoPath = getResource("icons/logo.png");
         if (logoPath != null)
             stage.getIcons().add(new Image(logoPath.toExternalForm()));
         FXMLController controller = loader.getController();
@@ -143,7 +142,7 @@ public class FxUtils {
         openStages.put(ABOUT_STAGE, stage);
     }
 
-    public static void newDownloadingStage(DownloadModel dm, MainTableUtils mainTableUtils) {
+    public static void newDownloadingStage(DownloadModel dm) {
         FXMLLoader loader;
         Stage stage = new Stage();
         VBox root;
@@ -158,7 +157,6 @@ public class FxUtils {
         stage.setScene(scene);
         stage.setMinWidth(root.getPrefWidth());
         stage.setMinHeight(root.getPrefHeight());
-        stage.initStyle(StageStyle.TRANSPARENT);
         var end = dm.getName().length();
         if (end > 60)
             end = 60;
@@ -167,11 +165,11 @@ public class FxUtils {
         controller.setStage(stage);
         openDownloadings.add(controller);
         controller.setDownloadModel(dm);
-        controller.setMainTableUtils(mainTableUtils);
+        stage.setOnCloseRequest(e -> openDownloadings.add(controller));
         stage.show();
     }
 
-    public static void newBatchListStage(List<LinkModel> links, MainTableUtils mainTableUtils) {
+    public static void newBatchListStage(List<LinkModel> links) {
         FXMLLoader loader;
         Stage stage = new Stage();
         VBox root;
@@ -186,18 +184,16 @@ public class FxUtils {
         stage.setScene(scene);
         stage.setMinWidth(root.getPrefWidth());
         stage.setMinHeight(root.getPrefHeight());
-        stage.initStyle(StageStyle.TRANSPARENT);
         stage.setTitle("Links");
         BatchList controller = loader.getController();
         controller.setStage(stage);
         controller.setData(links);
-        controller.setMainTableUtils(mainTableUtils);
         stage.show();
     }
 
     public static void newQueueSettingStage(QueueModel selectedQueue) {
-        if (openStages.containsKey(SCHEDULER_STAGE)) {
-            openStages.get(SCHEDULER_STAGE).toFront();
+        if (openStages.containsKey(QUEUE_SETTING_STAGE)) {
+            openStages.get(QUEUE_SETTING_STAGE).toFront();
             return;
         }
         FXMLLoader loader;
@@ -215,7 +211,6 @@ public class FxUtils {
 
         stage.setMinWidth(root.getPrefWidth());
         stage.setMinHeight(root.getPrefHeight());
-        stage.initStyle(StageStyle.TRANSPARENT);
         var queueName = ALL_DOWNLOADS_QUEUE;
         if (selectedQueue != null)
             queueName = selectedQueue.getName();
@@ -225,11 +220,11 @@ public class FxUtils {
         controller.setSelectedQueue(selectedQueue);
         getQueueSubject().addObserver(controller);
         stage.setOnCloseRequest(e -> {
-            openStages.remove(SCHEDULER_STAGE);
+            openStages.remove(QUEUE_SETTING_STAGE);
             getQueueSubject().removeObserver(controller);
         });
         stage.show();
-        openStages.put(SCHEDULER_STAGE, stage);
+        openStages.put(QUEUE_SETTING_STAGE, stage);
     }
 
 

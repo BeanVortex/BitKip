@@ -59,7 +59,7 @@ public class QueueUtils {
                         speedLimit = qm.getSpeed();
                     if (sDownloads > 1)
                         i = performSimultaneousDownload(qm, simulDownloads, i, dm, speedLimit, sDownloads);
-                    else DownloadOpUtils.startDownload(mainTableUtils, dm, speedLimit,
+                    else DownloadOpUtils.startDownload(dm, speedLimit,
                             null, true, true, null);
                 }
                 if (!startedQueues.contains(qm))
@@ -75,7 +75,7 @@ public class QueueUtils {
     private static int performSimultaneousDownload(QueueModel qm, AtomicInteger simulDownloads,
                                                    int i, DownloadModel dm, String speedLimit, int sDownloads) {
         if (simulDownloads.get() < sDownloads) {
-            DownloadOpUtils.startDownload(mainTableUtils, dm, speedLimit,
+            DownloadOpUtils.startDownload(dm, speedLimit,
                     null, true, false, null);
             simulDownloads.getAndIncrement();
         } else {
@@ -96,8 +96,7 @@ public class QueueUtils {
         return i;
     }
 
-    private static void whenQueueDone(QueueModel qm, MenuItem startItem, MenuItem stopItem,
-                                      ExecutorService executor) {
+    private static void whenQueueDone(QueueModel qm, MenuItem startItem, MenuItem stopItem, ExecutorService executor) {
         startItem.setDisable(false);
         stopItem.setDisable(true);
         queueDoneNotification(qm);
@@ -111,7 +110,7 @@ public class QueueUtils {
     }
 
 
-    public static void stopQueue(QueueModel qm, MenuItem startItem, MenuItem stopItem, MainTableUtils mainTableUtils) {
+    public static void stopQueue(QueueModel qm, MenuItem startItem, MenuItem stopItem) {
         if (startedQueues.contains(qm)) {
             var downloadsByQueue = startedQueues.get(startedQueues.indexOf(qm)).getDownloads();
             downloadsByQueue.forEach(dm -> {

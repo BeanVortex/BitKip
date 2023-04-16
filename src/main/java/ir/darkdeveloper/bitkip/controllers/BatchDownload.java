@@ -2,12 +2,13 @@ package ir.darkdeveloper.bitkip.controllers;
 
 import ir.darkdeveloper.bitkip.config.AppConfigs;
 import ir.darkdeveloper.bitkip.config.QueueObserver;
-import ir.darkdeveloper.bitkip.controllers.interfaces.NewDownloadFxmlController;
 import ir.darkdeveloper.bitkip.models.DownloadModel;
 import ir.darkdeveloper.bitkip.models.LinkModel;
 import ir.darkdeveloper.bitkip.models.QueueModel;
 import ir.darkdeveloper.bitkip.repo.QueuesRepo;
-import ir.darkdeveloper.bitkip.utils.*;
+import ir.darkdeveloper.bitkip.utils.FxUtils;
+import ir.darkdeveloper.bitkip.utils.InputValidations;
+import ir.darkdeveloper.bitkip.utils.NewDownloadUtils;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -29,7 +30,7 @@ import java.util.concurrent.Executors;
 import static ir.darkdeveloper.bitkip.config.AppConfigs.downloadPath;
 import static ir.darkdeveloper.bitkip.utils.FileExtensions.ALL_DOWNLOADS_QUEUE;
 
-public class BatchDownload implements NewDownloadFxmlController, QueueObserver {
+public class BatchDownload implements QueueObserver {
     @FXML
     private Label errorLabel;
     @FXML
@@ -58,7 +59,6 @@ public class BatchDownload implements NewDownloadFxmlController, QueueObserver {
     private TextField urlField;
 
     private Stage stage;
-    private MainTableUtils mainTableUtils;
     private DownloadModel dm;
 
 
@@ -121,7 +121,7 @@ public class BatchDownload implements NewDownloadFxmlController, QueueObserver {
                     lm.getQueues().add(selectedQueue);
                 lm.setPath(locationField.getText());
             });
-            FxUtils.newBatchListStage(links, mainTableUtils);
+            FxUtils.newBatchListStage(links);
             stage.close();
         } catch (IllegalArgumentException e) {
             if (e instanceof NumberFormatException)
@@ -285,8 +285,4 @@ public class BatchDownload implements NewDownloadFxmlController, QueueObserver {
         }
     }
 
-    @Override
-    public void setMainTableUtils(MainTableUtils mainTableUtils) {
-        this.mainTableUtils = mainTableUtils;
-    }
 }

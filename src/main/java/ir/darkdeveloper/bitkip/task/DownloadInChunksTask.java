@@ -6,7 +6,6 @@ import ir.darkdeveloper.bitkip.models.DownloadStatus;
 import ir.darkdeveloper.bitkip.repo.DownloadsRepo;
 import ir.darkdeveloper.bitkip.utils.DownloadOpUtils;
 import ir.darkdeveloper.bitkip.utils.IOUtils;
-import ir.darkdeveloper.bitkip.utils.MainTableUtils;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -33,7 +32,6 @@ import static ir.darkdeveloper.bitkip.config.AppConfigs.*;
 
 public class DownloadInChunksTask extends DownloadTask {
     private final int chunks;
-    private final MainTableUtils mainTableUtils;
     private final Long limit;
     private final List<FileChannel> fileChannels = new ArrayList<>();
     private final List<Path> filePaths = new ArrayList<>();
@@ -42,15 +40,13 @@ public class DownloadInChunksTask extends DownloadTask {
     private final boolean isLimited;
     private ExecutorService executor;
     private int retries = 0;
-
     private boolean blocking;
 
-    public DownloadInChunksTask(DownloadModel downloadModel, MainTableUtils mainTableUtils, Long limit) {
+    public DownloadInChunksTask(DownloadModel downloadModel, Long limit) {
         super(downloadModel);
         if (downloadModel.getChunks() == 0)
             throw new IllegalArgumentException("To download file in chunks, chunks must not be 0");
         this.chunks = downloadModel.getChunks();
-        this.mainTableUtils = mainTableUtils;
         this.limit = limit;
         isLimited = limit != null;
     }
@@ -285,7 +281,7 @@ public class DownloadInChunksTask extends DownloadTask {
                             .findFirst().ifPresentOrElse(dc -> dc.onComplete(download),
                                     () -> {
                                         if (download.isShowCompleteDialog())
-                                            DownloadOpUtils.openDownloadingStage(download, mainTableUtils);
+                                            DownloadOpUtils.openDownloadingStage(download);
                                     });
                     if (download.isOpenAfterComplete())
                         hostServices.showDocument(download.getFilePath());

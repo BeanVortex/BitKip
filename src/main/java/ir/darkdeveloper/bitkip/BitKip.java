@@ -8,7 +8,6 @@ import ir.darkdeveloper.bitkip.task.ScheduleTask;
 import ir.darkdeveloper.bitkip.utils.*;
 import javafx.application.Application;
 import javafx.stage.Stage;
-import javafx.stage.StageStyle;
 
 import java.net.URL;
 import java.util.ArrayList;
@@ -29,14 +28,10 @@ public class BitKip extends Application {
         queues = ScheduleRepo.createDefaultSchedulesForQueues(queues);
         AppConfigs.addAllQueues(queues);
         IOUtils.createSaveLocations();
-        FxUtils.switchSceneToMain(stage);
         ScheduleTask.startSchedules();
         AppConfigs.setHostServices(getHostServices());
-        stage.initStyle(StageStyle.UNDECORATED);
-        stage.setResizable(true);
-        ResizeUtil.addResizeListener(stage);
+        FxUtils.startMainStage(stage);
         MoreUtils.checkUpdates(false);
-        stage.show();
     }
 
 

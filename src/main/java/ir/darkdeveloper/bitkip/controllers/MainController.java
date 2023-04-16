@@ -6,19 +6,21 @@ import ir.darkdeveloper.bitkip.controllers.interfaces.FXMLController;
 import ir.darkdeveloper.bitkip.models.DownloadModel;
 import ir.darkdeveloper.bitkip.models.DownloadStatus;
 import ir.darkdeveloper.bitkip.repo.QueuesRepo;
-import ir.darkdeveloper.bitkip.utils.*;
+import ir.darkdeveloper.bitkip.utils.DownloadOpUtils;
+import ir.darkdeveloper.bitkip.utils.MainTableUtils;
+import ir.darkdeveloper.bitkip.utils.MenuUtils;
+import ir.darkdeveloper.bitkip.utils.SideUtils;
 import javafx.animation.TranslateTransition;
-import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.geometry.Pos;
-import javafx.geometry.Rectangle2D;
-import javafx.scene.control.*;
+import javafx.scene.control.Button;
+import javafx.scene.control.ScrollBar;
+import javafx.scene.control.TableView;
+import javafx.scene.control.TreeView;
 import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
 import javafx.scene.input.ScrollEvent;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
-import javafx.stage.Screen;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 import org.kordamp.ikonli.javafx.FontIcon;
@@ -28,7 +30,7 @@ import java.util.ResourceBundle;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static ir.darkdeveloper.bitkip.BitKip.getResource;
-import static ir.darkdeveloper.bitkip.config.AppConfigs.*;
+import static ir.darkdeveloper.bitkip.config.AppConfigs.selectedQueue;
 import static ir.darkdeveloper.bitkip.utils.FileExtensions.ALL_DOWNLOADS_QUEUE;
 
 
@@ -36,8 +38,6 @@ public class MainController implements FXMLController, QueueObserver {
 
     @FXML
     private TreeView<String> sideTree;
-    @FXML
-    private ImageView logoImg;
     @FXML
     private Button operationMenu;
     @FXML
@@ -49,19 +49,10 @@ public class MainController implements FXMLController, QueueObserver {
     @FXML
     private TableView<DownloadModel> contentTable;
     @FXML
-    private HBox mainBox;
-    @FXML
     private HBox toolbar;
-    @FXML
-    private Button closeBtn;
-    @FXML
-    private Button fullWindowBtn;
-    @FXML
-    private Button hideBtn;
 
     private Stage stage;
     private MainTableUtils mainTableUtils;
-    private Rectangle2D bounds;
 
     @Override
     public void setStage(Stage stage) {
@@ -89,34 +80,23 @@ public class MainController implements FXMLController, QueueObserver {
         stage.heightProperty().addListener((ob, o, n) ->
                 sideTree.setPrefHeight(n.doubleValue() - toolbar.getPrefHeight()));
 
-        stage.xProperty().addListener((observable, oldValue, newValue) -> {
-            if (WindowUtils.isOnPrimaryScreen(newValue.doubleValue()))
-                bounds = Screen.getPrimary().getVisualBounds();
-        });
+
         newDownloadBtnInits();
         var logoPath = getResource("icons/logo.png");
         if (logoPath != null) {
             var img = new Image(logoPath.toExternalForm());
-            logoImg.setImage(img);
             stage.getIcons().add(img);
         }
-        WindowUtils.toolbarInits(toolbar, stage, bounds, newDownloadBtn, mainPrefWidth, mainPrefHeight);
-        WindowUtils.onToolbarDoubleClicked(toolbar, stage, contentTable, bounds, newDownloadBtn, mainPrefWidth, mainPrefHeight);
-        MenuUtils.initFileMenu(menuFile, mainTableUtils);
-        MenuUtils.initOperationMenu(operationMenu, mainTableUtils);
+        MenuUtils.initFileMenu(menuFile);
+        MenuUtils.initOperationMenu(operationMenu);
         MenuUtils.initMoreMenu(moreBtn, contentTable);
     }
 
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        closeBtn.setGraphic(new FontIcon());
-        fullWindowBtn.setGraphic(new FontIcon());
-        hideBtn.setGraphic(new FontIcon());
         newDownloadBtn.setGraphic(new FontIcon());
         StackPane.setAlignment(newDownloadBtn, Pos.BOTTOM_RIGHT);
-        bounds = Screen.getPrimary().getVisualBounds();
-        mainBox.setPrefHeight(bounds.getHeight());
     }
 
     private void initSides() {
@@ -133,7 +113,7 @@ public class MainController implements FXMLController, QueueObserver {
         var queues = AppConfigs.getQueues();
         if (queues.isEmpty())
             queues = QueuesRepo.getAllQueues(false, true);
-        SideUtils.prepareSideTree(sideTree, queues, mainTableUtils);
+        SideUtils.prepareSideTree(sideTree, queues);
 
     }
 
@@ -169,29 +149,10 @@ public class MainController implements FXMLController, QueueObserver {
         });
     }
 
-    @FXML
-    private void closeApp() {
-        Platform.exit();
-    }
-
-    @FXML
-    private void hideWindowApp() {
-        stage.setIconified(true);
-    }
-
-    @FXML
-    private void toggleFullWindowApp() {
-        var screenY = stage.getY();
-        if (screenY - bounds.getMinY() >= 0 && bounds.getHeight() > stage.getHeight())
-            bounds = WindowUtils.maximizeWindow(stage, bounds, newDownloadBtn);
-        else if (screenY - bounds.getMinY() <= 0 && bounds.getHeight() <= stage.getHeight())
-            bounds = WindowUtils.minimizeWindow(stage, bounds, mainPrefWidth, mainPrefHeight);
-
-    }
 
     @FXML
     private void onNewDownload() {
-        DownloadOpUtils.newDownload(mainTableUtils, true);
+        DownloadOpUtils.newDownload(true);
     }
 
     @Override
@@ -204,7 +165,7 @@ public class MainController implements FXMLController, QueueObserver {
             initSides();
         else
             // when add happens
-            SideUtils.prepareSideTree(sideTree, queues, mainTableUtils);
-        MenuUtils.initOperationMenu(operationMenu, mainTableUtils);
+            SideUtils.prepareSideTree(sideTree, queues);
+        MenuUtils.initOperationMenu(operationMenu);
     }
 }

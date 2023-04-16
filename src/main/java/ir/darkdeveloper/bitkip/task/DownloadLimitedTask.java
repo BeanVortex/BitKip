@@ -5,7 +5,6 @@ import ir.darkdeveloper.bitkip.models.DownloadModel;
 import ir.darkdeveloper.bitkip.models.DownloadStatus;
 import ir.darkdeveloper.bitkip.repo.DownloadsRepo;
 import ir.darkdeveloper.bitkip.utils.DownloadOpUtils;
-import ir.darkdeveloper.bitkip.utils.MainTableUtils;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -29,7 +28,6 @@ public class DownloadLimitedTask extends DownloadTask {
     private boolean isCalculating;
     private final long limit;
     private final boolean isSpeedLimited;
-    private final MainTableUtils mainTableUtils;
     private File file;
     private ExecutorService executor;
     private FileChannel fileChannel;
@@ -40,11 +38,10 @@ public class DownloadLimitedTask extends DownloadTask {
     /**
      * if not isSpeedLimited, then valueLimit
      **/
-    public DownloadLimitedTask(DownloadModel downloadModel, long limit, boolean isSpeedLimited, MainTableUtils mainTableUtils) {
+    public DownloadLimitedTask(DownloadModel downloadModel, long limit, boolean isSpeedLimited) {
         super(downloadModel);
         this.limit = limit;
         this.isSpeedLimited = isSpeedLimited;
-        this.mainTableUtils = mainTableUtils;
     }
 
 
@@ -160,7 +157,7 @@ public class DownloadLimitedTask extends DownloadTask {
                             .findFirst().ifPresentOrElse(dc -> dc.onComplete(download),
                                     () -> {
                                         if (download.isShowCompleteDialog())
-                                            DownloadOpUtils.openDownloadingStage(download, mainTableUtils);
+                                            DownloadOpUtils.openDownloadingStage(download);
                                     });
                     if (download.isOpenAfterComplete())
                         hostServices.showDocument(download.getFilePath());

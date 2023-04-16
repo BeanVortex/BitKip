@@ -1,7 +1,7 @@
 package ir.darkdeveloper.bitkip.controllers;
 
 import ir.darkdeveloper.bitkip.config.AppConfigs;
-import ir.darkdeveloper.bitkip.controllers.interfaces.NewDownloadFxmlController;
+import ir.darkdeveloper.bitkip.config.QueueObserver;
 import ir.darkdeveloper.bitkip.models.DownloadModel;
 import ir.darkdeveloper.bitkip.models.DownloadStatus;
 import ir.darkdeveloper.bitkip.models.QueueModel;
@@ -25,10 +25,10 @@ import java.util.ResourceBundle;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executors;
 
-import static ir.darkdeveloper.bitkip.config.AppConfigs.downloadPath;
+import static ir.darkdeveloper.bitkip.config.AppConfigs.*;
 import static ir.darkdeveloper.bitkip.utils.FileExtensions.ALL_DOWNLOADS_QUEUE;
 
-public class SingleDownload implements NewDownloadFxmlController {
+public class SingleDownload implements QueueObserver {
 
     @FXML
     private Label errorLabel;
@@ -63,15 +63,10 @@ public class SingleDownload implements NewDownloadFxmlController {
     @FXML
     private Button openLocation;
     private Stage stage;
-    private MainTableUtils mainTableUtils;
 
     private final DownloadModel dm = new DownloadModel();
 
 
-    @Override
-    public void setMainTableUtils(MainTableUtils mainTableUtils) {
-        this.mainTableUtils = mainTableUtils;
-    }
 
 
     @Override
@@ -189,6 +184,7 @@ public class SingleDownload implements NewDownloadFxmlController {
     @FXML
     private void onCancel() {
         stage.close();
+        getQueueSubject().removeObserver(this);
     }
 
     @FXML
@@ -203,9 +199,9 @@ public class SingleDownload implements NewDownloadFxmlController {
     @FXML
     private void onDownload() {
         prepareDownload();
-        DownloadOpUtils.startDownload(mainTableUtils, dm, speedField.getText(), bytesField.getText(),
+        DownloadOpUtils.startDownload(dm, speedField.getText(), bytesField.getText(),
                 false, false, null);
-        DownloadOpUtils.openDownloadingStage(dm, mainTableUtils);
+        DownloadOpUtils.openDownloadingStage(dm);
         stage.close();
     }
 
