@@ -303,6 +303,7 @@ public class QueueSetting implements FXMLController, QueueObserver {
     @Override
     public void updateQueue() {
         initQueuesList();
+        initSelectedQueueData();
     }
 
     @FXML

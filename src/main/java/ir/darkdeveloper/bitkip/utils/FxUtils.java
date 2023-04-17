@@ -143,7 +143,7 @@ public class FxUtils {
 
     public static void newDownloadingStage(DownloadModel dm) {
         FXMLLoader loader;
-        Stage stage = new Stage();
+        var stage = new Stage();
         VBox root;
         try {
             loader = new FXMLLoader(getResource("fxml/downloading.fxml"));
@@ -196,7 +196,7 @@ public class FxUtils {
             return;
         }
         FXMLLoader loader;
-        Stage stage = new Stage();
+        var stage = new Stage();
         VBox root;
         try {
             loader = new FXMLLoader(getResource("fxml/queueSetting.fxml"));
