@@ -48,6 +48,7 @@ public class QueueUtils {
         var simulDownloads = new AtomicInteger(0);
         executor.submit(() -> {
             var sDownloads = qm.getSimultaneouslyDownload();
+            var pauseCount = qm.getDownloads().stream().filter(dm -> dm.getDownloadStatus() == DownloadStatus.Paused).count();
             for (int i = 0; i < qm.getDownloads().size(); i++) {
                 var dm = qm.getDownloads().get(i);
                 if (dm.getDownloadStatus() == DownloadStatus.Paused) {
@@ -57,9 +58,11 @@ public class QueueUtils {
                     String speedLimit = null;
                     if (qm.getSpeed() != null)
                         speedLimit = qm.getSpeed();
-                    if (sDownloads > 1)
-                        i = performSimultaneousDownload(qm, simulDownloads, i, dm, speedLimit, sDownloads);
-                    else DownloadOpUtils.startDownload(dm, speedLimit,
+                    if (sDownloads > 1 && pauseCount >= sDownloads)
+                        i = performSimultaneousDownloadWaitForPrev(qm, simulDownloads, i, dm, speedLimit, sDownloads);
+                    else if (sDownloads > 1 && pauseCount < sDownloads) {
+                        performSimultaneousDownloadDontWaitForPrev(pauseCount, simulDownloads, dm, speedLimit);
+                    } else DownloadOpUtils.startDownload(dm, speedLimit,
                             null, true, true, null);
                 }
                 if (!startedQueues.contains(qm))
@@ -68,12 +71,20 @@ public class QueueUtils {
 
             if (sDownloads == 1)
                 whenQueueDone(qm, startItem, stopItem, executor);
+
+            waitToFinishForLessPausedDownloads(qm, startItem, stopItem, executor, simulDownloads, pauseCount);
+
         });
 
     }
 
-    private static int performSimultaneousDownload(QueueModel qm, AtomicInteger simulDownloads,
-                                                   int i, DownloadModel dm, String speedLimit, int sDownloads) {
+
+    /**
+     * consider 7 files are going to download in parallel. 3 of them will get in if clause and the 4th one will be hold
+     * in else clause until one of those 3 stops or finishes
+     * */
+    private static int performSimultaneousDownloadWaitForPrev(QueueModel qm, AtomicInteger simulDownloads,
+                                                              int i, DownloadModel dm, String speedLimit, int sDownloads) {
         if (simulDownloads.get() < sDownloads) {
             DownloadOpUtils.startDownload(dm, speedLimit,
                     null, true, false, null);
@@ -94,6 +105,41 @@ public class QueueUtils {
             }
         }
         return i;
+    }
+
+    /**
+     * it is useful when queue simultaneously downloads are greater than current paused downloads in queue
+     * it starts all downloads non-blocking and the waiting to finish is done later in waitToFinishForLessPausedDownloads method
+     * @see QueueUtils#waitToFinishForLessPausedDownloads(QueueModel, MenuItem, MenuItem, ExecutorService, AtomicInteger, long)
+     * */
+    private static void performSimultaneousDownloadDontWaitForPrev(long pauseCount, AtomicInteger simulDownloads,
+                                                                   DownloadModel dm, String speedLimit) {
+        if (simulDownloads.get() < pauseCount) {
+            DownloadOpUtils.startDownload(dm, speedLimit, null, true, false, null);
+            simulDownloads.getAndIncrement();
+        }
+    }
+
+
+    /**
+     * waits for non-blocking downloads to finish
+     * @see QueueUtils#performSimultaneousDownloadDontWaitForPrev(long, AtomicInteger, DownloadModel, String)
+    * */
+    private static void waitToFinishForLessPausedDownloads(QueueModel qm, MenuItem startItem, MenuItem stopItem,
+                                                           ExecutorService executor, AtomicInteger simulDownloads,
+                                                           long pauseCount) {
+        if (simulDownloads.get() == pauseCount) {
+            var count = currentDownloadings.stream().filter(d -> d.getQueues().contains(qm)).count();
+            while (count != 0) {
+                try {
+                    Thread.sleep(3000);
+                    count = currentDownloadings.stream().filter(d -> d.getQueues().contains(qm)).count();
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+            whenQueueDone(qm, startItem, stopItem, executor);
+        }
     }
 
     private static void whenQueueDone(QueueModel qm, MenuItem startItem, MenuItem stopItem, ExecutorService executor) {
