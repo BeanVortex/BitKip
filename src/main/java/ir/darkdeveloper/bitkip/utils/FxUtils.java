@@ -24,7 +24,8 @@ import java.util.List;
 import java.util.Map;
 
 import static ir.darkdeveloper.bitkip.BitKip.getResource;
-import static ir.darkdeveloper.bitkip.config.AppConfigs.*;
+import static ir.darkdeveloper.bitkip.config.AppConfigs.getQueueSubject;
+import static ir.darkdeveloper.bitkip.config.AppConfigs.openDownloadings;
 import static ir.darkdeveloper.bitkip.utils.FileExtensions.ALL_DOWNLOADS_QUEUE;
 import static ir.darkdeveloper.bitkip.utils.FileExtensions.staticQueueNames;
 

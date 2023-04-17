@@ -40,7 +40,6 @@ import java.util.ResourceBundle;
 import static ir.darkdeveloper.bitkip.BitKip.getResource;
 import static ir.darkdeveloper.bitkip.config.AppConfigs.*;
 import static ir.darkdeveloper.bitkip.utils.OSUtils.*;
-
 public class DownloadingController implements FXMLController {
 
     @FXML
@@ -321,7 +320,7 @@ public class DownloadingController implements FXMLController {
             if (isWindows())
                 Runtime.getRuntime().exec(new String[]{"explorer", "/select,", file.getAbsolutePath()});
             else if (isUnix())
-                Runtime.getRuntime().exec(new String[]{"xdg-open", "--select", file.getAbsolutePath()});
+                Runtime.getRuntime().exec(new String[]{"xdg-open", file.getParentFile().getAbsolutePath()});
             else if (isMac())
                 Runtime.getRuntime().exec(new String[]{"osascript", "-e",
                         "tell app \"Finder\" to reveal POSIX file \"" + file.getAbsolutePath() + "\""});
