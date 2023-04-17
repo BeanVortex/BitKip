@@ -21,8 +21,8 @@ public class DownloadOpUtils {
     /*
      * Resumes downloads non-blocking
      * */
-    public static void resumeDownloads(List<DownloadModel> modelList, String speedLimit, String byteLimit) {
-        modelList.stream().filter(dm -> !currentDownloadings.contains(dm))
+    public static void resumeDownloads(List<DownloadModel> dms, String speedLimit, String byteLimit) {
+        dms.stream().filter(dm -> !currentDownloadings.contains(dm))
                 .forEach(dm -> {
                     dm.setLastTryDate(LocalDateTime.now());
                     dm.setDownloadStatus(DownloadStatus.Trying);
@@ -47,8 +47,23 @@ public class DownloadOpUtils {
         }
     }
 
-    public static void pauseDownloads() {
-        mainTableUtils.getSelected().forEach(DownloadOpUtils::pauseDownload);
+    public static void restartDownload(List<DownloadModel> dms) {
+        var header = "Restarting download(s)";
+        var v = "Are you sure you want to restart ";
+        var content = dms.size() == 1 ? v + dms.get(0).getName() + " ?" : v + "selected downloads?";
+        content += "\nIf the files exist, they will be deleted";
+        if (FxUtils.askWarning(header, content)) {
+            dms.forEach(dm -> {
+                IOUtils.deleteDownload(dm);
+                DownloadsRepo.deleteDownload(dm);
+                mainTableUtils.remove(dm);
+                startDownload(dm, null, null, false, false, null);
+            });
+        }
+    }
+
+    public static void pauseDownloads(List<DownloadModel> dms) {
+        dms.forEach(DownloadOpUtils::pauseDownload);
     }
 
     public static void pauseDownload(DownloadModel dm) {
@@ -57,16 +72,15 @@ public class DownloadOpUtils {
                 .findFirst().ifPresent(dm2 -> dm2.getDownloadTask().pause());
     }
 
-    public static void deleteDownloads(boolean withFiles) {
-        var selectedItems = mainTableUtils.getSelected();
+    public static void deleteDownloads(ObservableList<DownloadModel> dms, boolean withFiles) {
         var header = "Delete selected downloads?";
-        if (selectedItems.size() == 1)
-            header = "Delete " + selectedItems.get(0).getName();
+        if (dms.size() == 1)
+            header = "Delete " + dms.get(0).getName();
         var content = "Are you sure you want to delete selected download(s)?";
         if (withFiles)
             content += "\nFiles are deleted";
-        if (FxUtils.askWarning(header, content)){
-            selectedItems.forEach(dm -> {
+        if (FxUtils.askWarning(header, content)) {
+            dms.forEach(dm -> {
                 currentDownloadings.stream().filter(c -> c.equals(dm))
                         .findFirst()
                         .ifPresent(dm2 -> dm2.getDownloadTask().pause());
@@ -78,7 +92,7 @@ public class DownloadOpUtils {
                         .forEach(DownloadingController::closeStage);
             });
 
-            mainTableUtils.remove(selectedItems);
+            mainTableUtils.remove(dms);
         }
     }
 
@@ -91,8 +105,8 @@ public class DownloadOpUtils {
         FxUtils.newDownloadingStage(dm);
     }
 
-    public static void openFiles(ObservableList<DownloadModel> selected) {
-        selected.filtered(dm -> dm.getDownloadStatus() == DownloadStatus.Completed)
+    public static void openFiles(ObservableList<DownloadModel> dms) {
+        dms.filtered(dm -> dm.getDownloadStatus() == DownloadStatus.Completed)
                 .forEach(dm -> {
                     if (!new File(dm.getFilePath()).exists()) {
                         Notifications.create()

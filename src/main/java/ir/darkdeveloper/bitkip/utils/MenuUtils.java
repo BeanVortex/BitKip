@@ -108,10 +108,10 @@ public class MenuUtils {
         menuItems.get(openLbl).setOnAction(e -> DownloadOpUtils.openFiles(mainTableUtils.getSelected()));
         menuItems.get(resumeLbl).setOnAction(e -> DownloadOpUtils.resumeDownloads(
                 mainTableUtils.getSelected(), null, null));
-        menuItems.get(pauseLbl).setOnAction(e -> DownloadOpUtils.pauseDownloads());
-        menuItems.get(restartLbl).setOnAction(e -> System.out.println("restartLbl"));
-        menuItems.get(deleteLbl).setOnAction(e -> DownloadOpUtils.deleteDownloads(false));
-        menuItems.get(deleteWithFileLbl).setOnAction(e -> DownloadOpUtils.deleteDownloads(true));
+        menuItems.get(pauseLbl).setOnAction(e -> DownloadOpUtils.pauseDownloads(mainTableUtils.getSelected()));
+        menuItems.get(restartLbl).setOnAction(e -> DownloadOpUtils.restartDownload(mainTableUtils.getSelected()));
+        menuItems.get(deleteLbl).setOnAction(e -> DownloadOpUtils.deleteDownloads(mainTableUtils.getSelected(), false));
+        menuItems.get(deleteWithFileLbl).setOnAction(e -> DownloadOpUtils.deleteDownloads(mainTableUtils.getSelected(), true));
         menuItems.get(newQueueLbl).setOnAction(e -> FxUtils.newQueueStage());
         menuItems.get(deleteFromQueueLbl).setOnAction(e -> deleteFromQueue());
         menuItems.get(queueSettingLbl).setOnAction(e -> FxUtils.newQueueSettingStage(null));

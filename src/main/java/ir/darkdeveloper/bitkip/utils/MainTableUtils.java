@@ -150,18 +150,18 @@ public class MainTableUtils {
         menuItems.get(lbls.get(1)).setOnAction(e ->
                 DownloadOpUtils.resumeDownloads(getSelected(), null, null));
         // PAUSE
-        menuItems.get(lbls.get(2)).setOnAction(e -> DownloadOpUtils.pauseDownloads());
+        menuItems.get(lbls.get(2)).setOnAction(e -> DownloadOpUtils.pauseDownloads(getSelected()));
         // RESTART
-        menuItems.get(lbls.get(3)).setOnAction(e -> System.out.println("restart"));
+        menuItems.get(lbls.get(3)).setOnAction(e -> DownloadOpUtils.restartDownload(getSelected()));
         // DETAILS
         menuItems.get(lbls.get(4)).setOnAction(e ->
                 getSelected().forEach(FxUtils::newDownloadingStage));
         // DELETE FROM QUEUE
         menuItems.get(lbls.get(5)).setOnAction(e -> MenuUtils.deleteFromQueue());
         // DELETE
-        menuItems.get(lbls.get(6)).setOnAction(e -> DownloadOpUtils.deleteDownloads(false));
+        menuItems.get(lbls.get(6)).setOnAction(e -> DownloadOpUtils.deleteDownloads(getSelected(), false));
         // DELETE WITH FILE
-        menuItems.get(lbls.get(7)).setOnAction(ev -> DownloadOpUtils.deleteDownloads(true));
+        menuItems.get(lbls.get(7)).setOnAction(ev -> DownloadOpUtils.deleteDownloads(getSelected(), true));
     }
 
 
