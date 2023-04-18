@@ -31,7 +31,7 @@ public class DownloadsRepo {
             COL_ADD_TO_QUEUE_DATE = "add_to_queue_date",
             COL_LAST_TRY_DATE = "last_try_date",
             COL_COMPLETE_DATE = "complete_date",
-            COL_RESUMEABLE = "resumeable",
+            COL_RESUMABLE = "resumable",
             COL_PATH = "path";
 
     public static void createTable() {
@@ -43,7 +43,7 @@ public class DownloadsRepo {
                 + COL_DOWNLOADED + " INTEGER,"
                 + COL_OPEN_AFTER_COMPLETE + " INTEGER,"
                 + COL_SHOW_COMPLETE_DIALOG + " INTEGER,"
-                + COL_RESUMEABLE + " INTEGER,"
+                + COL_RESUMABLE + " INTEGER,"
                 + COL_URL + " VARCHAR,"
                 + COL_PATH + " VARCHAR,"
                 + COL_CHUNKS + " INTEGER,"
@@ -63,7 +63,7 @@ public class DownloadsRepo {
                 ALTER TABLE %s
                 ADD COLUMN %s INTEGER DEFAULT 1
                 """
-                .formatted(DOWNLOADS_TABLE_NAME, COL_RESUMEABLE);
+                .formatted(DOWNLOADS_TABLE_NAME, COL_RESUMABLE);
         DatabaseHelper.executeUpdateSql(addResumeableSql, true);
     }
 
@@ -75,7 +75,7 @@ public class DownloadsRepo {
 
         var showDialog = dm.isShowCompleteDialog() ? 1 : 0;
         var openFile = dm.isOpenAfterComplete() ? 1 : 0;
-        var resumeable = dm.isResumeable() ? 1 : 0;
+        var resumeable = dm.isResumable() ? 1 : 0;
 
         var downloadSql = """
                 INSERT INTO %s (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
@@ -83,7 +83,7 @@ public class DownloadsRepo {
                 """.formatted(
                 DOWNLOADS_TABLE_NAME,
                 COL_NAME, COL_PROGRESS, COL_DOWNLOADED, COL_SIZE, COL_URL, COL_PATH, COL_CHUNKS, COL_ADD_DATE,
-                COL_ADD_TO_QUEUE_DATE, COL_LAST_TRY_DATE, COL_SHOW_COMPLETE_DIALOG, COL_OPEN_AFTER_COMPLETE, COL_RESUMEABLE,
+                COL_ADD_TO_QUEUE_DATE, COL_LAST_TRY_DATE, COL_SHOW_COMPLETE_DIALOG, COL_OPEN_AFTER_COMPLETE, COL_RESUMABLE,
                 dm.getName(),
                 dm.getProgress(),
                 dm.getDownloaded(),
@@ -253,7 +253,7 @@ public class DownloadsRepo {
         var chunks = rs.getInt(COL_CHUNKS);
         var showCompleteDialog = rs.getBoolean(COL_SHOW_COMPLETE_DIALOG);
         var openAfterComplete = rs.getBoolean(COL_OPEN_AFTER_COMPLETE);
-        var resumeable = rs.getBoolean(COL_RESUMEABLE);
+        var resumable = rs.getBoolean(COL_RESUMABLE);
         var addDate = rs.getString(COL_ADD_DATE);
         var addDateStr = LocalDateTime.parse(addDate);
         var addToQueueDate = rs.getString(COL_ADD_TO_QUEUE_DATE);
@@ -275,7 +275,7 @@ public class DownloadsRepo {
                 .id(id).name(name).progress(progress).downloaded(downloaded).size(size).url(url).filePath(filePath)
                 .chunks(chunks).queues(queues).addDate(addDateStr).addToQueueDate(addToQueueDateStr)
                 .lastTryDate(lastTryDateStr).completeDate(completeDateStr).openAfterComplete(openAfterComplete)
-                .showCompleteDialog(showCompleteDialog).downloadStatus(downloadStatus).resumeable(resumeable)
+                .showCompleteDialog(showCompleteDialog).downloadStatus(downloadStatus).resumable(resumable)
                 .build();
     }
 

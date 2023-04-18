@@ -121,7 +121,7 @@ public class MainTableUtils {
                     menuItems.get(resumeLbl).setOnAction(e -> DownloadOpUtils.resumeDownloads(getSelected(), null, null));
                     menuItems.get(pauseLbl).setOnAction(e -> DownloadOpUtils.pauseDownloads(getSelected()));
                     menuItems.get(refreshLbl).setOnAction(e -> DownloadOpUtils.refreshDownload(getSelected()));
-                    menuItems.get(restartLbl).setOnAction(e -> DownloadOpUtils.restartDownload(getSelected()));
+                    menuItems.get(restartLbl).setOnAction(e -> DownloadOpUtils.restartDownloads(getSelected()));
                     menuItems.get(downloadingLbl).setOnAction(e -> getSelected().forEach(FxUtils::newDownloadingStage));
                     menuItems.get(deleteFromQueueLbl).setOnAction(e -> MenuUtils.deleteFromQueue());
                     menuItems.get(deleteLbl).setOnAction(e -> DownloadOpUtils.deleteDownloads(getSelected(), false));

@@ -141,9 +141,9 @@ public class DownloadingController implements FXMLController {
         downloadedOfLbl.setText(downloadOf);
         progressLbl.setText("Progress: %.2f%%".formatted(downloadModel.getProgress()));
         downloadProgress.setProgress(downloadModel.getProgress() / 100);
-        var resumeableText = new Text(downloadModel.isResumeable() ? "Yes" : "No");
-        resumeableText.setFill(downloadModel.isResumeable() ? Paint.valueOf("#388E3C") : Paint.valueOf("#EF5350"));
-        resumeableLbl.setGraphic(new HBox(new Text("Resumeable: "), resumeableText));
+        var resumeableText = new Text(downloadModel.isResumable() ? "Yes" : "No");
+        resumeableText.setFill(downloadModel.isResumable() ? Paint.valueOf("#388E3C") : Paint.valueOf("#EF5350"));
+        resumeableLbl.setGraphic(new HBox(new Text("Resumable: "), resumeableText));
         openSwitch.setSelected(downloadModel.isOpenAfterComplete());
         showSwitch.setSelected(downloadModel.isShowCompleteDialog());
         onComplete(downloadModel);

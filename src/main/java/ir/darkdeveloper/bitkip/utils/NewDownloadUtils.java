@@ -80,7 +80,7 @@ public class NewDownloadUtils {
                 finalConnection[0] = connect(urlField.getText(), 3000, 3000);
             var fileSize = getFileSize(finalConnection[0]);
             checkFieldsAfterSizePreparation(fileSize, sizeLabel, chunksField, bytesField, finalConnection[0]);
-            dm.setResumeable(canResume(finalConnection[0]));
+            dm.setResumable(canResume(finalConnection[0]));
             dm.setSize(fileSize);
             return fileSize;
         }, executor);
@@ -180,7 +180,7 @@ public class NewDownloadUtils {
      */
     public static void startDownload(DownloadModel dm, String speed, String bytes, boolean resume, boolean blocking,
                                      ExecutorService executor) {
-        if (!dm.isResumeable())
+        if (!dm.isResumable())
             return;
         DownloadTask downloadTask = new DownloadLimitedTask(dm, Long.MAX_VALUE, false);
         if (dm.getChunks() == 0) {

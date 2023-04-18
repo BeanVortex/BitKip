@@ -28,7 +28,13 @@ public class DownloadOpUtils {
                     dm.setDownloadStatus(DownloadStatus.Trying);
                     DownloadsRepo.updateDownloadLastTryDate(dm);
                     mainTableUtils.refreshTable();
-                    NewDownloadUtils.startDownload(dm, speedLimit, byteLimit, true, false, null);
+                    if (dm.isResumable())
+                        NewDownloadUtils.startDownload(dm, speedLimit, byteLimit, true, false, null);
+                    else {
+                        dm.setDownloadStatus(DownloadStatus.Restarting);
+                        mainTableUtils.refreshTable();
+                        restartDownload(dm);
+                    }
                     openDownloadings.stream().filter(dc -> dc.getDownloadModel().equals(dm))
                             .forEach(DownloadingController::initDownloadListeners);
                 });
@@ -47,19 +53,20 @@ public class DownloadOpUtils {
         }
     }
 
-    public static void restartDownload(List<DownloadModel> dms) {
+    public static void restartDownloads(List<DownloadModel> dms) {
         var header = "Restarting download(s)";
         var v = "Are you sure you want to restart ";
         var content = dms.size() == 1 ? v + dms.get(0).getName() + " ?" : v + "selected downloads?";
         content += "\nIf the files exist, they will be deleted";
-        if (FxUtils.askWarning(header, content)) {
-            dms.forEach(dm -> {
-                IOUtils.deleteDownload(dm);
-                DownloadsRepo.deleteDownload(dm);
-                mainTableUtils.remove(dm);
-                startDownload(dm, null, null, false, false, null);
-            });
-        }
+        if (FxUtils.askWarning(header, content))
+            dms.forEach(DownloadOpUtils::restartDownload);
+    }
+
+    private static void restartDownload(DownloadModel dm) {
+        IOUtils.deleteDownload(dm);
+        DownloadsRepo.deleteDownload(dm);
+        mainTableUtils.remove(dm);
+        startDownload(dm, null, null, false, false, null);
     }
 
     public static void pauseDownloads(List<DownloadModel> dms) {

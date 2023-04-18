@@ -110,7 +110,7 @@ public class MenuUtils {
         menuItems.get(resumeLbl).setOnAction(e -> DownloadOpUtils.resumeDownloads(
                 mainTableUtils.getSelected(), null, null));
         menuItems.get(pauseLbl).setOnAction(e -> DownloadOpUtils.pauseDownloads(mainTableUtils.getSelected()));
-        menuItems.get(restartLbl).setOnAction(e -> DownloadOpUtils.restartDownload(mainTableUtils.getSelected()));
+        menuItems.get(restartLbl).setOnAction(e -> DownloadOpUtils.restartDownloads(mainTableUtils.getSelected()));
         menuItems.get(refreshLbl).setOnAction(e -> DownloadOpUtils.refreshDownload(mainTableUtils.getSelected()));
         menuItems.get(deleteLbl).setOnAction(e -> DownloadOpUtils.deleteDownloads(mainTableUtils.getSelected(), false));
         menuItems.get(deleteWithFileLbl).setOnAction(e -> DownloadOpUtils.deleteDownloads(mainTableUtils.getSelected(), true));

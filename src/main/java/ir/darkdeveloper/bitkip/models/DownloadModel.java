@@ -37,7 +37,7 @@ public class DownloadModel {
     private LocalDateTime completeDate;
     private boolean openAfterComplete;
     private boolean showCompleteDialog;
-    private boolean resumeable;
+    private boolean resumable;
 
     private String sizeString;
     private String downloadedString;

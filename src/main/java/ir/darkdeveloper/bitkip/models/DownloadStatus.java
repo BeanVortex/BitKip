@@ -4,5 +4,6 @@ public enum DownloadStatus {
     Downloading,
     Trying,
     Paused,
-    Completed;
+    Completed,
+    Restarting
 }
