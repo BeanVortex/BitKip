@@ -131,4 +131,10 @@ public class DownloadOpUtils {
             IOUtils.moveFile(dm.getFilePath(), newFilePath);
         DownloadsRepo.updateDownloadProperty(COL_PATH, "\"" + newFilePath + "\"", dm.getId());
     }
+
+    public static void refreshDownload(ObservableList<DownloadModel> selected) {
+        if (selected.size() != 1)
+            return;
+        FxUtils.newRefreshStage(selected.get(0));
+    }
 }

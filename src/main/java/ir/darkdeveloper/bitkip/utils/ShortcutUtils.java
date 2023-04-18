@@ -15,6 +15,7 @@ public class ShortcutUtils {
     public static final KeyCodeCombination RESUME_KEY = new KeyCodeCombination(KeyCode.R, KeyCombination.CONTROL_DOWN);
     public static final KeyCodeCombination PAUSE_KEY = new KeyCodeCombination(KeyCode.P, KeyCombination.CONTROL_DOWN);
     public static final KeyCodeCombination RESTART_KEY = new KeyCodeCombination(KeyCode.E, KeyCombination.CONTROL_DOWN);
+    public static final KeyCodeCombination REFRESH_KEY = new KeyCodeCombination(KeyCode.X, KeyCombination.CONTROL_DOWN);
     public static final KeyCodeCombination DELETE_FILE_KEY = new KeyCodeCombination(KeyCode.DELETE, KeyCombination.CONTROL_DOWN);
     public static final KeyCodeCombination DELETE_KEY = new KeyCodeCombination(KeyCode.DELETE);
     public static final KeyCodeCombination NEW_QUEUE_KEY = new KeyCodeCombination(KeyCode.N, KeyCombination.SHIFT_DOWN);

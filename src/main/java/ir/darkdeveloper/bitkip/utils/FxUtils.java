@@ -272,5 +272,27 @@ public class FxUtils {
         return res.orElse(no) == yes;
 
     }
+
+    public static void newRefreshStage(DownloadModel dm) {
+        FXMLLoader loader;
+        Stage stage = new Stage();
+        VBox root;
+        try {
+            loader = new FXMLLoader(getResource("fxml/refreshLink.fxml"));
+            root = loader.load();
+        } catch (IOException e) {
+            e.printStackTrace();
+            throw new RuntimeException(e);
+        }
+        var scene = new Scene(root);
+        stage.setScene(scene);
+        stage.setMinWidth(root.getPrefWidth());
+        stage.setMinHeight(root.getPrefHeight());
+        stage.setTitle("Refreshing Link");
+        RefreshController controller = loader.getController();
+        controller.setStage(stage);
+        controller.setDownload(dm);
+        stage.showAndWait();
+    }
 }
 

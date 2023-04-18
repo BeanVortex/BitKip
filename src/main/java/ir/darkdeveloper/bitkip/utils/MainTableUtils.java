@@ -91,22 +91,22 @@ public class MainTableUtils {
                     var openLbl = new Label("open");
                     var resumeLbl = new Label("resume");
                     var pauseLbl = new Label("pause");
+                    var refreshLbl = new Label("refresh link");
                     var restartLbl = new Label("restart");
                     var downloadingLbl = new Label("details");
                     var deleteFromQueueLbl = new Label("delete from this queue");
                     var deleteLbl = new Label("delete");
                     var deleteWithFileLbl = new Label("delete with file");
-                    var lbls = List.of(openLbl, resumeLbl, pauseLbl, restartLbl, downloadingLbl, deleteFromQueueLbl,
+                    var lbls = List.of(openLbl, resumeLbl, pauseLbl, refreshLbl, restartLbl, downloadingLbl, deleteFromQueueLbl,
                             deleteLbl, deleteWithFileLbl);
-                    var keyCodes = Arrays.asList(OPEN_KEY, RESUME_KEY, PAUSE_KEY, RESTART_KEY, DOWNLOADING_STAGE_KEY,
-                            null, DELETE_KEY, DELETE_FILE_KEY);
+                    var keyCodes = Arrays.asList(OPEN_KEY, RESUME_KEY, PAUSE_KEY,
+                            REFRESH_KEY, RESTART_KEY, DOWNLOADING_STAGE_KEY, null, DELETE_KEY, DELETE_FILE_KEY);
                     var menuItems = MenuUtils.createMapMenuItems(lbls, keyCodes);
 
                     var addToQueueMenu = new Menu();
                     var addToQueueLbl = new Label("add to queue");
                     addToQueueMenu.setGraphic(addToQueueLbl);
                     initAddToQueueMenu(addToQueueMenu);
-                    menuItemOperations(menuItems, lbls);
                     for (var item : menuItems.values()) {
                         if (item.getGraphic().equals(deleteFromQueueLbl))
                             cMenu.getItems().add(addToQueueMenu);
@@ -114,8 +114,18 @@ public class MainTableUtils {
                     }
 
                     menuItems.put(addToQueueLbl, addToQueueMenu);
-                    MenuUtils.disableMenuItems(resumeLbl, pauseLbl, openLbl, deleteFromQueueLbl, restartLbl,
+                    MenuUtils.disableMenuItems(resumeLbl, pauseLbl, openLbl, deleteFromQueueLbl, refreshLbl, restartLbl,
                             addToQueueLbl, deleteLbl, deleteWithFileLbl, menuItems, selectedItems);
+
+                    menuItems.get(openLbl).setOnAction(e -> DownloadOpUtils.openFiles(getSelected()));
+                    menuItems.get(resumeLbl).setOnAction(e -> DownloadOpUtils.resumeDownloads(getSelected(), null, null));
+                    menuItems.get(pauseLbl).setOnAction(e -> DownloadOpUtils.pauseDownloads(getSelected()));
+                    menuItems.get(refreshLbl).setOnAction(e -> DownloadOpUtils.refreshDownload(getSelected()));
+                    menuItems.get(restartLbl).setOnAction(e -> DownloadOpUtils.restartDownload(getSelected()));
+                    menuItems.get(downloadingLbl).setOnAction(e -> getSelected().forEach(FxUtils::newDownloadingStage));
+                    menuItems.get(deleteFromQueueLbl).setOnAction(e -> MenuUtils.deleteFromQueue());
+                    menuItems.get(deleteLbl).setOnAction(e -> DownloadOpUtils.deleteDownloads(getSelected(), false));
+                    menuItems.get(deleteWithFileLbl).setOnAction(ev -> DownloadOpUtils.deleteDownloads(getSelected(), true));
 
                     row.setContextMenu(cMenu);
                     cMenu.show(row, event.getX(), event.getY());
@@ -139,29 +149,6 @@ public class MainTableUtils {
         });
         addToQueueMenu.getItems().addAll(addToQueueItems.keySet());
         MenuUtils.initAddToQueueMenu(addToQueueMenu, addToQueueItems);
-    }
-
-
-    // sequence is important where labels defined
-    private void menuItemOperations(LinkedHashMap<Label, MenuItem> menuItems, List<Label> lbls) {
-        // OPEN
-        menuItems.get(lbls.get(0)).setOnAction(e -> DownloadOpUtils.openFiles(getSelected()));
-        // RESUME
-        menuItems.get(lbls.get(1)).setOnAction(e ->
-                DownloadOpUtils.resumeDownloads(getSelected(), null, null));
-        // PAUSE
-        menuItems.get(lbls.get(2)).setOnAction(e -> DownloadOpUtils.pauseDownloads(getSelected()));
-        // RESTART
-        menuItems.get(lbls.get(3)).setOnAction(e -> DownloadOpUtils.restartDownload(getSelected()));
-        // DETAILS
-        menuItems.get(lbls.get(4)).setOnAction(e ->
-                getSelected().forEach(FxUtils::newDownloadingStage));
-        // DELETE FROM QUEUE
-        menuItems.get(lbls.get(5)).setOnAction(e -> MenuUtils.deleteFromQueue());
-        // DELETE
-        menuItems.get(lbls.get(6)).setOnAction(e -> DownloadOpUtils.deleteDownloads(getSelected(), false));
-        // DELETE WITH FILE
-        menuItems.get(lbls.get(7)).setOnAction(ev -> DownloadOpUtils.deleteDownloads(getSelected(), true));
     }
 
 

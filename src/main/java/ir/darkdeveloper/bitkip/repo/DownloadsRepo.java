@@ -18,7 +18,7 @@ import static ir.darkdeveloper.bitkip.repo.ScheduleRepo.*;
 public class DownloadsRepo {
 
 
-    private static final String COL_ID = "id",
+    public static final String COL_ID = "id",
             COL_NAME = "name",
             COL_PROGRESS = "progress",
             COL_SIZE = "size",
@@ -31,8 +31,8 @@ public class DownloadsRepo {
             COL_ADD_TO_QUEUE_DATE = "add_to_queue_date",
             COL_LAST_TRY_DATE = "last_try_date",
             COL_COMPLETE_DATE = "complete_date",
-            COL_RESUMEABLE = "resumeable";
-    public static final String COL_PATH = "path";
+            COL_RESUMEABLE = "resumeable",
+            COL_PATH = "path";
 
     public static void createTable() {
         var sql = "CREATE TABLE IF NOT EXISTS " + DOWNLOADS_TABLE_NAME + "("
