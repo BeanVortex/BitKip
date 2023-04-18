@@ -16,6 +16,7 @@ import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.input.Clipboard;
@@ -40,16 +41,19 @@ import java.util.ResourceBundle;
 import static ir.darkdeveloper.bitkip.BitKip.getResource;
 import static ir.darkdeveloper.bitkip.config.AppConfigs.*;
 import static ir.darkdeveloper.bitkip.utils.OSUtils.*;
+
 public class DownloadingController implements FXMLController {
 
+    @FXML
+    private VBox container;
+    @FXML
+    private ScrollPane scrollPane;
+    @FXML
+    private Label locationLbl;
     @FXML
     private Button openFolderBtn;
     @FXML
     private Hyperlink link;
-    @FXML
-    private VBox rootBox;
-    @FXML
-    private VBox advancedVbox;
     @FXML
     private TextField speedField;
     @FXML
@@ -58,8 +62,6 @@ public class DownloadingController implements FXMLController {
     private ToggleSwitch openSwitch;
     @FXML
     private ToggleSwitch showSwitch;
-    @FXML
-    private TitledPane advancedPane;
     @FXML
     private Label progressLbl;
     @FXML
@@ -96,11 +98,10 @@ public class DownloadingController implements FXMLController {
             stage.getIcons().add(img);
         }
 
-        advancedPane.expandedProperty().addListener((observable, oldValue, newValue) -> {
-            if (newValue)
-                stage.setHeight(rootBox.getMinHeight() + advancedVbox.getHeight());
-            else
-                stage.setHeight(rootBox.getMinHeight());
+        stage.heightProperty().addListener((o, ol, n) -> scrollPane.setPrefHeight(n.doubleValue()));
+        stage.widthProperty().addListener((o, ol, n) -> {
+            scrollPane.setPrefWidth(n.doubleValue());
+            container.setPrefWidth(n.doubleValue() - 20);
         });
     }
 
@@ -125,6 +126,7 @@ public class DownloadingController implements FXMLController {
         InputValidations.validInputChecks(null, bytesField, speedField, downloadModel);
         bytesField.setText(downloadModel.getSize() + "");
         link.setText(downloadModel.getUrl());
+        locationLbl.setText("Path: " + new File(downloadModel.getFilePath()).getParentFile().getAbsolutePath());
         var end = downloadModel.getName().length();
         if (end > 60)
             end = 60;

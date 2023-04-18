@@ -14,6 +14,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonBar;
 import javafx.scene.control.ButtonType;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.image.Image;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
@@ -145,7 +146,7 @@ public class FxUtils {
     public static void newDownloadingStage(DownloadModel dm) {
         FXMLLoader loader;
         var stage = new Stage();
-        VBox root;
+        ScrollPane root;
         try {
             loader = new FXMLLoader(getResource("fxml/downloading.fxml"));
             root = loader.load();
@@ -155,8 +156,8 @@ public class FxUtils {
         }
         var scene = new Scene(root);
         stage.setScene(scene);
-        stage.setMinWidth(root.getPrefWidth());
-        stage.setMinHeight(root.getPrefHeight());
+        stage.setMinWidth(root.getMinWidth());
+        stage.setMinHeight(root.getMinHeight());
         var end = dm.getName().length();
         if (end > 60)
             end = 60;

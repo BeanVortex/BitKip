@@ -18,6 +18,14 @@
     -fx-background-color: #4a677c;
 }
 
+.padding_10{
+    -fx-padding: 10;
+}
+
+.padding_20 {
+    -fx-padding: 20;
+}
+
 
 #newDownloadBtn {
     -fx-min-width: 50;
@@ -50,3 +58,4 @@
 .title-opacity{
     -fx-opacity: 0.8;
 }
+
