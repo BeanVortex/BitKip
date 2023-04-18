@@ -104,17 +104,14 @@ public class DownloadsRepo {
             var genKeys = stmt.getGeneratedKeys();
             genKeys.next();
             dm.setId(genKeys.getInt(1));
-            // todo check batch insert
-            dm.getQueues().forEach(queue -> {
-                var queueDownloadSql = """
-                        INSERT INTO %s (%s, %s) VALUES (%d, %d);
-                        """.formatted(QUEUE_DOWNLOAD_TABLE_NAME, COL_DOWNLOAD_ID, COL_QUEUE_ID, dm.getId(), queue.getId());
-                try {
-                    stmt.executeUpdate(queueDownloadSql);
-                } catch (SQLException e) {
-                    throw new RuntimeException(e);
-                }
-            });
+
+            var queueDownloadSql = new StringBuilder("INSERT INTO ");
+            queueDownloadSql.append(QUEUE_DOWNLOAD_TABLE_NAME)
+                    .append(" (").append(COL_DOWNLOAD_ID).append(", ").append(COL_QUEUE_ID).append(") VALUES");
+            for (var q : dm.getQueues())
+                queueDownloadSql.append("(").append(dm.getId()).append(",").append(q.getId()).append("),");
+            queueDownloadSql.deleteCharAt(queueDownloadSql.length() - 1);
+            stmt.executeUpdate(queueDownloadSql.toString());
         } catch (SQLException e) {
             e.printStackTrace();
         }

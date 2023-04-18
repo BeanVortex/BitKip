@@ -10,10 +10,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.HttpURLConnection;
-import java.net.SocketTimeoutException;
-import java.net.URL;
-import java.net.UnknownHostException;
+import java.net.*;
 import java.nio.channels.Channels;
 import java.nio.channels.ClosedChannelException;
 import java.nio.channels.FileChannel;
@@ -52,7 +49,7 @@ public class DownloadLimitedTask extends DownloadTask {
             return 0L;
         try {
             performDownload();
-        }catch (IOException | InterruptedException e){
+        } catch (IOException | InterruptedException e) {
             e.printStackTrace();
             this.pause();
         }
@@ -84,8 +81,7 @@ public class DownloadLimitedTask extends DownloadTask {
                     calculateSpeedAndProgress(file, fileSize);
                     downloadValueLimited(fileChannel, in, limit, existingFileSize);
                 }
-            } catch (SocketTimeoutException | UnknownHostException s) {
-                s.printStackTrace();
+            } catch (SocketTimeoutException | UnknownHostException | SocketException s) {
                 retries++;
                 if (!paused) {
                     Thread.sleep(2000);
