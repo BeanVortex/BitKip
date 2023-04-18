@@ -40,6 +40,7 @@ import java.util.ResourceBundle;
 
 import static ir.darkdeveloper.bitkip.BitKip.getResource;
 import static ir.darkdeveloper.bitkip.config.AppConfigs.*;
+import static ir.darkdeveloper.bitkip.utils.DownloadOpUtils.openFile;
 import static ir.darkdeveloper.bitkip.utils.OSUtils.*;
 
 public class DownloadingController implements FXMLController {
@@ -252,7 +253,7 @@ public class DownloadingController implements FXMLController {
                         .showError();
                 return;
             }
-            hostServices.showDocument(downloadModel.getFilePath());
+            openFile(null, downloadModel);
             return;
         }
 

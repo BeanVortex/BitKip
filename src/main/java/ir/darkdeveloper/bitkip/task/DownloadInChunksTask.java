@@ -26,6 +26,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 
 import static ir.darkdeveloper.bitkip.config.AppConfigs.*;
+import static ir.darkdeveloper.bitkip.utils.DownloadOpUtils.openFile;
 
 public class DownloadInChunksTask extends DownloadTask {
     private final int chunks;
@@ -171,7 +172,8 @@ public class DownloadInChunksTask extends DownloadTask {
                     var currFileSize = getCurrentFileSize(partFile);
                     performDownload(url, fromContinue, fromContinue + currFileSize, to, partFile, currFileSize);
                 }
-            } catch (ClosedChannelException ignore) {}
+            } catch (ClosedChannelException ignore) {
+            }
             var currFileSize = getCurrentFileSize(partFile);
             if (!paused && currFileSize != (to - fromContinue + 1))
                 performDownload(url, fromContinue, fromContinue + currFileSize, to, partFile, currFileSize);
@@ -180,8 +182,8 @@ public class DownloadInChunksTask extends DownloadTask {
 
 
     private void performLimitedDownload(URL url, long fromContinue, long from, long to, File partFile, long existingFileSize)
-           throws IOException, InterruptedException {
-       if (retries != downloadRetryCount) {
+            throws IOException, InterruptedException {
+        if (retries != downloadRetryCount) {
             try {
                 var bytesToDownloadEachInCycle = limit / chunks;
                 var con = (HttpURLConnection) url.openConnection();
@@ -281,7 +283,7 @@ public class DownloadInChunksTask extends DownloadTask {
                                             DownloadOpUtils.openDownloadingStage(download);
                                     });
                     if (download.isOpenAfterComplete())
-                        hostServices.showDocument(download.getFilePath());
+                        openFile(null, download);
                 } else
                     openDownloadings.stream().filter(dc -> dc.getDownloadModel().equals(download))
                             .forEach(DownloadingController::onPause);

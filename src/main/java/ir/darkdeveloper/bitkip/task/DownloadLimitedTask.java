@@ -18,6 +18,7 @@ import java.time.LocalDateTime;
 import java.util.concurrent.ExecutorService;
 
 import static ir.darkdeveloper.bitkip.config.AppConfigs.*;
+import static ir.darkdeveloper.bitkip.utils.DownloadOpUtils.openFile;
 
 
 public class DownloadLimitedTask extends DownloadTask {
@@ -156,7 +157,8 @@ public class DownloadLimitedTask extends DownloadTask {
                                             DownloadOpUtils.openDownloadingStage(download);
                                     });
                     if (download.isOpenAfterComplete())
-                        hostServices.showDocument(download.getFilePath());
+                        openFile(null, downloadModel);
+
                 } else openDownloadings.stream().filter(dc -> dc.getDownloadModel().equals(download))
                         .forEach(DownloadingController::onPause);
 

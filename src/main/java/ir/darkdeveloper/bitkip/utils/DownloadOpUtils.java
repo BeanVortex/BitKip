@@ -7,7 +7,9 @@ import ir.darkdeveloper.bitkip.repo.DownloadsRepo;
 import javafx.collections.ObservableList;
 import org.controlsfx.control.Notifications;
 
+import java.awt.*;
 import java.io.File;
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -113,19 +115,27 @@ public class DownloadOpUtils {
     }
 
     public static void openFiles(ObservableList<DownloadModel> dms) {
+        var desktop = Desktop.getDesktop();
         dms.filtered(dm -> dm.getDownloadStatus() == DownloadStatus.Completed)
-                .forEach(dm -> {
-                    if (!new File(dm.getFilePath()).exists()) {
-                        Notifications.create()
-                                .title("File not found")
-                                .text("%s has been moved or removed".formatted(dm.getName()))
-                                .showError();
-                        return;
-                    }
-                    hostServices.showDocument(dm.getFilePath());
-                });
+                .forEach(dm -> openFile(desktop, dm));
     }
 
+    public static void openFile(Desktop desktop, DownloadModel dm) {
+        if (desktop == null)
+            desktop = Desktop.getDesktop();
+        if (!new File(dm.getFilePath()).exists()) {
+            Notifications.create()
+                    .title("File not found")
+                    .text("%s has been moved or removed".formatted(dm.getName()))
+                    .showError();
+            return;
+        }
+        try {
+            desktop.open(new File(dm.getFilePath()));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 
     public static void moveFiles(DownloadModel dm, String newFilePath) {
         if (dm.getProgress() != 100) {
