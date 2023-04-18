@@ -131,7 +131,8 @@ public class DownloadOpUtils {
             return;
         }
         try {
-            desktop.open(new File(dm.getFilePath()));
+            if (Desktop.isDesktopSupported())
+                desktop.open(new File(dm.getFilePath()));
         } catch (IOException e) {
             e.printStackTrace();
         }
