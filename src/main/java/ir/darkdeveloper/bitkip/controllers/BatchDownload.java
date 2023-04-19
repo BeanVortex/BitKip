@@ -27,6 +27,7 @@ import java.util.ResourceBundle;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executors;
 
+import static ir.darkdeveloper.bitkip.config.AppConfigs.getQueueSubject;
 import static ir.darkdeveloper.bitkip.config.AppConfigs.queuesPath;
 import static ir.darkdeveloper.bitkip.utils.FileExtensions.ALL_DOWNLOADS_QUEUE;
 
@@ -122,6 +123,7 @@ public class BatchDownload implements QueueObserver {
                 lm.setPath(locationField.getText());
             });
             FxUtils.newBatchListStage(links);
+            getQueueSubject().removeObserver(this);
             stage.close();
         } catch (IllegalArgumentException e) {
             if (e instanceof NumberFormatException)
@@ -259,6 +261,7 @@ public class BatchDownload implements QueueObserver {
 
     @FXML
     private void onCancel() {
+        getQueueSubject().removeObserver(this);
         stage.close();
     }
 

@@ -190,6 +190,7 @@ public class SingleDownload implements QueueObserver {
         dm.setDownloadStatus(DownloadStatus.Paused);
         DownloadsRepo.insertDownload(dm);
         mainTableUtils.addRow(dm);
+        getQueueSubject().removeObserver(this);
         stage.close();
     }
 
@@ -199,6 +200,7 @@ public class SingleDownload implements QueueObserver {
         DownloadOpUtils.startDownload(dm, speedField.getText(), bytesField.getText(),
                 false, false, null);
         DownloadOpUtils.openDownloadingStage(dm);
+        getQueueSubject().removeObserver(this);
         stage.close();
     }
 

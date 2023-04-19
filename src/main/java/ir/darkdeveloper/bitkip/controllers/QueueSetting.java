@@ -329,6 +329,7 @@ public class QueueSetting implements FXMLController, QueueObserver {
 
     @FXML
     private void onCancel() {
+        getQueueSubject().removeObserver(this);
         stage.close();
     }
 

@@ -17,4 +17,8 @@ public class QueueSubject {
     public void notifyAllObservers() {
         observers.forEach(QueueObserver::updateQueue);
     }
+
+    public List<QueueObserver> observers() {
+        return observers;
+    }
 }
