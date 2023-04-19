@@ -1,5 +1,6 @@
 package ir.darkdeveloper.bitkip;
 
+import com.dustinredmond.fxtrayicon.FXTrayIcon;
 import ir.darkdeveloper.bitkip.config.AppConfigs;
 import ir.darkdeveloper.bitkip.repo.DownloadsRepo;
 import ir.darkdeveloper.bitkip.repo.QueuesRepo;
@@ -12,8 +13,7 @@ import javafx.stage.Stage;
 import java.net.URL;
 import java.util.ArrayList;
 
-import static ir.darkdeveloper.bitkip.config.AppConfigs.currentDownloadings;
-import static ir.darkdeveloper.bitkip.config.AppConfigs.startedQueues;
+import static ir.darkdeveloper.bitkip.config.AppConfigs.*;
 
 public class BitKip extends Application {
 
@@ -28,10 +28,22 @@ public class BitKip extends Application {
         queues = ScheduleRepo.createDefaultSchedulesForQueues(queues);
         AppConfigs.addAllQueues(queues);
         IOUtils.createSaveLocations();
-        ScheduleTask.startSchedules();
         AppConfigs.setHostServices(getHostServices());
         FxUtils.startMainStage(stage);
+        ScheduleTask.startSchedules();
         MoreUtils.checkUpdates(false);
+        initTray(stage);
+    }
+
+    private void initTray(Stage stage) {
+        var tray = new FXTrayIcon.Builder(stage, getResource("icons/logo.png"))
+                .menuItem("Open App", e -> stage.show())
+                .menuItem("Exit App", e -> {
+                    stop();
+                    System.exit(0);
+                })
+                .build();
+        tray.show();
     }
 
 
@@ -40,6 +52,14 @@ public class BitKip extends Application {
         var notObservedDms = new ArrayList<>(currentDownloadings);
         notObservedDms.forEach(dm -> dm.getDownloadTask().pause());
         startedQueues.clear();
+        currentSchedules.values().forEach(sm -> {
+            var startScheduler = sm.getStartScheduler();
+            var stopScheduler = sm.getStopScheduler();
+            if (startScheduler != null)
+                startScheduler.shutdownNow();
+            if (stopScheduler != null)
+                stopScheduler.shutdownNow();
+        });
     }
 
 

@@ -34,7 +34,7 @@ application {
 
 javafx {
     version = '19.0.2.1'
-    modules = ['javafx.controls', 'javafx.fxml', 'javafx.graphics']
+    modules = ['javafx.controls', 'javafx.fxml', 'javafx.graphics', 'javafx.swing']
 }
 
 dependencies {
@@ -42,6 +42,7 @@ dependencies {
     implementation 'org.kordamp.ikonli:ikonli-javafx:12.3.1'
     implementation 'org.xerial:sqlite-jdbc:3.40.0.0'
     implementation 'org.jsoup:jsoup:1.15.3'
+    implementation 'com.dustinredmond.fxtrayicon:FXTrayIcon:4.0.1'
     implementation 'org.kordamp.ikonli:ikonli-fontawesome5-pack:12.3.1'
     implementation 'org.kordamp.bootstrapfx:bootstrapfx-core:0.4.0'
     implementation 'io.projectreactor:reactor-core:3.4.24'

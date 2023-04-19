@@ -6,7 +6,6 @@ import ir.darkdeveloper.bitkip.controllers.interfaces.FXMLController;
 import ir.darkdeveloper.bitkip.models.DownloadModel;
 import ir.darkdeveloper.bitkip.models.LinkModel;
 import ir.darkdeveloper.bitkip.models.QueueModel;
-import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
@@ -50,8 +49,7 @@ public class FxUtils {
             stage.setMinHeight(root.getMinHeight());
             controller.setStage(stage);
             stage.setTitle("BitKip");
-            // todo change in future due to having tray icons
-            stage.setOnCloseRequest(e -> Platform.exit());
+            stage.setOnCloseRequest(e -> stage.hide());
             stage.show();
         } catch (IOException ex) {
             ex.printStackTrace();
