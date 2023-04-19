@@ -113,6 +113,8 @@ public class MainController implements FXMLController, QueueObserver {
         var queues = AppConfigs.getQueues();
         if (queues.isEmpty())
             queues = QueuesRepo.getAllQueues(false, true);
+
+        sideTree.focusedProperty().addListener(o -> mainTableUtils.clearSelection());
         SideUtils.prepareSideTree(sideTree, queues);
 
     }

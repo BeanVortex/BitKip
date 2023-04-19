@@ -82,6 +82,8 @@ public class DownloadOpUtils {
     }
 
     public static void deleteDownloads(ObservableList<DownloadModel> dms, boolean withFiles) {
+        if (dms.size() == 0)
+            return;
         var header = "Delete selected downloads?";
         if (dms.size() == 1)
             header = "Delete " + dms.get(0).getName();

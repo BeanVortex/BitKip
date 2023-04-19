@@ -8,17 +8,21 @@ import ir.darkdeveloper.bitkip.repo.QueuesRepo;
 import javafx.event.EventHandler;
 import javafx.geometry.Side;
 import javafx.scene.control.*;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyCodeCombination;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.paint.Paint;
 import org.kordamp.ikonli.javafx.FontIcon;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.function.Predicate;
 
 import static ir.darkdeveloper.bitkip.config.AppConfigs.*;
 import static ir.darkdeveloper.bitkip.utils.FileExtensions.*;
 import static ir.darkdeveloper.bitkip.utils.FileExtensions.OTHERS_QUEUE;
+import static ir.darkdeveloper.bitkip.utils.ShortcutUtils.DELETE_KEY;
 import static ir.darkdeveloper.bitkip.utils.ShortcutUtils.NEW_QUEUE_KEY;
 
 public class SideUtils {
@@ -56,6 +60,15 @@ public class SideUtils {
         sideTree.setShowRoot(true);
         sideTree.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
         sideTree.setOnMouseClicked(SideUtils.onSideClicked(sideTree));
+        sideTree.setOnKeyPressed(e -> {
+            var selectedItem = sideTree.getSelectionModel().getSelectedItem();
+            if (selectedItem != null) {
+                var itemName = selectedItem.getValue();
+                if (selectedItem.getParent().getValue().equals("Queues") && e.getCode().equals(KeyCode.DELETE))
+                    QueueUtils.deleteQueue(itemName);
+            }
+        });
+
     }
 
 
@@ -134,15 +147,18 @@ public class SideUtils {
         var cMenu = new ContextMenu();
         var startQueueLbl = new Label("Start queue");
         var stopQueueLbl = new Label("Stop  queue");
-        var scheduleLbl = new Label("Settings");
+        var queueSettingLbl = new Label("Settings");
         var deleteLbl = new Label("Delete");
 
         List<Label> lbls;
+        List<KeyCodeCombination> keys = null;
         if (FileExtensions.staticQueueNames.stream().anyMatch(itemName::equals))
-            lbls = List.of(startQueueLbl, stopQueueLbl, scheduleLbl);
-        else
-            lbls = List.of(startQueueLbl, stopQueueLbl, scheduleLbl, deleteLbl);
-        var menuItems = MenuUtils.createMapMenuItems(lbls, null);
+            lbls = List.of(startQueueLbl, stopQueueLbl, queueSettingLbl);
+        else {
+            lbls = List.of(startQueueLbl, stopQueueLbl, queueSettingLbl, deleteLbl);
+            keys = Arrays.asList(null, null, null, DELETE_KEY);
+        }
+        var menuItems = MenuUtils.createMapMenuItems(lbls, keys);
         cMenu.getItems().addAll(menuItems.values());
         var qm = QueuesRepo.findByName(itemName, false);
         menuItems.get(startQueueLbl).setDisable(startedQueues.contains(qm));
@@ -152,7 +168,7 @@ public class SideUtils {
                 QueueUtils.startQueue(qm, menuItems.get(startQueueLbl), menuItems.get(stopQueueLbl)));
         menuItems.get(stopQueueLbl).setOnAction(e ->
                 QueueUtils.stopQueue(qm, menuItems.get(startQueueLbl), menuItems.get(stopQueueLbl)));
-        menuItems.get(scheduleLbl).setOnAction(e -> FxUtils.newQueueSettingStage(qm));
+        menuItems.get(queueSettingLbl).setOnAction(e -> FxUtils.newQueueSettingStage(qm));
         if (menuItems.containsKey(deleteLbl))
             menuItems.get(deleteLbl).setOnAction(e -> QueueUtils.deleteQueue(itemName));
         return cMenu;
