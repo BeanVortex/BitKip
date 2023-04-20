@@ -121,6 +121,7 @@ public class BatchList implements FXMLController {
             dm.setChunks(lm.getChunks());
             dm.setAddDate(LocalDateTime.now());
             dm.setAddToQueueDate(LocalDateTime.now());
+            dm.setResumable(lm.getResumeable());
             dm.setQueues(new CopyOnWriteArrayList<>(lm.getQueues()));
             dm.setDownloadStatus(DownloadStatus.Paused);
             downloads.add(dm);
