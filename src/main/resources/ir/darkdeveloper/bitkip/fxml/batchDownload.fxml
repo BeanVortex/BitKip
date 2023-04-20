@@ -6,9 +6,7 @@
 <VBox xmlns="http://javafx.com/javafx"
       xmlns:fx="http://javafx.com/fxml"
       fx:controller="ir.darkdeveloper.bitkip.controllers.BatchDownload"
-      styleClass="new_down_details"
-      spacing="10"
-      prefHeight="400.0" prefWidth="600.0">
+      spacing="10">
 
 
     <HBox spacing="20" alignment="CENTER">

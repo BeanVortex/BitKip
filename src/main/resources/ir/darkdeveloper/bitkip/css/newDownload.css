@@ -15,9 +15,6 @@
     -fx-background-color: #009688;
 }
 
-.new_down_details {
-    -fx-padding: 5;
-}
 
 #openLocation .ikonli-font-icon {
     -fx-icon-code: "far-folder-open";

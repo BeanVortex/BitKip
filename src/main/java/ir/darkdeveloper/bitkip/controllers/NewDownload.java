@@ -4,8 +4,8 @@ import ir.darkdeveloper.bitkip.config.QueueObserver;
 import ir.darkdeveloper.bitkip.controllers.interfaces.FXMLController;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
-import javafx.scene.Parent;
 import javafx.scene.control.Button;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.image.Image;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
@@ -19,6 +19,10 @@ import static ir.darkdeveloper.bitkip.config.AppConfigs.getQueueSubject;
 
 public class NewDownload implements FXMLController {
 
+    @FXML
+    private ScrollPane scroll;
+    @FXML
+    private VBox container;
     @FXML
     private Button singleButton;
     @FXML
@@ -55,7 +59,12 @@ public class NewDownload implements FXMLController {
             var buttonWidth = width / 2;
             batchButton.setPrefWidth(buttonWidth);
             singleButton.setPrefWidth(buttonWidth);
+            var diff = scroll.getPrefWidth() - container.getPrefWidth();
+            scroll.setPrefWidth(n.doubleValue());
+            container.setPrefWidth(n.doubleValue() - diff);
         });
+
+        stage.heightProperty().addListener((ob, o, n) -> scroll.setPrefHeight(n.doubleValue() - singleButton.getHeight()));
 
         var logoPath = getResource("icons/logo.png");
         if (logoPath != null) {
@@ -103,10 +112,8 @@ public class NewDownload implements FXMLController {
     private void switchDownloadDetails(String fxmlName) {
         try {
             var loader = new FXMLLoader(getResource("fxml/" + fxmlName + ".fxml"));
-            Parent details = loader.load();
-            var root = (VBox) stage.getScene().getRoot();
-            var rootChildren = root.getChildren();
-            rootChildren.removeIf(node -> {
+            VBox details = loader.load();
+            container.getChildren().removeIf(node -> {
                 if (node.getId() == null)
                     return false;
                 return node.getId().equals("download_details");
@@ -115,13 +122,11 @@ public class NewDownload implements FXMLController {
             if (prevController != null)
                 getQueueSubject().removeObserver(prevController);
 
-            var box = new VBox();
-            box.getChildren().add(details);
-            box.setId("download_details");
+            details.setId("download_details");
             controller.setStage(stage);
             getQueueSubject().addObserver(controller);
             prevController = controller;
-            rootChildren.add(box);
+            container.getChildren().add(details);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

@@ -11,8 +11,11 @@
         <URL value="@../css/main.css"/>
         <URL value="@../css/newDownload.css"/>
     </stylesheets>
-    <HBox minWidth="600" alignment="CENTER">
+    <HBox minWidth="600" alignment="CENTER" minHeight="40">
         <Button styleClass="tab_btn" minWidth="300" text="Single" fx:id="singleButton" onAction="#showSingle"/>
         <Button styleClass="tab_btn" minWidth="300" text="Batch" fx:id="batchButton" onAction="#showBatch"/>
     </HBox>
+    <ScrollPane fx:id="scroll" minHeight="510" prefWidth="600">
+        <VBox fx:id="container" prefWidth="580" alignment="CENTER" styleClass="padding_10"/>
+    </ScrollPane>
 </VBox>
