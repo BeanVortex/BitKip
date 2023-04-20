@@ -70,7 +70,7 @@ public class QueueUtils {
             }
 
             // when queue is done or paused all manually and one simultaneously download
-            if (sDownloads == 1 && startedQueues.contains(qm))
+            if (sDownloads == 1 && startedQueues.contains(qm) && pauseCount != 0)
                 whenQueueDone(qm, startItem, stopItem, executor);
 
             waitToFinishForLessPausedDownloads(qm, startItem, stopItem, executor, simulDownloads, pauseCount);

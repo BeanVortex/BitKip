@@ -10,13 +10,12 @@ public class PowerUtils {
         switch (turnOffMode) {
             case SLEEP -> sleep();
             case TURN_OFF -> shutDown();
-            case HIBERNATE -> hibernate();
         }
     }
 
     private static void shutDown() {
         try {
-            Process process = Runtime.getRuntime().exec(new String[]{"shutdown /s /t 0"});
+            Process process = Runtime.getRuntime().exec(new String[]{"shutdown -s -t 00"});
             process.waitFor();
         } catch (IOException | InterruptedException e) {
             e.printStackTrace();
@@ -32,14 +31,5 @@ public class PowerUtils {
         }
     }
 
-    private static void hibernate() {
-        try {
-            Process process = Runtime.getRuntime().exec(new String[]{"shutdown /h"});
-            process.waitFor();
-
-        } catch (IOException | InterruptedException e) {
-            e.printStackTrace();
-        }
-    }
 
 }

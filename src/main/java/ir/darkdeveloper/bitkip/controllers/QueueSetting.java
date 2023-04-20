@@ -120,7 +120,7 @@ public class QueueSetting implements FXMLController, QueueObserver {
     }
 
     private void initPowerCombo() {
-        var items = FXCollections.observableArrayList(TurnOffMode.TURN_OFF, TurnOffMode.SLEEP, TurnOffMode.HIBERNATE);
+        var items = FXCollections.observableArrayList(TurnOffMode.TURN_OFF, TurnOffMode.SLEEP);
         powerCombo.setItems(items);
         powerCombo.getSelectionModel().select(0);
         powerCombo.setDisable(true);
