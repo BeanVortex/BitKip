@@ -112,8 +112,8 @@
 
                             <HBox spacing="10" alignment="CENTER_LEFT" styleClass="padding_10">
                                 <CheckBox text="When done: " fx:id="whenDoneCheck" styleClass="bold"
-                                          onAction="#onWhenDoneChecked"/>
-                                <ComboBox fx:id="powerCombo"/>
+                                          onAction="#onWhenDoneChecked" disable="true"/>
+                                <ComboBox fx:id="powerCombo" disable="true"/>
                             </HBox>
 
 
