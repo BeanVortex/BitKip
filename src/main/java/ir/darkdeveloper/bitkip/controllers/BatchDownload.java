@@ -279,7 +279,7 @@ public class BatchDownload implements QueueObserver {
     @FXML
     private void onQueueChanged() {
         var selectedQueue = queueCombo.getSelectionModel().getSelectedItem();
-        if (selectedQueue.hasFolder()) {
+        if (selectedQueue != null && selectedQueue.hasFolder()) {
             var folder = new File(queuesPath + selectedQueue.getName());
             if (!folder.exists())
                 folder.mkdir();
