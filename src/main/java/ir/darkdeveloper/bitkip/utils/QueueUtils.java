@@ -10,6 +10,8 @@ import javafx.scene.control.MenuItem;
 import org.controlsfx.control.Notifications;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutorService;
@@ -24,17 +26,21 @@ public class QueueUtils {
     public static void startQueue(QueueModel qm, MenuItem startItem, MenuItem stopItem) {
         var schedule = qm.getSchedule();
         if (!startedQueues.contains(qm)) {
-            var downloadsByQueue = QueuesRepo.findByName(qm.getName(), true)
-                    .getDownloads()
-                    .stream()
-                    .sorted(Comparator.comparing(DownloadModel::getAddToQueueDate))
-                    .toList();
+            var downloadsByQueue = new ArrayList<>(
+                    QueuesRepo.findByName(qm.getName(), true)
+                            .getDownloads()
+                            .stream()
+                            .sorted(Comparator.comparing(DownloadModel::getAddToQueueDate))
+                            .toList()
+            );
             if (downloadsByQueue.isEmpty()) {
                 queueDoneNotification(qm);
                 return;
             }
             startItem.setDisable(true);
             stopItem.setDisable(false);
+            if (!qm.isDownloadFromTop())
+                Collections.reverse(downloadsByQueue);
             qm.setDownloads(new CopyOnWriteArrayList<>(downloadsByQueue));
             startedQueues.add(qm);
             start(qm, startItem, stopItem);
@@ -83,7 +89,7 @@ public class QueueUtils {
     /**
      * consider 7 files are going to download in parallel. 3 of them will get in if clause and the 4th one will be hold
      * in else clause until one of those 3 stops or finishes
-     * */
+     */
     private static int performSimultaneousDownloadWaitForPrev(QueueModel qm, AtomicInteger simulDownloads,
                                                               int i, DownloadModel dm, String speedLimit, int sDownloads) {
         if (simulDownloads.get() < sDownloads) {
@@ -111,8 +117,9 @@ public class QueueUtils {
     /**
      * it is useful when queue simultaneously downloads are greater than current paused downloads in queue
      * it starts all downloads non-blocking and the waiting to finish is done later in waitToFinishForLessPausedDownloads method
+     *
      * @see QueueUtils#waitToFinishForLessPausedDownloads(QueueModel, MenuItem, MenuItem, ExecutorService, AtomicInteger, long)
-     * */
+     */
     private static void performSimultaneousDownloadDontWaitForPrev(long pauseCount, AtomicInteger simulDownloads,
                                                                    DownloadModel dm, String speedLimit) {
         if (simulDownloads.get() < pauseCount) {
@@ -124,8 +131,9 @@ public class QueueUtils {
 
     /**
      * waits for non-blocking downloads to finish
+     *
      * @see QueueUtils#performSimultaneousDownloadDontWaitForPrev(long, AtomicInteger, DownloadModel, String)
-    * */
+     */
     private static void waitToFinishForLessPausedDownloads(QueueModel qm, MenuItem startItem, MenuItem stopItem,
                                                            ExecutorService executor, AtomicInteger simulDownloads,
                                                            long pauseCount) {

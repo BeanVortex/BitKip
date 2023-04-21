@@ -32,6 +32,9 @@
                         <HBox alignment="CENTER_LEFT" styleClass="padding_10">
                             <CheckBox text="Has folder" styleClass="bold" fx:id="hasFolderCheck"/>
                         </HBox>
+                        <HBox alignment="CENTER_LEFT" styleClass="padding_10">
+                            <CheckBox text="Download from top" styleClass="bold" fx:id="downloadOrderCheck"/>
+                        </HBox>
                     </VBox>
                 </Tab>
 

@@ -15,6 +15,7 @@ public class QueueModel {
     private boolean editable;
     private boolean canAddDownload;
     private boolean hasFolder;
+    private boolean downloadFromTop = true;
     private String speed = "0";
     private int simultaneouslyDownload = 1;
     private ScheduleModel schedule;

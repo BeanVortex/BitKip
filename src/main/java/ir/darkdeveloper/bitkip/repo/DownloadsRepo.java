@@ -122,7 +122,7 @@ public class DownloadsRepo {
         var sql = """
                 SELECT d.*,
                        qd.%s,
-                       q.%s as %s,q.%s,q.%s,q.%s,q.%s,q.%s,q.%s,
+                       q.%s as %s, q.*,
                        sc.%s,sc.%s,sc.%s,sc.%s,sc.%s,sc.%s,sc.%s,sc.%s,sc.%s
                 FROM %s d
                          INNER JOIN %s qd ON d.%s = qd.%s
@@ -131,8 +131,7 @@ public class DownloadsRepo {
                 WHERE q.%s = "%s"
                 """
                 .formatted(COL_QUEUE_ID,
-                        COL_NAME, COL_QUEUE_NAME, COL_EDITABLE, COL_CAN_ADD_DOWN, COL_HAS_FOLDER, COL_SPEED_LIMIT,
-                        COL_SIMUL_DOWNLOAD, COL_SCHEDULE_ID,
+                        COL_NAME, COL_QUEUE_NAME,
                         COL_ENABLED, COL_DAYS, COL_ONCE_DOWNLOAD, COL_START_TIME, COL_START_DATE,
                         COL_STOP_TIME_ENABLED, COL_STOP_TIME, COL_TURN_OFF_MODE_ENABLED, COL_TURN_OFF_MODE,
                         DOWNLOADS_TABLE_NAME,

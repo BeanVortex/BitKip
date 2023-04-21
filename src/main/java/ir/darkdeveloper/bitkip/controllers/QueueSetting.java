@@ -45,6 +45,8 @@ public class QueueSetting implements FXMLController, QueueObserver {
     @FXML
     private CheckBox hasFolderCheck;
     @FXML
+    private CheckBox downloadOrderCheck;
+    @FXML
     private VBox rightContainer;
     @FXML
     private Label savedLabel;
@@ -219,7 +221,7 @@ public class QueueSetting implements FXMLController, QueueObserver {
         speedField.setText(selectedQueue.get().getSpeed());
         simulDownloadSpinner.getValueFactory().setValue(selectedQueue.get().getSimultaneouslyDownload());
         hasFolderCheck.setSelected(selectedQueue.get().hasFolder());
-
+        downloadOrderCheck.setSelected(selectedQueue.get().isDownloadFromTop());
         stage.setTitle("Queue Setting: %s".formatted(selectedQueue.get().getName()));
         queueList.getSelectionModel().select(selectedQueue.get());
         datePicker.setValue(LocalDate.now());
@@ -380,17 +382,15 @@ public class QueueSetting implements FXMLController, QueueObserver {
             queue.setSpeed(speedField.getText());
             queue.setSimultaneouslyDownload(simulDownloadSpinner.getValue());
             queue.setHasFolder(hasFolderCheck.isSelected());
+            queue.setDownloadFromTop(downloadOrderCheck.isSelected());
             queue.setSchedule(schedule);
-            String[] qCols = {COL_SPEED_LIMIT, COL_SIMUL_DOWNLOAD, COL_HAS_FOLDER};
-            String[] qValues = {queue.getSpeed(), queue.getSimultaneouslyDownload() + "", (queue.hasFolder() ? 1 : 0) + ""};
+            String[] qCols = {COL_SPEED_LIMIT, COL_SIMUL_DOWNLOAD, COL_HAS_FOLDER, COL_DOWN_TOP};
+            String[] qValues = {queue.getSpeed(), queue.getSimultaneouslyDownload() + "",
+                    (queue.hasFolder() ? 1 : 0) + "", (queue.isDownloadFromTop() ? 1 : 0) + ""};
             QueuesRepo.updateQueue(qCols, qValues, queue.getId());
             createOrDeleteFolder(queue.hasFolder(), queue);
             ScheduleRepo.updateSchedule(schedule);
-            var updatedQueues = getQueues().stream()
-                    .peek(q -> {
-                        if (q.equals(queue))
-                            q.setSchedule(schedule);
-                    }).toList();
+            var updatedQueues = QueuesRepo.getAllQueues(false, true);
             addAllQueues(updatedQueues);
             queueList.getItems().clear();
             queueList.getItems().addAll(updatedQueues);

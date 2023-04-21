@@ -15,13 +15,14 @@ import static ir.darkdeveloper.bitkip.repo.DatabaseHelper.*;
 
 public class QueuesRepo {
 
-   public static final String COL_ID = "id",
+    public static final String COL_ID = "id",
             COL_NAME = "name",
             COL_EDITABLE = "editable",
             COL_CAN_ADD_DOWN = "can_add_download",
             COL_SCHEDULE_ID = "schedule_id",
             COL_HAS_FOLDER = "has_folder",
             COL_SPEED_LIMIT = "speed_limit",
+            COL_DOWN_TOP = "download_from_top",
             COL_SIMUL_DOWNLOAD = "simultaneously_download";
 
 
@@ -53,6 +54,7 @@ public class QueuesRepo {
                     %s INTEGER,
                     %s INTEGER,
                     %s INTEGER,
+                    %s INTEGER,
                     %s VARCHAR,
                     %s INTEGER,
                     FOREIGN KEY (%s) REFERENCES %s(%s) ON DELETE CASCADE
@@ -64,6 +66,7 @@ public class QueuesRepo {
                         COL_EDITABLE,
                         COL_CAN_ADD_DOWN,
                         COL_HAS_FOLDER,
+                        COL_DOWN_TOP,
                         COL_SIMUL_DOWNLOAD,
                         COL_SPEED_LIMIT,
                         COL_SCHEDULE_ID,
@@ -92,18 +95,19 @@ public class QueuesRepo {
 
     public static void insertQueue(QueueModel queue) {
         var sql = """
-                INSERT OR IGNORE INTO %s (%s,%s,%s,%s,%s,%s,%s) VALUES("%s",%d,%d,%d,%d,%d,%s);
+                INSERT OR IGNORE INTO %s (%s,%s,%s,%s,%s,%s,%s,%s) VALUES("%s",%d,%d,%d,%d,%d,%s,%d);
                 """
                 .formatted(QUEUES_TABLE_NAME,
                         COL_NAME, COL_EDITABLE, COL_CAN_ADD_DOWN, COL_HAS_FOLDER, COL_SCHEDULE_ID,
-                        COL_SIMUL_DOWNLOAD, COL_SPEED_LIMIT,
+                        COL_SIMUL_DOWNLOAD, COL_SPEED_LIMIT, COL_DOWN_TOP,
                         queue.getName(),
                         queue.isEditable() ? 1 : 0,
                         queue.isCanAddDownload() ? 1 : 0,
                         queue.hasFolder() ? 1 : 0,
                         queue.getSchedule().getId(),
                         queue.getSimultaneouslyDownload(),
-                        queue.getSpeed());
+                        queue.getSpeed(),
+                        queue.isDownloadFromTop() ? 1 : 0);
         try (var con = DatabaseHelper.openConnection();
              var stmt = con.createStatement()) {
             stmt.executeUpdate(sql);
@@ -203,14 +207,14 @@ public class QueuesRepo {
     private static void alters() {
         // NEW ALTERS SHOULD ADD ON TOP
         var addAlters = """
-                BEGIN TRANSACTION;
+                ALTER TABLE %s ADD COLUMN %s INTEGER DEFAULT 1;
                 ALTER TABLE %s ADD COLUMN %s INTEGER DEFAULT 0;
                 ALTER TABLE %s ADD COLUMN %s INTEGER DEFAULT 1;
                 ALTER TABLE %s ADD COLUMN %s VARCHAR DEFAULT "0";
                 ALTER TABLE %s ADD COLUMN %s INTEGER DEFAULT NULL REFERENCES %s(%s) ON DELETE CASCADE;
-                COMMIT
                 """
                 .formatted(
+                        QUEUES_TABLE_NAME, COL_DOWN_TOP,
                         QUEUES_TABLE_NAME, COL_HAS_FOLDER,
                         QUEUES_TABLE_NAME, COL_SIMUL_DOWNLOAD,
                         QUEUES_TABLE_NAME, COL_SPEED_LIMIT,
@@ -225,6 +229,7 @@ public class QueuesRepo {
         var editable = rs.getBoolean(COL_EDITABLE);
         var canAddDownload = rs.getBoolean(COL_CAN_ADD_DOWN);
         var hasFolder = rs.getBoolean(COL_HAS_FOLDER);
+        var downloadFromTop = rs.getBoolean(COL_DOWN_TOP);
         var speedLimit = rs.getString(COL_SPEED_LIMIT);
         var simulDownloads = rs.getInt(COL_SIMUL_DOWNLOAD);
         CopyOnWriteArrayList<DownloadModel> downloads = null;
@@ -233,7 +238,8 @@ public class QueuesRepo {
         ScheduleModel schedule = null;
         if (fetchSchedule)
             schedule = ScheduleRepo.getSchedule(id);
-        return new QueueModel(id, name, editable, canAddDownload, hasFolder, speedLimit, simulDownloads, schedule, downloads);
+        return new QueueModel(id, name, editable, canAddDownload, hasFolder, downloadFromTop,
+                speedLimit, simulDownloads, schedule, downloads);
     }
 
     static QueueModel createQueueModel(ResultSet rs, int queueId, String queueName,
@@ -243,7 +249,8 @@ public class QueuesRepo {
         var hasFolder = rs.getBoolean(COL_HAS_FOLDER);
         var speedLimit = rs.getString(COL_SPEED_LIMIT);
         var simulDownloads = rs.getInt(COL_SIMUL_DOWNLOAD);
-        return new QueueModel(queueId, queueName, editable, canAddDownload, hasFolder,
+        var downloadFromTop = rs.getBoolean(COL_DOWN_TOP);
+        return new QueueModel(queueId, queueName, editable, canAddDownload, hasFolder, downloadFromTop,
                 speedLimit, simulDownloads, schedule, null);
     }
 }
