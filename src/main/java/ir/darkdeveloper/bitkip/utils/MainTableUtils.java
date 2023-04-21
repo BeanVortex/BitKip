@@ -13,7 +13,6 @@ import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.util.Callback;
 import org.apache.commons.lang3.time.DurationFormatUtils;
-
 import java.text.DecimalFormat;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
@@ -84,8 +83,10 @@ public class MainTableUtils {
     private Callback<TableView<DownloadModel>, TableRow<DownloadModel>> getTableViewTableRowCallback() {
         return param -> {
             var row = new TableRow<DownloadModel>();
+
             row.setOnMouseClicked(event -> {
                 var selectedItems = getSelected();
+                row.setContextMenu(null);
                 if (!row.isEmpty() && event.getButton().equals(MouseButton.SECONDARY)) {
                     var cMenu = new ContextMenu();
                     var openLbl = new Label("open");
@@ -128,9 +129,10 @@ public class MainTableUtils {
                     menuItems.get(deleteWithFileLbl).setOnAction(ev -> DownloadOpUtils.deleteDownloads(getSelected(), true));
 
                     row.setContextMenu(cMenu);
-                    cMenu.show(row, event.getX(), event.getY());
+                    cMenu.show(row, event.getScreenX(), event.getScreenY());
                 }
             });
+            row.setOnMousePressed(e -> row.setContextMenu(null));
             return row;
         };
     }

@@ -68,6 +68,7 @@ public class SideUtils {
                     QueueUtils.deleteQueue(itemName);
             }
         });
+        sideTree.setOnMousePressed(event -> sideTree.setContextMenu(null));
 
     }
 
@@ -78,16 +79,11 @@ public class SideUtils {
             if (selectedItem == null)
                 return;
             var itemName = selectedItem.getValue();
-            if (itemName.equals("All")) {
-                sideTree.setContextMenu(null);
-                return;
-            }
+            sideTree.setContextMenu(null);
+            if (itemName.equals("All")) return;
             if (event.getButton().equals(MouseButton.PRIMARY)) {
                 // updates status of current downloading before changing queue
-                if (itemName.equals("Queues")) {
-                    sideTree.setContextMenu(null);
-                    return;
-                }
+                if (itemName.equals("Queues")) return;
                 currentDownloadings.forEach(DownloadsRepo::updateTableStatus);
                 Predicate<DownloadModel> condition = null;
                 String queueToFetch = itemName;
@@ -115,10 +111,8 @@ public class SideUtils {
                         || itemName.equals("Finished") || itemName.equals("Unfinished");
                 mainTableUtils.setDownloads(downloadsData, addDateSort);
             } else if (event.getButton().equals(MouseButton.SECONDARY)) {
-                if (itemName.equals("Finished") || itemName.equals("Unfinished") || itemName.equals("Categories")) {
-                    sideTree.setContextMenu(null);
+                if (itemName.equals("Finished") || itemName.equals("Unfinished") || itemName.equals("Categories"))
                     return;
-                }
                 ContextMenu cMenu;
                 if (itemName.equals("Queues"))
                     cMenu = createNewQueueMenu();
@@ -126,7 +120,6 @@ public class SideUtils {
                     cMenu = createTreeMenu(itemName);
                 sideTree.setContextMenu(cMenu);
                 cMenu.show(selectedItem.getGraphic(), Side.BOTTOM, 0, 0);
-
             }
         };
     }
@@ -146,7 +139,7 @@ public class SideUtils {
     private static ContextMenu createTreeMenu(String itemName) {
         var cMenu = new ContextMenu();
         var startQueueLbl = new Label("Start queue");
-        var stopQueueLbl = new Label("Stop  queue");
+        var stopQueueLbl = new Label("Stop queue");
         var queueSettingLbl = new Label("Settings");
         var deleteLbl = new Label("Delete");
 
