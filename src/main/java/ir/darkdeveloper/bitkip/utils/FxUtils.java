@@ -350,6 +350,8 @@ public class FxUtils {
         dialog.getDialogPane().setContent(container);
         dialog.setResultConverter(dialogButton -> {
             if (dialogButton == ButtonType.OK) {
+                if (pwd.getText().isBlank())
+                    return null;
                 return pwd.getText();
             }
             return null;
