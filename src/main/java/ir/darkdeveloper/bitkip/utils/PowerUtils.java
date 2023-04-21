@@ -1,8 +1,11 @@
 package ir.darkdeveloper.bitkip.utils;
 
+import com.sun.jna.Native;
 import ir.darkdeveloper.bitkip.models.TurnOffMode;
 
 import java.io.IOException;
+
+import static com.sun.jna.Platform.*;
 
 public class PowerUtils {
 
@@ -15,20 +18,35 @@ public class PowerUtils {
 
     private static void shutDown() {
         try {
-            Process process = Runtime.getRuntime().exec(new String[]{"shutdown -s -t 00"});
-            process.waitFor();
-        } catch (IOException | InterruptedException e) {
+            if (isWindows())
+                Runtime.getRuntime().exec(new String[]{"shutdown", "-s"});
+            else if (isLinux() || isSolaris() || isFreeBSD() || isOpenBSD())
+                Runtime.getRuntime().exec(new String[]{"sudo", "shutdown", "now"});
+            else if (isMac())
+                Runtime.getRuntime().exec(new String[]{"sudo", "shutdown"});
+        } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
     private static void sleep() {
         try {
-            Process process = Runtime.getRuntime().exec(new String[]{"rundll32.exe powrprof.dll,SetSuspendState 0,1,0"});
-            process.waitFor();
-        } catch (IOException | InterruptedException e) {
+            if (isWindows())
+                SetSuspendState(false, false, false);
+            else if (isLinux() || isSolaris() || isFreeBSD() || isOpenBSD())
+                Runtime.getRuntime().exec(new String[]{"sudo", "systemctl", "suspend"});
+            else if (isMac())
+                Runtime.getRuntime().exec(new String[]{"sudo", "shutdown", "-s"});
+        } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    public static native boolean SetSuspendState(boolean hibernate, boolean forceCritical, boolean disableWakeEvent);
+
+    static {
+        if (isWindows())
+            Native.register("powrprof");
     }
 
 

@@ -26,6 +26,13 @@
     -fx-padding: 20;
 }
 
+.descText {
+    -fx-opacity: 0.7;
+}
+.title_size{
+    -fx-font-size: 20;
+}
+
 
 #newDownloadBtn {
     -fx-min-width: 50;
@@ -58,4 +65,3 @@
 .title-opacity{
     -fx-opacity: 0.8;
 }
-

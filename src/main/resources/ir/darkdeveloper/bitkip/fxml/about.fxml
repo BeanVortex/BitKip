@@ -3,7 +3,7 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.VBox?>
-<VBox prefHeight="350.0" prefWidth="450.0" spacing="20" stylesheets="@../css/about.css"
+<VBox minHeight="350.0" minWidth="450.0" spacing="20" stylesheets="@../css/about.css"
       style="-fx-padding: 10"
       fx:id="parent"
       xmlns="http://javafx.com/javafx/16" xmlns:fx="http://javafx.com/fxml/1"

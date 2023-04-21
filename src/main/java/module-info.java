@@ -21,6 +21,7 @@ module ir.darkdeveloper.bitkip {
     requires java.desktop;
     requires com.dustinredmond.fxtrayicon;
     requires javafx.swing;
+    requires com.sun.jna;
 
     opens ir.darkdeveloper.bitkip to javafx.fxml, javafx.controls;
     opens ir.darkdeveloper.bitkip.controllers to javafx.fxml, javafx.base;

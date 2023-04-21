@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<?import java.net.URL?>
+<VBox xmlns="http://javafx.com/javafx"
+      xmlns:fx="http://javafx.com/fxml"
+      fx:controller="ir.darkdeveloper.bitkip.controllers.ShuttingDownController"
+      minWidth="300"
+      minHeight="100"
+      spacing="10"
+      styleClass="padding_10">
+    <stylesheets>
+        <URL value="@../css/main.css"/>
+        <URL value="@../css/newDownload.css"/>
+    </stylesheets>
+    <HBox alignment="CENTER" style="-fx-padding: 10 0 0 0">
+        <Label text="System is going to " fx:id="modeLbl" style="-fx-font-size: 16"/>
+        <Label fx:id="counterLbl" style="-fx-font-size: 16"/>
+    </HBox>
+
+    <HBox alignment="CENTER">
+        <Button fx:id="cancelBtn" text="Cancel" styleClass="cancel_btn"/>
+    </HBox>
+
+
+</VBox>

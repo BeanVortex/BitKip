@@ -35,6 +35,7 @@ import java.util.ResourceBundle;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import static com.sun.jna.Platform.isWindows;
 import static ir.darkdeveloper.bitkip.BitKip.getResource;
 import static ir.darkdeveloper.bitkip.config.AppConfigs.*;
 import static ir.darkdeveloper.bitkip.repo.QueuesRepo.*;
@@ -42,6 +43,8 @@ import static java.time.DayOfWeek.*;
 
 public class QueueSetting implements FXMLController, QueueObserver {
 
+    @FXML
+    private Label windowsPowerLbl;
     @FXML
     private CheckBox hasFolderCheck;
     @FXML
@@ -126,6 +129,13 @@ public class QueueSetting implements FXMLController, QueueObserver {
         powerCombo.setItems(items);
         powerCombo.getSelectionModel().select(0);
         powerCombo.setDisable(true);
+        if (isWindows()){
+            windowsPowerLbl.setMaxWidth(rightContainer.getPrefWidth());
+            windowsPowerLbl.setWrapText(true);
+            windowsPowerLbl.setText("Sleep option may hibernate windows." +
+                    " To avoid, please run cmd as administrator and type: powercfg -hibernate off");
+            windowsPowerLbl.setVisible(true);
+        }
     }
 
     private void initRadios() {

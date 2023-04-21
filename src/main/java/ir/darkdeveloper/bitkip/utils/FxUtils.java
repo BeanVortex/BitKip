@@ -6,6 +6,7 @@ import ir.darkdeveloper.bitkip.controllers.interfaces.FXMLController;
 import ir.darkdeveloper.bitkip.models.DownloadModel;
 import ir.darkdeveloper.bitkip.models.LinkModel;
 import ir.darkdeveloper.bitkip.models.QueueModel;
+import ir.darkdeveloper.bitkip.models.TurnOffMode;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
@@ -101,10 +102,13 @@ public class FxUtils {
             e.printStackTrace();
             throw new RuntimeException(e);
         }
+        var logoPath = getResource("icons/logo.png");
+        if (logoPath != null)
+            stage.getIcons().add(new Image(logoPath.toExternalForm()));
         var scene = new Scene(root);
         stage.setScene(scene);
-        stage.setMinWidth(root.getPrefWidth());
-        stage.setMinHeight(root.getPrefHeight());
+        stage.setMinWidth(root.getMinWidth());
+        stage.setMinHeight(root.getMinHeight());
         stage.setTitle("New Queue");
         NewQueueController controller = loader.getController();
         controller.setStage(stage);
@@ -128,8 +132,8 @@ public class FxUtils {
         }
         var scene = new Scene(root);
         stage.setScene(scene);
-        stage.setMinWidth(root.getPrefWidth());
-        stage.setMinHeight(root.getPrefHeight());
+        stage.setMinWidth(root.getMinWidth());
+        stage.setMinHeight(root.getMinHeight());
         stage.setTitle("About");
         var logoPath = getResource("icons/logo.png");
         if (logoPath != null)
@@ -140,6 +144,32 @@ public class FxUtils {
         stage.show();
         openStages.put(ABOUT_STAGE, stage);
     }
+
+    public static void newShuttingDownStage(TurnOffMode turnOffMode) {
+        FXMLLoader loader;
+        Stage stage = new Stage();
+        VBox root;
+        try {
+            loader = new FXMLLoader(getResource("fxml/shuttingDown.fxml"));
+            root = loader.load();
+        } catch (IOException e) {
+            e.printStackTrace();
+            throw new RuntimeException(e);
+        }
+        var logoPath = getResource("icons/logo.png");
+        if (logoPath != null)
+            stage.getIcons().add(new Image(logoPath.toExternalForm()));
+        var scene = new Scene(root);
+        stage.setScene(scene);
+        stage.setMinWidth(root.getMinWidth());
+        stage.setMinHeight(root.getMinHeight());
+        stage.setTitle("Shutting down");
+        ShuttingDownController controller = loader.getController();
+        controller.setStage(stage);
+        controller.setTurnOffMode(turnOffMode);
+        stage.showAndWait();
+    }
+
 
     public static void newDownloadingStage(DownloadModel dm) {
         FXMLLoader loader;

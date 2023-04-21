@@ -38,10 +38,10 @@ import java.net.URL;
 import java.util.List;
 import java.util.ResourceBundle;
 
+import static com.sun.jna.Platform.*;
 import static ir.darkdeveloper.bitkip.BitKip.getResource;
 import static ir.darkdeveloper.bitkip.config.AppConfigs.*;
 import static ir.darkdeveloper.bitkip.utils.DownloadOpUtils.openFile;
-import static ir.darkdeveloper.bitkip.utils.OSUtils.*;
 
 public class DownloadingController implements FXMLController {
 
@@ -322,7 +322,7 @@ public class DownloadingController implements FXMLController {
         if (desktop.isSupported(Desktop.Action.OPEN)) {
             if (isWindows())
                 Runtime.getRuntime().exec(new String[]{"explorer", "/select,", file.getAbsolutePath()});
-            else if (isUnix())
+            else if (isLinux() || isSolaris() || isFreeBSD() || isOpenBSD())
                 Runtime.getRuntime().exec(new String[]{"xdg-open", file.getParentFile().getAbsolutePath()});
             else if (isMac())
                 Runtime.getRuntime().exec(new String[]{"osascript", "-e",

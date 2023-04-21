@@ -115,8 +115,12 @@
 
                             <HBox spacing="10" alignment="CENTER_LEFT" styleClass="padding_10">
                                 <CheckBox text="When done: " fx:id="whenDoneCheck" styleClass="bold"
-                                          onAction="#onWhenDoneChecked" disable="true"/>
-                                <ComboBox fx:id="powerCombo" disable="true"/>
+                                          onAction="#onWhenDoneChecked"/>
+                                <ComboBox fx:id="powerCombo"/>
+                            </HBox>
+
+                            <HBox alignment="BASELINE_LEFT" styleClass="padding_10">
+                                <Label fx:id="windowsPowerLbl" visible="false" styleClass="descText"/>
                             </HBox>
 
 
