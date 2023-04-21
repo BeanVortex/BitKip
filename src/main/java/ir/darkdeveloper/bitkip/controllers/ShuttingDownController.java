@@ -36,7 +36,7 @@ public class ShuttingDownController implements FXMLController {
         var service = Executors.newCachedThreadPool();
         service.submit(() -> {
             try {
-                for (int i = 4; i >= 0; i--) {
+                for (int i = 10; i >= 0; i--) {
                     var finalI = i;
                     Platform.runLater(() -> counterLbl.setText(finalI + ""));
                     Thread.sleep(1000);

@@ -6,13 +6,17 @@ import ir.darkdeveloper.bitkip.repo.DownloadsRepo;
 import ir.darkdeveloper.bitkip.repo.QueuesRepo;
 import ir.darkdeveloper.bitkip.repo.ScheduleRepo;
 import ir.darkdeveloper.bitkip.task.ScheduleTask;
-import ir.darkdeveloper.bitkip.utils.*;
+import ir.darkdeveloper.bitkip.utils.FxUtils;
+import ir.darkdeveloper.bitkip.utils.IOUtils;
+import ir.darkdeveloper.bitkip.utils.MoreUtils;
 import javafx.application.Application;
 import javafx.stage.Stage;
 
+import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
 
+import static com.sun.jna.Platform.isLinux;
 import static ir.darkdeveloper.bitkip.config.AppConfigs.*;
 
 public class BitKip extends Application {
@@ -35,15 +39,18 @@ public class BitKip extends Application {
         initTray(stage);
     }
 
+
     private void initTray(Stage stage) {
-        var tray = new FXTrayIcon.Builder(stage, getResource("icons/logo.png"))
-                .menuItem("Open App", e -> stage.show())
-                .menuItem("Exit App", e -> {
-                    stop();
-                    System.exit(0);
-                })
-                .build();
-        tray.show();
+        if (!isLinux()){
+            var tray = new FXTrayIcon.Builder(stage, getResource("icons/logo.png"))
+                    .menuItem("Open App", e -> stage.show())
+                    .menuItem("Exit App", e -> {
+                        stop();
+                        System.exit(0);
+                    })
+                    .build();
+            tray.show();
+        }
     }
 
 
@@ -63,7 +70,7 @@ public class BitKip extends Application {
     }
 
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
         launch();
     }
 

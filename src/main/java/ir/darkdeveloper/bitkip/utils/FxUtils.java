@@ -7,6 +7,7 @@ import ir.darkdeveloper.bitkip.models.DownloadModel;
 import ir.darkdeveloper.bitkip.models.LinkModel;
 import ir.darkdeveloper.bitkip.models.QueueModel;
 import ir.darkdeveloper.bitkip.models.TurnOffMode;
+import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
@@ -24,6 +25,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import static com.sun.jna.Platform.isLinux;
 import static ir.darkdeveloper.bitkip.BitKip.getResource;
 import static ir.darkdeveloper.bitkip.config.AppConfigs.getQueueSubject;
 import static ir.darkdeveloper.bitkip.config.AppConfigs.openDownloadings;
@@ -50,7 +52,12 @@ public class FxUtils {
             stage.setMinHeight(root.getMinHeight());
             controller.setStage(stage);
             stage.setTitle("BitKip");
-            stage.setOnCloseRequest(e -> stage.hide());
+            stage.setOnCloseRequest(e -> {
+                if (isLinux()) {
+                    Platform.exit();
+                    System.exit(0);
+                } else stage.hide();
+            });
             stage.show();
         } catch (IOException ex) {
             ex.printStackTrace();
@@ -289,7 +296,12 @@ public class FxUtils {
     public static boolean askWarning(String header, String content) {
         var yes = new ButtonType("Yes", ButtonBar.ButtonData.YES);
         var no = new ButtonType("No", ButtonBar.ButtonData.NO);
-        var alert = new Alert(Alert.AlertType.WARNING, content, yes, no);
+        return askWarning(header, content, yes, no);
+
+    }
+
+    public static boolean askWarning(String header, String content, ButtonType primary, ButtonType secondary) {
+        var alert = new Alert(Alert.AlertType.WARNING, content, primary, secondary);
         alert.setTitle("Warning");
         alert.setHeaderText(header);
         var stage = (Stage) alert.getDialogPane().getScene().getWindow();
@@ -297,8 +309,7 @@ public class FxUtils {
         if (logoPath != null)
             stage.getIcons().add(new Image(logoPath.toExternalForm()));
         var res = alert.showAndWait();
-        return res.orElse(no) == yes;
-
+        return res.orElse(secondary) == primary;
     }
 
     public static void newRefreshStage(DownloadModel dm) {
