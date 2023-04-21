@@ -6,6 +6,7 @@ import ir.darkdeveloper.bitkip.models.TurnOffMode;
 import java.io.IOException;
 
 import static com.sun.jna.Platform.*;
+import static ir.darkdeveloper.bitkip.config.AppConfigs.userPassword;
 
 public class PowerUtils {
 
@@ -20,10 +21,17 @@ public class PowerUtils {
         try {
             if (isWindows())
                 Runtime.getRuntime().exec(new String[]{"shutdown", "-s"});
-            else if (isLinux() || isSolaris() || isFreeBSD() || isOpenBSD())
-                Runtime.getRuntime().exec(new String[]{"sudo", "shutdown", "now"});
-            else if (isMac())
-                Runtime.getRuntime().exec(new String[]{"sudo", "shutdown"});
+            else {
+                // isMac()
+                var command = "sudo,-S,shutdown";
+                if (isLinux() || isSolaris() || isFreeBSD() || isOpenBSD())
+                    command += ",now";
+                var pb = new ProcessBuilder(command.split(","));
+                var process = pb.start();
+                process.getOutputStream().write((userPassword + "\n").getBytes());
+                process.getOutputStream().flush();
+            }
+
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -33,10 +41,16 @@ public class PowerUtils {
         try {
             if (isWindows())
                 SetSuspendState(false, false, false);
-            else if (isLinux() || isSolaris() || isFreeBSD() || isOpenBSD())
-                Runtime.getRuntime().exec(new String[]{"sudo", "systemctl", "suspend"});
-            else if (isMac())
-                Runtime.getRuntime().exec(new String[]{"sudo", "shutdown", "-s"});
+            else {
+                // isLinux() || isSolaris() || isFreeBSD() || isOpenBSD()
+                var command = "sudo,-S,systemctl,suspend";
+                if (isMac())
+                    command = "sudo,-S,shutdown,-s";
+                var pb = new ProcessBuilder(command.split(","));
+                var process = pb.start();
+                process.getOutputStream().write((userPassword + "\n").getBytes());
+                process.getOutputStream().flush();
+            }
         } catch (IOException e) {
             e.printStackTrace();
         }

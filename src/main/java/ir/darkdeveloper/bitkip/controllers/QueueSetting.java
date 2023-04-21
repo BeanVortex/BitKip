@@ -35,7 +35,7 @@ import java.util.ResourceBundle;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import static com.sun.jna.Platform.isWindows;
+import static com.sun.jna.Platform.*;
 import static ir.darkdeveloper.bitkip.BitKip.getResource;
 import static ir.darkdeveloper.bitkip.config.AppConfigs.*;
 import static ir.darkdeveloper.bitkip.repo.QueuesRepo.*;
@@ -129,7 +129,7 @@ public class QueueSetting implements FXMLController, QueueObserver {
         powerCombo.setItems(items);
         powerCombo.getSelectionModel().select(0);
         powerCombo.setDisable(true);
-        if (isWindows()){
+        if (isWindows()) {
             windowsPowerLbl.setMaxWidth(rightContainer.getPrefWidth());
             windowsPowerLbl.setWrapText(true);
             windowsPowerLbl.setText("Sleep option may hibernate windows." +
@@ -381,6 +381,14 @@ public class QueueSetting implements FXMLController, QueueObserver {
             schedule.setStopTime(stopTime);
             schedule.setTurnOffEnabled(whenDoneCheck.isSelected());
             schedule.setTurnOffMode(powerCombo.getValue());
+            if (schedule.isTurnOffEnabled() && (isLinux() || isMac()) && userPassword == null) {
+                var header = "By enabling to turn off or suspend automatically, provide system password.";
+                var content = "To be able to turn off or suspend your pc, application needs your system password";
+                if (!FxUtils.askForPassword(header, content))
+                    throw new IllegalArgumentException("Can't schedule because application won't be able to" +
+                            " turn off or suspend\nprovide password in the prompt");
+            }
+
             var startDate = schedule.getStartDate();
             if (schedule.isEnabled() && schedule.isOnceDownload() && startDate != null) {
                 var d = startDate.atTime(schedule.getStartTime());

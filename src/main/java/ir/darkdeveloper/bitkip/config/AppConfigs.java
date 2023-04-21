@@ -45,6 +45,8 @@ public class AppConfigs {
     public static QueueModel selectedQueue;
     public static boolean showCompleteDialog = true;
 
+    public static String userPassword;
+
 
     public static void setHostServices(HostServices hostServices) {
         AppConfigs.hostServices = hostServices;

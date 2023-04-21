@@ -3,6 +3,7 @@ package ir.darkdeveloper.bitkip.task;
 import ir.darkdeveloper.bitkip.models.QueueModel;
 import ir.darkdeveloper.bitkip.models.ScheduleModel;
 import ir.darkdeveloper.bitkip.repo.ScheduleRepo;
+import ir.darkdeveloper.bitkip.utils.FxUtils;
 import ir.darkdeveloper.bitkip.utils.MenuUtils;
 import ir.darkdeveloper.bitkip.utils.QueueUtils;
 import javafx.scene.control.Label;
@@ -12,6 +13,8 @@ import java.time.*;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
+import static com.sun.jna.Platform.isLinux;
+import static com.sun.jna.Platform.isMac;
 import static ir.darkdeveloper.bitkip.config.AppConfigs.*;
 
 
@@ -39,6 +42,11 @@ public class ScheduleTask {
         if (schedule.isStopTimeEnabled())
             stopSchedule(isThereSchedule, queue, startItem, stopItem);
         currentSchedules.put(schedule.getId(), schedule);
+        if (schedule.isTurnOffEnabled() && (isLinux() || isMac()) && userPassword == null) {
+            var header = "You have at least one queue that has been scheduled to turn off or suspend.";
+            var content = "To be able to turn off or suspend your pc, application needs your system password";
+            FxUtils.askForPassword(header, content);
+        }
     }
 
     private static void startSchedule(boolean isThereSchedule, QueueModel queue,

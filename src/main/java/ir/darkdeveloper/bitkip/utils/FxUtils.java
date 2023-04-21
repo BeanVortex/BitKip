@@ -10,12 +10,10 @@ import ir.darkdeveloper.bitkip.models.TurnOffMode;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXMLLoader;
+import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.Scene;
-import javafx.scene.control.Alert;
-import javafx.scene.control.ButtonBar;
-import javafx.scene.control.ButtonType;
-import javafx.scene.control.ScrollPane;
+import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
@@ -27,8 +25,7 @@ import java.util.Map;
 
 import static com.sun.jna.Platform.isLinux;
 import static ir.darkdeveloper.bitkip.BitKip.getResource;
-import static ir.darkdeveloper.bitkip.config.AppConfigs.getQueueSubject;
-import static ir.darkdeveloper.bitkip.config.AppConfigs.openDownloadings;
+import static ir.darkdeveloper.bitkip.config.AppConfigs.*;
 import static ir.darkdeveloper.bitkip.utils.FileExtensions.ALL_DOWNLOADS_QUEUE;
 import static ir.darkdeveloper.bitkip.utils.FileExtensions.staticQueueNames;
 
@@ -332,6 +329,38 @@ public class FxUtils {
         controller.setStage(stage);
         controller.setDownload(dm);
         stage.showAndWait();
+    }
+
+    public static boolean askForPassword(String header, String content) {
+        var dialog = new Dialog<String>();
+        dialog.setTitle("Set Password");
+        dialog.setHeaderText(header);
+        dialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
+
+        var pwd = new PasswordField();
+        pwd.setPromptText("System password");
+        var contentLabel = new Label();
+        contentLabel.setText(content);
+        contentLabel.setWrapText(true);
+        var container = new VBox();
+        container.setAlignment(Pos.CENTER_LEFT);
+        container.setStyle("-fx-padding: 10");
+        container.setSpacing(10);
+        container.getChildren().addAll(contentLabel, pwd);
+        dialog.getDialogPane().setContent(container);
+        dialog.setResultConverter(dialogButton -> {
+            if (dialogButton == ButtonType.OK) {
+                return pwd.getText();
+            }
+            return null;
+        });
+
+        var result = dialog.showAndWait();
+        if (result.isPresent()) {
+            userPassword = result.get();
+            return true;
+        }
+        return false;
     }
 }
 

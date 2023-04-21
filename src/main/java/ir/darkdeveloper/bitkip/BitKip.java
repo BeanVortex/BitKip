@@ -12,7 +12,6 @@ import ir.darkdeveloper.bitkip.utils.MoreUtils;
 import javafx.application.Application;
 import javafx.stage.Stage;
 
-import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
 
@@ -20,6 +19,7 @@ import static com.sun.jna.Platform.isLinux;
 import static ir.darkdeveloper.bitkip.config.AppConfigs.*;
 
 public class BitKip extends Application {
+
 
     @Override
     public void start(Stage stage) {
@@ -41,7 +41,7 @@ public class BitKip extends Application {
 
 
     private void initTray(Stage stage) {
-        if (!isLinux()){
+        if (!isLinux()) {
             var tray = new FXTrayIcon.Builder(stage, getResource("icons/logo.png"))
                     .menuItem("Open App", e -> stage.show())
                     .menuItem("Exit App", e -> {
@@ -69,8 +69,7 @@ public class BitKip extends Application {
         });
     }
 
-
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) {
         launch();
     }
 
