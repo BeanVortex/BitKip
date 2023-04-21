@@ -447,7 +447,7 @@ public class QueueSetting implements FXMLController, QueueObserver {
                 if (saveStatus == SaveStatus.ERROR)
                     savedLabel.setTextFill(Paint.valueOf("#EF5350"));
                 savedLabel.setVisible(true);
-                Thread.sleep(1500);
+                Thread.sleep(2500);
                 savedLabel.setVisible(false);
             } catch (InterruptedException ignore) {
             }
