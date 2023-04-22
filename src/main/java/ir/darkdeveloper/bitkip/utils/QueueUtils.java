@@ -51,8 +51,8 @@ public class QueueUtils {
 
     private static void start(QueueModel qm, MenuItem startItem, MenuItem stopItem) {
         var executor = Executors.newCachedThreadPool();
-        var simulDownloads = new AtomicInteger(0);
         executor.submit(() -> {
+            var simulDownloads = new AtomicInteger(0);
             var sDownloads = qm.getSimultaneouslyDownload();
             var pauseCount = qm.getDownloads().stream().filter(dm -> dm.getDownloadStatus() == DownloadStatus.Paused).count();
             for (int i = 0; i < qm.getDownloads().size(); i++) {
@@ -159,7 +159,7 @@ public class QueueUtils {
         shutdownSchedulersOnOnceDownload(qm);
         var schedule = qm.getSchedule();
         if (schedule.isEnabled() && schedule.isTurnOffEnabled())
-            FxUtils.newShuttingDownStage(schedule.getTurnOffMode());
+            Platform.runLater(() -> FxUtils.newShuttingDownStage(schedule.getTurnOffMode()));
         if (executor != null)
             executor.shutdown();
     }

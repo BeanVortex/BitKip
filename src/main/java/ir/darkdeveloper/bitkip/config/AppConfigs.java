@@ -34,7 +34,7 @@ public class AppConfigs {
     public static final String othersPath = downloadPath + "Others" + File.separator;
     public static final String queuesPath = downloadPath + "Queues" + File.separator;
 
-    public static int downloadRetryCount = 2;
+    public static int downloadRetryCount = 10;
     public static HostServices hostServices;
 
     public static final List<DownloadModel> currentDownloadings = new ArrayList<>();
