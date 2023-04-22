@@ -207,7 +207,7 @@ public class DownloadingController implements FXMLController {
     public void initialize(URL location, ResourceBundle resources) {
         controlBtn.setText(isPaused.get() ? "Resume" : "Pause");
         remainingLbl.setText("Remaining: Paused");
-        isPaused.addListener((o, ol, newValue) -> {
+        isPaused.addListener((o, ol, newValue) -> Platform.runLater(() -> {
             if (downloadModel.getDownloadStatus() == DownloadStatus.Completed)
                 return;
             bytesField.setDisable(!newValue);
@@ -222,7 +222,7 @@ public class DownloadingController implements FXMLController {
             downloadedOfLbl.setText(downloadOf);
             if (newValue)
                 remainingLbl.setText("Remaining: Paused");
-        });
+        }));
 
         openSwitch.selectedProperty().addListener((o, old, newVal) -> {
             downloadModel.setOpenAfterComplete(newVal);

@@ -143,26 +143,8 @@ public class MenuUtils {
         menuItems.get(addToQueueLbl).setDisable(selectedItems.isEmpty());
         menuItems.get(deleteLbl).setDisable(selectedItems.isEmpty());
         menuItems.get(deleteWithFileLbl).setDisable(selectedItems.isEmpty());
+        menuItems.get(deleteFromQueueLbl).setDisable(selectedItems.isEmpty());
 
-        selectedItems.stream().filter(dm -> dm.getDownloadStatus() == DownloadStatus.Paused)
-                .findFirst().ifPresent(dm -> {
-                    menuItems.get(resumeLbl).setDisable(false);
-                    menuItems.get(pauseLbl).setDisable(true);
-                    menuItems.get(openLbl).setDisable(true);
-                });
-        selectedItems.stream().filter(dm -> dm.getDownloadStatus() == DownloadStatus.Downloading
-                        || dm.getDownloadStatus() == DownloadStatus.Trying)
-                .findFirst().ifPresent(dm -> {
-                    menuItems.get(resumeLbl).setDisable(true);
-                    menuItems.get(pauseLbl).setDisable(false);
-                    menuItems.get(openLbl).setDisable(true);
-                });
-        selectedItems.stream().filter(dm -> dm.getDownloadStatus() == DownloadStatus.Completed)
-                .findFirst().ifPresent(dm -> {
-                    menuItems.get(resumeLbl).setDisable(true);
-                    menuItems.get(pauseLbl).setDisable(true);
-                    menuItems.get(openLbl).setDisable(false);
-                });
         selectedItems
                 .filtered(dm -> staticQueueNames.stream()
                         .anyMatch(s -> dm.getQueues().get(0).getName().equals(s)))
@@ -170,6 +152,38 @@ public class MenuUtils {
                 .findFirst()
                 .ifPresentOrElse(dm -> menuItems.get(deleteFromQueueLbl).setDisable(true),
                         () -> menuItems.get(deleteFromQueueLbl).setDisable(selectedItems.isEmpty()));
+
+        selectedItems.stream().filter(dm -> dm.getDownloadStatus() == DownloadStatus.Paused)
+                .findFirst().ifPresent(dm -> {
+                    menuItems.get(resumeLbl).setDisable(false);
+                    menuItems.get(pauseLbl).setDisable(true);
+                    menuItems.get(openLbl).setDisable(true);
+                    menuItems.get(restartLbl).setDisable(false);
+                    menuItems.get(refreshLbl).setDisable(false);
+                    menuItems.get(addToQueueLbl).setDisable(false);
+                    menuItems.get(deleteFromQueueLbl).setDisable(false);
+                });
+        selectedItems.stream().filter(dm -> dm.getDownloadStatus() == DownloadStatus.Downloading
+                        || dm.getDownloadStatus() == DownloadStatus.Trying)
+                .findFirst().ifPresent(dm -> {
+                    menuItems.get(resumeLbl).setDisable(true);
+                    menuItems.get(pauseLbl).setDisable(false);
+                    menuItems.get(openLbl).setDisable(true);
+                    menuItems.get(restartLbl).setDisable(true);
+                    menuItems.get(refreshLbl).setDisable(true);
+                    menuItems.get(addToQueueLbl).setDisable(true);
+                    menuItems.get(deleteFromQueueLbl).setDisable(true);
+                });
+        selectedItems.stream().filter(dm -> dm.getDownloadStatus() == DownloadStatus.Completed)
+                .findFirst().ifPresent(dm -> {
+                    menuItems.get(resumeLbl).setDisable(true);
+                    menuItems.get(pauseLbl).setDisable(true);
+                    menuItems.get(openLbl).setDisable(false);
+                    menuItems.get(restartLbl).setDisable(false);
+                    menuItems.get(refreshLbl).setDisable(false);
+                    menuItems.get(addToQueueLbl).setDisable(false);
+                    menuItems.get(deleteFromQueueLbl).setDisable(false);
+                });
     }
 
     public static void initMoreMenu(Button moreBtn, TableView<DownloadModel> table) {

@@ -13,6 +13,7 @@ import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.util.Callback;
 import org.apache.commons.lang3.time.DurationFormatUtils;
+
 import java.text.DecimalFormat;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
