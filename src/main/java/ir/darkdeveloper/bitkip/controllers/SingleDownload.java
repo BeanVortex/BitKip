@@ -106,46 +106,34 @@ public class SingleDownload implements QueueObserver {
         NewDownloadUtils.initPopOvers(questionBtns, contents);
         InputValidations.validInputChecks(chunksField, bytesField, speedField, dm);
         InputValidations.prepareLinkFromClipboard(urlField);
+        queueCombo.getSelectionModel().selectedIndexProperty().addListener(observable -> onQueueChanged());
         urlField.textProperty().addListener((o, oldValue, newValue) -> {
             if (!newValue.isBlank())
-                autoFillLocationAndSizeAndName(true);
+                autoFillLocationAndSizeAndName();
         });
         nameField.textProperty().addListener((o, oldValue, newValue) -> {
             if (!newValue.isBlank())
-                autoFillLocationAndSizeAndName(false);
+                onOfflineFieldsChanged();
         });
-        locationField.textProperty().addListener((o, oldValue, newValue) -> {
-            if (!newValue.isBlank())
-                autoFillLocationAndSizeAndName(false);
-        });
-        autoFillLocationAndSizeAndName(true);
+        locationField.textProperty().addListener((o, ol, n) -> onOfflineFieldsChanged());
+        autoFillLocationAndSizeAndName();
 
     }
 
-    private void autoFillLocationAndSizeAndName(boolean prepareFileName) {
+    private void autoFillLocationAndSizeAndName() {
         try {
-            var link = urlField.getText();
-            var connection = NewDownloadUtils.connect(link, 3000, 3000);
+            // firing select event
+            queueCombo.getSelectionModel().select(queueCombo.getSelectionModel().getSelectedIndex());
+            var url = urlField.getText();
+            var connection = NewDownloadUtils.connect(url, 3000, 3000);
             var executor = Executors.newFixedThreadPool(2);
             CompletableFuture<Void> fileNameLocationFuture = CompletableFuture.completedFuture(null);
-            if (prepareFileName)
-                fileNameLocationFuture = NewDownloadUtils.prepareFileNameAndFieldsAsync(connection, link, nameField, executor)
-                        .thenAccept(fileName -> NewDownloadUtils.determineLocationAndQueue(locationField, fileName, dm));
+            fileNameLocationFuture = NewDownloadUtils.prepareFileNameAndFieldsAsync(connection, url, nameField, executor)
+                    .thenAccept(this::setLocation);
             var sizeFuture = NewDownloadUtils.prepareFileSizeAndFieldsAsync(connection, urlField, sizeLabel, chunksField, bytesField, dm, executor);
             CompletableFuture.allOf(fileNameLocationFuture, sizeFuture)
                     .whenComplete((unused, throwable) -> {
-                        var file = new File(locationField.getText() + nameField.getText());
-                        var chunkFile = new File(locationField.getText() + nameField.getText() + "#0");
-                        if (file.exists() || chunkFile.exists()) {
-                            errorLabel.setVisible(true);
-                            downloadBtn.setDisable(true);
-                            addBtn.setDisable(true);
-                            Platform.runLater(() -> errorLabel.setText("File with this name exists in this location"));
-                        } else {
-                            errorLabel.setVisible(false);
-                            downloadBtn.setDisable(false);
-                            addBtn.setDisable(false);
-                        }
+                        NewDownloadUtils.checkIfFileExists(locationField.getText(), nameField.getText(), errorLabel, downloadBtn, addBtn);
                         executor.shutdown();
                     })
                     .exceptionally(throwable -> {
@@ -167,10 +155,14 @@ public class SingleDownload implements QueueObserver {
         }
     }
 
+    private void setLocation(String fileName) {
+        NewDownloadUtils.determineLocationAndQueue(locationField, fileName, dm);
+    }
 
     @FXML
     private void onSelectLocation(ActionEvent e) {
         NewDownloadUtils.selectLocation(e, locationField);
+        NewDownloadUtils.checkIfFileExists(locationField.getText(), nameField.getText(), errorLabel, downloadBtn, addBtn);
     }
 
     @FXML
@@ -240,12 +232,13 @@ public class SingleDownload implements QueueObserver {
 
     @FXML
     private void onQueueChanged() {
-        var selectedQueue = queueCombo.getSelectionModel().getSelectedItem();
-        if (selectedQueue != null && selectedQueue.hasFolder()) {
-            var folder = new File(queuesPath + selectedQueue.getName());
-            if (!folder.exists())
-                folder.mkdir();
-            locationField.setText(folder.getAbsolutePath());
-        }
+        onOfflineFieldsChanged();
     }
+
+    private void onOfflineFieldsChanged() {
+        NewDownloadUtils.onOfflineFieldsChanged(locationField, nameField.getText(), dm, queueCombo,
+                errorLabel, downloadBtn, addBtn, openLocation);
+    }
+
+
 }

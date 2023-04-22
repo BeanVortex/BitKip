@@ -2,7 +2,6 @@ package ir.darkdeveloper.bitkip.controllers;
 
 import ir.darkdeveloper.bitkip.config.AppConfigs;
 import ir.darkdeveloper.bitkip.config.QueueObserver;
-import ir.darkdeveloper.bitkip.models.DownloadModel;
 import ir.darkdeveloper.bitkip.models.LinkModel;
 import ir.darkdeveloper.bitkip.models.QueueModel;
 import ir.darkdeveloper.bitkip.repo.QueuesRepo;
@@ -19,17 +18,15 @@ import javafx.scene.control.TextField;
 import javafx.stage.Stage;
 import org.kordamp.ikonli.javafx.FontIcon;
 
-import java.io.File;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.ResourceBundle;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.Executors;
 
 import static ir.darkdeveloper.bitkip.config.AppConfigs.getQueueSubject;
-import static ir.darkdeveloper.bitkip.config.AppConfigs.queuesPath;
 import static ir.darkdeveloper.bitkip.utils.FileExtensions.ALL_DOWNLOADS_QUEUE;
+import static ir.darkdeveloper.bitkip.utils.FileExtensions.extensions;
 
 public class BatchDownload implements QueueObserver {
     @FXML
@@ -59,8 +56,9 @@ public class BatchDownload implements QueueObserver {
     @FXML
     private TextField urlField;
 
+    private LinkModel tempLink;
+
     private Stage stage;
-    private DownloadModel dm;
 
 
     @Override
@@ -101,61 +99,34 @@ public class BatchDownload implements QueueObserver {
         };
         NewDownloadUtils.initPopOvers(questionBtns, contents);
         autoFillLocation();
+        queueCombo.getSelectionModel().selectedIndexProperty().addListener(observable -> onQueueChanged());
         startField.textProperty().addListener(o -> autoFillLocation());
         endField.textProperty().addListener(o -> autoFillLocation());
         urlField.textProperty().addListener(o -> autoFillLocation());
+        locationField.textProperty().addListener((o, ol, n) -> onOfflineFieldsChanged());
     }
 
-    @FXML
-    private void onCheck() {
-        try {
-            var url = urlField.getText();
-            var start = Integer.parseInt(startField.getText());
-            var end = Integer.parseInt(endField.getText());
-            var links = generateLinks(url, start, end, Integer.parseInt(chunksField.getText()), false);
-            var selectedQueue = queueCombo.getSelectionModel().getSelectedItem();
-            var allDownloadsQueue = QueuesRepo.findByName(ALL_DOWNLOADS_QUEUE, false);
-            links.forEach(lm -> {
-                lm.getQueues().add(allDownloadsQueue);
-                lm.getQueues().addAll(dm.getQueues());
-                if (selectedQueue.getId() != allDownloadsQueue.getId())
-                    lm.getQueues().add(selectedQueue);
-                lm.setPath(locationField.getText());
-            });
-            FxUtils.newBatchListStage(links);
-            getQueueSubject().removeObserver(this);
-            stage.close();
-        } catch (IllegalArgumentException e) {
-            if (e instanceof NumberFormatException)
-                return;
-            errorLabel.setVisible(true);
-            addBtn.setDisable(true);
-            var errorStr = e.getLocalizedMessage();
-            errorLabel.setText(errorStr);
-        }
+    private void onOfflineFieldsChanged() {
+        NewDownloadUtils.onOfflineFieldsChanged(locationField, tempLink.getName(), null, queueCombo,
+                errorLabel, null, addBtn, openLocation);
     }
 
 
     private void autoFillLocation() {
-        var executor = Executors.newCachedThreadPool();
         try {
-            dm = new DownloadModel();
+            queueCombo.getSelectionModel().select(queueCombo.getSelectionModel().getSelectedItem());
             var url = urlField.getText();
             var start = Integer.parseInt(startField.getText());
             var end = Integer.parseInt(endField.getText());
             var links = generateLinks(url, start, end, Integer.parseInt(chunksField.getText()), true);
             var link = links.get(0);
-
+            tempLink = link;
             var connection = NewDownloadUtils.connect(link.getLink(), 3000, 3000);
             var fileNameLocationFuture = CompletableFuture.supplyAsync(() -> NewDownloadUtils.extractFileName(link.getLink(), connection))
-                    .thenAccept(fileName -> NewDownloadUtils.determineLocationAndQueue(locationField, fileName, dm));
+                    .thenAccept(this::setLocation);
             fileNameLocationFuture.whenComplete((unused, throwable) -> {
-                errorLabel.setVisible(false);
-                addBtn.setDisable(false);
-                executor.shutdown();
+                NewDownloadUtils.checkIfFileExists(locationField.getText(), tempLink.getName(), errorLabel, null, addBtn);
             }).exceptionally(throwable -> {
-                if (!executor.isShutdown())
-                    executor.shutdown();
                 errorLabel.setVisible(true);
                 addBtn.setDisable(true);
                 var errorMsg = throwable.getCause().getLocalizedMessage();
@@ -164,7 +135,6 @@ public class BatchDownload implements QueueObserver {
             });
         } catch (NumberFormatException ignore) {
         } catch (Exception e) {
-            executor.shutdown();
             errorLabel.setVisible(true);
             addBtn.setDisable(true);
             var errorMsg = e.getLocalizedMessage();
@@ -172,7 +142,11 @@ public class BatchDownload implements QueueObserver {
                 errorMsg = "No links found";
             errorLabel.setText(errorMsg);
         }
-        executor.close();
+    }
+
+    private void setLocation(String fileName) {
+        NewDownloadUtils.determineLocationAndQueue(locationField, fileName, null);
+        tempLink.setName(fileName);
     }
 
     public List<LinkModel> generateLinks(String url, int start, int end, int chunks, boolean oneLink) {
@@ -252,7 +226,55 @@ public class BatchDownload implements QueueObserver {
     @FXML
     private void onSelectLocation(ActionEvent e) {
         NewDownloadUtils.selectLocation(e, locationField);
+        if (tempLink != null)
+            NewDownloadUtils.checkIfFileExists(locationField.getText(), tempLink.getName(), errorLabel, null, addBtn);
     }
+
+    @FXML
+    private void onCheck() {
+        try {
+            var url = urlField.getText();
+            var start = Integer.parseInt(startField.getText());
+            var end = Integer.parseInt(endField.getText());
+            var links = generateLinks(url, start, end, Integer.parseInt(chunksField.getText()), false);
+            var selectedQueue = queueCombo.getSelectionModel().getSelectedItem();
+            var allDownloadsQueue = QueuesRepo.findByName(ALL_DOWNLOADS_QUEUE, false);
+            var secondaryQueue = getSecondaryQueueByFileName(tempLink.getName());
+            links.forEach(lm -> {
+                lm.getQueues().add(allDownloadsQueue);
+                lm.getQueues().add(secondaryQueue);
+                if (selectedQueue.getId() != allDownloadsQueue.getId())
+                    lm.getQueues().add(selectedQueue);
+                lm.setPath(locationField.getText());
+            });
+            FxUtils.newBatchListStage(links);
+            getQueueSubject().removeObserver(this);
+            stage.close();
+        } catch (IllegalArgumentException e) {
+            if (e instanceof NumberFormatException)
+                return;
+            errorLabel.setVisible(true);
+            addBtn.setDisable(true);
+            var errorStr = e.getLocalizedMessage();
+            errorLabel.setText(errorStr);
+        }
+    }
+
+    private QueueModel getSecondaryQueueByFileName(String fileName) {
+        if (fileName == null || fileName.isBlank())
+            return null;
+        for (var entry : extensions.entrySet()) {
+            // empty is set for others
+            if (entry.getValue().isEmpty())
+                return QueuesRepo.findByName(entry.getKey(), false);
+
+            var matched = entry.getValue().stream().anyMatch(fileName::endsWith);
+            if (matched)
+                return QueuesRepo.findByName(entry.getKey(), false);
+        }
+        return null;
+    }
+
 
     @FXML
     private void onNewQueue() {
@@ -278,13 +300,8 @@ public class BatchDownload implements QueueObserver {
 
     @FXML
     private void onQueueChanged() {
-        var selectedQueue = queueCombo.getSelectionModel().getSelectedItem();
-        if (selectedQueue != null && selectedQueue.hasFolder()) {
-            var folder = new File(queuesPath + selectedQueue.getName());
-            if (!folder.exists())
-                folder.mkdir();
-            locationField.setText(folder.getAbsolutePath());
-        }
+        onOfflineFieldsChanged();
     }
-
 }
+
+

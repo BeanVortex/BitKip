@@ -26,12 +26,14 @@ public class AppConfigs {
             + File.separator + "Documents"
             + File.separator + "BitKip" + File.separator;
 
-    public static final String videosPath = downloadPath + "Videos" + File.separator;
-    public static final String programsPath = downloadPath + "Programs" + File.separator;
     public static final String compressedPath = downloadPath + "Compressed" + File.separator;
-    public static final String musicPath = downloadPath + "Music" + File.separator;
+    public static final String programsPath = downloadPath + "Programs" + File.separator;
+    public static final String videosPath = downloadPath + "Videos" + File.separator;
     public static final String documentPath = downloadPath + "Documents" + File.separator;
+    public static final String musicPath = downloadPath + "Music" + File.separator;
     public static final String othersPath = downloadPath + "Others" + File.separator;
+    public static final List<String> defaultDownloadPaths = List.of(compressedPath, programsPath, videosPath,
+            documentPath, musicPath, othersPath);
     public static final String queuesPath = downloadPath + "Queues" + File.separator;
 
     public static int downloadRetryCount = 10;

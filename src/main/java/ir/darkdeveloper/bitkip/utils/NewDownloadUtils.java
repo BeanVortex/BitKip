@@ -2,6 +2,7 @@ package ir.darkdeveloper.bitkip.utils;
 
 import ir.darkdeveloper.bitkip.config.AppConfigs;
 import ir.darkdeveloper.bitkip.models.DownloadModel;
+import ir.darkdeveloper.bitkip.models.QueueModel;
 import ir.darkdeveloper.bitkip.repo.DownloadsRepo;
 import ir.darkdeveloper.bitkip.repo.QueuesRepo;
 import ir.darkdeveloper.bitkip.task.DownloadInChunksTask;
@@ -10,6 +11,7 @@ import ir.darkdeveloper.bitkip.task.DownloadTask;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.scene.control.Button;
+import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.stage.DirectoryChooser;
@@ -121,41 +123,32 @@ public class NewDownloadUtils {
 
     public static void determineLocationAndQueue(TextField locationField, String fileName, DownloadModel dm) {
         Platform.runLater(() -> {
-            if (fileName.isBlank())
+            if (fileName == null || fileName.isBlank())
                 return;
-            var compressedMatch = FileExtensions.compressedEx.stream().anyMatch(fileName::endsWith);
-            if (compressedMatch) {
-                locationField.setText(AppConfigs.compressedPath);
-                dm.setQueues(new CopyOnWriteArrayList<>(List.of(QueuesRepo.findByName(COMPRESSED_QUEUE, false))));
-                return;
+            for (var entry : extensions.entrySet()) {
+                // empty is set for others
+                if (entry.getValue().isEmpty()) {
+                    if (!locationField.getText().equals(othersPath))
+                        locationField.setText(othersPath);
+                    determineQueue(dm, entry.getKey());
+                    return;
+                }
+                var matched = entry.getValue().stream().anyMatch(fileName::endsWith);
+                if (matched) {
+                    var path = defaultDownloadPaths.stream().filter(p -> p.contains(entry.getKey()))
+                            .findFirst().orElse(othersPath);
+                    if (!locationField.getText().equals(path))
+                        locationField.setText(path);
+                    determineQueue(dm, entry.getKey());
+                    return;
+                }
             }
-            var videoMatch = FileExtensions.videoEx.stream().anyMatch(fileName::endsWith);
-            if (videoMatch) {
-                locationField.setText(AppConfigs.videosPath);
-                dm.setQueues(new CopyOnWriteArrayList<>(List.of(QueuesRepo.findByName(VIDEOS_QUEUE, false))));
-                return;
-            }
-            var programMatch = FileExtensions.programEx.stream().anyMatch(fileName::endsWith);
-            if (programMatch) {
-                locationField.setText(AppConfigs.programsPath);
-                dm.setQueues(new CopyOnWriteArrayList<>(List.of(QueuesRepo.findByName(PROGRAMS_QUEUE, false))));
-                return;
-            }
-            var musicMatch = FileExtensions.musicEx.stream().anyMatch(fileName::endsWith);
-            if (musicMatch) {
-                locationField.setText(AppConfigs.musicPath);
-                dm.setQueues(new CopyOnWriteArrayList<>(List.of(QueuesRepo.findByName(MUSIC_QUEUE, false))));
-                return;
-            }
-            var documentMatch = FileExtensions.documentEx.stream().anyMatch(fileName::endsWith);
-            if (documentMatch) {
-                locationField.setText(AppConfigs.documentPath);
-                dm.setQueues(new CopyOnWriteArrayList<>(List.of(QueuesRepo.findByName(DOCS_QUEUE, false))));
-                return;
-            }
-            locationField.setText(AppConfigs.othersPath);
-            dm.setQueues(new CopyOnWriteArrayList<>(List.of(QueuesRepo.findByName(OTHERS_QUEUE, false))));
         });
+    }
+
+    private static void determineQueue(DownloadModel dm, String queueName) {
+        if (dm != null)
+            dm.setQueues(new CopyOnWriteArrayList<>(List.of(QueuesRepo.findByName(queueName, false))));
     }
 
     public static void initPopOvers(Button[] questionButtons, String[] contents) {
@@ -243,6 +236,8 @@ public class NewDownloadUtils {
         var selectedDir = dirChooser.showDialog(FxUtils.getStageFromEvent(e));
         if (selectedDir != null) {
             var path = selectedDir.getPath();
+            if (!path.endsWith(File.separator))
+                path += File.separator;
             locationField.setText(path);
             return;
         }
@@ -250,6 +245,52 @@ public class NewDownloadUtils {
                 .title("No Directory")
                 .text("Location is wrong!")
                 .showError();
+    }
+
+    public static void checkIfFileExists(String location, String name,
+                                         Label errorLabel, Button downloadBtn, Button addBtn) {
+        var file = new File(location + name);
+        var chunkFile = new File(location + name + "#0");
+        if (file.exists() || chunkFile.exists()) {
+            errorLabel.setVisible(true);
+            if (downloadBtn != null)
+                downloadBtn.setDisable(true);
+            addBtn.setDisable(true);
+            Platform.runLater(() -> errorLabel.setText("At least one file with this name exists in this location"));
+        } else {
+            errorLabel.setVisible(false);
+            if (downloadBtn != null)
+                downloadBtn.setDisable(false);
+            addBtn.setDisable(false);
+        }
+    }
+
+    public static void onOfflineFieldsChanged(TextField locationField, String filename, DownloadModel dm,
+                                              ComboBox<QueueModel> queueCombo, Label errorLabel,
+                                              Button downloadBtn, Button addBtn, Button openLocation) {
+        // when saving outside BitKip folder
+        var selectedQueue = queueCombo.getSelectionModel().getSelectedItem();
+        if (!locationField.getText().contains("BitKip")
+                && (selectedQueue == null || !selectedQueue.hasFolder())) {
+            openLocation.setDisable(false);
+            return;
+        }
+
+        if (selectedQueue != null && selectedQueue.hasFolder()) {
+            var folder = new File(queuesPath + selectedQueue.getName());
+            if (!folder.exists())
+                folder.mkdir();
+            var path = folder.getAbsolutePath();
+            if (!path.endsWith(File.separator))
+                path += File.separator;
+            if (!locationField.getText().equals(path))
+                locationField.setText(path);
+            openLocation.setDisable(true);
+        } else {
+            determineLocationAndQueue(locationField, filename, dm);
+            openLocation.setDisable(false);
+        }
+        checkIfFileExists(locationField.getText(), filename, errorLabel, downloadBtn, addBtn);
     }
 }
 
