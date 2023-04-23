@@ -220,6 +220,7 @@ public class DownloadInChunksTask extends DownloadTask {
 
     private void calculateSpeedAndProgressChunks(long fileSize) {
         executor.submit(() -> {
+            Thread.currentThread().setName("calculator: " + Thread.currentThread().getName());
             try {
                 while (!isCalculating) Thread.onSpinWait();
                 while (!paused) {
@@ -295,7 +296,7 @@ public class DownloadInChunksTask extends DownloadTask {
                 mainTableUtils.refreshTable();
             }
             if (executor != null && !blocking)
-                executor.shutdown();
+                executor.shutdownNow();
             System.gc();
         } catch (IOException e) {
             throw new RuntimeException(e);

@@ -207,22 +207,11 @@ public class DownloadingController implements FXMLController {
     public void initialize(URL location, ResourceBundle resources) {
         controlBtn.setText(isPaused.get() ? "Resume" : "Pause");
         remainingLbl.setText("Remaining: Paused");
-        isPaused.addListener((o, ol, newValue) -> Platform.runLater(() -> {
-            if (downloadModel.getDownloadStatus() == DownloadStatus.Completed)
-                return;
-            bytesField.setDisable(!newValue);
-            speedField.setDisable(!newValue);
-            if (!speedField.getText().equals("0"))
-                bytesField.setDisable(true);
-            controlBtn.setText(newValue ? "Resume" : "Pause");
-            statusLbl.setText("Status: " + (newValue ? DownloadStatus.Paused : DownloadStatus.Downloading));
-            var downloadOf = "%s / %s"
-                    .formatted(IOUtils.formatBytes(downloadModel.getDownloaded()),
-                            IOUtils.formatBytes(downloadModel.getSize()));
-            downloadedOfLbl.setText(downloadOf);
-            if (newValue)
-                remainingLbl.setText("Remaining: Paused");
-        }));
+        isPaused.addListener((o, ol, newValue) -> {
+            if (!Platform.isFxApplicationThread())
+                Platform.runLater(() -> updatePause(newValue));
+            else updatePause(newValue);
+        });
 
         openSwitch.selectedProperty().addListener((o, old, newVal) -> {
             downloadModel.setOpenAfterComplete(newVal);
@@ -235,6 +224,23 @@ public class DownloadingController implements FXMLController {
         linkPopover.setAnimated(true);
         linkPopover.setContentNode(new Label("Copied"));
         link.setOnMouseExited(event -> linkPopover.hide());
+    }
+
+    private void updatePause(Boolean paused) {
+        if (downloadModel.getDownloadStatus() == DownloadStatus.Completed)
+            return;
+        bytesField.setDisable(!paused);
+        speedField.setDisable(!paused);
+        if (!speedField.getText().equals("0"))
+            bytesField.setDisable(true);
+        controlBtn.setText(paused ? "Resume" : "Pause");
+        statusLbl.setText("Status: " + (paused ? DownloadStatus.Paused : DownloadStatus.Downloading));
+        var downloadOf = "%s / %s"
+                .formatted(IOUtils.formatBytes(downloadModel.getDownloaded()),
+                        IOUtils.formatBytes(downloadModel.getSize()));
+        downloadedOfLbl.setText(downloadOf);
+        if (paused)
+            remainingLbl.setText("Remaining: Paused");
     }
 
     @FXML

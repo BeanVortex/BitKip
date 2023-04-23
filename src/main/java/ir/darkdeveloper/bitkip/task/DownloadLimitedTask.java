@@ -169,7 +169,7 @@ public class DownloadLimitedTask extends DownloadTask {
                 mainTableUtils.refreshTable();
             }
             if (executor != null && !blocking)
-                executor.shutdown();
+                executor.shutdownNow();
             System.gc();
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -186,6 +186,7 @@ public class DownloadLimitedTask extends DownloadTask {
         if (isCalculating)
             return;
         executor.submit(() -> {
+            Thread.currentThread().setName("calculator: " + Thread.currentThread().getName());
             try {
                 isCalculating = true;
                 while (!paused) {
