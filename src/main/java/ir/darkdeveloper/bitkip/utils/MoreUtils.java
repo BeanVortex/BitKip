@@ -20,8 +20,9 @@ public class MoreUtils {
         executor.submit(updateChecker);
 
         updateChecker.valueProperty().addListener((obs, old, newVal) -> {
-            var version = newVal.split(",")[0];
-            var description = newVal.split(",")[1];
+            var version = newVal.version();
+            var description = newVal.description();
+            System.out.println(newVal.assets());
             if (!AppConfigs.VERSION.equals(version)) {
                 var alert = new Alert(Alert.AlertType.INFORMATION,
                         "", ButtonType.YES, ButtonType.NO);
