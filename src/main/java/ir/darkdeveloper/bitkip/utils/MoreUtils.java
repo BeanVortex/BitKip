@@ -21,7 +21,7 @@ public class MoreUtils {
 
         updateChecker.valueProperty().addListener((obs, old, newVal) -> {
             var version = newVal.version();
-            var description = newVal.description();
+            var description = newVal.description().header();
             System.out.println(newVal.assets());
             if (!AppConfigs.VERSION.equals(version)) {
                 var alert = new Alert(Alert.AlertType.INFORMATION,

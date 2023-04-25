@@ -23,7 +23,13 @@ public class UpdateCheckTask extends Task<UpdateModel> {
                 .select("div").get(0)
                 .select("span").get(0)
                 .text().substring(1);
-        var description = doc.select(".Box-body").select(".markdown-body").text();
+        var descriptionTitle = doc.select(".Box-body .markdown-body h3").text();
+        var descriptionList = doc.select(".Box-body .markdown-body ul li");
+        var features = new ArrayList<String>();
+        for (var li : descriptionList)
+            features.add(li.text());
+
+        var description = new UpdateModel.Description(descriptionTitle, features);
 
 
         if (!updateVersion.equals(VERSION)) {
