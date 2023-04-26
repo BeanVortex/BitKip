@@ -7,20 +7,19 @@ import ir.darkdeveloper.bitkip.repo.DownloadsRepo;
 import ir.darkdeveloper.bitkip.repo.QueuesRepo;
 import ir.darkdeveloper.bitkip.task.DownloadTask;
 import ir.darkdeveloper.bitkip.utils.DownloadOpUtils;
+import ir.darkdeveloper.bitkip.utils.FxUtils;
 import ir.darkdeveloper.bitkip.utils.IOUtils;
 import ir.darkdeveloper.bitkip.utils.InputValidations;
 import javafx.application.Platform;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.fxml.FXML;
-import javafx.scene.control.*;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 import javafx.scene.image.Image;
-import javafx.scene.input.Clipboard;
-import javafx.scene.input.ClipboardContent;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Paint;
@@ -40,7 +39,8 @@ import java.util.ResourceBundle;
 
 import static com.sun.jna.Platform.*;
 import static ir.darkdeveloper.bitkip.BitKip.getResource;
-import static ir.darkdeveloper.bitkip.config.AppConfigs.*;
+import static ir.darkdeveloper.bitkip.config.AppConfigs.currentDownloadings;
+import static ir.darkdeveloper.bitkip.config.AppConfigs.openDownloadings;
 import static ir.darkdeveloper.bitkip.utils.DownloadOpUtils.openFile;
 
 public class DownloadingController implements FXMLController {
@@ -279,10 +279,7 @@ public class DownloadingController implements FXMLController {
 
     @FXML
     public void copyLink() {
-        var clip = Clipboard.getSystemClipboard();
-        var content = new ClipboardContent();
-        content.putString(link.getText());
-        clip.setContent(content);
+        FxUtils.setClipboard(link.getText());
         linkPopover.show(link);
     }
 

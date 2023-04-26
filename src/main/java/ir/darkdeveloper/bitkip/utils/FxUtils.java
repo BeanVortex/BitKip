@@ -3,10 +3,7 @@ package ir.darkdeveloper.bitkip.utils;
 
 import ir.darkdeveloper.bitkip.controllers.*;
 import ir.darkdeveloper.bitkip.controllers.interfaces.FXMLController;
-import ir.darkdeveloper.bitkip.models.DownloadModel;
-import ir.darkdeveloper.bitkip.models.LinkModel;
-import ir.darkdeveloper.bitkip.models.QueueModel;
-import ir.darkdeveloper.bitkip.models.TurnOffMode;
+import ir.darkdeveloper.bitkip.models.*;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXMLLoader;
@@ -15,10 +12,13 @@ import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
+import javafx.scene.input.Clipboard;
+import javafx.scene.input.ClipboardContent;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -357,12 +357,56 @@ public class FxUtils {
             return null;
         });
 
+        var logoPath = getResource("icons/logo.png");
+        if (logoPath != null)
+            ((Stage) dialog.getDialogPane().getScene().getWindow()).getIcons().add(new Image(logoPath.toExternalForm()));
         var result = dialog.showAndWait();
         if (result.isPresent()) {
             userPassword = result.get();
             return true;
         }
         return false;
+    }
+
+    public static void showUpdateDialog(UpdateModel updateModel) {
+        var dialog = new Dialog<String>();
+        dialog.setTitle("New Update Available: " + updateModel.version());
+        dialog.setHeaderText(updateModel.description().header());
+        dialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK);
+
+        var nodes = new ArrayList<Node>();
+        nodes.add(new Label(String.join("\n", updateModel.description().features())));
+        updateModel.assets().forEach(asset -> {
+            var link = new Hyperlink();
+            if (asset.size().isBlank())
+                link.setText(asset.title());
+            else
+                link.setText(asset.title() + " / " + asset.size());
+            link.setOnAction(e -> {
+                setClipboard(asset.link());
+                newDownloadStage(true);
+                dialog.close();
+            });
+            nodes.add(link);
+        });
+
+        var container = new VBox();
+        container.setAlignment(Pos.CENTER_LEFT);
+        container.setStyle("-fx-padding: 10");
+        container.setSpacing(10);
+        container.getChildren().addAll(nodes);
+        dialog.getDialogPane().setContent(container);
+        var logoPath = getResource("icons/logo.png");
+        if (logoPath != null)
+            ((Stage) dialog.getDialogPane().getScene().getWindow()).getIcons().add(new Image(logoPath.toExternalForm()));
+        dialog.showAndWait();
+    }
+
+    public static void setClipboard(String value) {
+        var clip = Clipboard.getSystemClipboard();
+        var content = new ClipboardContent();
+        content.putString(value);
+        clip.setContent(content);
     }
 }
 

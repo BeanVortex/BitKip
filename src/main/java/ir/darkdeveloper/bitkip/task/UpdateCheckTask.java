@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.concurrent.ExecutorService;
 
+import static com.sun.jna.Platform.*;
 import static ir.darkdeveloper.bitkip.config.AppConfigs.VERSION;
 
 public class UpdateCheckTask extends Task<UpdateModel> {
@@ -39,7 +40,14 @@ public class UpdateCheckTask extends Task<UpdateModel> {
             var assets = new ArrayList<UpdateModel.Asset>();
             for (var row : rows) {
                 var fileATag = row.select("a").get(0);
-                var fileTitle = fileATag.select("span").get(0).text();
+                var fileTitle = fileATag.select("span").text();
+                if (isWindows() && !fileTitle.contains("win") && !fileTitle.contains("exe") && !fileTitle.contains("msi")
+                        && !(fileTitle.contains("Source code") && fileTitle.contains("zip")))
+                    continue;
+                if (isLinux() && !fileTitle.contains("linux") && !fileTitle.contains("tar.gz"))
+                    continue;
+                if (isMac() && !fileTitle.contains("mac") && !fileTitle.contains("dmg") && !fileTitle.contains("tar.gz"))
+                    continue;
                 var fileLink = "https://github.com" + fileATag.attr("href");
                 var fileSize = row.select("div > span").get(0).text();
                 if (!fileSize.contains("MB"))
