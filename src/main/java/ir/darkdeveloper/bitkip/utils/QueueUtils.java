@@ -39,7 +39,7 @@ public class QueueUtils {
             }
             startItem.setDisable(true);
             stopItem.setDisable(false);
-            if (!qm.isDownloadFromTop())
+            if (qm.isDownloadFromTop())
                 Collections.reverse(downloadsByQueue);
             qm.setDownloads(new CopyOnWriteArrayList<>(downloadsByQueue));
             startedQueues.add(qm);
