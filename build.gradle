@@ -68,7 +68,9 @@ jlink {
         if (OperatingSystem.current().windows) {
             appVersion = version
             installerName = 'BitKip'
-            installerOptions = ['--win-menu', '--win-shortcut', '--icon', 'src/main/resources/ir/darkdeveloper/bitkip/icons/logo.ico']
+            installerOptions = ['--win-menu', '--win-shortcut',
+                                '--icon', 'src/main/resources/ir/darkdeveloper/bitkip/icons/logo.ico',
+                                '--vendor', 'DarkDeveloper']
             imageOptions = ['--icon', 'src/main/resources/ir/darkdeveloper/bitkip/icons/logo.ico']
         }
     }

@@ -127,8 +127,7 @@ public class SingleDownload implements QueueObserver {
             var url = urlField.getText();
             var connection = NewDownloadUtils.connect(url, 3000, 3000);
             var executor = Executors.newFixedThreadPool(2);
-            CompletableFuture<Void> fileNameLocationFuture = CompletableFuture.completedFuture(null);
-            fileNameLocationFuture = NewDownloadUtils.prepareFileNameAndFieldsAsync(connection, url, nameField, executor)
+            var fileNameLocationFuture = NewDownloadUtils.prepareFileNameAndFieldsAsync(connection, url, nameField, executor)
                     .thenAccept(this::setLocation);
             var sizeFuture = NewDownloadUtils.prepareFileSizeAndFieldsAsync(connection, urlField, sizeLabel, chunksField, bytesField, dm, executor);
             CompletableFuture.allOf(fileNameLocationFuture, sizeFuture)

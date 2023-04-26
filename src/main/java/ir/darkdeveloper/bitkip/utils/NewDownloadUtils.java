@@ -126,19 +126,19 @@ public class NewDownloadUtils {
             if (fileName == null || fileName.isBlank())
                 return;
             for (var entry : extensions.entrySet()) {
-                // empty is set for others
-                if (entry.getValue().isEmpty()) {
-                    if (!locationField.getText().equals(othersPath))
-                        locationField.setText(othersPath);
-                    determineQueue(dm, entry.getKey());
-                    return;
-                }
                 var matched = entry.getValue().stream().anyMatch(fileName::endsWith);
                 if (matched) {
                     var path = defaultDownloadPaths.stream().filter(p -> p.contains(entry.getKey()))
                             .findFirst().orElse(othersPath);
                     if (!locationField.getText().equals(path))
                         locationField.setText(path);
+                    determineQueue(dm, entry.getKey());
+                    return;
+                }
+                // empty is set for others
+                if (entry.getValue().isEmpty()) {
+                    if (!locationField.getText().equals(othersPath))
+                        locationField.setText(othersPath);
                     determineQueue(dm, entry.getKey());
                     return;
                 }
