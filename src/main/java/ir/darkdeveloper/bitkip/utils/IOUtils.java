@@ -17,6 +17,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.logging.Logger;
 
+import static ir.darkdeveloper.bitkip.config.AppConfigs.dataPath;
 import static ir.darkdeveloper.bitkip.config.AppConfigs.downloadPath;
 
 
@@ -25,6 +26,7 @@ public class IOUtils {
 
 
     public static void createSaveLocations() {
+        mkdir(dataPath);
         Arrays.stream(FileType.values()).forEach(fileType -> IOUtils.mkdir(fileType.getPath()));
         QueueUtils.createFolders();
     }

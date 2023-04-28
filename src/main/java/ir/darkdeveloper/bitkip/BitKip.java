@@ -23,15 +23,15 @@ public class BitKip extends Application {
 
     @Override
     public void start(Stage stage) {
+        IOUtils.createSaveLocations();
         DownloadsRepo.createTable();
         ScheduleRepo.createSchedulesTable();
         QueuesRepo.createTable();
         var queues = QueuesRepo.getAllQueues(false, true);
-        if (queues == null)
+        if (queues.isEmpty())
             queues = QueuesRepo.createDefaultRecords();
         queues = ScheduleRepo.createDefaultSchedulesForQueues(queues);
         AppConfigs.addAllQueues(queues);
-        IOUtils.createSaveLocations();
         AppConfigs.setHostServices(getHostServices());
         FxUtils.startMainStage(stage);
         ScheduleTask.startSchedules();

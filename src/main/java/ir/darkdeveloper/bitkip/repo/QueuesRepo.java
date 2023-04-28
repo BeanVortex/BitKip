@@ -37,9 +37,10 @@ public class QueuesRepo {
             if (name.equals("All Downloads"))
                 queue.setCanAddDownload(true);
             var schedule = new ScheduleModel();
-            ScheduleRepo.insertSchedule(schedule, queue.getId());
+            ScheduleRepo.insertSchedule(schedule, -1);
             queue.setSchedule(schedule);
             insertQueue(queue);
+            ScheduleRepo.updateScheduleQueueId(schedule.getId(), queue.getId());
             return queue;
         }).toList();
     }
