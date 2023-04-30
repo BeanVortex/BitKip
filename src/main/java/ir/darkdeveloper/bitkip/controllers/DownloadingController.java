@@ -229,7 +229,8 @@ public class DownloadingController implements FXMLController {
     private void updatePause(Boolean paused) {
         if (downloadModel.getDownloadStatus() == DownloadStatus.Completed)
             return;
-        bytesField.setDisable(!paused);
+        if (downloadModel.getChunks() == 0)
+            bytesField.setDisable(!paused);
         speedField.setDisable(!paused);
         if (!speedField.getText().equals("0"))
             bytesField.setDisable(true);

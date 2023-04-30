@@ -51,7 +51,8 @@ public class DownloadLimitedTask extends DownloadTask {
         try {
             performDownload();
         } catch (IOException | InterruptedException e) {
-            e.printStackTrace();
+            if (e instanceof IOException)
+                e.printStackTrace();
             this.pause();
         }
         return getCurrentFileSize(file);
@@ -196,7 +197,9 @@ public class DownloadLimitedTask extends DownloadTask {
                     updateValue(currentFileSize);
                 }
                 isCalculating = false;
-            } catch (IOException | InterruptedException e) {
+
+            } catch (InterruptedException ignore) {
+            } catch (IOException e) {
                 e.printStackTrace();
             }
         });

@@ -15,7 +15,6 @@ import java.nio.channels.Channels;
 import java.nio.channels.ClosedChannelException;
 import java.nio.channels.FileChannel;
 import java.nio.file.Files;
-import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
@@ -134,6 +133,8 @@ public class DownloadInChunksTask extends DownloadTask {
                 try {
                     performLimitedDownload(url, fromContinue, finalFrom, finalTo, partFile, fileSize);
                 } catch (IOException | InterruptedException e) {
+                    if (e instanceof IOException)
+                        e.printStackTrace();
                     this.pause();
                 }
             }, executor);
@@ -142,10 +143,13 @@ public class DownloadInChunksTask extends DownloadTask {
                 try {
                     performDownload(url, fromContinue, finalFrom, finalTo, partFile, fileSize);
                 } catch (IOException | InterruptedException e) {
+                    if (e instanceof IOException)
+                        e.printStackTrace();
                     this.pause();
                 }
             }, executor);
         }
+        c.whenComplete((unused, throwable) -> Thread.currentThread().interrupt());
         futures.add(c);
     }
 
@@ -208,12 +212,12 @@ public class DownloadInChunksTask extends DownloadTask {
                 if (!paused) {
                     Thread.sleep(2000);
                     var currFileSize = getCurrentFileSize(partFile);
-                    performDownload(url, fromContinue, fromContinue + currFileSize, to, partFile, currFileSize);
+                    performLimitedDownload(url, fromContinue, fromContinue + currFileSize, to, partFile, currFileSize);
                 }
             }
             var currFileSize = getCurrentFileSize(partFile);
             if (!paused && currFileSize != (to - fromContinue + 1))
-                performDownload(url, fromContinue, fromContinue + currFileSize, to, partFile, currFileSize);
+                performLimitedDownload(url, fromContinue, fromContinue + currFileSize, to, partFile, currFileSize);
         }
     }
 
@@ -233,8 +237,8 @@ public class DownloadInChunksTask extends DownloadTask {
                     updateProgress(currentFileSize, fileSize);
                     updateValue(currentFileSize);
                 }
-            } catch (NoSuchFileException ignore) {
-            } catch (IOException | InterruptedException e) {
+            } catch (InterruptedException ignore) {
+            } catch (IOException e) {
                 e.printStackTrace();
             }
         });
