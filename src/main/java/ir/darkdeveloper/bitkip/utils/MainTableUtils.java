@@ -94,15 +94,16 @@ public class MainTableUtils {
                     var resumeLbl = new Label("resume");
                     var pauseLbl = new Label("pause");
                     var refreshLbl = new Label("refresh link");
+                    var copyLbl = new Label("copy link");
                     var restartLbl = new Label("restart");
                     var downloadingLbl = new Label("details");
                     var deleteFromQueueLbl = new Label("delete from this queue");
                     var deleteLbl = new Label("delete");
                     var deleteWithFileLbl = new Label("delete with file");
-                    var lbls = List.of(openLbl, resumeLbl, pauseLbl, refreshLbl, restartLbl, downloadingLbl, deleteFromQueueLbl,
+                    var lbls = List.of(openLbl, resumeLbl, pauseLbl, refreshLbl, copyLbl, restartLbl, downloadingLbl, deleteFromQueueLbl,
                             deleteLbl, deleteWithFileLbl);
                     var keyCodes = Arrays.asList(OPEN_KEY, RESUME_KEY, PAUSE_KEY,
-                            REFRESH_KEY, RESTART_KEY, DOWNLOADING_STAGE_KEY, null, DELETE_KEY, DELETE_FILE_KEY);
+                            REFRESH_KEY, COPY_KEY, RESTART_KEY, DOWNLOADING_STAGE_KEY, null, DELETE_KEY, DELETE_FILE_KEY);
                     var menuItems = MenuUtils.createMapMenuItems(lbls, keyCodes);
 
                     var addToQueueMenu = new Menu();
@@ -116,13 +117,14 @@ public class MainTableUtils {
                     }
 
                     menuItems.put(addToQueueLbl, addToQueueMenu);
-                    MenuUtils.disableMenuItems(resumeLbl, pauseLbl, openLbl, deleteFromQueueLbl, refreshLbl, restartLbl,
+                    MenuUtils.disableMenuItems(resumeLbl, pauseLbl, openLbl, deleteFromQueueLbl, refreshLbl, copyLbl, restartLbl,
                             addToQueueLbl, deleteLbl, deleteWithFileLbl, menuItems, selectedItems);
 
                     menuItems.get(openLbl).setOnAction(e -> DownloadOpUtils.openFiles(getSelected()));
                     menuItems.get(resumeLbl).setOnAction(e -> DownloadOpUtils.resumeDownloads(getSelected(), null, null));
                     menuItems.get(pauseLbl).setOnAction(e -> DownloadOpUtils.pauseDownloads(getSelected()));
                     menuItems.get(refreshLbl).setOnAction(e -> DownloadOpUtils.refreshDownload(getSelected()));
+                    menuItems.get(copyLbl).setOnAction(e -> FxUtils.setClipboard(getSelected().get(0).getUrl()));
                     menuItems.get(restartLbl).setOnAction(e -> DownloadOpUtils.restartDownloads(getSelected()));
                     menuItems.get(downloadingLbl).setOnAction(e -> getSelected().forEach(FxUtils::newDownloadingStage));
                     menuItems.get(deleteFromQueueLbl).setOnAction(e -> MenuUtils.deleteFromQueue());

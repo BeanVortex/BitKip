@@ -52,6 +52,7 @@ public class MenuUtils {
         var resumeLbl = new Label("Resume");
         var pauseLbl = new Label("Pause");
         var refreshLbl = new Label("Refresh link");
+        var copyLbl = new Label("Copy link");
         var restartLbl = new Label("Restart");
         var deleteLbl = new Label("Delete selected");
         var deleteWithFileLbl = new Label("Delete selected with file");
@@ -62,8 +63,8 @@ public class MenuUtils {
         var stopQueueLbl = new Label("Stop queue");
         var queueSettingLbl = new Label("Queue settings");
 
-        var lbls = List.of(openLbl, resumeLbl, pauseLbl, refreshLbl, restartLbl, deleteLbl, deleteWithFileLbl);
-        var keyCodes = List.of(OPEN_KEY, RESUME_KEY, PAUSE_KEY, REFRESH_KEY, RESTART_KEY, DELETE_KEY, DELETE_FILE_KEY);
+        var lbls = List.of(openLbl, resumeLbl, pauseLbl, refreshLbl, copyLbl, restartLbl, deleteLbl, deleteWithFileLbl);
+        var keyCodes = List.of(OPEN_KEY, RESUME_KEY, PAUSE_KEY, REFRESH_KEY, COPY_KEY, RESTART_KEY, DELETE_KEY, DELETE_FILE_KEY);
         var menuItems = createMapMenuItems(lbls, keyCodes);
 
         var split = new SeparatorMenuItem();
@@ -99,7 +100,7 @@ public class MenuUtils {
 
         operationMenu.setOnMouseClicked(event -> {
             var selectedItems = mainTableUtils.getSelected();
-            disableMenuItems(resumeLbl, pauseLbl, openLbl, deleteFromQueueLbl, refreshLbl, restartLbl,
+            disableMenuItems(resumeLbl, pauseLbl, openLbl, deleteFromQueueLbl, refreshLbl, copyLbl, restartLbl,
                     addToQueueLbl, deleteLbl, deleteWithFileLbl, menuItems, selectedItems);
             disableEnableStartStopQueue(startQueueMenu, stopQueueMenu);
             deleteLbl.setText("Delete selected (" + selectedItems.size() + ")");
@@ -112,6 +113,7 @@ public class MenuUtils {
         menuItems.get(pauseLbl).setOnAction(e -> DownloadOpUtils.pauseDownloads(mainTableUtils.getSelected()));
         menuItems.get(restartLbl).setOnAction(e -> DownloadOpUtils.restartDownloads(mainTableUtils.getSelected()));
         menuItems.get(refreshLbl).setOnAction(e -> DownloadOpUtils.refreshDownload(mainTableUtils.getSelected()));
+        menuItems.get(copyLbl).setOnAction(e -> FxUtils.setClipboard(mainTableUtils.getSelected().get(0).getUrl()));
         menuItems.get(deleteLbl).setOnAction(e -> DownloadOpUtils.deleteDownloads(mainTableUtils.getSelected(), false));
         menuItems.get(deleteWithFileLbl).setOnAction(e -> DownloadOpUtils.deleteDownloads(mainTableUtils.getSelected(), true));
         menuItems.get(newQueueLbl).setOnAction(e -> FxUtils.newQueueStage());
@@ -131,8 +133,8 @@ public class MenuUtils {
     }
 
     public static void disableMenuItems(Label resumeLbl, Label pauseLbl, Label openLbl, Label deleteFromQueueLbl,
-                                        Label refreshLbl, Label restartLbl, Label addToQueueLbl, Label deleteLbl,
-                                        Label deleteWithFileLbl,
+                                        Label refreshLbl, Label copyLbl, Label restartLbl, Label addToQueueLbl,
+                                        Label deleteLbl, Label deleteWithFileLbl,
                                         LinkedHashMap<Label, MenuItem> menuItems,
                                         ObservableList<DownloadModel> selectedItems) {
         menuItems.get(openLbl).setDisable(selectedItems.isEmpty());
@@ -140,6 +142,7 @@ public class MenuUtils {
         menuItems.get(pauseLbl).setDisable(selectedItems.isEmpty());
         menuItems.get(restartLbl).setDisable(selectedItems.isEmpty());
         menuItems.get(refreshLbl).setDisable(selectedItems.size() != 1);
+        menuItems.get(copyLbl).setDisable(selectedItems.size() != 1);
         menuItems.get(addToQueueLbl).setDisable(selectedItems.isEmpty());
         menuItems.get(deleteLbl).setDisable(selectedItems.isEmpty());
         menuItems.get(deleteWithFileLbl).setDisable(selectedItems.isEmpty());
