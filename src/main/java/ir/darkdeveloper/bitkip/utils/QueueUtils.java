@@ -210,7 +210,11 @@ public class QueueUtils {
 
     public static void createFolders() {
         getQueues().stream().filter(QueueModel::hasFolder)
-                .forEach(qm -> IOUtils.createFolderInSaveLocation("Queues" + File.separator + qm.getName()));
+                .forEach(qm -> {
+                    var name = "Queues" + File.separator + qm.getName();
+                    IOUtils.createFolderInSaveLocation(name);
+                    IOUtils.createFolderInSaveLocation(name + File.separator + ".temp");
+                });
     }
 
     public static void deleteQueue(String name) {

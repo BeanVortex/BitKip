@@ -27,8 +27,11 @@ public class IOUtils {
 
     public static void createSaveLocations() {
         mkdir(dataPath);
-        Arrays.stream(FileType.values()).forEach(fileType -> IOUtils.mkdir(fileType.getPath()));
-        QueueUtils.createFolders();
+        Arrays.stream(FileType.values()).forEach(fileType -> {
+            IOUtils.mkdir(fileType.getPath());
+            if (fileType != FileType.QUEUES)
+                IOUtils.mkdir(fileType.getPath() + ".temp");
+        });
     }
 
     private static void mkdir(String dirPath) {
