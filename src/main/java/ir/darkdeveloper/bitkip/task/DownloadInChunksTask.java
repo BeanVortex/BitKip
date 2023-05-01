@@ -15,6 +15,7 @@ import java.nio.channels.Channels;
 import java.nio.channels.ClosedChannelException;
 import java.nio.channels.FileChannel;
 import java.nio.file.Files;
+import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
@@ -79,12 +80,12 @@ public class DownloadInChunksTask extends DownloadTask {
         var to = bytesForEach;
         var from = 0L;
         var fromContinue = 0L;
-        var filePath = downloadModel.getFilePath();
+        var pathToChunk = Paths.get(downloadModel.getFilePath()).getParent() + File.separator + ".temp" + File.separator;
         var lastPartSize = fileSize - ((chunks - 1) * bytesForEach);
         for (int i = 0; i < chunks; i++, fromContinue = to, to += bytesForEach) {
-            var name = filePath + "#" + i;
-            filePaths.add(Paths.get(name));
-            var partFile = new File(name);
+            var filePath = pathToChunk + downloadModel.getName() + "#" + i;
+            filePaths.add(Paths.get(filePath));
+            var partFile = new File(filePath);
             var existingFileSize = 0L;
             if (!partFile.exists()) {
                 partFile.createNewFile();
@@ -129,7 +130,7 @@ public class DownloadInChunksTask extends DownloadTask {
                             File partFile, long finalTo, long finalFrom, long fromContinue) {
         CompletableFuture<Void> c;
         if (isLimited) {
-            c = CompletableFuture.runAsync(() -> {
+            c = CompletableFuture.supplyAsync(() -> {
                 try {
                     performLimitedDownload(url, fromContinue, finalFrom, finalTo, partFile, fileSize);
                 } catch (IOException | InterruptedException e) {
@@ -137,9 +138,10 @@ public class DownloadInChunksTask extends DownloadTask {
                         e.printStackTrace();
                     this.pause();
                 }
+                return null;
             }, executor);
         } else {
-            c = CompletableFuture.runAsync(() -> {
+            c = CompletableFuture.supplyAsync(() -> {
                 try {
                     performDownload(url, fromContinue, finalFrom, finalTo, partFile, fileSize);
                 } catch (IOException | InterruptedException e) {
@@ -147,6 +149,7 @@ public class DownloadInChunksTask extends DownloadTask {
                         e.printStackTrace();
                     this.pause();
                 }
+                return null;
             }, executor);
         }
         c.whenComplete((unused, throwable) -> Thread.currentThread().interrupt());
@@ -227,17 +230,17 @@ public class DownloadInChunksTask extends DownloadTask {
             Thread.currentThread().setName("calculator: " + Thread.currentThread().getName());
             try {
                 while (!isCalculating) Thread.onSpinWait();
+                Thread.sleep(ONE_SEC);
                 while (!paused) {
                     var currentFileSize = 0L;
-
-                    Thread.sleep(ONE_SEC);
                     for (int i = 0; i < chunks; i++)
                         currentFileSize += Files.size(filePaths.get(i));
-
                     updateProgress(currentFileSize, fileSize);
                     updateValue(currentFileSize);
+
+                    Thread.sleep(ONE_SEC);
                 }
-            } catch (InterruptedException ignore) {
+            } catch (InterruptedException | NoSuchFileException ignore) {
             } catch (IOException e) {
                 e.printStackTrace();
             }

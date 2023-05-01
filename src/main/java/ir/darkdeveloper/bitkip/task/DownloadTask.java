@@ -16,8 +16,8 @@ import static ir.darkdeveloper.bitkip.config.AppConfigs.currentDownloadings;
 
 public abstract class DownloadTask extends Task<Long> {
 
-    long ONE_SEC = 1000;
-    DownloadModel downloadModel;
+    protected static final long ONE_SEC = 1000;
+    protected DownloadModel downloadModel;
 
     public abstract void pause();
 

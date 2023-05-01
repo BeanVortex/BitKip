@@ -63,11 +63,11 @@ public class IOUtils {
             dm.setDownloaded(currentFileSize);
         if (filePaths.stream().allMatch(path -> path.toFile().exists())
                 && currentFileSize == dm.getSize()) {
-            var firstFile = new File(dm.getFilePath() + "#0");
+            var firstFile = filePaths.get(0).toFile();
             for (int i = 1; i < chunks; i++) {
-                var name = dm.getFilePath() + "#" + i;
+                var nextFile = filePaths.get(i).toFile();
                 try (
-                        var in = new FileInputStream(name);
+                        var in = new FileInputStream(nextFile);
                         var out = new FileOutputStream(firstFile, firstFile.exists());
                         var inputChannel = in.getChannel();
                         var outputChannel = out.getChannel()
@@ -79,10 +79,11 @@ public class IOUtils {
                         buffer.clear();
                     }
                 }
-                Files.deleteIfExists(Path.of(name));
+                if (nextFile.exists())
+                    nextFile.delete();
             }
-            var firstFilePath = firstFile.getPath();
-            return firstFile.renameTo(new File(firstFilePath.substring(0, firstFilePath.lastIndexOf('#'))));
+            var pathToMove = filePaths.get(0).getParent().getParent() + File.separator + dm.getName();
+            return firstFile.renameTo(new File(pathToMove));
         }
         return false;
     }
