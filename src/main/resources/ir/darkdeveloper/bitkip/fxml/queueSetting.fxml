@@ -35,6 +35,9 @@
                         <HBox alignment="CENTER_LEFT" styleClass="padding_10">
                             <CheckBox text="Download from top" styleClass="bold" fx:id="downloadOrderCheck"/>
                         </HBox>
+                         <HBox alignment="CENTER_LEFT" styleClass="padding_x_10">
+                                <Label text="Based on added to queue column" styleClass="descText"/>
+                         </HBox>
                     </VBox>
                 </Tab>
 
