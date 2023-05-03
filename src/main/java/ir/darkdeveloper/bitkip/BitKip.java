@@ -38,6 +38,7 @@ public class BitKip extends Application {
         FxUtils.startMainStage(stage);
         ScheduleTask.startSchedules();
         MoreUtils.checkUpdates(false);
+        IOUtils.moveChunkFilesToTemp(downloadPath);
         initTray(stage);
     }
 

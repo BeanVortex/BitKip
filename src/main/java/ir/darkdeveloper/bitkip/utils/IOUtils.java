@@ -3,10 +3,7 @@ package ir.darkdeveloper.bitkip.utils;
 import ir.darkdeveloper.bitkip.models.DownloadModel;
 import ir.darkdeveloper.bitkip.models.FileType;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
+import java.io.*;
 import java.nio.ByteBuffer;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -125,5 +122,27 @@ public class IOUtils {
         var dir = new File(downloadPath + name);
         if (dir.exists())
             dir.delete();
+    }
+
+    public static void moveChunkFilesToTemp(String path) {
+        var f = new File(path);
+        if (f.isDirectory()) {
+            var listFiles = f.listFiles();
+            if (listFiles != null){
+                for (var file : listFiles) {
+                    var oldPath = file.getPath();
+                    if (oldPath.contains(".temp"))
+                        continue;
+                    if (oldPath.contains("#")) {
+                        var fileName = oldPath.substring(oldPath.lastIndexOf(File.separator) + 1);
+                        var newPath = Paths.get(oldPath).getParent() + File.separator + ".temp" + File.separator + fileName;
+                        moveFile(oldPath, newPath);
+                    }
+                    else moveChunkFilesToTemp(file.getPath());
+                }
+
+            }
+        }
+
     }
 }
