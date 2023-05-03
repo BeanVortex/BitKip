@@ -24,8 +24,8 @@ public class UpdateCheckTask extends Task<UpdateModel> {
                 .select("div").get(0)
                 .select("span").get(0)
                 .text().substring(1);
-        var descriptionTitle = doc.select(".Box-body .markdown-body h3").text();
-        var descriptionList = doc.select(".Box-body .markdown-body ul li");
+        var descriptionTitle = doc.select(".Box-body").get(0).select(".markdown-body h3").text();
+        var descriptionList = doc.select(".Box-body").get(0).select(".markdown-body ul li");
         var features = new ArrayList<String>();
         for (var li : descriptionList)
             features.add(li.text());
