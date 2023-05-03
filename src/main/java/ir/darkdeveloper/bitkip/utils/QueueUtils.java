@@ -158,8 +158,13 @@ public class QueueUtils {
         startedQueues.remove(qm);
         shutdownSchedulersOnOnceDownload(qm);
         var schedule = qm.getSchedule();
-        if (schedule.isEnabled() && schedule.isTurnOffEnabled())
-            Platform.runLater(() -> FxUtils.newShuttingDownStage(schedule.getTurnOffMode()));
+        if (schedule.isEnabled() && schedule.isTurnOffEnabled()) {
+            var turnOffMode = schedule.getTurnOffMode();
+            Platform.runLater(() -> {
+                if (FxUtils.askForShutdown(turnOffMode))
+                    PowerUtils.turnOff(turnOffMode);
+            });
+        }
         if (executor != null)
             executor.shutdown();
     }

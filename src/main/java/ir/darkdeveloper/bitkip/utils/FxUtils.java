@@ -15,6 +15,7 @@ import javafx.scene.image.Image;
 import javafx.scene.input.Clipboard;
 import javafx.scene.input.ClipboardContent;
 import javafx.scene.layout.VBox;
+import javafx.scene.paint.Paint;
 import javafx.stage.Stage;
 
 import java.io.IOException;
@@ -22,6 +23,7 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Executors;
 
 import static com.sun.jna.Platform.isLinux;
 import static ir.darkdeveloper.bitkip.BitKip.getResource;
@@ -147,31 +149,6 @@ public class FxUtils {
         stage.setOnCloseRequest(e -> openStages.remove(ABOUT_STAGE));
         stage.show();
         openStages.put(ABOUT_STAGE, stage);
-    }
-
-    public static void newShuttingDownStage(TurnOffMode turnOffMode) {
-        FXMLLoader loader;
-        Stage stage = new Stage();
-        VBox root;
-        try {
-            loader = new FXMLLoader(getResource("fxml/shuttingDown.fxml"));
-            root = loader.load();
-        } catch (IOException e) {
-            e.printStackTrace();
-            throw new RuntimeException(e);
-        }
-        var logoPath = getResource("icons/logo.png");
-        if (logoPath != null)
-            stage.getIcons().add(new Image(logoPath.toExternalForm()));
-        var scene = new Scene(root);
-        stage.setScene(scene);
-        stage.setMinWidth(root.getMinWidth());
-        stage.setMinHeight(root.getMinHeight());
-        stage.setTitle("Shutting down");
-        ShuttingDownController controller = loader.getController();
-        controller.setStage(stage);
-        controller.setTurnOffMode(turnOffMode);
-        stage.showAndWait();
     }
 
 
@@ -369,6 +346,45 @@ public class FxUtils {
             return true;
         }
         return false;
+    }
+
+    public static boolean askForShutdown(TurnOffMode turnOffMode) {
+        var dialog = new Dialog<ButtonType>();
+        dialog.setTitle("Your pc is about to " + turnOffMode);
+        dialog.setHeaderText("Queue is done or finished and scheduled to " + turnOffMode);
+        dialog.getDialogPane().getButtonTypes().addAll(ButtonType.APPLY, ButtonType.CANCEL);
+
+        var countDownLbl = new Label();
+        var service = Executors.newCachedThreadPool();
+        service.submit(() -> {
+            try {
+                for (int i = 10; i >= 0; i--) {
+                    var finalI = i;
+                    Platform.runLater(() -> countDownLbl.setText(finalI + ""));
+                    Thread.sleep(1000);
+                }
+                Platform.runLater(() -> {
+                    dialog.setResult(ButtonType.APPLY);
+                    dialog.close();
+                });
+            } catch (InterruptedException ignore) {
+            }
+        });
+        dialog.setOnCloseRequest(e -> service.shutdownNow());
+        var container = new VBox();
+        container.setAlignment(Pos.CENTER);
+        container.setStyle("-fx-padding: 10");
+        container.setSpacing(10);
+        countDownLbl.setTextFill(Paint.valueOf("#F44336"));
+        container.setStyle("-fx-font-size: 18; -fx-font-weight: bold");
+        container.getChildren().addAll(countDownLbl);
+        dialog.getDialogPane().setContent(container);
+
+        var logoPath = getResource("icons/logo.png");
+        if (logoPath != null)
+            ((Stage) dialog.getDialogPane().getScene().getWindow()).getIcons().add(new Image(logoPath.toExternalForm()));
+        var result = dialog.showAndWait();
+        return result.isPresent() && result.get() == ButtonType.APPLY;
     }
 
     public static void showUpdateDialog(UpdateModel updateModel) {
