@@ -148,8 +148,7 @@ public class MenuUtils {
         menuItems.get(deleteWithFileLbl).setDisable(selectedItems.isEmpty());
         menuItems.get(deleteFromQueueLbl).setDisable(selectedItems.isEmpty());
 
-        selectedItems
-                .filtered(dm -> staticQueueNames.stream()
+        selectedItems.filtered(dm -> staticQueueNames.stream()
                         .anyMatch(s -> dm.getQueues().get(0).getName().equals(s)))
                 .stream()
                 .findFirst()
@@ -164,7 +163,6 @@ public class MenuUtils {
                     menuItems.get(restartLbl).setDisable(false);
                     menuItems.get(refreshLbl).setDisable(false);
                     menuItems.get(addToQueueLbl).setDisable(false);
-                    menuItems.get(deleteFromQueueLbl).setDisable(false);
                 });
         selectedItems.stream().filter(dm -> dm.getDownloadStatus() == DownloadStatus.Downloading
                         || dm.getDownloadStatus() == DownloadStatus.Trying)
@@ -175,7 +173,6 @@ public class MenuUtils {
                     menuItems.get(restartLbl).setDisable(true);
                     menuItems.get(refreshLbl).setDisable(true);
                     menuItems.get(addToQueueLbl).setDisable(true);
-                    menuItems.get(deleteFromQueueLbl).setDisable(true);
                 });
         selectedItems.stream().filter(dm -> dm.getDownloadStatus() == DownloadStatus.Completed)
                 .findFirst().ifPresent(dm -> {
@@ -185,7 +182,6 @@ public class MenuUtils {
                     menuItems.get(restartLbl).setDisable(false);
                     menuItems.get(refreshLbl).setDisable(false);
                     menuItems.get(addToQueueLbl).setDisable(false);
-                    menuItems.get(deleteFromQueueLbl).setDisable(false);
                 });
     }
 
