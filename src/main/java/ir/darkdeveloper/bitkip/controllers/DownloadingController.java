@@ -14,10 +14,6 @@ import javafx.application.Platform;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.fxml.FXML;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.control.ScrollPane;
-import javafx.scene.control.TextField;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.layout.HBox;
@@ -30,14 +26,11 @@ import org.controlsfx.control.Notifications;
 import org.controlsfx.control.PopOver;
 import org.controlsfx.control.ToggleSwitch;
 
-import java.awt.*;
 import java.io.File;
-import java.io.IOException;
 import java.net.URL;
 import java.util.List;
 import java.util.ResourceBundle;
 
-import static com.sun.jna.Platform.*;
 import static ir.darkdeveloper.bitkip.BitKip.getResource;
 import static ir.darkdeveloper.bitkip.config.AppConfigs.currentDownloadings;
 import static ir.darkdeveloper.bitkip.config.AppConfigs.openDownloadings;
@@ -320,22 +313,9 @@ public class DownloadingController implements FXMLController {
 
 
     @FXML
-    private void onFolderOpen() throws IOException {
-        var desktop = Desktop.getDesktop();
-        File file = new File(downloadModel.getFilePath());
-        if (desktop.isSupported(Desktop.Action.OPEN)) {
-            if (isWindows())
-                Runtime.getRuntime().exec(new String[]{"explorer", "/select,", file.getAbsolutePath()});
-            else if (isLinux() || isSolaris() || isFreeBSD() || isOpenBSD())
-                Runtime.getRuntime().exec(new String[]{"xdg-open", file.getParentFile().getAbsolutePath()});
-            else if (isMac())
-                Runtime.getRuntime().exec(new String[]{"osascript", "-e",
-                        "tell app \"Finder\" to reveal POSIX file \"" + file.getAbsolutePath() + "\""});
-        } else
-            Notifications.create()
-                    .title("Not Supported")
-                    .text("Your operating system does not support this action")
-                    .showError();
-
+    private void onFolderOpen() {
+        DownloadOpUtils.openContainingFolder(downloadModel);
     }
+
+
 }

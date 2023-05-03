@@ -15,6 +15,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 
+import static com.sun.jna.Platform.*;
+import static com.sun.jna.Platform.isMac;
 import static ir.darkdeveloper.bitkip.config.AppConfigs.*;
 import static ir.darkdeveloper.bitkip.repo.DownloadsRepo.COL_PATH;
 
@@ -137,6 +139,31 @@ public class DownloadOpUtils {
                 desktop.open(new File(dm.getFilePath()));
         } catch (IOException e) {
             e.printStackTrace();
+        }
+    }
+
+    public static void openContainingFolder(DownloadModel dm) {
+        try {
+            var desktop = Desktop.getDesktop();
+            File file = new File(dm.getFilePath());
+            if (desktop.isSupported(Desktop.Action.OPEN)) {
+                if (isWindows())
+                    Runtime.getRuntime().exec(new String[]{"explorer", "/select,", file.getAbsolutePath()});
+                else if (isLinux() || isSolaris() || isFreeBSD() || isOpenBSD())
+                    Runtime.getRuntime().exec(new String[]{"xdg-open", file.getParentFile().getAbsolutePath()});
+                else if (isMac())
+                    Runtime.getRuntime().exec(new String[]{"osascript", "-e",
+                            "tell app \"Finder\" to reveal POSIX file \"" + file.getAbsolutePath() + "\""});
+            } else
+                Notifications.create()
+                        .title("Not Supported")
+                        .text("Your operating system does not support this action")
+                        .showError();
+        }catch (IOException e){
+            Notifications.create()
+                    .title("Error opening containing folder")
+                    .text(e.getMessage())
+                    .showError();
         }
     }
 

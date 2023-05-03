@@ -49,6 +49,7 @@ public class MenuUtils {
     public static void initOperationMenu(Button operationMenu) {
         var c = new ContextMenu();
         var openLbl = new Label("Open");
+        var openFolderLbl = new Label("Open folder");
         var resumeLbl = new Label("Resume");
         var pauseLbl = new Label("Pause");
         var refreshLbl = new Label("Refresh URL");
@@ -63,8 +64,8 @@ public class MenuUtils {
         var stopQueueLbl = new Label("Stop queue");
         var queueSettingLbl = new Label("Queue settings");
 
-        var lbls = List.of(openLbl, resumeLbl, pauseLbl, refreshLbl, copyLbl, restartLbl, deleteLbl, deleteWithFileLbl);
-        var keyCodes = List.of(OPEN_KEY, RESUME_KEY, PAUSE_KEY, REFRESH_KEY, COPY_KEY, RESTART_KEY, DELETE_KEY, DELETE_FILE_KEY);
+        var lbls = List.of(openLbl, openFolderLbl, resumeLbl, pauseLbl, refreshLbl, copyLbl, restartLbl, deleteLbl, deleteWithFileLbl);
+        var keyCodes = List.of(OPEN_KEY, OPEN_FOLDER_KEY, RESUME_KEY, PAUSE_KEY, REFRESH_KEY, COPY_KEY, RESTART_KEY, DELETE_KEY, DELETE_FILE_KEY);
         var menuItems = createMapMenuItems(lbls, keyCodes);
 
         var split = new SeparatorMenuItem();
@@ -100,7 +101,7 @@ public class MenuUtils {
 
         operationMenu.setOnMouseClicked(event -> {
             var selectedItems = mainTableUtils.getSelected();
-            disableMenuItems(resumeLbl, pauseLbl, openLbl, deleteFromQueueLbl, refreshLbl, copyLbl, restartLbl,
+            disableMenuItems(resumeLbl, pauseLbl, openLbl, openFolderLbl, deleteFromQueueLbl, refreshLbl, copyLbl, restartLbl,
                     addToQueueLbl, deleteLbl, deleteWithFileLbl, menuItems, selectedItems);
             disableEnableStartStopQueue(startQueueMenu, stopQueueMenu);
             deleteLbl.setText("Delete selected (" + selectedItems.size() + ")");
@@ -108,6 +109,7 @@ public class MenuUtils {
         });
 
         menuItems.get(openLbl).setOnAction(e -> DownloadOpUtils.openFiles(mainTableUtils.getSelected()));
+        menuItems.get(openFolderLbl).setOnAction(e -> DownloadOpUtils.openContainingFolder(mainTableUtils.getSelected().get(0)));
         menuItems.get(resumeLbl).setOnAction(e -> DownloadOpUtils.resumeDownloads(
                 mainTableUtils.getSelected(), null, null));
         menuItems.get(pauseLbl).setOnAction(e -> DownloadOpUtils.pauseDownloads(mainTableUtils.getSelected()));
@@ -132,12 +134,13 @@ public class MenuUtils {
                 .forEach(item -> item.setDisable(false));
     }
 
-    public static void disableMenuItems(Label resumeLbl, Label pauseLbl, Label openLbl, Label deleteFromQueueLbl,
+    public static void disableMenuItems(Label resumeLbl, Label pauseLbl, Label openLbl, Label openFolderLbl, Label deleteFromQueueLbl,
                                         Label refreshLbl, Label copyLbl, Label restartLbl, Label addToQueueLbl,
                                         Label deleteLbl, Label deleteWithFileLbl,
                                         LinkedHashMap<Label, MenuItem> menuItems,
                                         ObservableList<DownloadModel> selectedItems) {
         menuItems.get(openLbl).setDisable(selectedItems.isEmpty());
+        menuItems.get(openFolderLbl).setDisable(selectedItems.size() != 1);
         menuItems.get(resumeLbl).setDisable(selectedItems.isEmpty());
         menuItems.get(pauseLbl).setDisable(selectedItems.isEmpty());
         menuItems.get(restartLbl).setDisable(selectedItems.isEmpty());
@@ -160,6 +163,8 @@ public class MenuUtils {
                     menuItems.get(resumeLbl).setDisable(false);
                     menuItems.get(pauseLbl).setDisable(true);
                     menuItems.get(openLbl).setDisable(true);
+                    if (selectedItems.size() == 1)
+                        menuItems.get(openFolderLbl).setDisable(true);
                     menuItems.get(restartLbl).setDisable(false);
                     menuItems.get(refreshLbl).setDisable(false);
                     menuItems.get(addToQueueLbl).setDisable(false);
@@ -170,6 +175,8 @@ public class MenuUtils {
                     menuItems.get(resumeLbl).setDisable(true);
                     menuItems.get(pauseLbl).setDisable(false);
                     menuItems.get(openLbl).setDisable(true);
+                    if (selectedItems.size() == 1)
+                        menuItems.get(openFolderLbl).setDisable(true);
                     menuItems.get(restartLbl).setDisable(true);
                     menuItems.get(refreshLbl).setDisable(true);
                     menuItems.get(addToQueueLbl).setDisable(true);
@@ -179,6 +186,8 @@ public class MenuUtils {
                     menuItems.get(resumeLbl).setDisable(true);
                     menuItems.get(pauseLbl).setDisable(true);
                     menuItems.get(openLbl).setDisable(false);
+                    if (selectedItems.size() == 1)
+                        menuItems.get(openFolderLbl).setDisable(false);
                     menuItems.get(restartLbl).setDisable(false);
                     menuItems.get(refreshLbl).setDisable(false);
                     menuItems.get(addToQueueLbl).setDisable(false);

@@ -91,6 +91,7 @@ public class MainTableUtils {
                 if (!row.isEmpty() && event.getButton().equals(MouseButton.SECONDARY)) {
                     var cMenu = new ContextMenu();
                     var openLbl = new Label("Open");
+                    var openFolderLbl = new Label("Open folder");
                     var resumeLbl = new Label("Resume");
                     var pauseLbl = new Label("Pause");
                     var refreshLbl = new Label("Refresh URL");
@@ -100,9 +101,9 @@ public class MainTableUtils {
                     var deleteFromQueueLbl = new Label("Delete from this queue");
                     var deleteLbl = new Label("Delete");
                     var deleteWithFileLbl = new Label("Delete with file");
-                    var lbls = List.of(openLbl, resumeLbl, pauseLbl, refreshLbl, copyLbl, restartLbl, downloadingLbl, deleteFromQueueLbl,
+                    var lbls = List.of(openLbl, openFolderLbl, resumeLbl, pauseLbl, refreshLbl, copyLbl, restartLbl, downloadingLbl, deleteFromQueueLbl,
                             deleteLbl, deleteWithFileLbl);
-                    var keyCodes = Arrays.asList(OPEN_KEY, RESUME_KEY, PAUSE_KEY,
+                    var keyCodes = Arrays.asList(OPEN_KEY, OPEN_FOLDER_KEY, RESUME_KEY, PAUSE_KEY,
                             REFRESH_KEY, COPY_KEY, RESTART_KEY, DOWNLOADING_STAGE_KEY, null, DELETE_KEY, DELETE_FILE_KEY);
                     var menuItems = MenuUtils.createMapMenuItems(lbls, keyCodes);
 
@@ -117,10 +118,11 @@ public class MainTableUtils {
                     }
 
                     menuItems.put(addToQueueLbl, addToQueueMenu);
-                    MenuUtils.disableMenuItems(resumeLbl, pauseLbl, openLbl, deleteFromQueueLbl, refreshLbl, copyLbl, restartLbl,
+                    MenuUtils.disableMenuItems(resumeLbl, pauseLbl, openLbl,openFolderLbl, deleteFromQueueLbl, refreshLbl, copyLbl, restartLbl,
                             addToQueueLbl, deleteLbl, deleteWithFileLbl, menuItems, selectedItems);
 
                     menuItems.get(openLbl).setOnAction(e -> DownloadOpUtils.openFiles(getSelected()));
+                    menuItems.get(openFolderLbl).setOnAction(e -> DownloadOpUtils.openContainingFolder(getSelected().get(0)));
                     menuItems.get(resumeLbl).setOnAction(e -> DownloadOpUtils.resumeDownloads(getSelected(), null, null));
                     menuItems.get(pauseLbl).setOnAction(e -> DownloadOpUtils.pauseDownloads(getSelected()));
                     menuItems.get(refreshLbl).setOnAction(e -> DownloadOpUtils.refreshDownload(getSelected()));
