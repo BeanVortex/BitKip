@@ -1,8 +1,8 @@
 package ir.darkdeveloper.bitkip.utils;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 
 public class FileExtensions {
 
@@ -30,12 +30,14 @@ public class FileExtensions {
             "cda", "aif", "mid", "midi", "wma", "wpl");
 
 
-    public static final Map<String, List<String>> extensions = Map.of(
-            COMPRESSED_QUEUE, compressedEx,
-            PROGRAMS_QUEUE, programEx,
-            VIDEOS_QUEUE, videoEx,
-            DOCS_QUEUE, documentEx,
-            MUSIC_QUEUE, musicEx,
-            OTHERS_QUEUE, new ArrayList<>()
-    );
+    public static final LinkedHashMap<String, List<String>> extensions = new LinkedHashMap<>();
+
+    static {
+        extensions.put(COMPRESSED_QUEUE, compressedEx);
+        extensions.put(PROGRAMS_QUEUE, programEx);
+        extensions.put(VIDEOS_QUEUE, videoEx);
+        extensions.put(DOCS_QUEUE, documentEx);
+        extensions.put(MUSIC_QUEUE, musicEx);
+        extensions.put(OTHERS_QUEUE, new ArrayList<>());
+    }
 }

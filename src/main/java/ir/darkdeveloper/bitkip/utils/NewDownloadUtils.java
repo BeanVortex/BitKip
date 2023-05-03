@@ -93,17 +93,9 @@ public class NewDownloadUtils {
         var raw = connection.getHeaderField("Content-Disposition");
         if (raw != null && raw.contains("="))
             return raw.split("=")[1].replaceAll("\"", "");
-
-        var hasParameter = link.lastIndexOf('?') != -1;
-        var extractedFileName = "";
-        if (hasParameter)
-            extractedFileName = link.substring(link.lastIndexOf('/') + 1, link.lastIndexOf('?'));
-        else
-            extractedFileName = link.substring(link.lastIndexOf('/') + 1);
-
+        var extractedFileName = link.substring(link.lastIndexOf('/') + 1);
         if (!extractedFileName.isBlank())
             return extractedFileName;
-
         return UUID.randomUUID().toString();
     }
 
