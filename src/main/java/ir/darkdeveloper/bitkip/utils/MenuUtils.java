@@ -51,8 +51,8 @@ public class MenuUtils {
         var openLbl = new Label("Open");
         var resumeLbl = new Label("Resume");
         var pauseLbl = new Label("Pause");
-        var refreshLbl = new Label("Refresh link");
-        var copyLbl = new Label("Copy link");
+        var refreshLbl = new Label("Refresh URL");
+        var copyLbl = new Label("Copy URL");
         var restartLbl = new Label("Restart");
         var deleteLbl = new Label("Delete selected");
         var deleteWithFileLbl = new Label("Delete selected with file");

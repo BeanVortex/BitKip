@@ -324,7 +324,10 @@ public class FxUtils {
         stage.setScene(scene);
         stage.setMinWidth(root.getPrefWidth());
         stage.setMinHeight(root.getPrefHeight());
-        stage.setTitle("Refreshing Link");
+        stage.setTitle("Refreshing URL");
+        var logoPath = getResource("icons/logo.png");
+        if (logoPath != null)
+            stage.getIcons().add(new Image(logoPath.toExternalForm()));
         RefreshController controller = loader.getController();
         controller.setStage(stage);
         controller.setDownload(dm);

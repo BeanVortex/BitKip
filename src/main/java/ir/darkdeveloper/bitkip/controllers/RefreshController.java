@@ -5,6 +5,7 @@ import ir.darkdeveloper.bitkip.models.DownloadModel;
 import ir.darkdeveloper.bitkip.repo.DownloadsRepo;
 import ir.darkdeveloper.bitkip.utils.DownloadOpUtils;
 import ir.darkdeveloper.bitkip.utils.InputValidations;
+import ir.darkdeveloper.bitkip.utils.NewDownloadUtils;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -41,15 +42,13 @@ public class RefreshController implements FXMLController {
     @Override
     public void initAfterStage() {
         urlField.textProperty().addListener((o, ol, n) -> {
-            if (n.equals(dm.getUrl())) {
-                errorLabel.setText("Same link!");
-                saveBtn.setDisable(true);
-                resumeBtn.setDisable(true);
-            } else {
-                errorLabel.setText("");
-                saveBtn.setDisable(false);
-                resumeBtn.setDisable(false);
-            }
+            errorLabel.setVisible(false);
+            saveBtn.setDisable(false);
+            resumeBtn.setDisable(false);
+            if (n.equals(dm.getUrl()))
+                NewDownloadUtils.disableControlsAndShowError("Same URL", errorLabel, saveBtn, resumeBtn);
+            if (n.isBlank())
+                NewDownloadUtils.disableControlsAndShowError("URL is blank", errorLabel, saveBtn, resumeBtn);
         });
     }
 
@@ -67,6 +66,7 @@ public class RefreshController implements FXMLController {
 
     private void setDownloadData() {
         nameLbl.setText("Name: " + dm.getName());
+        urlField.setText(dm.getUrl());
         InputValidations.prepareLinkFromClipboard(urlField);
     }
 
@@ -86,6 +86,7 @@ public class RefreshController implements FXMLController {
     private void onResume() {
         saveToDB();
         DownloadOpUtils.resumeDownloads(List.of(dm), null, null);
+        stage.close();
     }
 
     private void saveToDB() {

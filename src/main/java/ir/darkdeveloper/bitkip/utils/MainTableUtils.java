@@ -90,16 +90,16 @@ public class MainTableUtils {
                 row.setContextMenu(null);
                 if (!row.isEmpty() && event.getButton().equals(MouseButton.SECONDARY)) {
                     var cMenu = new ContextMenu();
-                    var openLbl = new Label("open");
-                    var resumeLbl = new Label("resume");
-                    var pauseLbl = new Label("pause");
-                    var refreshLbl = new Label("refresh link");
-                    var copyLbl = new Label("copy link");
-                    var restartLbl = new Label("restart");
-                    var downloadingLbl = new Label("details");
-                    var deleteFromQueueLbl = new Label("delete from this queue");
-                    var deleteLbl = new Label("delete");
-                    var deleteWithFileLbl = new Label("delete with file");
+                    var openLbl = new Label("Open");
+                    var resumeLbl = new Label("Resume");
+                    var pauseLbl = new Label("Pause");
+                    var refreshLbl = new Label("Refresh URL");
+                    var copyLbl = new Label("Copy URL");
+                    var restartLbl = new Label("Restart");
+                    var downloadingLbl = new Label("Details");
+                    var deleteFromQueueLbl = new Label("Delete from this queue");
+                    var deleteLbl = new Label("Delete");
+                    var deleteWithFileLbl = new Label("Delete with file");
                     var lbls = List.of(openLbl, resumeLbl, pauseLbl, refreshLbl, copyLbl, restartLbl, downloadingLbl, deleteFromQueueLbl,
                             deleteLbl, deleteWithFileLbl);
                     var keyCodes = Arrays.asList(OPEN_KEY, RESUME_KEY, PAUSE_KEY,
@@ -107,7 +107,7 @@ public class MainTableUtils {
                     var menuItems = MenuUtils.createMapMenuItems(lbls, keyCodes);
 
                     var addToQueueMenu = new Menu();
-                    var addToQueueLbl = new Label("add to queue");
+                    var addToQueueLbl = new Label("Add to queue");
                     addToQueueMenu.setGraphic(addToQueueLbl);
                     initAddToQueueMenu(addToQueueMenu);
                     for (var item : menuItems.values()) {
