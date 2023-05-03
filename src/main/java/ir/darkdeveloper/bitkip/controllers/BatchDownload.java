@@ -50,7 +50,7 @@ public class BatchDownload implements QueueObserver {
     @FXML
     private Button cancelBtn;
     @FXML
-    private Button addBtn;
+    private Button checkBtn;
     @FXML
     private Button questionBtnUrl;
     @FXML
@@ -73,7 +73,7 @@ public class BatchDownload implements QueueObserver {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        addBtn.setGraphic(new FontIcon());
+        checkBtn.setGraphic(new FontIcon());
         cancelBtn.setGraphic(new FontIcon());
         questionBtnChunks.setGraphic(new FontIcon());
         openLocation.setGraphic(new FontIcon());
@@ -86,7 +86,7 @@ public class BatchDownload implements QueueObserver {
         queueCombo.getItems().addAll(queues);
         queueCombo.setValue(queues.get(0));
         errorLabel.setVisible(false);
-        addBtn.setDisable(true);
+        checkBtn.setDisable(true);
         InputValidations.prepareLinkFromClipboard(urlField);
         InputValidations.validChunksInputChecks(chunksField);
         InputValidations.validIntInputCheck(startField, 0L);
@@ -102,13 +102,21 @@ public class BatchDownload implements QueueObserver {
         queueCombo.getSelectionModel().selectedIndexProperty().addListener(observable -> onQueueChanged());
         startField.textProperty().addListener(o -> autoFillLocation());
         endField.textProperty().addListener(o -> autoFillLocation());
-        urlField.textProperty().addListener(o -> autoFillLocation());
-        locationField.textProperty().addListener((o, ol, n) -> onOfflineFieldsChanged());
+        urlField.textProperty().addListener((o, ol, n) -> {
+            if (n.isBlank())
+                NewDownloadUtils.disableControlsAndShowError("URL is blank", errorLabel, checkBtn, null);
+            else autoFillLocation();
+        });
+        locationField.textProperty().addListener((o, ol, n) -> {
+            if (n.isBlank())
+                NewDownloadUtils.disableControlsAndShowError("Location is blank", errorLabel, checkBtn, null);
+            else onOfflineFieldsChanged();
+        });
     }
 
     private void onOfflineFieldsChanged() {
         NewDownloadUtils.onOfflineFieldsChanged(locationField, tempLink.getName(), null, queueCombo,
-                errorLabel, null, addBtn, openLocation);
+                errorLabel, null, checkBtn, openLocation);
     }
 
 
@@ -125,22 +133,18 @@ public class BatchDownload implements QueueObserver {
             var fileNameLocationFuture = CompletableFuture.supplyAsync(() -> NewDownloadUtils.extractFileName(link.getLink(), connection))
                     .thenAccept(this::setLocation);
             fileNameLocationFuture.whenComplete((unused, throwable) -> {
-                NewDownloadUtils.checkIfFileExists(locationField.getText(), tempLink.getName(), errorLabel, null, addBtn);
+                NewDownloadUtils.checkIfFileExists(locationField.getText(), tempLink.getName(), errorLabel, null, checkBtn);
             }).exceptionally(throwable -> {
-                errorLabel.setVisible(true);
-                addBtn.setDisable(true);
-                var errorMsg = throwable.getCause().getLocalizedMessage();
-                Platform.runLater(() -> errorLabel.setText(errorMsg));
+                var errorMsg = throwable.getLocalizedMessage();
+                Platform.runLater(() -> NewDownloadUtils.disableControlsAndShowError(errorMsg, errorLabel, checkBtn, null));
                 return null;
             });
         } catch (NumberFormatException ignore) {
         } catch (Exception e) {
-            errorLabel.setVisible(true);
-            addBtn.setDisable(true);
             var errorMsg = e.getLocalizedMessage();
             if (e instanceof IndexOutOfBoundsException)
-                errorMsg = "No links found";
-            errorLabel.setText(errorMsg);
+                errorMsg = "No URLs found";
+            NewDownloadUtils.disableControlsAndShowError(errorMsg, errorLabel, checkBtn, null);
         }
     }
 
@@ -227,13 +231,22 @@ public class BatchDownload implements QueueObserver {
     private void onSelectLocation(ActionEvent e) {
         NewDownloadUtils.selectLocation(e, locationField);
         if (tempLink != null)
-            NewDownloadUtils.checkIfFileExists(locationField.getText(), tempLink.getName(), errorLabel, null, addBtn);
+            NewDownloadUtils.checkIfFileExists(locationField.getText(), tempLink.getName(), errorLabel, null, checkBtn);
     }
 
     @FXML
     private void onCheck() {
         try {
             var url = urlField.getText();
+            var location = locationField.getText();
+            if (url.isBlank()){
+                NewDownloadUtils.disableControlsAndShowError("URL is blank", errorLabel, checkBtn, null);
+                return;
+            }
+            if (location.isBlank()) {
+                NewDownloadUtils.disableControlsAndShowError("Location is blank", errorLabel, checkBtn, null);
+                return;
+            }
             var start = Integer.parseInt(startField.getText());
             var end = Integer.parseInt(endField.getText());
             var links = generateLinks(url, start, end, Integer.parseInt(chunksField.getText()), false);
@@ -245,7 +258,7 @@ public class BatchDownload implements QueueObserver {
                 lm.getQueues().add(secondaryQueue);
                 if (selectedQueue.getId() != allDownloadsQueue.getId())
                     lm.getQueues().add(selectedQueue);
-                lm.setPath(locationField.getText());
+                lm.setPath(location);
             });
             FxUtils.newBatchListStage(links);
             getQueueSubject().removeObserver(this);
@@ -253,10 +266,7 @@ public class BatchDownload implements QueueObserver {
         } catch (IllegalArgumentException e) {
             if (e instanceof NumberFormatException)
                 return;
-            errorLabel.setVisible(true);
-            addBtn.setDisable(true);
-            var errorStr = e.getLocalizedMessage();
-            errorLabel.setText(errorStr);
+            NewDownloadUtils.disableControlsAndShowError(e.getLocalizedMessage(), errorLabel, checkBtn, null);
         }
     }
 

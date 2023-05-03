@@ -61,7 +61,7 @@
     <HBox alignment="BOTTOM_CENTER" style="-fx-padding: 15 0 0 0">
         <HBox spacing="20" alignment="CENTER">
             <Button text="Cancel" styleClass="cancel_btn" fx:id="cancelBtn" onAction="#onCancel"/>
-            <Button text="Check" styleClass="add_btn" fx:id="addBtn" onAction="#onCheck"/>
+            <Button text="Check" styleClass="add_btn" fx:id="checkBtn" onAction="#onCheck"/>
         </HBox>
     </HBox>
 </VBox>

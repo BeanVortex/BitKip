@@ -36,7 +36,7 @@ public class NewDownloadUtils {
     public static HttpURLConnection connect(String uri, int connectTimeout, int readTimeout) {
         try {
             if (uri.isBlank())
-                throw new IllegalArgumentException("Link is blank");
+                throw new IllegalArgumentException("URL is blank");
             var url = new URL(uri);
             var conn = (HttpURLConnection) url.openConnection();
             conn.setConnectTimeout(connectTimeout);
@@ -283,6 +283,14 @@ public class NewDownloadUtils {
             openLocation.setDisable(false);
         }
         checkIfFileExists(locationField.getText(), filename, errorLabel, downloadBtn, addBtn);
+    }
+
+    public static void disableControlsAndShowError(String error, Label errorLbl, Button btn1, Button btn2) {
+        errorLbl.setVisible(true);
+        btn1.setDisable(true);
+        if (btn2 != null)
+            btn2.setDisable(true);
+        errorLbl.setText(error);
     }
 }
 
