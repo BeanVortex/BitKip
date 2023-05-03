@@ -381,7 +381,7 @@ public class QueueSetting implements FXMLController, QueueObserver {
             schedule.setStopTime(stopTime);
             schedule.setTurnOffEnabled(whenDoneCheck.isSelected());
             schedule.setTurnOffMode(powerCombo.getValue());
-            if (schedule.isTurnOffEnabled() && (isLinux() || isMac()) && userPassword == null) {
+            if (schedule.isEnabled() && schedule.isTurnOffEnabled() && (isLinux() || isMac()) && userPassword == null) {
                 var header = "By enabling to turn off or suspend automatically, provide system password.";
                 var content = "To be able to turn off or suspend your pc, application needs your system password";
                 if (!FxUtils.askForPassword(header, content))
