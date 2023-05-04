@@ -108,7 +108,7 @@ public class BatchList implements FXMLController {
         var downloads = new ArrayList<DownloadModel>();
         links.forEach(lm -> {
             var dm = new DownloadModel();
-            dm.setUrl(lm.getLink());
+            dm.setUrl(lm.getUrl());
             var fileName = lm.getName();
             var path = lm.getPath();
             if (path.endsWith(File.separator))

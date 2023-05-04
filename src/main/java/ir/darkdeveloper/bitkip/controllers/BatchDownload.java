@@ -4,6 +4,7 @@ import ir.darkdeveloper.bitkip.config.AppConfigs;
 import ir.darkdeveloper.bitkip.config.QueueObserver;
 import ir.darkdeveloper.bitkip.models.LinkModel;
 import ir.darkdeveloper.bitkip.models.QueueModel;
+import ir.darkdeveloper.bitkip.repo.DownloadsRepo;
 import ir.darkdeveloper.bitkip.repo.QueuesRepo;
 import ir.darkdeveloper.bitkip.utils.FxUtils;
 import ir.darkdeveloper.bitkip.utils.InputValidations;
@@ -18,7 +19,9 @@ import javafx.scene.control.TextField;
 import javafx.stage.Stage;
 import org.kordamp.ikonli.javafx.FontIcon;
 
+import java.io.File;
 import java.net.URL;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.ResourceBundle;
@@ -115,8 +118,9 @@ public class BatchDownload implements QueueObserver {
     }
 
     private void onOfflineFieldsChanged() {
-        NewDownloadUtils.onOfflineFieldsChanged(locationField, tempLink.getName(), null, queueCombo,
-                errorLabel, null, checkBtn, openLocation);
+        if (tempLink != null)
+            NewDownloadUtils.onOfflineFieldsChanged(locationField, tempLink.getName(), null, queueCombo,
+                    errorLabel, null, checkBtn, openLocation);
     }
 
 
@@ -129,8 +133,8 @@ public class BatchDownload implements QueueObserver {
             var links = generateLinks(url, start, end, Integer.parseInt(chunksField.getText()), true);
             var link = links.get(0);
             tempLink = link;
-            var connection = NewDownloadUtils.connect(link.getLink(), 3000, 3000);
-            var fileNameLocationFuture = CompletableFuture.supplyAsync(() -> NewDownloadUtils.extractFileName(link.getLink(), connection))
+            var connection = NewDownloadUtils.connect(link.getUrl(), 3000, 3000);
+            var fileNameLocationFuture = CompletableFuture.supplyAsync(() -> NewDownloadUtils.extractFileName(link.getUrl(), connection))
                     .thenAccept(this::setLocation);
             fileNameLocationFuture.whenComplete((unused, throwable) -> {
                 NewDownloadUtils.checkIfFileExists(locationField.getText(), tempLink.getName(), errorLabel, null, checkBtn);
@@ -238,18 +242,38 @@ public class BatchDownload implements QueueObserver {
     private void onCheck() {
         try {
             var url = urlField.getText();
-            var location = locationField.getText();
-            if (url.isBlank()){
+            var path = locationField.getText();
+            if (url.isBlank()) {
                 NewDownloadUtils.disableControlsAndShowError("URL is blank", errorLabel, checkBtn, null);
                 return;
             }
-            if (location.isBlank()) {
+            if (path.isBlank()) {
                 NewDownloadUtils.disableControlsAndShowError("Location is blank", errorLabel, checkBtn, null);
                 return;
             }
             var start = Integer.parseInt(startField.getText());
             var end = Integer.parseInt(endField.getText());
             var links = generateLinks(url, start, end, Integer.parseInt(chunksField.getText()), false);
+
+            for (var link : links) {
+                var byURL = DownloadsRepo.findByURL(link.getUrl());
+                if (!byURL.isEmpty()) {
+                    var found = byURL.stream()
+                            .filter(dm -> {
+                                var s = Paths.get(dm.getFilePath()).getParent().toString() + File.separator;
+                                return s.equals(path);
+                            })
+                            .findFirst();
+                    if (found.isPresent()) {
+                        NewDownloadUtils.disableControlsAndShowError(
+                                "At least one URL exists for this location. Change location or change start, end.\n"
+                                        + found.get().getUrl(),
+                                errorLabel, checkBtn, null);
+                        return;
+                    }
+                }
+            }
+
             var selectedQueue = queueCombo.getSelectionModel().getSelectedItem();
             var allDownloadsQueue = QueuesRepo.findByName(ALL_DOWNLOADS_QUEUE, false);
             var secondaryQueue = getSecondaryQueueByFileName(tempLink.getName());
@@ -258,7 +282,7 @@ public class BatchDownload implements QueueObserver {
                 lm.getQueues().add(secondaryQueue);
                 if (selectedQueue.getId() != allDownloadsQueue.getId())
                     lm.getQueues().add(selectedQueue);
-                lm.setPath(location);
+                lm.setPath(path);
             });
             FxUtils.newBatchListStage(links);
             getQueueSubject().removeObserver(this);

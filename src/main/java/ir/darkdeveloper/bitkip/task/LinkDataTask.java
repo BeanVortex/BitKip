@@ -19,9 +19,9 @@ public class LinkDataTask extends Task<Flux<LinkModel>> {
     protected Flux<LinkModel> call() {
         return Flux.create(fluxSink -> {
             links.forEach(lm -> {
-                var connection = NewDownloadUtils.connect(lm.getLink(), 3000, 3000);
+                var connection = NewDownloadUtils.connect(lm.getUrl(), 3000, 3000);
                 var fileSize = NewDownloadUtils.getFileSize(connection);
-                var fileName = NewDownloadUtils.extractFileName(lm.getLink(), connection);
+                var fileName = NewDownloadUtils.extractFileName(lm.getUrl(), connection);
                 lm.setName(fileName);
                 lm.setSize(fileSize);
                 lm.setResumeable(NewDownloadUtils.canResume(connection));

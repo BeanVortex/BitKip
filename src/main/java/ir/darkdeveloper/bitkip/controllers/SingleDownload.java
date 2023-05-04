@@ -20,6 +20,7 @@ import org.kordamp.ikonli.javafx.FontIcon;
 
 import java.io.File;
 import java.net.URL;
+import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.util.ResourceBundle;
 import java.util.concurrent.CompletableFuture;
@@ -200,21 +201,40 @@ public class SingleDownload implements QueueObserver {
     }
 
     private boolean prepareDownload() {
-        if (urlField.getText().isBlank()) {
+
+        var url = urlField.getText();
+        var fileName = nameField.getText();
+        var path = locationField.getText();
+        if (url.isBlank()) {
             NewDownloadUtils.disableControlsAndShowError("URL is blank", errorLabel, downloadBtn, addBtn);
             return false;
         }
-        if (nameField.getText().isBlank()) {
+        if (fileName.isBlank()) {
             NewDownloadUtils.disableControlsAndShowError("Name is blank", errorLabel, downloadBtn, addBtn);
             return false;
         }
-        if (locationField.getText().isBlank()) {
+        if (path.isBlank()) {
             NewDownloadUtils.disableControlsAndShowError("Location is blank", errorLabel, downloadBtn, addBtn);
             return false;
         }
-        dm.setUrl(urlField.getText());
-        var fileName = nameField.getText();
-        var path = locationField.getText();
+
+        var byURL = DownloadsRepo.findByURL(url);
+        if (!byURL.isEmpty()) {
+            var found = byURL.stream()
+                    .filter(dm -> {
+                        var s = Paths.get(dm.getFilePath()).getParent().toString() + File.separator;
+                        return s.equals(path);
+                    })
+                    .findFirst();
+            if (found.isPresent()) {
+                NewDownloadUtils.disableControlsAndShowError(
+                        "This url exists for this location. Change location", errorLabel, downloadBtn, addBtn);
+                return false;
+            }
+        }
+
+
+        dm.setUrl(url);
         if (path.endsWith(File.separator))
             dm.setFilePath(path + fileName);
         else

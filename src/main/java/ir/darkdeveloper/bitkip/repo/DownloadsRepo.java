@@ -139,16 +139,16 @@ public class DownloadsRepo {
                         QUEUES_TABLE_NAME, COL_ID, COL_QUEUE_ID,
                         SCHEDULE_TABLE_NAME, COL_SCHEDULE_ID, COL_ID,
                         COL_NAME, queueName);
-        return fetchDownloads(sql);
+        return fetchDownloads(sql, true);
     }
 
-    private static List<DownloadModel> fetchDownloads(String sql) {
+    private static List<DownloadModel> fetchDownloads(String sql, boolean fetchQueue) {
         var list = new ArrayList<DownloadModel>();
         try (var con = DatabaseHelper.openConnection();
              var stmt = con.createStatement();
              var rs = stmt.executeQuery(sql)) {
             while (rs.next())
-                list.add(createDownload(rs));
+                list.add(createDownload(rs, fetchQueue));
             return list;
         } catch (SQLException e) {
             e.printStackTrace();
@@ -156,6 +156,13 @@ public class DownloadsRepo {
         return list;
     }
 
+    public static List<DownloadModel> findByURL(String url) {
+        var sql = """
+                SELECT * FROM %s WHERE %s="%s";
+                """
+                .formatted(DOWNLOADS_TABLE_NAME, COL_URL, url);
+        return fetchDownloads(sql, false);
+    }
 
     public static void updateDownloadQueue(int download_id, int queue_id) {
         var colQueueCount = "queue_count";
@@ -241,7 +248,7 @@ public class DownloadsRepo {
         DatabaseHelper.executeUpdateSql(sql, false);
     }
 
-    private static DownloadModel createDownload(ResultSet rs) throws SQLException {
+    private static DownloadModel createDownload(ResultSet rs, boolean fetchQueue) throws SQLException {
         var id = rs.getInt(COL_ID);
         var name = rs.getString(COL_NAME);
         var progress = rs.getFloat(COL_PROGRESS);
@@ -263,19 +270,23 @@ public class DownloadsRepo {
         var completeDateStr = completeDate == null ? null : LocalDateTime.parse(completeDate);
         var downloadStatus = progress != 100 ? DownloadStatus.Paused : DownloadStatus.Completed;
 
-        var queueId = rs.getInt(COL_QUEUE_ID);
-        var queueName = rs.getString(COL_QUEUE_NAME);
-        var scheduleId = rs.getInt(COL_SCHEDULE_ID);
-        var schedule = createScheduleModel(rs, scheduleId);
-        var queue = QueuesRepo.createQueueModel(rs, queueId, queueName, schedule);
-        var queues = new CopyOnWriteArrayList<>(Collections.singletonList(queue));
-
-        return DownloadModel.builder()
+        var build = DownloadModel.builder()
                 .id(id).name(name).progress(progress).downloaded(downloaded).size(size).url(url).filePath(filePath)
-                .chunks(chunks).queues(queues).addDate(addDateStr).addToQueueDate(addToQueueDateStr)
+                .chunks(chunks).addDate(addDateStr).addToQueueDate(addToQueueDateStr)
                 .lastTryDate(lastTryDateStr).completeDate(completeDateStr).openAfterComplete(openAfterComplete)
                 .showCompleteDialog(showCompleteDialog).downloadStatus(downloadStatus).resumable(resumable)
                 .build();
+
+        if (fetchQueue) {
+            var queueId = rs.getInt(COL_QUEUE_ID);
+            var queueName = rs.getString(COL_QUEUE_NAME);
+            var scheduleId = rs.getInt(COL_SCHEDULE_ID);
+            var schedule = createScheduleModel(rs, scheduleId);
+            var queue = QueuesRepo.createQueueModel(rs, queueId, queueName, schedule);
+            var queues = new CopyOnWriteArrayList<>(Collections.singletonList(queue));
+            build.setQueues(queues);
+        }
+        return build;
     }
 
 
