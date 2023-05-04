@@ -292,7 +292,9 @@ public class MenuUtils {
                         if (startedQueues.contains(qm))
                             startedQueues.get(startedQueues.indexOf(qm)).getDownloads().add(dm);
                         if (moveFiles) {
-                            var newFilePath = queuesPath + qm.getName() + File.separator + dm.getName();
+                            var newFilePath = FileType.determineFileType(dm.getName()).getPath() + dm.getName();
+                            if (qm.hasFolder())
+                                newFilePath = queuesPath + qm.getName() + File.separator + dm.getName();
                             DownloadOpUtils.moveFiles(dm, newFilePath);
                         }
 

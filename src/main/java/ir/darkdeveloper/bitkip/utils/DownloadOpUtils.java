@@ -10,6 +10,7 @@ import org.controlsfx.control.Notifications;
 import java.awt.*;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -159,7 +160,7 @@ public class DownloadOpUtils {
                         .title("Not Supported")
                         .text("Your operating system does not support this action")
                         .showError();
-        }catch (IOException e){
+        } catch (IOException e) {
             Notifications.create()
                     .title("Error opening containing folder")
                     .text(e.getMessage())
@@ -169,10 +170,12 @@ public class DownloadOpUtils {
 
     public static void moveFiles(DownloadModel dm, String newFilePath) {
         if (dm.getProgress() != 100) {
-            if (dm.getChunks() != 0)
+            if (dm.getChunks() != 0){
+                var oldTempPath = Paths.get(dm.getFilePath()).getParent() + File.separator + ".temp" + File.separator + dm.getName();
+                var newTempPath = Paths.get(newFilePath).getParent() + File.separator + ".temp" + File.separator + dm.getName();
                 for (int i = 0; i < dm.getChunks(); i++)
-                    IOUtils.moveFile(dm.getFilePath() + "#" + i, newFilePath + "#" + i);
-            else
+                    IOUtils.moveFile(oldTempPath + "#" + i, newTempPath + "#" + i);
+            } else
                 IOUtils.moveFile(dm.getFilePath(), newFilePath);
         } else
             IOUtils.moveFile(dm.getFilePath(), newFilePath);
