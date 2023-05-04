@@ -145,9 +145,9 @@ public class SingleDownload implements QueueObserver {
                     .exceptionally(throwable -> {
                         if (!executor.isShutdown())
                             executor.shutdown();
+                        var errMsg = throwable.getCause().getLocalizedMessage();
                         Platform.runLater(() ->
-                                NewDownloadUtils.disableControlsAndShowError(throwable.getLocalizedMessage(),
-                                        errorLabel, downloadBtn, addBtn));
+                                NewDownloadUtils.disableControlsAndShowError(errMsg, errorLabel, downloadBtn, addBtn));
                         return null;
                     });
         } catch (Exception e) {

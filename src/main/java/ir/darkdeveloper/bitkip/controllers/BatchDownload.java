@@ -139,7 +139,7 @@ public class BatchDownload implements QueueObserver {
             fileNameLocationFuture.whenComplete((unused, throwable) -> {
                 NewDownloadUtils.checkIfFileExists(locationField.getText(), tempLink.getName(), errorLabel, null, checkBtn);
             }).exceptionally(throwable -> {
-                var errorMsg = throwable.getLocalizedMessage();
+                var errorMsg = throwable.getCause().getLocalizedMessage();
                 Platform.runLater(() -> NewDownloadUtils.disableControlsAndShowError(errorMsg, errorLabel, checkBtn, null));
                 return null;
             });

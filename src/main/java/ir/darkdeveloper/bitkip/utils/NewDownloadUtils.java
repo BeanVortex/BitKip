@@ -94,6 +94,11 @@ public class NewDownloadUtils {
         if (raw != null && raw.contains("="))
             return raw.split("=")[1].replaceAll("\"", "");
         var extractedFileName = link.substring(link.lastIndexOf('/') + 1);
+        var lastIndexParameter = extractedFileName.lastIndexOf('?');
+        var hasParameter = lastIndexParameter != -1;
+        if (hasParameter)
+            extractedFileName = extractedFileName.substring(0, lastIndexParameter);
+
         if (!extractedFileName.isBlank())
             return extractedFileName;
         return UUID.randomUUID().toString();
