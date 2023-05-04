@@ -59,12 +59,11 @@ public class DownloadsRepo {
 
 
     private static void alters() {
-        var addResumeableSql = """
-                ALTER TABLE %s
-                ADD COLUMN %s INTEGER DEFAULT 1
+        var addAlters = """
+                ALTER TABLE %s ADD COLUMN %s INTEGER DEFAULT 1
                 """
                 .formatted(DOWNLOADS_TABLE_NAME, COL_RESUMABLE);
-        DatabaseHelper.executeUpdateSql(addResumeableSql, true);
+        DatabaseHelper.executeUpdateSql(addAlters, true);
     }
 
 

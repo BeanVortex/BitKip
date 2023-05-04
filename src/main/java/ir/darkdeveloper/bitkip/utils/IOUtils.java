@@ -79,7 +79,9 @@ public class IOUtils {
                 if (nextFile.exists())
                     nextFile.delete();
             }
-            var pathToMove = filePaths.get(0).getParent().getParent() + File.separator + dm.getName();
+            var pathToMove = filePaths.get(0).getParent() + File.separator + dm.getName();
+            if (filePaths.get(0).toString().contains("BitKip"))
+                pathToMove = filePaths.get(0).getParent().getParent() + File.separator + dm.getName();
             return firstFile.renameTo(new File(pathToMove));
         }
         return false;
@@ -128,7 +130,7 @@ public class IOUtils {
         var f = new File(path);
         if (f.isDirectory()) {
             var listFiles = f.listFiles();
-            if (listFiles != null){
+            if (listFiles != null) {
                 for (var file : listFiles) {
                     var oldPath = file.getPath();
                     if (oldPath.contains(".temp"))
@@ -137,8 +139,7 @@ public class IOUtils {
                         var fileName = oldPath.substring(oldPath.lastIndexOf(File.separator) + 1);
                         var newPath = Paths.get(oldPath).getParent() + File.separator + ".temp" + File.separator + fileName;
                         moveFile(oldPath, newPath);
-                    }
-                    else moveChunkFilesToTemp(file.getPath());
+                    } else moveChunkFilesToTemp(file.getPath());
                 }
 
             }

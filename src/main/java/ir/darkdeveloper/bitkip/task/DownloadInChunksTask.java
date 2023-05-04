@@ -80,10 +80,12 @@ public class DownloadInChunksTask extends DownloadTask {
         var to = bytesForEach;
         var from = 0L;
         var fromContinue = 0L;
-        var pathToChunk = Paths.get(downloadModel.getFilePath()).getParent() + File.separator + ".temp" + File.separator;
+        var tempFolderPath = Paths.get(downloadModel.getFilePath()).getParent().toString() + File.separator;
+        if (tempFolderPath.contains("BitKip"))
+            tempFolderPath = Paths.get(downloadModel.getFilePath()).getParent() + File.separator + ".temp" + File.separator;
         var lastPartSize = fileSize - ((chunks - 1) * bytesForEach);
         for (int i = 0; i < chunks; i++, fromContinue = to, to += bytesForEach) {
-            var filePath = pathToChunk + downloadModel.getName() + "#" + i;
+            var filePath = tempFolderPath + downloadModel.getName() + "#" + i;
             filePaths.add(Paths.get(filePath));
             var partFile = new File(filePath);
             var existingFileSize = 0L;
