@@ -57,7 +57,7 @@ public class NewDownloadUtils {
     public static void checkFieldsAfterSizePreparation(long fileSize, Label sizeLabel, TextField chunksField,
                                                        TextField bytesField, HttpURLConnection connection) {
         if (!canResume(connection)) {
-            chunksField.setText("0");
+            chunksField.setText("8");
             chunksField.setDisable(true);
         } else
             chunksField.setDisable(false);
