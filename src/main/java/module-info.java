@@ -10,12 +10,10 @@ module ir.darkdeveloper.bitkip {
     requires org.kordamp.ikonli.fontawesome5;
     requires org.kordamp.bootstrapfx.core;
     requires java.logging;
-    requires lombok;
+    requires static lombok;
     requires java.sql;
     requires org.xerial.sqlitejdbc;
     requires org.apache.commons.lang3;
-    requires org.junit.jupiter.api;
-    requires org.junit.platform.commons;
     requires reactor.core;
     requires org.jsoup;
     requires java.desktop;
