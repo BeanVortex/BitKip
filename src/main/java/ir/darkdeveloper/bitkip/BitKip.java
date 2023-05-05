@@ -48,8 +48,7 @@ public class BitKip extends Application {
         if (SystemTray.isSupported()) {
             Platform.setImplicitExit(false);
             var tray = SystemTray.getSystemTray();
-            var image = Toolkit.getDefaultToolkit()
-                    .getImage("src/main/resources/ir/darkdeveloper/bitkip/icons/logo.png");
+            var image = Toolkit.getDefaultToolkit().getImage(getResource("icons/logo.png"));
             var popup = new PopupMenu();
             var openItem = new MenuItem("Open App");
             var exitItem = new MenuItem("Exit App");
