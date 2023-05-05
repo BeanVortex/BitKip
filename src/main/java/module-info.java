@@ -17,7 +17,6 @@ module ir.darkdeveloper.bitkip {
     requires reactor.core;
     requires org.jsoup;
     requires java.desktop;
-    requires com.dustinredmond.fxtrayicon;
     requires javafx.swing;
     requires com.sun.jna;
 

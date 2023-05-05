@@ -1,6 +1,5 @@
 package ir.darkdeveloper.bitkip;
 
-import com.dustinredmond.fxtrayicon.FXTrayIcon;
 import ir.darkdeveloper.bitkip.config.AppConfigs;
 import ir.darkdeveloper.bitkip.repo.DownloadsRepo;
 import ir.darkdeveloper.bitkip.repo.QueuesRepo;
@@ -11,12 +10,14 @@ import ir.darkdeveloper.bitkip.utils.IOUtils;
 import ir.darkdeveloper.bitkip.utils.MoreUtils;
 import ir.darkdeveloper.bitkip.utils.QueueUtils;
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.stage.Stage;
 
+import java.awt.*;
+import java.awt.event.ActionListener;
 import java.net.URL;
 import java.util.ArrayList;
 
-import static com.sun.jna.Platform.isLinux;
 import static ir.darkdeveloper.bitkip.config.AppConfigs.*;
 
 public class BitKip extends Application {
@@ -44,16 +45,37 @@ public class BitKip extends Application {
 
 
     private void initTray(Stage stage) {
-        if (!isLinux()) {
-            var tray = new FXTrayIcon.Builder(stage, getResource("icons/logo.png"))
-                    .menuItem("Open App", e -> stage.show())
-                    .menuItem("Exit App", e -> {
-                        stop();
-                        System.exit(0);
-                    })
-                    .build();
-            tray.show();
+        if (SystemTray.isSupported()) {
+            Platform.setImplicitExit(false);
+            var tray = SystemTray.getSystemTray();
+            var image = Toolkit.getDefaultToolkit()
+                    .getImage("src/main/resources/ir/darkdeveloper/bitkip/icons/logo.png");
+            var popup = new PopupMenu();
+            var openItem = new MenuItem("Open App");
+            var exitItem = new MenuItem("Exit App");
+            ActionListener openListener = e -> Platform.runLater(() -> {
+                if (stage.isShowing())
+                    stage.toFront();
+                else stage.show();
+            });
+            openItem.addActionListener(openListener);
+            exitItem.addActionListener(e -> {
+                stop();
+                System.exit(0);
+            });
+            popup.add(openItem);
+            popup.add(exitItem);
+            var trayIcon = new TrayIcon(image, "BitKip", popup);
+            trayIcon.addActionListener(openListener);
+            trayIcon.setImageAutoSize(true);
+            try {
+                tray.add(trayIcon);
+            } catch (AWTException e) {
+                e.printStackTrace();
+            }
+
         }
+
     }
 
 

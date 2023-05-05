@@ -25,7 +25,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Executors;
 
-import static com.sun.jna.Platform.isLinux;
 import static ir.darkdeveloper.bitkip.BitKip.getResource;
 import static ir.darkdeveloper.bitkip.config.AppConfigs.*;
 import static ir.darkdeveloper.bitkip.utils.FileExtensions.ALL_DOWNLOADS_QUEUE;
@@ -51,12 +50,6 @@ public class FxUtils {
             stage.setMinHeight(root.getMinHeight());
             controller.setStage(stage);
             stage.setTitle("BitKip");
-            stage.setOnCloseRequest(e -> {
-                if (isLinux()) {
-                    Platform.exit();
-                    System.exit(0);
-                } else stage.hide();
-            });
             stage.show();
         } catch (IOException ex) {
             ex.printStackTrace();
