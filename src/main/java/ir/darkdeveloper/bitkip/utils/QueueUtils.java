@@ -239,6 +239,7 @@ public class QueueUtils {
             var newFilePath = FileType.determineFileType(dm.getName()).getPath() + dm.getName();
             DownloadOpUtils.moveFiles(dm, newFilePath);
         });
+        IOUtils.removeFolder("Queues" + File.separator + queueName + File.separator + ".temp") ;
         IOUtils.removeFolder("Queues" + File.separator + queueName);
     }
 

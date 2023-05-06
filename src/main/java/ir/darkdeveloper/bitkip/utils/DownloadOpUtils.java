@@ -10,6 +10,8 @@ import org.controlsfx.control.Notifications;
 import java.awt.*;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -170,9 +172,12 @@ public class DownloadOpUtils {
 
     public static void moveFiles(DownloadModel dm, String newFilePath) {
         if (dm.getProgress() != 100) {
-            if (dm.getChunks() != 0){
+            if (dm.getChunks() != 0) {
                 var oldTempPath = Paths.get(dm.getFilePath()).getParent() + File.separator + ".temp" + File.separator + dm.getName();
-                var newTempPath = Paths.get(newFilePath).getParent() + File.separator + ".temp" + File.separator + dm.getName();
+                var newTempPath = Paths.get(newFilePath).getParent() + File.separator + ".temp" + File.separator;
+                if (!Files.exists(Path.of(newTempPath)))
+                    new File(newTempPath).mkdir();
+                newTempPath += dm.getName();
                 for (int i = 0; i < dm.getChunks(); i++)
                     IOUtils.moveFile(oldTempPath + "#" + i, newTempPath + "#" + i);
             } else
