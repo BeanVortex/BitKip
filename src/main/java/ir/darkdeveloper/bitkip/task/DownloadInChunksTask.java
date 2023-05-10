@@ -25,6 +25,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 
+import static ir.darkdeveloper.bitkip.config.AppConfigs.log;
 import static ir.darkdeveloper.bitkip.config.AppConfigs.*;
 import static ir.darkdeveloper.bitkip.utils.DownloadOpUtils.openFile;
 
@@ -57,7 +58,11 @@ public class DownloadInChunksTask extends DownloadTask {
         var fileSize = downloadModel.getSize();
         if (file.exists() && isCompleted(downloadModel, file, mainTableUtils))
             return 0L;
-        downloadInChunks(url, fileSize);
+        try {
+            downloadInChunks(url, fileSize);
+        }catch (Exception e){
+            log.severe(e.getMessage());
+        }
         return 0L;
     }
 
@@ -136,10 +141,11 @@ public class DownloadInChunksTask extends DownloadTask {
         if (isLimited) {
             c = CompletableFuture.supplyAsync(() -> {
                 try {
+                    log.info("Limited downloading part " + partFile.getName());
                     performLimitedDownload(url, fromContinue, finalFrom, finalTo, partFile, fileSize);
                 } catch (IOException | InterruptedException e) {
                     if (e instanceof IOException)
-                        e.printStackTrace();
+                        log.severe(e.getMessage());
                     this.pause();
                 }
                 return null;
@@ -147,10 +153,11 @@ public class DownloadInChunksTask extends DownloadTask {
         } else {
             c = CompletableFuture.supplyAsync(() -> {
                 try {
+                    log.info("Downloading part " + partFile.getName());
                     performDownload(url, fromContinue, finalFrom, finalTo, partFile, fileSize);
                 } catch (IOException | InterruptedException e) {
                     if (e instanceof IOException)
-                        e.printStackTrace();
+                        log.severe(e.getMessage());
                     this.pause();
                 }
                 return null;
@@ -177,8 +184,9 @@ public class DownloadInChunksTask extends DownloadTask {
                 fileChannel.close();
                 con.disconnect();
             } catch (SocketTimeoutException | UnknownHostException | SocketException s) {
-                retries++;
                 if (!paused) {
+                    retries++;
+                    log.warning("Downloading part " + partFile.getName() + " failed. retry count : " + retries);
                     Thread.sleep(2000);
                     var currFileSize = getCurrentFileSize(partFile);
                     performDownload(url, fromContinue, fromContinue + currFileSize, to, partFile, currFileSize);
@@ -214,9 +222,9 @@ public class DownloadInChunksTask extends DownloadTask {
                 fileChannel.close();
                 con.disconnect();
             } catch (SocketTimeoutException | UnknownHostException s) {
-                s.printStackTrace();
-                retries++;
                 if (!paused) {
+                    retries++;
+                    log.warning("Downloading part " + partFile.getName() + " failed. retry count : " + retries);
                     Thread.sleep(2000);
                     var currFileSize = getCurrentFileSize(partFile);
                     performLimitedDownload(url, fromContinue, fromContinue + currFileSize, to, partFile, currFileSize);
@@ -246,7 +254,7 @@ public class DownloadInChunksTask extends DownloadTask {
                 }
             } catch (InterruptedException | NoSuchFileException ignore) {
             } catch (IOException e) {
-                e.printStackTrace();
+                log.severe(e.getLocalizedMessage());
             }
         });
     }
@@ -254,18 +262,19 @@ public class DownloadInChunksTask extends DownloadTask {
     @Override
     public void pause() {
         paused = true;
+        log.info("Paused download: " + downloadModel.getName());
         try {
             //this will cause execution get out of transferFrom
             for (var channel : fileChannels)
                 channel.close();
         } catch (IOException e) {
-            e.printStackTrace();
+            log.severe(e.getLocalizedMessage());
         }
     }
 
     @Override
     protected void failed() {
-        paused = true;
+        log.info("Failed download: " + downloadModel.getName());
         pause();
     }
 
@@ -281,6 +290,7 @@ public class DownloadInChunksTask extends DownloadTask {
                 var download = dmOpt.get();
                 download.setDownloadStatus(DownloadStatus.Paused);
                 if (IOUtils.mergeFiles(download, chunks, filePaths)) {
+                    log.info("File successfully downloaded: " + download.getName());
                     download.setCompleteDate(LocalDateTime.now());
                     download.setDownloadStatus(DownloadStatus.Completed);
                     download.setDownloaded(download.getSize());
@@ -295,7 +305,7 @@ public class DownloadInChunksTask extends DownloadTask {
                                             DownloadOpUtils.openDownloadingStage(download);
                                     });
                     if (download.isOpenAfterComplete())
-                        openFile(null, download);
+                        openFile(download);
                 } else
                     openDownloadings.stream().filter(dc -> dc.getDownloadModel().equals(download))
                             .forEach(DownloadingController::onPause);
@@ -310,7 +320,7 @@ public class DownloadInChunksTask extends DownloadTask {
                 executor.shutdownNow();
             System.gc();
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            log.severe(e.getLocalizedMessage());
         }
     }
 

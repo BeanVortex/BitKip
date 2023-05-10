@@ -13,6 +13,7 @@ import java.nio.file.Path;
 import java.util.concurrent.ExecutorService;
 
 import static ir.darkdeveloper.bitkip.config.AppConfigs.currentDownloadings;
+import static ir.darkdeveloper.bitkip.config.AppConfigs.log;
 
 public abstract class DownloadTask extends Task<Long> {
 
@@ -40,11 +41,10 @@ public abstract class DownloadTask extends Task<Long> {
                         .filter(c -> c.equals(downloadModel))
                         .findAny()
                         .ifPresent(currentDownloadings::remove);
-                System.out.println("already downloaded");
                 return true;
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            log.severe(e.getLocalizedMessage());
         }
         return false;
     }

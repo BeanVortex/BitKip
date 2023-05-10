@@ -11,6 +11,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
+import static ir.darkdeveloper.bitkip.config.AppConfigs.log;
 import static ir.darkdeveloper.bitkip.repo.DatabaseHelper.*;
 import static ir.darkdeveloper.bitkip.repo.QueuesRepo.*;
 import static ir.darkdeveloper.bitkip.repo.ScheduleRepo.*;
@@ -112,7 +113,7 @@ public class DownloadsRepo {
             queueDownloadSql.deleteCharAt(queueDownloadSql.length() - 1);
             stmt.executeUpdate(queueDownloadSql.toString());
         } catch (SQLException e) {
-            e.printStackTrace();
+            log.severe(e.getLocalizedMessage());
         }
     }
 
@@ -150,7 +151,7 @@ public class DownloadsRepo {
                 list.add(createDownload(rs, fetchQueue));
             return list;
         } catch (SQLException e) {
-            e.printStackTrace();
+            log.severe(e.getLocalizedMessage());
         }
         return list;
     }
@@ -227,7 +228,7 @@ public class DownloadsRepo {
             else throw new Exception("queue count for the download is not correct");
             stmt.executeUpdate(updateAddToQueueDateSql);
         } catch (Exception e) {
-            e.printStackTrace();
+            log.severe(e.getLocalizedMessage());
         }
     }
 

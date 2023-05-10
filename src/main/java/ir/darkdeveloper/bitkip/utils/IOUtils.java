@@ -2,6 +2,8 @@ package ir.darkdeveloper.bitkip.utils;
 
 import ir.darkdeveloper.bitkip.models.DownloadModel;
 import ir.darkdeveloper.bitkip.models.FileType;
+import ir.darkdeveloper.bitkip.models.QueueModel;
+import ir.darkdeveloper.bitkip.repo.DownloadsRepo;
 
 import java.io.*;
 import java.nio.ByteBuffer;
@@ -12,14 +14,13 @@ import java.nio.file.StandardCopyOption;
 import java.text.DecimalFormat;
 import java.util.Arrays;
 import java.util.List;
-import java.util.logging.Logger;
 
-import static ir.darkdeveloper.bitkip.config.AppConfigs.dataPath;
-import static ir.darkdeveloper.bitkip.config.AppConfigs.downloadPath;
+import static ir.darkdeveloper.bitkip.config.AppConfigs.log;
+import static ir.darkdeveloper.bitkip.config.AppConfigs.*;
+import static ir.darkdeveloper.bitkip.repo.DownloadsRepo.COL_PATH;
 
 
 public class IOUtils {
-    private static final Logger log = Logger.getLogger(IOUtils.class.getName());
 
 
     public static void createSaveLocations() {
@@ -31,12 +32,19 @@ public class IOUtils {
         });
     }
 
+    public static void createFoldersForQueue() {
+        getQueues().stream().filter(QueueModel::hasFolder)
+                .forEach(qm -> {
+                    var name = "Queues" + File.separator + qm.getName();
+                    IOUtils.createFolderInSaveLocation(name);
+                    IOUtils.createFolderInSaveLocation(name + File.separator + ".temp");
+                });
+    }
+
     private static void mkdir(String dirPath) {
         var file = new File(dirPath);
         if (file.mkdir())
             log.info("created dir: " + dirPath);
-        else
-            log.info("not created dir: " + dirPath);
     }
 
 
@@ -116,13 +124,40 @@ public class IOUtils {
             if (file.exists())
                 Files.move(Paths.get(oldFilePath), Paths.get(newFilePath), StandardCopyOption.REPLACE_EXISTING);
         } catch (IOException e) {
-            e.printStackTrace();
+            log.severe(e.getLocalizedMessage());
         }
+    }
+
+    public static void moveDownloadFilesFiles(DownloadModel dm, String newFilePath) {
+        if (dm.getProgress() != 100) {
+            if (dm.getChunks() != 0) {
+                var oldTempPath = Paths.get(dm.getFilePath()).getParent() + File.separator + ".temp" + File.separator + dm.getName();
+                var newTempPath = Paths.get(newFilePath).getParent() + File.separator + ".temp" + File.separator;
+                if (!Files.exists(Path.of(newTempPath)))
+                    new File(newTempPath).mkdir();
+                newTempPath += dm.getName();
+                for (int i = 0; i < dm.getChunks(); i++)
+                    IOUtils.moveFile(oldTempPath + "#" + i, newTempPath + "#" + i);
+            } else
+                IOUtils.moveFile(dm.getFilePath(), newFilePath);
+        } else
+            IOUtils.moveFile(dm.getFilePath(), newFilePath);
+        DownloadsRepo.updateDownloadProperty(COL_PATH, "\"" + newFilePath + "\"", dm.getId());
+    }
+
+    public static void moveFilesAndDeleteQueueFolder(String queueName) {
+        var downloadsByQueueName = DownloadsRepo.getDownloadsByQueueName(queueName);
+        downloadsByQueueName.forEach(dm -> {
+            var newFilePath = FileType.determineFileType(dm.getName()).getPath() + dm.getName();
+            moveDownloadFilesFiles(dm, newFilePath);
+        });
+        removeFolder("Queues" + File.separator + queueName + File.separator + ".temp");
+        removeFolder("Queues" + File.separator + queueName);
     }
 
     public static void removeFolder(String name) {
         var dir = new File(downloadPath + name);
-        if (dir.exists())
+        if (dir.exists() && dir.isDirectory())
             dir.delete();
     }
 
@@ -141,7 +176,6 @@ public class IOUtils {
                         moveFile(oldPath, newPath);
                     } else moveChunkFilesToTemp(file.getPath());
                 }
-
             }
         }
 

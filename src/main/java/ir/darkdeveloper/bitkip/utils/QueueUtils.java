@@ -1,15 +1,15 @@
 package ir.darkdeveloper.bitkip.utils;
 
 import ir.darkdeveloper.bitkip.config.AppConfigs;
-import ir.darkdeveloper.bitkip.models.*;
-import ir.darkdeveloper.bitkip.repo.DownloadsRepo;
+import ir.darkdeveloper.bitkip.models.DownloadModel;
+import ir.darkdeveloper.bitkip.models.DownloadStatus;
+import ir.darkdeveloper.bitkip.models.QueueModel;
 import ir.darkdeveloper.bitkip.repo.QueuesRepo;
 import ir.darkdeveloper.bitkip.repo.ScheduleRepo;
 import javafx.application.Platform;
 import javafx.scene.control.MenuItem;
 import org.controlsfx.control.Notifications;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -18,6 +18,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import static ir.darkdeveloper.bitkip.config.AppConfigs.log;
 import static ir.darkdeveloper.bitkip.config.AppConfigs.*;
 
 public class QueueUtils {
@@ -44,8 +45,11 @@ public class QueueUtils {
             qm.setDownloads(new CopyOnWriteArrayList<>(downloadsByQueue));
             startedQueues.add(qm);
             start(qm, startItem, stopItem);
-        } else if (schedule.isEnabled() && schedule.isOnceDownload())
+            log.info("Queue %s has been started".formatted(qm.getName()));
+        } else if (schedule.isEnabled() && schedule.isOnceDownload()) {
             currentSchedules.get(schedule.getId()).getStartScheduler().shutdown();
+            log.info("Start scheduler has been disabled for %s".formatted(qm.getName()));
+        }
 
     }
 
@@ -106,8 +110,7 @@ public class QueueUtils {
                 }
                 try {
                     Thread.sleep(5000);
-                } catch (InterruptedException e) {
-                    throw new RuntimeException(e);
+                } catch (InterruptedException ignore) {
                 }
             }
         }
@@ -161,6 +164,7 @@ public class QueueUtils {
         if (schedule.isEnabled() && schedule.isTurnOffEnabled()) {
             var turnOffMode = schedule.getTurnOffMode();
             Platform.runLater(() -> {
+                log.info("Turn off triggered");
                 if (FxUtils.askForShutdown(turnOffMode))
                     PowerUtils.turnOff(turnOffMode);
             });
@@ -179,6 +183,7 @@ public class QueueUtils {
             });
 
             startedQueues.remove(qm);
+            log.info("Queue %s stopped".formatted(qm.getName()));
             whenQueueDone(qm, startItem, stopItem, null);
         }
     }
@@ -198,6 +203,7 @@ public class QueueUtils {
 
             Platform.runLater(() -> addAllQueues(updatedQueues));
             ScheduleRepo.updateScheduleEnabled(schedule.getId(), schedule.isEnabled());
+            log.info("Schedulers has been disabled for %s".formatted(qm.getName()));
         }
     }
 
@@ -213,34 +219,15 @@ public class QueueUtils {
             Platform.runLater(Notification);
     }
 
-    public static void createFolders() {
-        getQueues().stream().filter(QueueModel::hasFolder)
-                .forEach(qm -> {
-                    var name = "Queues" + File.separator + qm.getName();
-                    IOUtils.createFolderInSaveLocation(name);
-                    IOUtils.createFolderInSaveLocation(name + File.separator + ".temp");
-                });
-    }
+
 
     public static void deleteQueue(String name) {
         var content = "Are you sure you want to delete '" + name + "' queue?\nFiles are not deleted";
         var header = "Delete '" + name + "' ?";
         if (FxUtils.askWarning(header, content)) {
-            moveFilesAndDeleteQueueFolder(name);
+            IOUtils.moveFilesAndDeleteQueueFolder(name);
             QueuesRepo.deleteQueue(name);
             AppConfigs.deleteQueue(name);
         }
     }
-
-
-    public static void moveFilesAndDeleteQueueFolder(String queueName) {
-        var downloadsByQueueName = DownloadsRepo.getDownloadsByQueueName(queueName);
-        downloadsByQueueName.forEach(dm -> {
-            var newFilePath = FileType.determineFileType(dm.getName()).getPath() + dm.getName();
-            DownloadOpUtils.moveFiles(dm, newFilePath);
-        });
-        IOUtils.removeFolder("Queues" + File.separator + queueName + File.separator + ".temp") ;
-        IOUtils.removeFolder("Queues" + File.separator + queueName);
-    }
-
 }

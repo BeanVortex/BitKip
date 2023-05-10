@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
+import static ir.darkdeveloper.bitkip.config.AppConfigs.log;
 import static ir.darkdeveloper.bitkip.repo.DatabaseHelper.*;
 
 public class QueuesRepo {
@@ -116,7 +117,7 @@ public class QueuesRepo {
             genKeys.next();
             queue.setId(genKeys.getInt(1));
         } catch (SQLException e) {
-            e.printStackTrace();
+            log.severe(e.getLocalizedMessage());
         }
     }
 
@@ -131,7 +132,7 @@ public class QueuesRepo {
             if (rs.next())
                 return createQueueModel(rs, fetchDownloads, true);
         } catch (SQLException e) {
-            e.printStackTrace();
+            log.severe(e.getLocalizedMessage());
         }
         throw new RuntimeException("Queue does not exist");
     }
@@ -151,7 +152,7 @@ public class QueuesRepo {
                 list.add(createQueueModel(rs, fetchDownloads, fetchSchedule));
             return list;
         } catch (SQLException e) {
-            e.printStackTrace();
+            log.severe(e.getLocalizedMessage());
         }
         return list;
     }

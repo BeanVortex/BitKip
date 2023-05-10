@@ -6,6 +6,8 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 
+import static ir.darkdeveloper.bitkip.config.AppConfigs.log;
+
 public class DatabaseHelper {
 
 
@@ -34,7 +36,7 @@ public class DatabaseHelper {
             stmt.close();
             con.close();
         } catch (SQLException e) {
-            e.printStackTrace();
+            log.severe(e.getLocalizedMessage());
         }
     }
 
@@ -44,7 +46,7 @@ public class DatabaseHelper {
             stmt.executeUpdate(sql);
         } catch (SQLException e) {
             if (!ignoreStackTrace)
-                e.printStackTrace();
+                log.severe(e.getLocalizedMessage());
         }
     }
 

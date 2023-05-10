@@ -15,6 +15,7 @@ import java.util.concurrent.TimeUnit;
 
 import static com.sun.jna.Platform.isLinux;
 import static com.sun.jna.Platform.isMac;
+import static ir.darkdeveloper.bitkip.config.AppConfigs.log;
 import static ir.darkdeveloper.bitkip.config.AppConfigs.*;
 
 
@@ -54,7 +55,7 @@ public class ScheduleTask {
         Runnable run = () -> QueueUtils.startQueue(queue, startItem, stopItem);
         var schedule = queue.getSchedule();
         createSchedule(run, schedule, false);
-
+        log.info("Start queue schedule service has been enabled for " + queue.getName());
         var sm = currentSchedules.get(schedule.getId());
         if (isThereSchedule)
             sm.getStartScheduler().shutdown();
@@ -65,7 +66,7 @@ public class ScheduleTask {
         Runnable run = () -> QueueUtils.stopQueue(queue, startItem, stopItem);
         var schedule = queue.getSchedule();
         createSchedule(run, schedule, true);
-
+        log.info("Stop queue schedule service has been enabled for " + queue.getName());
         var sm = currentSchedules.get(schedule.getId());
         if (isThereSchedule && sm.getStopScheduler() != null)
             sm.getStopScheduler().shutdown();

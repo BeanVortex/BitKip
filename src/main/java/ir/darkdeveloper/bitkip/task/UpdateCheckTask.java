@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.concurrent.ExecutorService;
 
 import static com.sun.jna.Platform.*;
+import static ir.darkdeveloper.bitkip.config.AppConfigs.log;
 import static ir.darkdeveloper.bitkip.config.AppConfigs.VERSION;
 
 public class UpdateCheckTask extends Task<UpdateModel> {
@@ -70,7 +71,7 @@ public class UpdateCheckTask extends Task<UpdateModel> {
                         .get();
                 break;
             } catch (IOException e) {
-                e.printStackTrace();
+                log.severe(e.getLocalizedMessage());
                 Thread.sleep(2000);
             }
         }

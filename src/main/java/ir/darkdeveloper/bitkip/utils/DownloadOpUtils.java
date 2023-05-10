@@ -10,18 +10,14 @@ import org.controlsfx.control.Notifications;
 import java.awt.*;
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 
 import static com.sun.jna.Platform.*;
-import static com.sun.jna.Platform.isMac;
+import static ir.darkdeveloper.bitkip.config.AppConfigs.log;
 import static ir.darkdeveloper.bitkip.config.AppConfigs.*;
-import static ir.darkdeveloper.bitkip.repo.DownloadsRepo.COL_PATH;
 
 public class DownloadOpUtils {
 
@@ -35,9 +31,10 @@ public class DownloadOpUtils {
                     dm.setDownloadStatus(DownloadStatus.Trying);
                     DownloadsRepo.updateDownloadLastTryDate(dm);
                     mainTableUtils.refreshTable();
-                    if (dm.isResumable())
+                    if (dm.isResumable()) {
+                        log.info("Resuming download : " + dm.getName());
                         NewDownloadUtils.startDownload(dm, speedLimit, byteLimit, true, false, null);
-                    else {
+                    } else {
                         dm.setDownloadStatus(DownloadStatus.Restarting);
                         mainTableUtils.refreshTable();
                         restartDownload(dm);
@@ -50,6 +47,7 @@ public class DownloadOpUtils {
     public static void startDownload(DownloadModel dm, String speedLimit, String byteLimit, boolean resume,
                                      boolean blocking, ExecutorService executor) {
         if (!currentDownloadings.contains(dm)) {
+            log.info("Starting download : " + dm.getName());
             dm.setLastTryDate(LocalDateTime.now());
             dm.setDownloadStatus(DownloadStatus.Trying);
             DownloadsRepo.updateDownloadLastTryDate(dm);
@@ -70,6 +68,7 @@ public class DownloadOpUtils {
     }
 
     private static void restartDownload(DownloadModel dm) {
+        log.info("Restarting download : " + dm.getName());
         IOUtils.deleteDownload(dm);
         DownloadsRepo.deleteDownload(dm);
         mainTableUtils.remove(dm);
@@ -81,6 +80,7 @@ public class DownloadOpUtils {
     }
 
     public static void pauseDownload(DownloadModel dm) {
+        log.info("Pausing download : " + dm.getName());
         currentDownloadings.stream()
                 .filter(c -> c.equals(dm))
                 .findFirst().ifPresent(dm2 -> dm2.getDownloadTask().pause());
@@ -106,6 +106,7 @@ public class DownloadOpUtils {
                 var openDownloadingsCopy = new ArrayList<>(openDownloadings);
                 openDownloadingsCopy.stream().filter(dc -> dc.getDownloadModel().equals(dm))
                         .forEach(DownloadingController::closeStage);
+                log.info("Download deleted : " + dm.getName());
             });
 
             mainTableUtils.remove(dms);
@@ -122,26 +123,28 @@ public class DownloadOpUtils {
     }
 
     public static void openFiles(ObservableList<DownloadModel> dms) {
-        var desktop = Desktop.getDesktop();
         dms.filtered(dm -> dm.getDownloadStatus() == DownloadStatus.Completed)
-                .forEach(dm -> openFile(desktop, dm));
+                .forEach(DownloadOpUtils::openFile);
     }
 
-    public static void openFile(Desktop desktop, DownloadModel dm) {
-        if (desktop == null)
-            desktop = Desktop.getDesktop();
+    public static void openFile(DownloadModel dm) {
+        var desktop = Desktop.getDesktop();
+        log.info("Opening file : " + dm.getFilePath());
         if (!new File(dm.getFilePath()).exists()) {
             Notifications.create()
                     .title("File not found")
                     .text("%s has been moved or removed".formatted(dm.getName()))
                     .showError();
+            log.severe("File does not exists : " + dm.getFilePath());
             return;
         }
         try {
             if (Desktop.isDesktopSupported())
                 desktop.open(new File(dm.getFilePath()));
+            else
+                log.warning("Desktop is not supported to open file");
         } catch (IOException e) {
-            e.printStackTrace();
+            log.severe(e.getLocalizedMessage());
         }
     }
 
@@ -150,6 +153,7 @@ public class DownloadOpUtils {
             var desktop = Desktop.getDesktop();
             File file = new File(dm.getFilePath());
             if (desktop.isSupported(Desktop.Action.OPEN)) {
+                log.info("Opening containing folder");
                 if (isWindows())
                     Runtime.getRuntime().exec(new String[]{"explorer", "/select,", file.getAbsolutePath()});
                 else if (isLinux() || isSolaris() || isFreeBSD() || isOpenBSD())
@@ -157,12 +161,15 @@ public class DownloadOpUtils {
                 else if (isMac())
                     Runtime.getRuntime().exec(new String[]{"osascript", "-e",
                             "tell app \"Finder\" to reveal POSIX file \"" + file.getAbsolutePath() + "\""});
-            } else
+            } else{
+                log.warning("Desktop is not supported to open containing folder");
                 Notifications.create()
                         .title("Not Supported")
                         .text("Your operating system does not support this action")
                         .showError();
+            }
         } catch (IOException e) {
+            log.severe(e.getLocalizedMessage());
             Notifications.create()
                     .title("Error opening containing folder")
                     .text(e.getMessage())
@@ -170,22 +177,6 @@ public class DownloadOpUtils {
         }
     }
 
-    public static void moveFiles(DownloadModel dm, String newFilePath) {
-        if (dm.getProgress() != 100) {
-            if (dm.getChunks() != 0) {
-                var oldTempPath = Paths.get(dm.getFilePath()).getParent() + File.separator + ".temp" + File.separator + dm.getName();
-                var newTempPath = Paths.get(newFilePath).getParent() + File.separator + ".temp" + File.separator;
-                if (!Files.exists(Path.of(newTempPath)))
-                    new File(newTempPath).mkdir();
-                newTempPath += dm.getName();
-                for (int i = 0; i < dm.getChunks(); i++)
-                    IOUtils.moveFile(oldTempPath + "#" + i, newTempPath + "#" + i);
-            } else
-                IOUtils.moveFile(dm.getFilePath(), newFilePath);
-        } else
-            IOUtils.moveFile(dm.getFilePath(), newFilePath);
-        DownloadsRepo.updateDownloadProperty(COL_PATH, "\"" + newFilePath + "\"", dm.getId());
-    }
 
     public static void refreshDownload(ObservableList<DownloadModel> selected) {
         if (selected.size() != 1)

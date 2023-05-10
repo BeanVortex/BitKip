@@ -273,7 +273,7 @@ public class MenuUtils {
                     });
             if (moveFiles) {
                 var newFilePath = FileType.determineFileType(dm.getName()).getPath() + dm.getName();
-                DownloadOpUtils.moveFiles(dm, newFilePath);
+                IOUtils.moveDownloadFilesFiles(dm, newFilePath);
             }
         }
     }
@@ -295,7 +295,7 @@ public class MenuUtils {
                             var newFilePath = FileType.determineFileType(dm.getName()).getPath() + dm.getName();
                             if (qm.hasFolder())
                                 newFilePath = queuesPath + qm.getName() + File.separator + dm.getName();
-                            DownloadOpUtils.moveFiles(dm, newFilePath);
+                            IOUtils.moveDownloadFilesFiles(dm, newFilePath);
                         }
 
                         DownloadsRepo.updateDownloadQueue(dm.getId(), qm.getId());

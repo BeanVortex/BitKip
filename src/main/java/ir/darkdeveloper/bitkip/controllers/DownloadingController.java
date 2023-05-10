@@ -253,7 +253,7 @@ public class DownloadingController implements FXMLController {
                         .showError();
                 return;
             }
-            openFile(null, downloadModel);
+            openFile(downloadModel);
             return;
         }
 

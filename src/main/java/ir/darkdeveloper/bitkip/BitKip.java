@@ -8,7 +8,6 @@ import ir.darkdeveloper.bitkip.task.ScheduleTask;
 import ir.darkdeveloper.bitkip.utils.FxUtils;
 import ir.darkdeveloper.bitkip.utils.IOUtils;
 import ir.darkdeveloper.bitkip.utils.MoreUtils;
-import ir.darkdeveloper.bitkip.utils.QueueUtils;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.stage.Stage;
@@ -23,6 +22,8 @@ import static ir.darkdeveloper.bitkip.config.AppConfigs.*;
 public class BitKip extends Application {
 
 
+
+
     @Override
     public void start(Stage stage) {
         IOUtils.createSaveLocations();
@@ -34,7 +35,7 @@ public class BitKip extends Application {
             queues = QueuesRepo.createDefaultRecords();
         queues = ScheduleRepo.createDefaultSchedulesForQueues(queues);
         AppConfigs.addAllQueues(queues);
-        QueueUtils.createFolders();
+        IOUtils.createFoldersForQueue();
         AppConfigs.setHostServices(getHostServices());
         FxUtils.startMainStage(stage);
         ScheduleTask.startSchedules();
@@ -91,6 +92,8 @@ public class BitKip extends Application {
             if (stopScheduler != null)
                 stopScheduler.shutdownNow();
         });
+        for (var handler : log.getHandlers())
+            handler.close();
     }
 
     public static void main(String[] args) {

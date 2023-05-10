@@ -12,6 +12,7 @@ import java.time.LocalTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static ir.darkdeveloper.bitkip.config.AppConfigs.log;
 import static ir.darkdeveloper.bitkip.repo.DatabaseHelper.*;
 import static ir.darkdeveloper.bitkip.repo.QueuesRepo.COL_SCHEDULE_ID;
 import static java.time.DayOfWeek.*;
@@ -92,7 +93,7 @@ public class ScheduleRepo {
             var scheduleId = genKeys.getInt(1);
             schedule.setId(scheduleId);
         } catch (SQLException e) {
-            e.printStackTrace();
+            log.severe(e.getLocalizedMessage());
         }
     }
 
@@ -107,7 +108,7 @@ public class ScheduleRepo {
             if (rs.next())
                 return createScheduleModel(rs, -1);
         } catch (SQLException e) {
-            e.printStackTrace();
+            log.severe(e.getLocalizedMessage());
         }
         return null;
     }

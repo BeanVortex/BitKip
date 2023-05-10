@@ -17,6 +17,7 @@ import java.nio.channels.FileChannel;
 import java.time.LocalDateTime;
 import java.util.concurrent.ExecutorService;
 
+import static ir.darkdeveloper.bitkip.config.AppConfigs.log;
 import static ir.darkdeveloper.bitkip.config.AppConfigs.*;
 import static ir.darkdeveloper.bitkip.utils.DownloadOpUtils.openFile;
 
@@ -52,7 +53,7 @@ public class DownloadLimitedTask extends DownloadTask {
             performDownload();
         } catch (IOException | InterruptedException e) {
             if (e instanceof IOException)
-                e.printStackTrace();
+                log.severe(e.getLocalizedMessage());
             this.pause();
         }
         return getCurrentFileSize(file);
@@ -81,11 +82,12 @@ public class DownloadLimitedTask extends DownloadTask {
                     downloadSpeedLimited(fileChannel, in, file, limit, fileSize, existingFileSize);
                 else {
                     calculateSpeedAndProgress(file, fileSize);
-                    downloadValueLimited(fileChannel, in, limit, existingFileSize);
+                    downloadSizeLimited(fileChannel, in, limit, existingFileSize);
                 }
             } catch (SocketTimeoutException | UnknownHostException | SocketException s) {
-                retries++;
                 if (!paused) {
+                    retries++;
+                    log.warning("Downloading " + downloadModel.getName() + " failed. retry count : " + retries);
                     Thread.sleep(2000);
                     performDownload();
                 }
@@ -106,6 +108,7 @@ public class DownloadLimitedTask extends DownloadTask {
                                       File file, long limit, long fileSize,
                                       long existingFileSize) throws IOException, InterruptedException {
         var byteChannel = Channels.newChannel(in);
+        log.info("Downloading speed limited: " + file.getName());
         do {
             var beforeDown = System.currentTimeMillis();
             fileChannel.transferFrom(byteChannel, existingFileSize, limit);
@@ -125,8 +128,9 @@ public class DownloadLimitedTask extends DownloadTask {
         } while (existingFileSize < fileSize && !paused);
     }
 
-    private void downloadValueLimited(FileChannel fileChannel, InputStream in,
-                                      long limit, long existingFileSize) throws IOException {
+    private void downloadSizeLimited(FileChannel fileChannel, InputStream in,
+                                     long limit, long existingFileSize) throws IOException {
+        log.info("Downloading size limited: " + file.getName());
         var byteChannel = Channels.newChannel(in);
         fileChannel.transferFrom(byteChannel, existingFileSize, limit);
     }
@@ -144,6 +148,7 @@ public class DownloadLimitedTask extends DownloadTask {
                 download.setDownloadStatus(DownloadStatus.Paused);
                 downloadModel.setDownloadStatus(DownloadStatus.Paused);
                 if (file.exists() && getCurrentFileSize(file) == downloadModel.getSize()) {
+                    log.info("File successfully downloaded: " + download.getName());
                     download.setCompleteDate(LocalDateTime.now());
                     download.setDownloadStatus(DownloadStatus.Completed);
                     downloadModel.setDownloadStatus(DownloadStatus.Completed);
@@ -158,7 +163,7 @@ public class DownloadLimitedTask extends DownloadTask {
                                             DownloadOpUtils.openDownloadingStage(download);
                                     });
                     if (download.isOpenAfterComplete())
-                        openFile(null, downloadModel);
+                        openFile(downloadModel);
 
                 } else openDownloadings.stream().filter(dc -> dc.getDownloadModel().equals(download))
                         .forEach(DownloadingController::onPause);
@@ -180,6 +185,7 @@ public class DownloadLimitedTask extends DownloadTask {
 
     @Override
     protected void failed() {
+        log.info("Failed download: " + downloadModel.getName());
         pause();
     }
 
@@ -216,6 +222,7 @@ public class DownloadLimitedTask extends DownloadTask {
     @Override
     public void pause() {
         paused = true;
+        log.info("Paused download: " + downloadModel.getName());
         succeeded();
     }
 

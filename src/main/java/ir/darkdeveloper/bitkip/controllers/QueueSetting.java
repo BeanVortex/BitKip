@@ -430,12 +430,12 @@ public class QueueSetting implements FXMLController, QueueObserver {
                 if (FxUtils.askToMoveFiles(downloadsByQueueName, queue)) {
                     downloadsByQueueName.forEach(dm -> {
                         var newFilePath = queuesPath + queue.getName() + File.separator + dm.getName();
-                        DownloadOpUtils.moveFiles(dm, newFilePath);
+                        IOUtils.moveDownloadFilesFiles(dm, newFilePath);
                     });
                 }
             }
         } else
-            QueueUtils.moveFilesAndDeleteQueueFolder(queue.getName());
+            IOUtils.moveFilesAndDeleteQueueFolder(queue.getName());
 
     }
 
