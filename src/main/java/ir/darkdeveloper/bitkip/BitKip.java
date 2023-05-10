@@ -68,7 +68,7 @@ public class BitKip extends Application {
             try {
                 tray.add(trayIcon);
             } catch (AWTException e) {
-                e.printStackTrace();
+                log.severe(e.getLocalizedMessage());
             }
 
         }

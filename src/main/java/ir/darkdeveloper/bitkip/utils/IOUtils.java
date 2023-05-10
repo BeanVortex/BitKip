@@ -24,6 +24,7 @@ public class IOUtils {
 
 
     public static void createSaveLocations() {
+        mkdir(downloadPath);
         Arrays.stream(FileType.values()).forEach(fileType -> {
             mkdir(fileType.getPath());
             if (fileType != FileType.QUEUES)
