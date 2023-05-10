@@ -197,9 +197,10 @@ public class MenuUtils {
     public static void initMoreMenu(Button moreBtn, TableView<DownloadModel> table) {
         var c = new ContextMenu();
         var checkForUpdatesLbl = new Label("Check updates");
+        var logsLbl = new Label("Logs");
         var aboutLbl = new Label("About");
 
-        var lbls = List.of(checkForUpdatesLbl, aboutLbl);
+        var lbls = List.of(checkForUpdatesLbl, logsLbl, aboutLbl);
         var menuItems = createMapMenuItems(lbls, null);
         c.getItems().addAll(menuItems.values());
         moreBtn.setContextMenu(c);
@@ -209,6 +210,7 @@ public class MenuUtils {
         });
 
         menuItems.get(checkForUpdatesLbl).setOnAction(e -> MoreUtils.checkUpdates(true));
+        menuItems.get(logsLbl).setOnAction(e -> FxUtils.newLogsStage());
         menuItems.get(aboutLbl).setOnAction(e -> FxUtils.newAboutStage());
     }
 

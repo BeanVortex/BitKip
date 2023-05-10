@@ -35,6 +35,7 @@ public class FxUtils {
     // these constants are used to prevent these stages to show more than 1
     private static final String QUEUE_SETTING_STAGE = "QueueSetting";
     private static final String ABOUT_STAGE = "About";
+    private static final String LOGS_STAGE = "Log";
     private static final Map<String, Stage> openStages = new LinkedHashMap<>();
 
 
@@ -144,6 +145,35 @@ public class FxUtils {
         openStages.put(ABOUT_STAGE, stage);
     }
 
+    public static void newLogsStage() {
+        if (openStages.containsKey(LOGS_STAGE)) {
+            openStages.get(LOGS_STAGE).toFront();
+            return;
+        }
+        FXMLLoader loader;
+        Stage stage = new Stage();
+        VBox root;
+        try {
+            loader = new FXMLLoader(getResource("fxml/logs.fxml"));
+            root = loader.load();
+        } catch (IOException e) {
+            log.severe(e.getLocalizedMessage());
+            throw new RuntimeException(e);
+        }
+        var scene = new Scene(root);
+        stage.setScene(scene);
+        stage.setMinWidth(root.getMinWidth());
+        stage.setMinHeight(root.getMinHeight());
+        stage.setTitle("Logs");
+        var logoPath = getResource("icons/logo.png");
+        if (logoPath != null)
+            stage.getIcons().add(new Image(logoPath.toExternalForm()));
+        FXMLController controller = loader.getController();
+        controller.setStage(stage);
+        stage.setOnCloseRequest(e -> openStages.remove(LOGS_STAGE));
+        stage.show();
+        openStages.put(LOGS_STAGE, stage);
+    }
 
     public static void newDownloadingStage(DownloadModel dm) {
         FXMLLoader loader;
@@ -229,7 +259,6 @@ public class FxUtils {
         stage.show();
         openStages.put(QUEUE_SETTING_STAGE, stage);
     }
-
 
     public static boolean askToMoveFiles(List<DownloadModel> downloads, QueueModel desQueue) {
         var downloadsHasFolder = downloads.stream().filter(dm ->
