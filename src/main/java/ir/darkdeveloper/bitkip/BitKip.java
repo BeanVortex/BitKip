@@ -21,9 +21,6 @@ import static ir.darkdeveloper.bitkip.config.AppConfigs.*;
 
 public class BitKip extends Application {
 
-
-
-
     @Override
     public void start(Stage stage) {
         IOUtils.createSaveLocations();

@@ -16,6 +16,7 @@ import java.util.ResourceBundle;
 
 import static ir.darkdeveloper.bitkip.BitKip.getResource;
 import static ir.darkdeveloper.bitkip.config.AppConfigs.getQueueSubject;
+import static ir.darkdeveloper.bitkip.config.AppConfigs.log;
 
 public class NewDownload implements FXMLController {
 
@@ -40,7 +41,7 @@ public class NewDownload implements FXMLController {
     @Override
     public void setStage(Stage stage) {
         this.stage = stage;
-        stage.setOnCloseRequest(e -> getQueueSubject().removeObserver(prevController));
+        this.stage.setOnCloseRequest(e -> getQueueSubject().removeObserver(prevController));
         initAfterStage();
     }
 
@@ -81,7 +82,6 @@ public class NewDownload implements FXMLController {
     @Override
     public void initialize(URL location, ResourceBundle resources) {
     }
-
 
     @FXML
     private void showSingle() {
@@ -128,6 +128,7 @@ public class NewDownload implements FXMLController {
             prevController = controller;
             container.getChildren().add(details);
         } catch (IOException e) {
+            log.severe(e.getLocalizedMessage());
             throw new RuntimeException(e);
         }
     }

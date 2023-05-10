@@ -26,9 +26,9 @@ public class IOUtils {
     public static void createSaveLocations() {
         mkdir(dataPath);
         Arrays.stream(FileType.values()).forEach(fileType -> {
-            IOUtils.mkdir(fileType.getPath());
+            mkdir(fileType.getPath());
             if (fileType != FileType.QUEUES)
-                IOUtils.mkdir(fileType.getPath() + ".temp");
+                mkdir(fileType.getPath() + ".temp");
         });
     }
 
@@ -36,8 +36,8 @@ public class IOUtils {
         getQueues().stream().filter(QueueModel::hasFolder)
                 .forEach(qm -> {
                     var name = "Queues" + File.separator + qm.getName();
-                    IOUtils.createFolderInSaveLocation(name);
-                    IOUtils.createFolderInSaveLocation(name + File.separator + ".temp");
+                    createFolderInSaveLocation(name);
+                    createFolderInSaveLocation(name + File.separator + ".temp");
                 });
     }
 
@@ -46,7 +46,6 @@ public class IOUtils {
         if (file.mkdir())
             log.info("created dir: " + dirPath);
     }
-
 
     public static String formatBytes(long bytes) {
         if (bytes <= 0) return "0";
@@ -105,7 +104,7 @@ public class IOUtils {
                 Files.deleteIfExists(Path.of(download.getFilePath()));
             }
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            log.severe(e.getLocalizedMessage());
         }
     }
 
@@ -137,11 +136,11 @@ public class IOUtils {
                     new File(newTempPath).mkdir();
                 newTempPath += dm.getName();
                 for (int i = 0; i < dm.getChunks(); i++)
-                    IOUtils.moveFile(oldTempPath + "#" + i, newTempPath + "#" + i);
+                    moveFile(oldTempPath + "#" + i, newTempPath + "#" + i);
             } else
-                IOUtils.moveFile(dm.getFilePath(), newFilePath);
+                moveFile(dm.getFilePath(), newFilePath);
         } else
-            IOUtils.moveFile(dm.getFilePath(), newFilePath);
+            moveFile(dm.getFilePath(), newFilePath);
         DownloadsRepo.updateDownloadProperty(COL_PATH, "\"" + newFilePath + "\"", dm.getId());
     }
 
@@ -178,6 +177,21 @@ public class IOUtils {
                 }
             }
         }
-
     }
+
+    public static void createOrDeleteFolderForQueue(boolean create, QueueModel queue) {
+        if (create) {
+            var res = createFolderInSaveLocation("Queues" + File.separator + queue.getName());
+            if (res) {
+                var downloadsByQueueName = DownloadsRepo.getDownloadsByQueueName(queue.getName());
+                if (FxUtils.askToMoveFiles(downloadsByQueueName, queue)) {
+                    downloadsByQueueName.forEach(dm -> {
+                        var newFilePath = queuesPath + queue.getName() + File.separator + dm.getName();
+                        moveDownloadFilesFiles(dm, newFilePath);
+                    });
+                }
+            }
+        } else moveFilesAndDeleteQueueFolder(queue.getName());
+    }
+
 }

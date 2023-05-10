@@ -6,6 +6,8 @@ import org.controlsfx.control.Notifications;
 
 import java.util.concurrent.Executors;
 
+import static ir.darkdeveloper.bitkip.config.AppConfigs.log;
+
 public class MoreUtils {
 
     public static void checkUpdates(boolean showNoUpdatesNotification) {
@@ -16,8 +18,10 @@ public class MoreUtils {
 
         updateChecker.valueProperty().addListener((obs, old, newVal) -> {
             var version = newVal.version();
-            if (!AppConfigs.VERSION.equals(version))
+            if (!AppConfigs.VERSION.equals(version)) {
+                log.info("New update available: " + version);
                 FxUtils.showUpdateDialog(newVal);
+            }
             else if (showNoUpdatesNotification)
                 Notifications.create()
                         .title("Checked for updates")

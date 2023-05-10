@@ -227,7 +227,7 @@ public class DownloadingController implements FXMLController {
         speedField.setDisable(!paused);
         if (!speedField.getText().equals("0"))
             bytesField.setDisable(true);
-        controlBtn.setText(paused ? "Resume" : "Pause");
+        controlBtn.setText(paused ? (downloadModel.isResumable() ? "Resume" : "Restart") : "Pause");
         statusLbl.setText("Status: " + (paused ? DownloadStatus.Paused : DownloadStatus.Downloading));
         var downloadOf = "%s / %s"
                 .formatted(IOUtils.formatBytes(downloadModel.getDownloaded()),
@@ -244,7 +244,6 @@ public class DownloadingController implements FXMLController {
 
     @FXML
     private void onControl() {
-
         if (isComplete) {
             if (!new File(downloadModel.getFilePath()).exists()) {
                 Notifications.create()

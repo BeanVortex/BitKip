@@ -40,7 +40,6 @@ public class BatchList implements FXMLController {
     public void initialize(URL location, ResourceBundle resources) {
         addBtn.requestFocus();
         addBtn.setDisable(true);
-
     }
 
 

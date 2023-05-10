@@ -6,6 +6,7 @@ import ir.darkdeveloper.bitkip.models.TurnOffMode;
 import java.io.IOException;
 
 import static com.sun.jna.Platform.*;
+import static ir.darkdeveloper.bitkip.config.AppConfigs.log;
 import static ir.darkdeveloper.bitkip.config.AppConfigs.userPassword;
 
 public class PowerUtils {
@@ -19,6 +20,7 @@ public class PowerUtils {
 
     private static void shutDown() {
         try {
+            log.info("Shutting down");
             if (isWindows())
                 Runtime.getRuntime().exec(new String[]{"shutdown", "-s"});
             else {
@@ -33,12 +35,13 @@ public class PowerUtils {
             }
 
         } catch (IOException e) {
-            e.printStackTrace();
+            log.severe(e.getLocalizedMessage());
         }
     }
 
     private static void sleep() {
         try {
+            log.info("Sleeping");
             if (isWindows())
                 SetSuspendState(false, false, false);
             else {
@@ -52,7 +55,7 @@ public class PowerUtils {
                 process.getOutputStream().flush();
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            log.severe(e.getLocalizedMessage());
         }
     }
 

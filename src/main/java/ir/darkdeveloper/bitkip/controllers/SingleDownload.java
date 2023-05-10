@@ -7,7 +7,10 @@ import ir.darkdeveloper.bitkip.models.DownloadStatus;
 import ir.darkdeveloper.bitkip.models.QueueModel;
 import ir.darkdeveloper.bitkip.repo.DownloadsRepo;
 import ir.darkdeveloper.bitkip.repo.QueuesRepo;
-import ir.darkdeveloper.bitkip.utils.*;
+import ir.darkdeveloper.bitkip.utils.DownloadOpUtils;
+import ir.darkdeveloper.bitkip.utils.FxUtils;
+import ir.darkdeveloper.bitkip.utils.InputValidations;
+import ir.darkdeveloper.bitkip.utils.NewDownloadUtils;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -206,14 +209,17 @@ public class SingleDownload implements QueueObserver {
         var fileName = nameField.getText();
         var path = locationField.getText();
         if (url.isBlank()) {
+            log.warning("URL is blank");
             NewDownloadUtils.disableControlsAndShowError("URL is blank", errorLabel, downloadBtn, addBtn);
             return false;
         }
         if (fileName.isBlank()) {
+            log.warning("Name is blank");
             NewDownloadUtils.disableControlsAndShowError("Name is blank", errorLabel, downloadBtn, addBtn);
             return false;
         }
         if (path.isBlank()) {
+            log.warning("Location is blank");
             NewDownloadUtils.disableControlsAndShowError("Location is blank", errorLabel, downloadBtn, addBtn);
             return false;
         }
@@ -227,8 +233,9 @@ public class SingleDownload implements QueueObserver {
                     })
                     .findFirst();
             if (found.isPresent()) {
-                NewDownloadUtils.disableControlsAndShowError(
-                        "This url exists for this location. Change location", errorLabel, downloadBtn, addBtn);
+                var msg = "This url exists for this location. Change location";
+                log.severe(msg);
+                NewDownloadUtils.disableControlsAndShowError(msg, errorLabel, downloadBtn, addBtn);
                 return false;
             }
         }

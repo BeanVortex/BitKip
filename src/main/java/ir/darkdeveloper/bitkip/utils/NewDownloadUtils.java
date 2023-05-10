@@ -43,7 +43,13 @@ public class NewDownloadUtils {
             conn.setReadTimeout(readTimeout);
             return conn;
         } catch (IOException e) {
-            throw new RuntimeException("Connection or read timeout. Connect to the internet");
+            var msg = "Connection or read timeout. Connect to the internet or check the url";
+            log.severe(msg);
+            Notifications.create()
+                    .title("Bad Connection")
+                    .text(msg)
+                    .showError();
+            throw new RuntimeException(msg);
         }
     }
 
@@ -149,17 +155,17 @@ public class NewDownloadUtils {
     }
 
     public static void initPopOvers(Button[] questionButtons, String[] contents) {
+        var pop = new PopOver();
+        pop.setAnimated(true);
+        pop.setAutoHide(true);
         for (int i = 0; i < questionButtons.length; i++) {
-            var pop = new PopOver();
-            pop.setAnimated(true);
-            pop.setContentNode(new Label(contents[i]));
             var finalI = i;
-            questionButtons[i].hoverProperty().addListener((o, old, newVal) -> {
-                if (newVal)
-                    pop.show(questionButtons[finalI]);
-                else
-                    pop.hide();
+            questionButtons[i].setOnAction(e -> {
+                pop.setContentNode(new Label(contents[finalI]));
+                if (pop.isShowing()) pop.hide();
+                else pop.show(questionButtons[finalI]);
             });
+            questionButtons[i].setOnMouseExited(e -> pop.hide());
         }
     }
 
@@ -217,7 +223,7 @@ public class NewDownloadUtils {
         if (executor == null)
             executor = Executors.newCachedThreadPool();
         downloadTask.setExecutor(executor);
-
+        log.info(("Starting %s download in " + (blocking ? "blocking" : "non-blocking")).formatted(dm.getName()));
         if (blocking)
             downloadTask.run();
         else

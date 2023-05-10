@@ -17,14 +17,12 @@ import java.util.ResourceBundle;
 
 public class AboutController implements FXMLController {
 
-
     @FXML
     private ImageView logoImg;
     @FXML
     private Label versionLbl;
 
     private Stage stage;
-
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -38,15 +36,11 @@ public class AboutController implements FXMLController {
 
     }
 
-
     @FXML
     private void openGithubPage(ActionEvent e) {
         var hyperlink = (Hyperlink) e.getSource();
         AppConfigs.hostServices.showDocument(hyperlink.getText());
     }
-
-
-
 
     @Override
     public void setStage(Stage stage) {
@@ -59,10 +53,8 @@ public class AboutController implements FXMLController {
         return stage;
     }
 
-
     @FXML
     private void checkForUpdates() {
         MoreUtils.checkUpdates(true);
     }
-
 }

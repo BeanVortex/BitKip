@@ -5,11 +5,12 @@ import ir.darkdeveloper.bitkip.controllers.interfaces.FXMLController;
 import ir.darkdeveloper.bitkip.models.QueueModel;
 import ir.darkdeveloper.bitkip.models.ScheduleModel;
 import ir.darkdeveloper.bitkip.models.TurnOffMode;
-import ir.darkdeveloper.bitkip.repo.DownloadsRepo;
 import ir.darkdeveloper.bitkip.repo.QueuesRepo;
 import ir.darkdeveloper.bitkip.repo.ScheduleRepo;
 import ir.darkdeveloper.bitkip.task.ScheduleTask;
-import ir.darkdeveloper.bitkip.utils.*;
+import ir.darkdeveloper.bitkip.utils.FxUtils;
+import ir.darkdeveloper.bitkip.utils.IOUtils;
+import ir.darkdeveloper.bitkip.utils.InputValidations;
 import javafx.application.Platform;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
@@ -24,7 +25,6 @@ import javafx.scene.layout.VBox;
 import javafx.scene.paint.Paint;
 import javafx.stage.Stage;
 
-import java.io.File;
 import java.net.URL;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
@@ -406,7 +406,7 @@ public class QueueSetting implements FXMLController, QueueObserver {
             String[] qValues = {queue.getSpeed(), queue.getSimultaneouslyDownload() + "",
                     (queue.hasFolder() ? 1 : 0) + "", (queue.isDownloadFromTop() ? 1 : 0) + ""};
             QueuesRepo.updateQueue(qCols, qValues, queue.getId());
-            createOrDeleteFolder(queue.hasFolder(), queue);
+            IOUtils.createOrDeleteFolderForQueue(queue.hasFolder(), queue);
             ScheduleRepo.updateSchedule(schedule);
             var updatedQueues = QueuesRepo.getAllQueues(false, true);
             addAllQueues(updatedQueues);
@@ -416,26 +416,11 @@ public class QueueSetting implements FXMLController, QueueObserver {
 
             ScheduleTask.schedule(queue);
             showResultMessage("Successfully Saved", SaveStatus.SUCCESS, executor);
+            log.info("Updated queue : " + queue);
         } catch (IllegalArgumentException e) {
             showResultMessage(e.getMessage(), SaveStatus.ERROR, executor);
+            log.severe(e.getMessage());
         }
-
-    }
-
-    private void createOrDeleteFolder(boolean hasFolder, QueueModel queue) {
-        if (hasFolder) {
-            var res = IOUtils.createFolderInSaveLocation("Queues" + File.separator + queue.getName());
-            if (res) {
-                var downloadsByQueueName = DownloadsRepo.getDownloadsByQueueName(queue.getName());
-                if (FxUtils.askToMoveFiles(downloadsByQueueName, queue)) {
-                    downloadsByQueueName.forEach(dm -> {
-                        var newFilePath = queuesPath + queue.getName() + File.separator + dm.getName();
-                        IOUtils.moveDownloadFilesFiles(dm, newFilePath);
-                    });
-                }
-            }
-        } else
-            IOUtils.moveFilesAndDeleteQueueFolder(queue.getName());
 
     }
 

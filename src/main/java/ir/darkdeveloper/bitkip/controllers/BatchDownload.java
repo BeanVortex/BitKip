@@ -28,6 +28,7 @@ import java.util.ResourceBundle;
 import java.util.concurrent.CompletableFuture;
 
 import static ir.darkdeveloper.bitkip.config.AppConfigs.getQueueSubject;
+import static ir.darkdeveloper.bitkip.config.AppConfigs.log;
 import static ir.darkdeveloper.bitkip.utils.FileExtensions.ALL_DOWNLOADS_QUEUE;
 import static ir.darkdeveloper.bitkip.utils.FileExtensions.extensions;
 
@@ -122,7 +123,6 @@ public class BatchDownload implements QueueObserver {
             NewDownloadUtils.onOfflineFieldsChanged(locationField, tempLink.getName(), null, queueCombo,
                     errorLabel, null, checkBtn, openLocation);
     }
-
 
     private void autoFillLocation() {
         try {
@@ -244,10 +244,12 @@ public class BatchDownload implements QueueObserver {
             var url = urlField.getText();
             var path = locationField.getText();
             if (url.isBlank()) {
+                log.warning("URL is blank");
                 NewDownloadUtils.disableControlsAndShowError("URL is blank", errorLabel, checkBtn, null);
                 return;
             }
             if (path.isBlank()) {
+                log.warning("Location is blank");
                 NewDownloadUtils.disableControlsAndShowError("Location is blank", errorLabel, checkBtn, null);
                 return;
             }
@@ -265,10 +267,10 @@ public class BatchDownload implements QueueObserver {
                             })
                             .findFirst();
                     if (found.isPresent()) {
-                        NewDownloadUtils.disableControlsAndShowError(
-                                "At least one URL exists for this location. Change location or change start, end.\n"
-                                        + found.get().getUrl(),
-                                errorLabel, checkBtn, null);
+                        var msg = "At least one URL exists for this location. Change location or change start, end.\n"
+                                + found.get().getUrl();
+                        log.warning(msg);
+                        NewDownloadUtils.disableControlsAndShowError(msg, errorLabel, checkBtn, null);
                         return;
                     }
                 }
@@ -290,6 +292,7 @@ public class BatchDownload implements QueueObserver {
         } catch (IllegalArgumentException e) {
             if (e instanceof NumberFormatException)
                 return;
+            log.severe(e.getLocalizedMessage());
             NewDownloadUtils.disableControlsAndShowError(e.getLocalizedMessage(), errorLabel, checkBtn, null);
         }
     }

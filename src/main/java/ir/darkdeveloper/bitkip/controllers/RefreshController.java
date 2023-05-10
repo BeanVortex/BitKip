@@ -16,6 +16,7 @@ import java.net.URL;
 import java.util.List;
 import java.util.ResourceBundle;
 
+import static ir.darkdeveloper.bitkip.config.AppConfigs.log;
 import static ir.darkdeveloper.bitkip.repo.DownloadsRepo.COL_URL;
 
 public class RefreshController implements FXMLController {
@@ -93,5 +94,6 @@ public class RefreshController implements FXMLController {
         var url = urlField.getText();
         dm.setUrl(url);
         DownloadsRepo.updateDownloadProperty(COL_URL, url, dm.getId());
+        log.info("URL refreshed for : " + dm.getName());
     }
 }

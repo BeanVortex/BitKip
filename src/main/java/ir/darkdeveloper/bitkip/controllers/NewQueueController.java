@@ -18,6 +18,7 @@ import java.net.URL;
 import java.util.ResourceBundle;
 
 import static ir.darkdeveloper.bitkip.BitKip.getResource;
+import static ir.darkdeveloper.bitkip.config.AppConfigs.log;
 
 public class NewQueueController implements FXMLController {
 
@@ -72,6 +73,7 @@ public class NewQueueController implements FXMLController {
         schedule.setQueueId(queueModel.getId());
         ScheduleRepo.updateScheduleQueueId(schedule.getId(), schedule.getQueueId());
         AppConfigs.addQueue(queueModel);
+        log.info("Created queue : " + queueName);
         stage.close();
     }
 
