@@ -4,14 +4,13 @@ import ir.darkdeveloper.bitkip.controllers.DownloadingController;
 import ir.darkdeveloper.bitkip.models.DownloadModel;
 import ir.darkdeveloper.bitkip.models.QueueModel;
 import ir.darkdeveloper.bitkip.models.ScheduleModel;
+import ir.darkdeveloper.bitkip.utils.IOUtils;
 import ir.darkdeveloper.bitkip.utils.MainTableUtils;
 import javafx.application.HostServices;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.text.SimpleDateFormat;
+import java.util.*;
 import java.util.logging.FileHandler;
 import java.util.logging.Logger;
 import java.util.logging.SimpleFormatter;
@@ -29,9 +28,14 @@ public class AppConfigs {
             + File.separator + "BitKip" + File.separator;
 
     public static final Logger log = Logger.getLogger("LOG");
+
     static {
         try {
-            var fileHandler = new FileHandler(dataPath + "BitKip.log");
+            IOUtils.mkdir(dataPath);
+            IOUtils.mkdir(dataPath + "logs");
+            var dateFormat = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss");
+            var timestamp = dateFormat.format(new Date());
+            var fileHandler = new FileHandler(dataPath + "logs" + File.separator + timestamp + ".log");
             var formatter = new SimpleFormatter();
             fileHandler.setFormatter(formatter);
             log.addHandler(fileHandler);

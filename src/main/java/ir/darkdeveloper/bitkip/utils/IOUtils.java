@@ -24,7 +24,6 @@ public class IOUtils {
 
 
     public static void createSaveLocations() {
-        mkdir(dataPath);
         Arrays.stream(FileType.values()).forEach(fileType -> {
             mkdir(fileType.getPath());
             if (fileType != FileType.QUEUES)
@@ -41,7 +40,7 @@ public class IOUtils {
                 });
     }
 
-    private static void mkdir(String dirPath) {
+    public static void mkdir(String dirPath) {
         var file = new File(dirPath);
         if (file.mkdir())
             log.info("created dir: " + dirPath);
