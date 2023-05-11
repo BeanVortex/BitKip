@@ -44,7 +44,7 @@ public abstract class DownloadTask extends Task<Long> {
                 return true;
             }
         } catch (Exception e) {
-            log.severe(e.getLocalizedMessage());
+            log.error(e.getLocalizedMessage());
         }
         return false;
     }

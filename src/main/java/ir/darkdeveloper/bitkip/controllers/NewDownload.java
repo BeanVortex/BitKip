@@ -128,7 +128,7 @@ public class NewDownload implements FXMLController {
             prevController = controller;
             container.getChildren().add(details);
         } catch (IOException e) {
-            log.severe(e.getLocalizedMessage());
+            log.error(e.getLocalizedMessage());
             throw new RuntimeException(e);
         }
     }

@@ -135,16 +135,16 @@ public class DownloadOpUtils {
                     .title("File not found")
                     .text("%s has been moved or removed".formatted(dm.getName()))
                     .showError();
-            log.severe("File does not exists : " + dm.getFilePath());
+            log.error("File does not exists : " + dm.getFilePath());
             return;
         }
         try {
             if (Desktop.isDesktopSupported())
                 desktop.open(new File(dm.getFilePath()));
             else
-                log.warning("Desktop is not supported to open file");
+                log.warn("Desktop is not supported to open file");
         } catch (IOException e) {
-            log.severe(e.getLocalizedMessage());
+            log.error(e.getLocalizedMessage());
         }
     }
 
@@ -162,14 +162,14 @@ public class DownloadOpUtils {
                     Runtime.getRuntime().exec(new String[]{"osascript", "-e",
                             "tell app \"Finder\" to reveal POSIX file \"" + file.getAbsolutePath() + "\""});
             } else{
-                log.warning("Desktop is not supported to open containing folder");
+                log.warn("Desktop is not supported to open containing folder");
                 Notifications.create()
                         .title("Not Supported")
                         .text("Your operating system does not support this action")
                         .showError();
             }
         } catch (IOException e) {
-            log.severe(e.getLocalizedMessage());
+            log.error(e.getLocalizedMessage());
             Notifications.create()
                     .title("Error opening containing folder")
                     .text(e.getMessage())

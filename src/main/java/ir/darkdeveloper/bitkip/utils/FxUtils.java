@@ -53,7 +53,7 @@ public class FxUtils {
             stage.setTitle("BitKip");
             stage.show();
         } catch (IOException e) {
-            log.severe(e.getLocalizedMessage());
+            log.error(e.getLocalizedMessage());
         }
     }
 
@@ -74,7 +74,7 @@ public class FxUtils {
             loader = new FXMLLoader(getResource("fxml/newDownload.fxml"));
             root = loader.load();
         } catch (IOException e) {
-            log.severe(e.getLocalizedMessage());
+            log.error(e.getLocalizedMessage());
             throw new RuntimeException(e);
         }
         var scene = new Scene(root);
@@ -99,7 +99,7 @@ public class FxUtils {
             loader = new FXMLLoader(getResource("fxml/newQueue.fxml"));
             root = loader.load();
         } catch (IOException e) {
-            log.severe(e.getLocalizedMessage());
+            log.error(e.getLocalizedMessage());
             throw new RuntimeException(e);
         }
         var logoPath = getResource("icons/logo.png");
@@ -127,7 +127,7 @@ public class FxUtils {
             loader = new FXMLLoader(getResource("fxml/about.fxml"));
             root = loader.load();
         } catch (IOException e) {
-            log.severe(e.getLocalizedMessage());
+            log.error(e.getLocalizedMessage());
             throw new RuntimeException(e);
         }
         var scene = new Scene(root);
@@ -157,7 +157,7 @@ public class FxUtils {
             loader = new FXMLLoader(getResource("fxml/logs.fxml"));
             root = loader.load();
         } catch (IOException e) {
-            log.severe(e.getLocalizedMessage());
+            log.error(e.getLocalizedMessage());
             throw new RuntimeException(e);
         }
         var scene = new Scene(root);
@@ -183,7 +183,7 @@ public class FxUtils {
             loader = new FXMLLoader(getResource("fxml/downloading.fxml"));
             root = loader.load();
         } catch (IOException e) {
-            log.severe(e.getLocalizedMessage());
+            log.error(e.getLocalizedMessage());
             throw new RuntimeException(e);
         }
         var scene = new Scene(root);
@@ -210,7 +210,7 @@ public class FxUtils {
             loader = new FXMLLoader(getResource("fxml/batchList.fxml"));
             root = loader.load();
         } catch (IOException e) {
-            log.severe(e.getLocalizedMessage());
+            log.error(e.getLocalizedMessage());
             throw new RuntimeException(e);
         }
         var scene = new Scene(root);
@@ -236,7 +236,7 @@ public class FxUtils {
             loader = new FXMLLoader(getResource("fxml/queueSetting.fxml"));
             root = loader.load();
         } catch (IOException e) {
-            log.severe(e.getLocalizedMessage());
+            log.error(e.getLocalizedMessage());
             throw new RuntimeException(e);
         }
         var scene = new Scene(root);
@@ -316,7 +316,7 @@ public class FxUtils {
             loader = new FXMLLoader(getResource("fxml/refreshLink.fxml"));
             root = loader.load();
         } catch (IOException e) {
-            log.severe(e.getLocalizedMessage());
+            log.error(e.getLocalizedMessage());
             throw new RuntimeException(e);
         }
         var scene = new Scene(root);

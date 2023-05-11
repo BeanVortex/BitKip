@@ -104,7 +104,7 @@ public class IOUtils {
                 Files.deleteIfExists(Path.of(download.getFilePath()));
             }
         } catch (IOException e) {
-            log.severe(e.getLocalizedMessage());
+            log.error(e.getLocalizedMessage());
         }
     }
 
@@ -123,7 +123,7 @@ public class IOUtils {
             if (file.exists())
                 Files.move(Paths.get(oldFilePath), Paths.get(newFilePath), StandardCopyOption.REPLACE_EXISTING);
         } catch (IOException e) {
-            log.severe(e.getLocalizedMessage());
+            log.error(e.getLocalizedMessage());
         }
     }
 

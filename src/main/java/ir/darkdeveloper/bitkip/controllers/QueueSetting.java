@@ -419,7 +419,7 @@ public class QueueSetting implements FXMLController, QueueObserver {
             log.info("Updated queue : " + queue);
         } catch (IllegalArgumentException e) {
             showResultMessage(e.getMessage(), SaveStatus.ERROR, executor);
-            log.severe(e.getMessage());
+            log.error(e.getMessage());
         }
 
     }

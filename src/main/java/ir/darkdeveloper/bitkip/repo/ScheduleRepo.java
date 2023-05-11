@@ -93,7 +93,7 @@ public class ScheduleRepo {
             var scheduleId = genKeys.getInt(1);
             schedule.setId(scheduleId);
         } catch (SQLException e) {
-            log.severe(e.getLocalizedMessage());
+            log.error(e.getLocalizedMessage());
         }
     }
 
@@ -108,7 +108,7 @@ public class ScheduleRepo {
             if (rs.next())
                 return createScheduleModel(rs, -1);
         } catch (SQLException e) {
-            log.severe(e.getLocalizedMessage());
+            log.error(e.getLocalizedMessage());
         }
         return null;
     }

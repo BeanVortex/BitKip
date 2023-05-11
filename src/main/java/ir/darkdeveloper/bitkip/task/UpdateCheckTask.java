@@ -71,7 +71,7 @@ public class UpdateCheckTask extends Task<UpdateModel> {
                         .get();
                 break;
             } catch (IOException e) {
-                log.severe(e.getLocalizedMessage());
+                log.error(e.getLocalizedMessage());
                 Thread.sleep(2000);
             }
         }

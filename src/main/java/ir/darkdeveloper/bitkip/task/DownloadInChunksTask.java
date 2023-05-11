@@ -61,7 +61,7 @@ public class DownloadInChunksTask extends DownloadTask {
         try {
             downloadInChunks(url, fileSize);
         }catch (Exception e){
-            log.severe(e.getMessage());
+            log.error(e.getMessage());
         }
         return 0L;
     }
@@ -145,7 +145,7 @@ public class DownloadInChunksTask extends DownloadTask {
                     performLimitedDownload(url, fromContinue, finalFrom, finalTo, partFile, fileSize);
                 } catch (IOException | InterruptedException e) {
                     if (e instanceof IOException)
-                        log.severe(e.getMessage());
+                        log.error(e.getMessage());
                     this.pause();
                 }
                 return null;
@@ -157,7 +157,7 @@ public class DownloadInChunksTask extends DownloadTask {
                     performDownload(url, fromContinue, finalFrom, finalTo, partFile, fileSize);
                 } catch (IOException | InterruptedException e) {
                     if (e instanceof IOException)
-                        log.severe(e.getMessage());
+                        log.error(e.getMessage());
                     this.pause();
                 }
                 return null;
@@ -186,7 +186,7 @@ public class DownloadInChunksTask extends DownloadTask {
             } catch (SocketTimeoutException | UnknownHostException | SocketException s) {
                 if (!paused) {
                     retries++;
-                    log.warning("Downloading part " + partFile.getName() + " failed. retry count : " + retries);
+                    log.warn("Downloading part " + partFile.getName() + " failed. retry count : " + retries);
                     Thread.sleep(2000);
                     var currFileSize = getCurrentFileSize(partFile);
                     performDownload(url, fromContinue, fromContinue + currFileSize, to, partFile, currFileSize);
@@ -224,7 +224,7 @@ public class DownloadInChunksTask extends DownloadTask {
             } catch (SocketTimeoutException | UnknownHostException s) {
                 if (!paused) {
                     retries++;
-                    log.warning("Downloading part " + partFile.getName() + " failed. retry count : " + retries);
+                    log.warn("Downloading part " + partFile.getName() + " failed. retry count : " + retries);
                     Thread.sleep(2000);
                     var currFileSize = getCurrentFileSize(partFile);
                     performLimitedDownload(url, fromContinue, fromContinue + currFileSize, to, partFile, currFileSize);
@@ -254,7 +254,7 @@ public class DownloadInChunksTask extends DownloadTask {
                 }
             } catch (InterruptedException | NoSuchFileException ignore) {
             } catch (IOException e) {
-                log.severe(e.getLocalizedMessage());
+                log.error(e.getLocalizedMessage());
             }
         });
     }
@@ -268,7 +268,7 @@ public class DownloadInChunksTask extends DownloadTask {
             for (var channel : fileChannels)
                 channel.close();
         } catch (IOException e) {
-            log.severe(e.getLocalizedMessage());
+            log.error(e.getLocalizedMessage());
         }
     }
 
@@ -320,7 +320,7 @@ public class DownloadInChunksTask extends DownloadTask {
                 executor.shutdownNow();
             System.gc();
         } catch (IOException e) {
-            log.severe(e.getLocalizedMessage());
+            log.error(e.getLocalizedMessage());
         }
     }
 

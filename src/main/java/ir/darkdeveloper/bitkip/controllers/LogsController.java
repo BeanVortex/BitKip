@@ -78,7 +78,7 @@ public class LogsController implements FXMLController {
                     .stream().reduce((s1, s2) -> String.join("\n", s1, s2));
             logArea.setText(logs.orElse("No logs"));
         } catch (IOException e) {
-            log.severe(e.getLocalizedMessage());
+            log.error(e.getLocalizedMessage());
             Notifications.create()
                     .title("Failed to read log file")
                     .text(e.getLocalizedMessage())

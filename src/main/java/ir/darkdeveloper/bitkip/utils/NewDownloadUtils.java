@@ -44,7 +44,7 @@ public class NewDownloadUtils {
             return conn;
         } catch (IOException e) {
             var msg = "Connection or read timeout. Connect to the internet or check the url";
-            log.severe(msg);
+            log.error(msg);
             Notifications.create()
                     .title("Bad Connection")
                     .text(msg)

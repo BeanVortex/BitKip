@@ -4,16 +4,15 @@ import ir.darkdeveloper.bitkip.controllers.DownloadingController;
 import ir.darkdeveloper.bitkip.models.DownloadModel;
 import ir.darkdeveloper.bitkip.models.QueueModel;
 import ir.darkdeveloper.bitkip.models.ScheduleModel;
-import ir.darkdeveloper.bitkip.utils.IOUtils;
 import ir.darkdeveloper.bitkip.utils.MainTableUtils;
 import javafx.application.HostServices;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.*;
-import java.util.logging.FileHandler;
-import java.util.logging.Logger;
-import java.util.logging.SimpleFormatter;
+
 
 public class AppConfigs {
 
@@ -27,23 +26,19 @@ public class AppConfigs {
             + File.separator + "Downloads"
             + File.separator + "BitKip" + File.separator;
 
-    public static final Logger log = Logger.getLogger("LOG");
 
-    static {
-        try {
-            IOUtils.mkdir(dataPath);
-            IOUtils.mkdir(dataPath + "logs");
-            var dateFormat = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss");
-            var timestamp = dateFormat.format(new Date());
-            var fileHandler = new FileHandler(dataPath + "logs" + File.separator + timestamp + ".log");
-            var formatter = new SimpleFormatter();
-            fileHandler.setFormatter(formatter);
-            log.addHandler(fileHandler);
-        } catch (Exception e) {
-            log.warning("Failed to initialize logging file");
-        }
+    public static Logger log;
+
+
+    public static void initLogger() {
+        new File(dataPath).mkdir();
+        new File(dataPath + "logs").mkdir();
+        var dateFormat = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss");
+        var timestamp = dateFormat.format(new Date());
+        var pathToLogFile = dataPath + "logs" + File.separator + timestamp + ".log";
+        System.setProperty("log.file.path", pathToLogFile);
+        log = LoggerFactory.getLogger("LOG");
     }
-
 
     public static final String compressedPath = downloadPath + "Compressed" + File.separator;
     public static final String programsPath = downloadPath + "Programs" + File.separator;

@@ -1,6 +1,7 @@
 package ir.darkdeveloper.bitkip;
 
 import ir.darkdeveloper.bitkip.config.AppConfigs;
+import ir.darkdeveloper.bitkip.controllers.ServletController;
 import ir.darkdeveloper.bitkip.repo.DownloadsRepo;
 import ir.darkdeveloper.bitkip.repo.QueuesRepo;
 import ir.darkdeveloper.bitkip.repo.ScheduleRepo;
@@ -11,6 +12,11 @@ import ir.darkdeveloper.bitkip.utils.MoreUtils;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.stage.Stage;
+import org.eclipse.jetty.server.Connector;
+import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.server.ServerConnector;
+import org.eclipse.jetty.servlet.ServletHandler;
+import org.eclipse.jetty.util.thread.QueuedThreadPool;
 
 import java.awt.*;
 import java.awt.event.ActionListener;
@@ -20,6 +26,8 @@ import java.util.ArrayList;
 import static ir.darkdeveloper.bitkip.config.AppConfigs.*;
 
 public class BitKip extends Application {
+
+
 
     @Override
     public void start(Stage stage) {
@@ -68,7 +76,7 @@ public class BitKip extends Application {
             try {
                 tray.add(trayIcon);
             } catch (AWTException e) {
-                log.severe(e.getLocalizedMessage());
+                log.error(e.getLocalizedMessage());
             }
 
         }
@@ -89,12 +97,35 @@ public class BitKip extends Application {
             if (stopScheduler != null)
                 stopScheduler.shutdownNow();
         });
-        for (var handler : log.getHandlers())
-            handler.close();
+
     }
 
+
+
+
     public static void main(String[] args) {
+        initLogger();
+        startServer();
         launch();
+    }
+
+    private static void startServer() {
+        var threadPool = new QueuedThreadPool(5, 1);
+        var server = new Server(threadPool);
+        var connector = new ServerConnector(server);
+        connector.setPort(1354);
+        server.setConnectors(new Connector[]{connector});
+        var handler = new ServletHandler();
+        server.setHandler(handler);
+
+        handler.addServletWithMapping(ServletController.class, "/*");
+
+        // Start the server
+        try {
+            server.start();
+        } catch (Exception e) {
+            log.error(e.getLocalizedMessage());
+        }
     }
 
     public static URL getResource(String path) {

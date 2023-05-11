@@ -35,7 +35,7 @@ public class PowerUtils {
             }
 
         } catch (IOException e) {
-            log.severe(e.getLocalizedMessage());
+            log.error(e.getLocalizedMessage());
         }
     }
 
@@ -55,7 +55,7 @@ public class PowerUtils {
                 process.getOutputStream().flush();
             }
         } catch (IOException e) {
-            log.severe(e.getLocalizedMessage());
+            log.error(e.getLocalizedMessage());
         }
     }
 

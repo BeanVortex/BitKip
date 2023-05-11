@@ -209,17 +209,17 @@ public class SingleDownload implements QueueObserver {
         var fileName = nameField.getText();
         var path = locationField.getText();
         if (url.isBlank()) {
-            log.warning("URL is blank");
+            log.warn("URL is blank");
             NewDownloadUtils.disableControlsAndShowError("URL is blank", errorLabel, downloadBtn, addBtn);
             return false;
         }
         if (fileName.isBlank()) {
-            log.warning("Name is blank");
+            log.warn("Name is blank");
             NewDownloadUtils.disableControlsAndShowError("Name is blank", errorLabel, downloadBtn, addBtn);
             return false;
         }
         if (path.isBlank()) {
-            log.warning("Location is blank");
+            log.warn("Location is blank");
             NewDownloadUtils.disableControlsAndShowError("Location is blank", errorLabel, downloadBtn, addBtn);
             return false;
         }
@@ -234,7 +234,7 @@ public class SingleDownload implements QueueObserver {
                     .findFirst();
             if (found.isPresent()) {
                 var msg = "This url exists for this location. Change location";
-                log.severe(msg);
+                log.error(msg);
                 NewDownloadUtils.disableControlsAndShowError(msg, errorLabel, downloadBtn, addBtn);
                 return false;
             }

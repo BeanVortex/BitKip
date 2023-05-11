@@ -36,7 +36,7 @@ public class DatabaseHelper {
             stmt.close();
             con.close();
         } catch (SQLException e) {
-            log.severe(e.getLocalizedMessage());
+            log.error(e.getLocalizedMessage());
         }
     }
 
@@ -46,7 +46,7 @@ public class DatabaseHelper {
             stmt.executeUpdate(sql);
         } catch (SQLException e) {
             if (!ignoreStackTrace)
-                log.severe(e.getLocalizedMessage());
+                log.error(e.getLocalizedMessage());
         }
     }
 

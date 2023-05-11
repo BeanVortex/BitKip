@@ -53,7 +53,7 @@ public class DownloadLimitedTask extends DownloadTask {
             performDownload();
         } catch (IOException | InterruptedException e) {
             if (e instanceof IOException)
-                log.severe(e.getLocalizedMessage());
+                log.error(e.getLocalizedMessage());
             this.pause();
         }
         return getCurrentFileSize(file);
@@ -87,7 +87,7 @@ public class DownloadLimitedTask extends DownloadTask {
             } catch (SocketTimeoutException | UnknownHostException | SocketException s) {
                 if (!paused) {
                     retries++;
-                    log.warning("Downloading " + downloadModel.getName() + " failed. retry count : " + retries);
+                    log.warn("Downloading " + downloadModel.getName() + " failed. retry count : " + retries);
                     Thread.sleep(2000);
                     performDownload();
                 }
