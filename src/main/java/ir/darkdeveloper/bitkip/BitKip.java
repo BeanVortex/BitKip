@@ -1,7 +1,8 @@
 package ir.darkdeveloper.bitkip;
 
 import ir.darkdeveloper.bitkip.config.AppConfigs;
-import ir.darkdeveloper.bitkip.servlets.ServletController;
+import ir.darkdeveloper.bitkip.servlets.BatchServlet;
+import ir.darkdeveloper.bitkip.servlets.SingleServlet;
 import ir.darkdeveloper.bitkip.repo.DownloadsRepo;
 import ir.darkdeveloper.bitkip.repo.QueuesRepo;
 import ir.darkdeveloper.bitkip.repo.ScheduleRepo;
@@ -16,7 +17,6 @@ import org.eclipse.jetty.server.Connector;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
 import org.eclipse.jetty.servlet.ServletHandler;
-import org.eclipse.jetty.servlet.ServletHolder;
 import org.eclipse.jetty.util.thread.QueuedThreadPool;
 
 import java.awt.*;
@@ -46,7 +46,6 @@ public class BitKip extends Application {
         ScheduleTask.startSchedules();
         MoreUtils.checkUpdates(false);
         IOUtils.moveChunkFilesToTemp(downloadPath);
-        startServer(stage);
         initTray(stage);
     }
 
@@ -104,10 +103,11 @@ public class BitKip extends Application {
 
     public static void main(String[] args) {
         initLogger();
+        startServer();
         launch();
     }
 
-    private static void startServer(Stage stage) {
+    private static void startServer() {
         var threadPool = new QueuedThreadPool(5, 1);
         var server = new Server(threadPool);
         var connector = new ServerConnector(server);
@@ -116,8 +116,8 @@ public class BitKip extends Application {
         var handler = new ServletHandler();
         server.setHandler(handler);
 
-        var servlet = new ServletController(stage);
-        handler.addServletWithMapping(new ServletHolder(servlet), "/d");
+        handler.addServletWithMapping(SingleServlet.class, "/single");
+        handler.addServletWithMapping(BatchServlet.class, "/batch");
 
         // Start the server
         try {

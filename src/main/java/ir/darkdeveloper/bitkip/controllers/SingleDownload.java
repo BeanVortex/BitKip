@@ -114,7 +114,7 @@ public class SingleDownload implements NewDownload {
         InputValidations.validInputChecks(chunksField, bytesField, speedField, dm);
 
         if (urlModel != null)
-            setInputValues(urlModel);
+            setInputValuesFromExtension(urlModel);
         else
             InputValidations.prepareLinkFromClipboard(urlField);
 
@@ -138,12 +138,14 @@ public class SingleDownload implements NewDownload {
             autoFillLocationAndSizeAndName();
     }
 
-    private void setInputValues(URLModel urlModel) {
-        urlField.setText(urlModel.getUrl());
-        nameField.setText(urlModel.getFilename());
-        setLocation(urlModel.getFilename());
-        sizeLabel.setText(IOUtils.formatBytes(urlModel.getFileSize()));
-        bytesField.setText(urlModel.getFileSize() + "");
+    private void setInputValuesFromExtension(URLModel urlModel) {
+        urlField.setText(urlModel.url());
+        nameField.setText(urlModel.filename());
+        setLocation(urlModel.filename());
+        sizeLabel.setText(IOUtils.formatBytes(urlModel.fileSize()));
+        bytesField.setText(urlModel.fileSize() + "");
+        dm.setResumable(urlModel.resumable());
+        dm.setSize(urlModel.fileSize());
     }
 
     private void autoFillLocationAndSizeAndName() {
@@ -267,10 +269,6 @@ public class SingleDownload implements NewDownload {
         dm.setChunks(Integer.parseInt(chunksField.getText()));
         dm.setAddDate(LocalDateTime.now());
         dm.setAddToQueueDate(LocalDateTime.now());
-        if (urlModel != null){
-            dm.setSize(urlModel.getFileSize());
-            dm.setResumable(urlModel.getResumable());
-        }
         var selectedQueue = queueCombo.getSelectionModel().getSelectedItem();
         var allDownloadsQueue = QueuesRepo.findByName(ALL_DOWNLOADS_QUEUE, false);
         dm.getQueues().add(allDownloadsQueue);
