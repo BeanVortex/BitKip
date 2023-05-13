@@ -1,6 +1,6 @@
 package ir.darkdeveloper.bitkip.servlets;
 
-import ir.darkdeveloper.bitkip.models.URLModel;
+import ir.darkdeveloper.bitkip.models.SingleURLModel;
 import ir.darkdeveloper.bitkip.utils.FxUtils;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
@@ -17,7 +17,7 @@ public class SingleServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) {
         try {
-            var urlModel = mapper.readValue(req.getReader(), URLModel.class);
+            var urlModel = mapper.readValue(req.getReader(), SingleURLModel.class);
             Platform.runLater(() -> FxUtils.newDownloadStage(true, urlModel));
         } catch (IOException e) {
             try {

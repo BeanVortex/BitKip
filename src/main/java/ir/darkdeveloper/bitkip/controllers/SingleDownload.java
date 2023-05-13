@@ -1,11 +1,11 @@
 package ir.darkdeveloper.bitkip.controllers;
 
 import ir.darkdeveloper.bitkip.config.AppConfigs;
-import ir.darkdeveloper.bitkip.controllers.interfaces.NewDownload;
+import ir.darkdeveloper.bitkip.config.QueueObserver;
 import ir.darkdeveloper.bitkip.models.DownloadModel;
 import ir.darkdeveloper.bitkip.models.DownloadStatus;
 import ir.darkdeveloper.bitkip.models.QueueModel;
-import ir.darkdeveloper.bitkip.models.URLModel;
+import ir.darkdeveloper.bitkip.models.SingleURLModel;
 import ir.darkdeveloper.bitkip.repo.DownloadsRepo;
 import ir.darkdeveloper.bitkip.repo.QueuesRepo;
 import ir.darkdeveloper.bitkip.utils.*;
@@ -30,7 +30,7 @@ import java.util.concurrent.Executors;
 import static ir.darkdeveloper.bitkip.config.AppConfigs.*;
 import static ir.darkdeveloper.bitkip.utils.FileExtensions.ALL_DOWNLOADS_QUEUE;
 
-public class SingleDownload implements NewDownload {
+public class SingleDownload implements QueueObserver {
 
     @FXML
     private Label errorLabel;
@@ -67,7 +67,7 @@ public class SingleDownload implements NewDownload {
 
     private final DownloadModel dm = new DownloadModel();
     private Stage stage;
-    private URLModel urlModel;
+    private SingleURLModel urlModel;
 
 
     @Override
@@ -138,7 +138,7 @@ public class SingleDownload implements NewDownload {
             autoFillLocationAndSizeAndName();
     }
 
-    private void setInputValuesFromExtension(URLModel urlModel) {
+    private void setInputValuesFromExtension(SingleURLModel urlModel) {
         urlField.setText(urlModel.url());
         nameField.setText(urlModel.filename());
         setLocation(urlModel.filename());
@@ -302,8 +302,7 @@ public class SingleDownload implements NewDownload {
     }
 
 
-    @Override
-    public void setUrlModel(URLModel urlModel) {
+    public void setUrlModel(SingleURLModel urlModel) {
         this.urlModel = urlModel;
         initAfterUrlModel();
     }

@@ -54,7 +54,7 @@ public class InputValidations {
     public static void validChunksInputChecks(TextField chunksField) {
         if (chunksField == null)
             return;
-        var threads = Runtime.getRuntime().availableProcessors() * 2;
+        var threads = maxChunks();
         chunksField.setText(threads + "");
         chunksField.textProperty().addListener((o, old, newValue) -> {
             if (!newValue.matches("\\d*"))
@@ -153,5 +153,10 @@ public class InputValidations {
             if (!n.isBlank() && Integer.parseInt(n) > 59)
                 secondSpinner.getEditor().setText("59");
         });
+    }
+
+
+    public static int maxChunks(){
+        return Runtime.getRuntime().availableProcessors() * 2;
     }
 }

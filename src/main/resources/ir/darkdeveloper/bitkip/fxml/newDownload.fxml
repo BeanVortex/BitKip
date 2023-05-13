@@ -6,7 +6,7 @@
 <VBox minHeight="550" prefHeight="550" minWidth="600" prefWidth="600.0"
       maxHeight="600"
       xmlns="http://javafx.com/javafx/16"
-      xmlns:fx="http://javafx.com/fxml/1" fx:controller="ir.darkdeveloper.bitkip.controllers.NewDownloadContainer">
+      xmlns:fx="http://javafx.com/fxml/1" fx:controller="ir.darkdeveloper.bitkip.controllers.NewDownloadController">
     <stylesheets>
         <URL value="@../css/main.css"/>
         <URL value="@../css/newDownload.css"/>

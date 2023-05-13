@@ -63,7 +63,7 @@ public class NewDownloadUtils {
     public static void checkFieldsAfterSizePreparation(long fileSize, Label sizeLabel, TextField chunksField,
                                                        TextField bytesField, HttpURLConnection connection) {
         if (!canResume(connection)) {
-            chunksField.setText("8");
+            chunksField.setText("" + InputValidations.maxChunks());
             chunksField.setDisable(true);
         } else
             chunksField.setDisable(false);
@@ -302,6 +302,18 @@ public class NewDownloadUtils {
         if (btn2 != null)
             btn2.setDisable(true);
         errorLbl.setText(error);
+    }
+
+    public static String determineLocation(String fileName) {
+        if (fileName == null || fileName.isBlank())
+            return null;
+        for (var entry : extensions.entrySet()) {
+            var matched = entry.getValue().stream().anyMatch(fileName::endsWith);
+            if (matched)
+                return defaultDownloadPaths.stream().filter(p -> p.contains(entry.getKey()))
+                        .findFirst().orElse(othersPath);
+        }
+        return null;
     }
 }
 

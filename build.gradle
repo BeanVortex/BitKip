@@ -45,8 +45,6 @@ dependencies {
     implementation 'org.eclipse.jetty:jetty-servlet:11.0.15'
     implementation 'org.eclipse.jetty:jetty-server:11.0.15'
     implementation 'com.fasterxml.jackson.core:jackson-databind:2.15.0'
-    implementation 'com.fasterxml.jackson.core:jackson-annotations:2.15.0'
-    implementation 'com.fasterxml.jackson.core:jackson-core:2.15.0'
     implementation 'ch.qos.logback:logback-classic:1.4.7'
     implementation 'org.kordamp.ikonli:ikonli-fontawesome5-pack:12.3.1'
     implementation 'org.kordamp.bootstrapfx:bootstrapfx-core:0.4.0'

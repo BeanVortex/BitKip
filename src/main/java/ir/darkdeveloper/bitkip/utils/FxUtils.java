@@ -66,7 +66,7 @@ public class FxUtils {
         return null;
     }
 
-    public static void newDownloadStage(boolean isSingle, URLModel urlModel) {
+    public static void newDownloadStage(boolean isSingle, SingleURLModel urlModel) {
         FXMLLoader loader;
         Stage stage = new Stage();
         VBox root;
@@ -84,7 +84,7 @@ public class FxUtils {
         stage.setWidth(root.getPrefWidth());
         stage.setHeight(root.getPrefHeight());
         stage.setTitle("New Download");
-        NewDownloadContainer controller = loader.getController();
+        NewDownloadController controller = loader.getController();
         controller.setStage(stage);
         controller.setUrlModel(urlModel);
         controller.setIsSingle(isSingle);
@@ -225,6 +225,8 @@ public class FxUtils {
         controller.setStage(stage);
         controller.setData(links);
         stage.show();
+        stage.setAlwaysOnTop(true);
+        stage.setAlwaysOnTop(false);
     }
 
     public static void newQueueSettingStage(QueueModel selectedQueue) {
@@ -260,6 +262,8 @@ public class FxUtils {
             getQueueSubject().removeObserver(controller);
         });
         stage.show();
+        stage.setAlwaysOnTop(true);
+        stage.setAlwaysOnTop(false);
         openStages.put(QUEUE_SETTING_STAGE, stage);
     }
 

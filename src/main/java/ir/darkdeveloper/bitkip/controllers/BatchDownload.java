@@ -1,10 +1,9 @@
 package ir.darkdeveloper.bitkip.controllers;
 
 import ir.darkdeveloper.bitkip.config.AppConfigs;
-import ir.darkdeveloper.bitkip.controllers.interfaces.NewDownload;
+import ir.darkdeveloper.bitkip.config.QueueObserver;
 import ir.darkdeveloper.bitkip.models.LinkModel;
 import ir.darkdeveloper.bitkip.models.QueueModel;
-import ir.darkdeveloper.bitkip.models.URLModel;
 import ir.darkdeveloper.bitkip.repo.DownloadsRepo;
 import ir.darkdeveloper.bitkip.repo.QueuesRepo;
 import ir.darkdeveloper.bitkip.utils.FxUtils;
@@ -33,7 +32,7 @@ import static ir.darkdeveloper.bitkip.config.AppConfigs.log;
 import static ir.darkdeveloper.bitkip.utils.FileExtensions.ALL_DOWNLOADS_QUEUE;
 import static ir.darkdeveloper.bitkip.utils.FileExtensions.extensions;
 
-public class BatchDownload implements NewDownload {
+public class BatchDownload implements QueueObserver {
     @FXML
     private Label errorLabel;
     @FXML
@@ -64,7 +63,6 @@ public class BatchDownload implements NewDownload {
     private LinkModel tempLink;
 
     private Stage stage;
-    private URLModel urlModel;
 
 
     @Override
@@ -299,7 +297,7 @@ public class BatchDownload implements NewDownload {
         }
     }
 
-    private QueueModel getSecondaryQueueByFileName(String fileName) {
+    public static QueueModel getSecondaryQueueByFileName(String fileName) {
         if (fileName == null || fileName.isBlank())
             return null;
         for (var entry : extensions.entrySet()) {
@@ -342,10 +340,6 @@ public class BatchDownload implements NewDownload {
         onOfflineFieldsChanged();
     }
 
-    @Override
-    public void setUrlModel(URLModel urlModel) {
-        this.urlModel = urlModel;
-    }
 }
 
 

@@ -1,8 +1,8 @@
 package ir.darkdeveloper.bitkip.controllers;
 
 import ir.darkdeveloper.bitkip.config.QueueObserver;
-import ir.darkdeveloper.bitkip.controllers.interfaces.NewDownload;
-import ir.darkdeveloper.bitkip.models.URLModel;
+import ir.darkdeveloper.bitkip.controllers.interfaces.FXMLController;
+import ir.darkdeveloper.bitkip.models.SingleURLModel;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.control.Button;
@@ -19,7 +19,7 @@ import static ir.darkdeveloper.bitkip.BitKip.getResource;
 import static ir.darkdeveloper.bitkip.config.AppConfigs.getQueueSubject;
 import static ir.darkdeveloper.bitkip.config.AppConfigs.log;
 
-public class NewDownloadContainer implements NewDownload {
+public class NewDownloadController implements FXMLController {
 
     @FXML
     private ScrollPane scroll;
@@ -33,7 +33,7 @@ public class NewDownloadContainer implements NewDownload {
     private Stage stage;
     private QueueObserver prevController;
     private boolean isSingle = true;
-    private URLModel urlModel;
+    private SingleURLModel urlModel;
 
     @Override
     public Stage getStage() {
@@ -55,8 +55,7 @@ public class NewDownloadContainer implements NewDownload {
             switchToMultipleDownload();
     }
 
-    @Override
-    public void setUrlModel(URLModel urlModel) {
+    public void setUrlModel(SingleURLModel urlModel) {
         this.urlModel = urlModel;
     }
 
@@ -126,8 +125,10 @@ public class NewDownloadContainer implements NewDownload {
                 return node.getId().equals("download_details");
             });
 
-            NewDownload controller = loader.getController();
-            controller.setUrlModel(urlModel);
+            QueueObserver controller = loader.getController();
+            if (fxmlName.equals("singleDownload"))
+                ((SingleDownload)controller).setUrlModel(urlModel);
+
             if (prevController != null)
                 getQueueSubject().removeObserver(prevController);
 
@@ -142,9 +143,4 @@ public class NewDownloadContainer implements NewDownload {
         }
     }
 
-
-    @Override
-    public void updateQueue() {
-
-    }
 }
