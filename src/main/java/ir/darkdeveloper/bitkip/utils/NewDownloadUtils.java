@@ -176,8 +176,6 @@ public class NewDownloadUtils {
      */
     public static void startDownload(DownloadModel dm, String speed, String bytes, boolean resume, boolean blocking,
                                      ExecutorService executor) {
-        if (!dm.isResumable())
-            return;
         DownloadTask downloadTask = new DownloadLimitedTask(dm, Long.MAX_VALUE, false);
         if (dm.getChunks() == 0) {
             if (speed != null) {

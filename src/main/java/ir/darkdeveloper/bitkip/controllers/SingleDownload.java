@@ -29,6 +29,7 @@ import java.util.concurrent.Executors;
 
 import static ir.darkdeveloper.bitkip.config.AppConfigs.*;
 import static ir.darkdeveloper.bitkip.utils.FileExtensions.ALL_DOWNLOADS_QUEUE;
+import static ir.darkdeveloper.bitkip.utils.InputValidations.maxChunks;
 
 public class SingleDownload implements QueueObserver {
 
@@ -87,9 +88,6 @@ public class SingleDownload implements QueueObserver {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-    }
-
-    private void initAfterUrlModel() {
         var queues = AppConfigs.getQueues();
         if (queues.isEmpty())
             queues = QueuesRepo.getAllQueues(false, false);
@@ -113,6 +111,9 @@ public class SingleDownload implements QueueObserver {
         NewDownloadUtils.initPopOvers(questionBtns, contents);
         InputValidations.validInputChecks(chunksField, bytesField, speedField, dm);
 
+    }
+
+    private void initAfterUrlModel() {
         if (urlModel != null)
             setInputValuesFromExtension(urlModel);
         else
@@ -144,6 +145,8 @@ public class SingleDownload implements QueueObserver {
         setLocation(urlModel.filename());
         sizeLabel.setText(IOUtils.formatBytes(urlModel.fileSize()));
         bytesField.setText(urlModel.fileSize() + "");
+        chunksField.setDisable(!urlModel.resumable());
+        chunksField.setText(urlModel.resumable() ? maxChunks() + "" : "0");
         dm.setResumable(urlModel.resumable());
         dm.setSize(urlModel.fileSize());
     }
