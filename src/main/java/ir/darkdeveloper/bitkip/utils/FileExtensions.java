@@ -17,7 +17,7 @@ public class FileExtensions {
     public static final List<String> staticQueueNames = List.of(ALL_DOWNLOADS_QUEUE, COMPRESSED_QUEUE,
             MUSIC_QUEUE, VIDEOS_QUEUE, PROGRAMS_QUEUE, DOCS_QUEUE, OTHERS_QUEUE);
 
-    public static final List<String> compressedEx = List.of("rar", "zip", "7z", "deb",
+    public static final List<String> compressedEx = List.of("rar", "zip", "7z", "deb", "compressed",
             "pkg", "rpm", "tar", "tar.gz", "z");
     public static final List<String> programEx = List.of("bin", "dmg", "iso", "msi",
             "exe", "sh", "cmd", "apk", "bat", "cgi", "jar", "py", "wsf");

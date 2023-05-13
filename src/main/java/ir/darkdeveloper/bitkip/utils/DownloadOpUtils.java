@@ -115,7 +115,7 @@ public class DownloadOpUtils {
 
     public static void newDownload(boolean isSingle) {
         mainTableUtils.clearSelection();
-        FxUtils.newDownloadStage(isSingle);
+        FxUtils.newDownloadStage(isSingle, null);
     }
 
     public static void openDownloadingStage(DownloadModel dm) {

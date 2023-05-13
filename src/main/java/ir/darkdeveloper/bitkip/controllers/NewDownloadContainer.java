@@ -1,7 +1,8 @@
 package ir.darkdeveloper.bitkip.controllers;
 
 import ir.darkdeveloper.bitkip.config.QueueObserver;
-import ir.darkdeveloper.bitkip.controllers.interfaces.FXMLController;
+import ir.darkdeveloper.bitkip.controllers.interfaces.NewDownload;
+import ir.darkdeveloper.bitkip.models.URLModel;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.control.Button;
@@ -18,7 +19,7 @@ import static ir.darkdeveloper.bitkip.BitKip.getResource;
 import static ir.darkdeveloper.bitkip.config.AppConfigs.getQueueSubject;
 import static ir.darkdeveloper.bitkip.config.AppConfigs.log;
 
-public class NewDownload implements FXMLController {
+public class NewDownloadContainer implements NewDownload {
 
     @FXML
     private ScrollPane scroll;
@@ -32,6 +33,7 @@ public class NewDownload implements FXMLController {
     private Stage stage;
     private QueueObserver prevController;
     private boolean isSingle = true;
+    private URLModel urlModel;
 
     @Override
     public Stage getStage() {
@@ -51,6 +53,11 @@ public class NewDownload implements FXMLController {
             switchToSingleDownload();
         else
             switchToMultipleDownload();
+    }
+
+    @Override
+    public void setUrlModel(URLModel urlModel) {
+        this.urlModel = urlModel;
     }
 
     @Override
@@ -118,7 +125,9 @@ public class NewDownload implements FXMLController {
                     return false;
                 return node.getId().equals("download_details");
             });
-            QueueObserver controller = loader.getController();
+
+            NewDownload controller = loader.getController();
+            controller.setUrlModel(urlModel);
             if (prevController != null)
                 getQueueSubject().removeObserver(prevController);
 
@@ -133,4 +142,9 @@ public class NewDownload implements FXMLController {
         }
     }
 
+
+    @Override
+    public void updateQueue() {
+
+    }
 }

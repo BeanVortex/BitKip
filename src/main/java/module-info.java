@@ -23,11 +23,13 @@ module ir.darkdeveloper.bitkip {
     requires org.eclipse.jetty.server;
     requires org.eclipse.jetty.util;
     requires org.slf4j;
+    requires com.fasterxml.jackson.databind;
 
 
     opens ir.darkdeveloper.bitkip to javafx.fxml, javafx.controls;
     opens ir.darkdeveloper.bitkip.controllers to javafx.fxml, javafx.base, org.eclipse.jetty.servlet, org.eclipse.jetty.server;
-    opens ir.darkdeveloper.bitkip.models to javafx.fxml, javafx.base;
+    opens ir.darkdeveloper.bitkip.models to javafx.fxml, javafx.base, com.fasterxml.jackson.databind;
     opens ir.darkdeveloper.bitkip.controllers.interfaces to javafx.base, javafx.fxml;
     exports ir.darkdeveloper.bitkip;
+    opens ir.darkdeveloper.bitkip.servlets to javafx.base, javafx.fxml, org.eclipse.jetty.server, org.eclipse.jetty.servlet;
 }

@@ -1,9 +1,10 @@
 package ir.darkdeveloper.bitkip.controllers;
 
 import ir.darkdeveloper.bitkip.config.AppConfigs;
-import ir.darkdeveloper.bitkip.config.QueueObserver;
+import ir.darkdeveloper.bitkip.controllers.interfaces.NewDownload;
 import ir.darkdeveloper.bitkip.models.LinkModel;
 import ir.darkdeveloper.bitkip.models.QueueModel;
+import ir.darkdeveloper.bitkip.models.URLModel;
 import ir.darkdeveloper.bitkip.repo.DownloadsRepo;
 import ir.darkdeveloper.bitkip.repo.QueuesRepo;
 import ir.darkdeveloper.bitkip.utils.FxUtils;
@@ -32,7 +33,7 @@ import static ir.darkdeveloper.bitkip.config.AppConfigs.log;
 import static ir.darkdeveloper.bitkip.utils.FileExtensions.ALL_DOWNLOADS_QUEUE;
 import static ir.darkdeveloper.bitkip.utils.FileExtensions.extensions;
 
-public class BatchDownload implements QueueObserver {
+public class BatchDownload implements NewDownload {
     @FXML
     private Label errorLabel;
     @FXML
@@ -63,6 +64,7 @@ public class BatchDownload implements QueueObserver {
     private LinkModel tempLink;
 
     private Stage stage;
+    private URLModel urlModel;
 
 
     @Override
@@ -338,6 +340,11 @@ public class BatchDownload implements QueueObserver {
     @FXML
     private void onQueueChanged() {
         onOfflineFieldsChanged();
+    }
+
+    @Override
+    public void setUrlModel(URLModel urlModel) {
+        this.urlModel = urlModel;
     }
 }
 

@@ -1,5 +1,6 @@
 package ir.darkdeveloper.bitkip.config;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import ir.darkdeveloper.bitkip.controllers.DownloadingController;
 import ir.darkdeveloper.bitkip.models.DownloadModel;
 import ir.darkdeveloper.bitkip.models.QueueModel;
@@ -28,6 +29,7 @@ public class AppConfigs {
 
 
     public static Logger log;
+    public static final ObjectMapper mapper = new ObjectMapper();
 
 
     public static void initLogger() {

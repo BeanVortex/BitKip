@@ -1,16 +1,14 @@
 package ir.darkdeveloper.bitkip.controllers;
 
 import ir.darkdeveloper.bitkip.config.AppConfigs;
-import ir.darkdeveloper.bitkip.config.QueueObserver;
+import ir.darkdeveloper.bitkip.controllers.interfaces.NewDownload;
 import ir.darkdeveloper.bitkip.models.DownloadModel;
 import ir.darkdeveloper.bitkip.models.DownloadStatus;
 import ir.darkdeveloper.bitkip.models.QueueModel;
+import ir.darkdeveloper.bitkip.models.URLModel;
 import ir.darkdeveloper.bitkip.repo.DownloadsRepo;
 import ir.darkdeveloper.bitkip.repo.QueuesRepo;
-import ir.darkdeveloper.bitkip.utils.DownloadOpUtils;
-import ir.darkdeveloper.bitkip.utils.FxUtils;
-import ir.darkdeveloper.bitkip.utils.InputValidations;
-import ir.darkdeveloper.bitkip.utils.NewDownloadUtils;
+import ir.darkdeveloper.bitkip.utils.*;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -32,7 +30,7 @@ import java.util.concurrent.Executors;
 import static ir.darkdeveloper.bitkip.config.AppConfigs.*;
 import static ir.darkdeveloper.bitkip.utils.FileExtensions.ALL_DOWNLOADS_QUEUE;
 
-public class SingleDownload implements QueueObserver {
+public class SingleDownload implements NewDownload {
 
     @FXML
     private Label errorLabel;
@@ -66,9 +64,10 @@ public class SingleDownload implements QueueObserver {
     private TextField locationField;
     @FXML
     private Button openLocation;
-    private Stage stage;
 
     private final DownloadModel dm = new DownloadModel();
+    private Stage stage;
+    private URLModel urlModel;
 
 
     @Override
@@ -88,6 +87,9 @@ public class SingleDownload implements QueueObserver {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
+    }
+
+    private void initAfterUrlModel() {
         var queues = AppConfigs.getQueues();
         if (queues.isEmpty())
             queues = QueuesRepo.getAllQueues(false, false);
@@ -107,9 +109,15 @@ public class SingleDownload implements QueueObserver {
                 "You can specify how many bytes of the file to download (Disabled in chunks downloading mode)",
                 "File is seperated into parts and will be downloaded concurrently"
         };
+
         NewDownloadUtils.initPopOvers(questionBtns, contents);
         InputValidations.validInputChecks(chunksField, bytesField, speedField, dm);
-        InputValidations.prepareLinkFromClipboard(urlField);
+
+        if (urlModel != null)
+            setInputValues(urlModel);
+        else
+            InputValidations.prepareLinkFromClipboard(urlField);
+
         queueCombo.getSelectionModel().selectedIndexProperty().addListener(observable -> onQueueChanged());
         urlField.textProperty().addListener((o, ol, n) -> {
             if (n.isBlank())
@@ -126,8 +134,16 @@ public class SingleDownload implements QueueObserver {
                 NewDownloadUtils.disableControlsAndShowError("Location is blank", errorLabel, downloadBtn, addBtn);
             else onOfflineFieldsChanged();
         });
-        autoFillLocationAndSizeAndName();
+        if (urlModel == null)
+            autoFillLocationAndSizeAndName();
+    }
 
+    private void setInputValues(URLModel urlModel) {
+        urlField.setText(urlModel.getUrl());
+        nameField.setText(urlModel.getFilename());
+        setLocation(urlModel.getFilename());
+        sizeLabel.setText(IOUtils.formatBytes(urlModel.getFileSize()));
+        bytesField.setText(urlModel.getFileSize() + "");
     }
 
     private void autoFillLocationAndSizeAndName() {
@@ -251,6 +267,10 @@ public class SingleDownload implements QueueObserver {
         dm.setChunks(Integer.parseInt(chunksField.getText()));
         dm.setAddDate(LocalDateTime.now());
         dm.setAddToQueueDate(LocalDateTime.now());
+        if (urlModel != null){
+            dm.setSize(urlModel.getFileSize());
+            dm.setResumable(urlModel.getResumable());
+        }
         var selectedQueue = queueCombo.getSelectionModel().getSelectedItem();
         var allDownloadsQueue = QueuesRepo.findByName(ALL_DOWNLOADS_QUEUE, false);
         dm.getQueues().add(allDownloadsQueue);
@@ -284,4 +304,9 @@ public class SingleDownload implements QueueObserver {
     }
 
 
+    @Override
+    public void setUrlModel(URLModel urlModel) {
+        this.urlModel = urlModel;
+        initAfterUrlModel();
+    }
 }
