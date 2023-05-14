@@ -39,6 +39,8 @@ import static com.sun.jna.Platform.*;
 import static ir.darkdeveloper.bitkip.BitKip.getResource;
 import static ir.darkdeveloper.bitkip.config.AppConfigs.*;
 import static ir.darkdeveloper.bitkip.repo.QueuesRepo.*;
+import static ir.darkdeveloper.bitkip.utils.FileExtensions.ALL_DOWNLOADS_QUEUE;
+import static ir.darkdeveloper.bitkip.utils.FileExtensions.staticQueueNames;
 import static java.time.DayOfWeek.*;
 
 public class QueueSetting implements FXMLController, QueueObserver {
@@ -231,6 +233,13 @@ public class QueueSetting implements FXMLController, QueueObserver {
         speedField.setText(selectedQueue.get().getSpeed());
         simulDownloadSpinner.getValueFactory().setValue(selectedQueue.get().getSimultaneouslyDownload());
         hasFolderCheck.setSelected(selectedQueue.get().hasFolder());
+        hasFolderCheck.setDisable(false);
+        if (staticQueueNames.stream().anyMatch(s -> s.equals(selectedQueue.get().getName()))) {
+            hasFolderCheck.setSelected(true);
+            hasFolderCheck.setDisable(true);
+            if (selectedQueue.get().getName().equals(ALL_DOWNLOADS_QUEUE))
+                hasFolderCheck.setSelected(false);
+        }
         downloadOrderCheck.setSelected(selectedQueue.get().isDownloadFromTop());
         stage.setTitle("Queue Setting: %s".formatted(selectedQueue.get().getName()));
         queueList.getSelectionModel().select(selectedQueue.get());
