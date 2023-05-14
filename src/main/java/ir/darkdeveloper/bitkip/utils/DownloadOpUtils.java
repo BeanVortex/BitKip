@@ -32,7 +32,7 @@ public class DownloadOpUtils {
                     DownloadsRepo.updateDownloadLastTryDate(dm);
                     mainTableUtils.refreshTable();
                     if (dm.isResumable()) {
-                        log.info("Resuming download : " + dm.getName());
+                        log.info("Resuming download : " + dm);
                         NewDownloadUtils.startDownload(dm, speedLimit, byteLimit, true, false, null);
                     } else {
                         dm.setDownloadStatus(DownloadStatus.Restarting);
@@ -47,7 +47,7 @@ public class DownloadOpUtils {
     public static void startDownload(DownloadModel dm, String speedLimit, String byteLimit, boolean resume,
                                      boolean blocking, ExecutorService executor) {
         if (!currentDownloadings.contains(dm)) {
-            log.info("Starting download : " + dm.getName());
+            log.info("Starting download : " + dm);
             dm.setLastTryDate(LocalDateTime.now());
             dm.setDownloadStatus(DownloadStatus.Trying);
             DownloadsRepo.updateDownloadLastTryDate(dm);
@@ -68,7 +68,7 @@ public class DownloadOpUtils {
     }
 
     private static void restartDownload(DownloadModel dm) {
-        log.info("Restarting download : " + dm.getName());
+        log.info("Restarting download : " + dm);
         IOUtils.deleteDownload(dm);
         DownloadsRepo.deleteDownload(dm);
         mainTableUtils.remove(dm);
@@ -80,7 +80,7 @@ public class DownloadOpUtils {
     }
 
     public static void pauseDownload(DownloadModel dm) {
-        log.info("Pausing download : " + dm.getName());
+        log.info("Pausing download : " + dm);
         currentDownloadings.stream()
                 .filter(c -> c.equals(dm))
                 .findFirst().ifPresent(dm2 -> dm2.getDownloadTask().pause());
@@ -100,13 +100,16 @@ public class DownloadOpUtils {
                 currentDownloadings.stream().filter(c -> c.equals(dm))
                         .findFirst()
                         .ifPresent(dm2 -> dm2.getDownloadTask().pause());
+                var logMsg = "download deleted: ";
                 DownloadsRepo.deleteDownload(dm);
-                if (withFiles)
+                if (withFiles) {
                     IOUtils.deleteDownload(dm);
+                    logMsg = "download deleted with file: ";
+                }
+                log.info(logMsg + dm);
                 var openDownloadingsCopy = new ArrayList<>(openDownloadings);
                 openDownloadingsCopy.stream().filter(dc -> dc.getDownloadModel().equals(dm))
                         .forEach(DownloadingController::closeStage);
-                log.info("Download deleted : " + dm.getName());
             });
 
             mainTableUtils.remove(dms);
@@ -161,7 +164,7 @@ public class DownloadOpUtils {
                 else if (isMac())
                     Runtime.getRuntime().exec(new String[]{"osascript", "-e",
                             "tell app \"Finder\" to reveal POSIX file \"" + file.getAbsolutePath() + "\""});
-            } else{
+            } else {
                 log.warn("Desktop is not supported to open containing folder");
                 Notifications.create()
                         .title("Not Supported")

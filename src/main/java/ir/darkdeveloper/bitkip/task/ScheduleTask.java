@@ -55,7 +55,7 @@ public class ScheduleTask {
         Runnable run = () -> QueueUtils.startQueue(queue, startItem, stopItem);
         var schedule = queue.getSchedule();
         createSchedule(run, schedule, false);
-        log.info("Start queue schedule service has been enabled for " + queue.getName());
+        log.info("Start queue schedule service has been enabled for " + queue.toStringModel());
         var sm = currentSchedules.get(schedule.getId());
         if (isThereSchedule)
             sm.getStartScheduler().shutdown();
@@ -66,7 +66,7 @@ public class ScheduleTask {
         Runnable run = () -> QueueUtils.stopQueue(queue, startItem, stopItem);
         var schedule = queue.getSchedule();
         createSchedule(run, schedule, true);
-        log.info("Stop queue schedule service has been enabled for " + queue.getName());
+        log.info("Stop queue schedule service has been enabled for " + queue.toStringModel());
         var sm = currentSchedules.get(schedule.getId());
         if (isThereSchedule && sm.getStopScheduler() != null)
             sm.getStopScheduler().shutdown();

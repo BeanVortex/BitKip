@@ -13,7 +13,6 @@ import static ir.darkdeveloper.bitkip.utils.MainTableUtils.dFormat;
 
 @Getter
 @Setter
-@ToString
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
@@ -103,5 +102,31 @@ public class DownloadModel {
 
     public String getDownloadStatusString() {
         return "%s (%s)".formatted(downloadStatus, dFormat.format(progress) + " %");
+    }
+
+    @Override
+    public String toString() {
+        return "DownloadModel{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", progress=" + progress +
+                ", size=" + size +
+                ", downloaded=" + downloaded +
+                ", url='" + url + '\'' +
+                ", filePath='" + filePath + '\'' +
+                ", remainingTime='" + remainingTime + '\'' +
+                ", queues=" + queues.stream().map(QueueModel::toStringModel).toList() +
+                ", chunks=" + chunks +
+                ", speed=" + speed +
+                ", downloadStatus=" + downloadStatus +
+                ", downloadTask=" + downloadTask +
+                ", addDate=" + addDate +
+                ", addToQueueDate=" + addToQueueDate +
+                ", lastTryDate=" + lastTryDate +
+                ", completeDate=" + completeDate +
+                ", openAfterComplete=" + openAfterComplete +
+                ", showCompleteDialog=" + showCompleteDialog +
+                ", resumable=" + resumable +
+                '}';
     }
 }

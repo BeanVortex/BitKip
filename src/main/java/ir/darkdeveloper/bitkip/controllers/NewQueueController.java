@@ -73,7 +73,7 @@ public class NewQueueController implements FXMLController {
         schedule.setQueueId(queueModel.getId());
         ScheduleRepo.updateScheduleQueueId(schedule.getId(), schedule.getQueueId());
         AppConfigs.addQueue(queueModel);
-        log.info("Created queue : " + queueName);
+        log.info("Created queue : " + queueModel.toStringModel());
         stage.close();
     }
 

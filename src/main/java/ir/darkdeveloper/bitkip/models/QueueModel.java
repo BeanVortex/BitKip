@@ -48,4 +48,18 @@ public class QueueModel {
     public boolean hasFolder() {
         return hasFolder;
     }
+
+    public String toStringModel() {
+        return "QueueModel{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", editable=" + editable +
+                ", canAddDownload=" + canAddDownload +
+                ", hasFolder=" + hasFolder +
+                ", downloadFromTop=" + downloadFromTop +
+                ", speed='" + speed + '\'' +
+                ", simultaneouslyDownload=" + simultaneouslyDownload +
+                ", schedule=" + schedule +
+                '}';
+    }
 }

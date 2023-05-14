@@ -45,10 +45,10 @@ public class QueueUtils {
             qm.setDownloads(new CopyOnWriteArrayList<>(downloadsByQueue));
             startedQueues.add(qm);
             start(qm, startItem, stopItem);
-            log.info("Queue %s has been started".formatted(qm.getName()));
+            log.info("Queue has been started: " + qm);
         } else if (schedule.isEnabled() && schedule.isOnceDownload()) {
             currentSchedules.get(schedule.getId()).getStartScheduler().shutdown();
-            log.info("Start scheduler has been disabled for %s".formatted(qm.getName()));
+            log.info("Start scheduler has been disabled for: " + qm.getName());
         }
 
     }
@@ -183,7 +183,7 @@ public class QueueUtils {
             });
 
             startedQueues.remove(qm);
-            log.info("Queue %s stopped".formatted(qm.getName()));
+            log.info("Queue has been stopped: " + qm);
             whenQueueDone(qm, startItem, stopItem, null);
         }
     }
@@ -203,7 +203,7 @@ public class QueueUtils {
 
             Platform.runLater(() -> addAllQueues(updatedQueues));
             ScheduleRepo.updateScheduleEnabled(schedule.getId(), schedule.isEnabled());
-            log.info("Schedulers has been disabled for %s".formatted(qm.getName()));
+            log.info("Schedulers has been disabled for: " + qm);
         }
     }
 
@@ -218,7 +218,6 @@ public class QueueUtils {
         else
             Platform.runLater(Notification);
     }
-
 
 
     public static void deleteQueue(String name) {

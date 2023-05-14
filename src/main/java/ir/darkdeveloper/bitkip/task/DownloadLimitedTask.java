@@ -108,7 +108,7 @@ public class DownloadLimitedTask extends DownloadTask {
                                       File file, long limit, long fileSize,
                                       long existingFileSize) throws IOException, InterruptedException {
         var byteChannel = Channels.newChannel(in);
-        log.info("Downloading speed limited: " + file.getName());
+        log.info("Downloading speed limited: " + downloadModel);
         do {
             var beforeDown = System.currentTimeMillis();
             fileChannel.transferFrom(byteChannel, existingFileSize, limit);
@@ -130,7 +130,7 @@ public class DownloadLimitedTask extends DownloadTask {
 
     private void downloadSizeLimited(FileChannel fileChannel, InputStream in,
                                      long limit, long existingFileSize) throws IOException {
-        log.info("Downloading size limited: " + file.getName());
+        log.info("Downloading size limited: " + downloadModel);
         var byteChannel = Channels.newChannel(in);
         fileChannel.transferFrom(byteChannel, existingFileSize, limit);
     }
@@ -148,7 +148,7 @@ public class DownloadLimitedTask extends DownloadTask {
                 download.setDownloadStatus(DownloadStatus.Paused);
                 downloadModel.setDownloadStatus(DownloadStatus.Paused);
                 if (file.exists() && getCurrentFileSize(file) == downloadModel.getSize()) {
-                    log.info("File successfully downloaded: " + download.getName());
+                    log.info("File successfully downloaded: " + download);
                     download.setCompleteDate(LocalDateTime.now());
                     download.setDownloadStatus(DownloadStatus.Completed);
                     downloadModel.setDownloadStatus(DownloadStatus.Completed);
@@ -185,7 +185,7 @@ public class DownloadLimitedTask extends DownloadTask {
 
     @Override
     protected void failed() {
-        log.info("Failed download: " + downloadModel.getName());
+        log.info("Failed download: " + downloadModel);
         pause();
     }
 
@@ -222,7 +222,7 @@ public class DownloadLimitedTask extends DownloadTask {
     @Override
     public void pause() {
         paused = true;
-        log.info("Paused download: " + downloadModel.getName());
+        log.info("Paused download: " + downloadModel);
         succeeded();
     }
 

@@ -73,6 +73,7 @@ public class DownloadInChunksTask extends DownloadTask {
         var futures = prepareParts(url, fileSize);
         if (!futures.isEmpty()) {
             isCalculating = true;
+            log.info("Downloading : " + downloadModel);
             var futureArr = new CompletableFuture[futures.size()];
             futures.toArray(futureArr);
             CompletableFuture.allOf(futureArr).get();
@@ -141,7 +142,6 @@ public class DownloadInChunksTask extends DownloadTask {
         if (isLimited) {
             c = CompletableFuture.supplyAsync(() -> {
                 try {
-                    log.info("Limited downloading part " + partFile.getName());
                     performLimitedDownload(url, fromContinue, finalFrom, finalTo, partFile, fileSize);
                 } catch (IOException | InterruptedException e) {
                     if (e instanceof IOException)
@@ -153,7 +153,6 @@ public class DownloadInChunksTask extends DownloadTask {
         } else {
             c = CompletableFuture.supplyAsync(() -> {
                 try {
-                    log.info("Downloading part " + partFile.getName());
                     performDownload(url, fromContinue, finalFrom, finalTo, partFile, fileSize);
                 } catch (IOException | InterruptedException e) {
                     if (e instanceof IOException)
@@ -262,7 +261,7 @@ public class DownloadInChunksTask extends DownloadTask {
     @Override
     public void pause() {
         paused = true;
-        log.info("Paused download: " + downloadModel.getName());
+        log.info("Paused download: " + downloadModel);
         try {
             //this will cause execution get out of transferFrom
             for (var channel : fileChannels)
@@ -274,7 +273,7 @@ public class DownloadInChunksTask extends DownloadTask {
 
     @Override
     protected void failed() {
-        log.info("Failed download: " + downloadModel.getName());
+        log.info("Failed download: " + downloadModel);
         pause();
     }
 
@@ -290,7 +289,7 @@ public class DownloadInChunksTask extends DownloadTask {
                 var download = dmOpt.get();
                 download.setDownloadStatus(DownloadStatus.Paused);
                 if (IOUtils.mergeFiles(download, chunks, filePaths)) {
-                    log.info("File successfully downloaded: " + download.getName());
+                    log.info("File successfully downloaded: " + download);
                     download.setCompleteDate(LocalDateTime.now());
                     download.setDownloadStatus(DownloadStatus.Completed);
                     download.setDownloaded(download.getSize());

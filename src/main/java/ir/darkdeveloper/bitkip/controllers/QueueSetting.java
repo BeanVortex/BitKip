@@ -425,7 +425,7 @@ public class QueueSetting implements FXMLController, QueueObserver {
 
             ScheduleTask.schedule(queue);
             showResultMessage("Successfully Saved", SaveStatus.SUCCESS, executor);
-            log.info("Updated queue : " + queue);
+            log.info("Updated queue : " + queue.toStringModel());
         } catch (IllegalArgumentException e) {
             showResultMessage(e.getMessage(), SaveStatus.ERROR, executor);
             log.error(e.getMessage());
