@@ -52,13 +52,12 @@ public class ScheduleTask {
 
     private static void startSchedule(boolean isThereSchedule, QueueModel queue,
                                       MenuItem startItem, MenuItem stopItem) {
-        var schedule = queue.getSchedule();
         Runnable run = () -> {
-            log.info("Start scheduler triggered: " + schedule);
+            log.info("Start scheduler triggered for " + queue.toStringModel());
             QueueUtils.startQueue(queue, startItem, stopItem);
         };
-        createSchedule(run, schedule, false);
-        log.info("Start queue schedule service has been enabled for " + queue.toStringModel());
+        var schedule = queue.getSchedule();
+        createSchedule(run, queue, false);
         var sm = currentSchedules.get(schedule.getId());
         if (isThereSchedule)
             sm.getStartScheduler().shutdown();
@@ -66,39 +65,53 @@ public class ScheduleTask {
 
     private static void stopSchedule(boolean isThereSchedule, QueueModel queue,
                                      MenuItem startItem, MenuItem stopItem) {
-        var schedule = queue.getSchedule();
         Runnable run = () -> {
-            log.info("Stop scheduler triggered: " + schedule);
+            log.info("Stop scheduler triggered for " + queue.toStringModel());
             QueueUtils.stopQueue(queue, startItem, stopItem);
         };
-        createSchedule(run, schedule, true);
-        log.info("Stop queue schedule service has been enabled for " + queue.toStringModel());
+        var schedule = queue.getSchedule();
+        createSchedule(run, queue, true);
         var sm = currentSchedules.get(schedule.getId());
         if (isThereSchedule && sm.getStopScheduler() != null)
             sm.getStopScheduler().shutdown();
     }
 
-    private static void createSchedule(Runnable run, ScheduleModel schedule, boolean isStop) {
+    private static void createSchedule(Runnable run, QueueModel queue, boolean isStop) {
+        var schedule = queue.getSchedule();
         var scheduler = Executors.newScheduledThreadPool(1);
-        var specifiedTime = schedule.getStartTime();
-        if (isStop) {
-            schedule.setStopScheduler(scheduler);
-            specifiedTime = schedule.getStopTime();
-        } else
-            schedule.setStartScheduler(scheduler);
 
         if (schedule.isOnceDownload()) {
             var initialDelay = calculateOnceInitialDelay(isStop, schedule);
+            var firstTriggerMsg = "Once start scheduler will trigger after ";
+            if (isStop) {
+                schedule.setStopScheduler(scheduler);
+                firstTriggerMsg = "Once stop scheduler will trigger after ";
+            } else
+                schedule.setStartScheduler(scheduler);
+            firstTriggerMsg += TimeUnit.MILLISECONDS.toMinutes(initialDelay) + " minutes :" + queue.toStringModel();
+            log.info(firstTriggerMsg);
             scheduler.schedule(run, initialDelay, TimeUnit.MILLISECONDS);
         } else {
+            var specifiedTime = schedule.getStartTime();
+            var firstTriggerMsg = "Daily start scheduler will trigger after ";
+
+            if (isStop) {
+                schedule.setStopScheduler(scheduler);
+                firstTriggerMsg = "Daily stop scheduler will trigger after ";
+                specifiedTime = schedule.getStopTime();
+            } else
+                schedule.setStartScheduler(scheduler);
+
             var initialDelay = calculateDailyInitialDelay(specifiedTime);
+            firstTriggerMsg += TimeUnit.MILLISECONDS.toMinutes(initialDelay) + " minutes :" + queue.toStringModel();
+            log.info(firstTriggerMsg);
+
             scheduler.scheduleAtFixedRate(() -> {
                 if (!schedule.getDays().contains(LocalDate.now().getDayOfWeek()))
                     return;
                 run.run();
             }, initialDelay, TimeUnit.DAYS.toMillis(1), TimeUnit.MILLISECONDS);
         }
-        log.info("Initiated scheduler: " + schedule);
     }
 
     private static long calculateOnceInitialDelay(boolean isStop, ScheduleModel schedule) {
