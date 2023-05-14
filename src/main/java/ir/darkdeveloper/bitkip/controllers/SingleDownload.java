@@ -147,6 +147,7 @@ public class SingleDownload implements QueueObserver {
         bytesField.setText(urlModel.fileSize() + "");
         chunksField.setDisable(!urlModel.resumable());
         chunksField.setText(urlModel.resumable() ? maxChunks() + "" : "0");
+        speedField.setDisable(false);
         dm.setResumable(urlModel.resumable());
         dm.setSize(urlModel.fileSize());
     }
