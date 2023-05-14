@@ -39,7 +39,7 @@ public class AppConfigs {
         var timestamp = dateFormat.format(new Date());
         var pathToLogFile = dataPath + "logs" + File.separator + timestamp + ".log";
         System.setProperty("log.file.path", pathToLogFile);
-        log = LoggerFactory.getLogger("LOG");
+        log = LoggerFactory.getLogger("BitKip");
     }
 
     public static final String compressedPath = downloadPath + "Compressed" + File.separator;
