@@ -52,8 +52,11 @@ public class ScheduleTask {
 
     private static void startSchedule(boolean isThereSchedule, QueueModel queue,
                                       MenuItem startItem, MenuItem stopItem) {
-        Runnable run = () -> QueueUtils.startQueue(queue, startItem, stopItem);
         var schedule = queue.getSchedule();
+        Runnable run = () -> {
+            log.info("Start scheduler triggered: " + schedule);
+            QueueUtils.startQueue(queue, startItem, stopItem);
+        };
         createSchedule(run, schedule, false);
         log.info("Start queue schedule service has been enabled for " + queue.toStringModel());
         var sm = currentSchedules.get(schedule.getId());
@@ -63,8 +66,11 @@ public class ScheduleTask {
 
     private static void stopSchedule(boolean isThereSchedule, QueueModel queue,
                                      MenuItem startItem, MenuItem stopItem) {
-        Runnable run = () -> QueueUtils.stopQueue(queue, startItem, stopItem);
         var schedule = queue.getSchedule();
+        Runnable run = () -> {
+            log.info("Stop scheduler triggered: " + schedule);
+            QueueUtils.stopQueue(queue, startItem, stopItem);
+        };
         createSchedule(run, schedule, true);
         log.info("Stop queue schedule service has been enabled for " + queue.toStringModel());
         var sm = currentSchedules.get(schedule.getId());
@@ -92,6 +98,7 @@ public class ScheduleTask {
                 run.run();
             }, initialDelay, TimeUnit.DAYS.toMillis(1), TimeUnit.MILLISECONDS);
         }
+        log.info("Initiated scheduler: " + schedule);
     }
 
     private static long calculateOnceInitialDelay(boolean isStop, ScheduleModel schedule) {
