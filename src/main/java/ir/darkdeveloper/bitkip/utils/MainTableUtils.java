@@ -20,7 +20,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 
 import static ir.darkdeveloper.bitkip.config.AppConfigs.currentDownloadings;
-import static ir.darkdeveloper.bitkip.utils.FileExtensions.staticQueueNames;
+import static ir.darkdeveloper.bitkip.utils.Defaults.staticQueueNames;
 import static ir.darkdeveloper.bitkip.utils.MenuUtils.createMenuItem;
 import static ir.darkdeveloper.bitkip.utils.ShortcutUtils.*;
 

@@ -1,16 +1,16 @@
 package ir.darkdeveloper.bitkip.models;
 
 import ir.darkdeveloper.bitkip.config.AppConfigs;
-import ir.darkdeveloper.bitkip.utils.FileExtensions;
+import ir.darkdeveloper.bitkip.utils.Defaults;
 
 import java.util.List;
 
 public enum FileType {
-    COMPRESSED(FileExtensions.compressedEx, AppConfigs.compressedPath),
-    VIDEO(FileExtensions.videoEx, AppConfigs.videosPath),
-    PROGRAM(FileExtensions.programEx, AppConfigs.programsPath),
-    MUSIC(FileExtensions.musicEx, AppConfigs.musicPath),
-    DOCUMENT(FileExtensions.documentEx, AppConfigs.documentPath),
+    COMPRESSED(Defaults.compressedEx, AppConfigs.compressedPath),
+    VIDEO(Defaults.videoEx, AppConfigs.videosPath),
+    PROGRAM(Defaults.programEx, AppConfigs.programsPath),
+    MUSIC(Defaults.musicEx, AppConfigs.musicPath),
+    DOCUMENT(Defaults.documentEx, AppConfigs.documentPath),
     OTHER(List.of(), AppConfigs.othersPath),
     QUEUES(List.of(), AppConfigs.queuesPath);
 

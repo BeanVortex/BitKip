@@ -28,7 +28,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executors;
 
 import static ir.darkdeveloper.bitkip.config.AppConfigs.*;
-import static ir.darkdeveloper.bitkip.utils.FileExtensions.ALL_DOWNLOADS_QUEUE;
+import static ir.darkdeveloper.bitkip.utils.Defaults.ALL_DOWNLOADS_QUEUE;
 import static ir.darkdeveloper.bitkip.utils.InputValidations.maxChunks;
 
 public class SingleDownload implements QueueObserver {
@@ -150,6 +150,7 @@ public class SingleDownload implements QueueObserver {
         speedField.setDisable(false);
         dm.setResumable(urlModel.resumable());
         dm.setSize(urlModel.fileSize());
+        dm.setAgent(urlModel.agent());
     }
 
     private void autoFillLocationAndSizeAndName() {
@@ -278,7 +279,6 @@ public class SingleDownload implements QueueObserver {
         dm.getQueues().add(allDownloadsQueue);
         if (selectedQueue.getId() != allDownloadsQueue.getId())
             dm.getQueues().add(selectedQueue);
-
         dm.setDownloadStatus(DownloadStatus.Trying);
         return true;
     }

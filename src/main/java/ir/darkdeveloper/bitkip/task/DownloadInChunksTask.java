@@ -25,7 +25,6 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 
-import static ir.darkdeveloper.bitkip.config.AppConfigs.log;
 import static ir.darkdeveloper.bitkip.config.AppConfigs.*;
 import static ir.darkdeveloper.bitkip.utils.DownloadOpUtils.openFile;
 
@@ -60,7 +59,7 @@ public class DownloadInChunksTask extends DownloadTask {
             return 0L;
         try {
             downloadInChunks(url, fileSize);
-        }catch (Exception e){
+        } catch (Exception e) {
             log.error(e.getMessage());
         }
         return 0L;
@@ -175,6 +174,8 @@ public class DownloadInChunksTask extends DownloadTask {
                 con.setReadTimeout(3000);
                 con.setConnectTimeout(3000);
                 con.addRequestProperty("Range", "bytes=" + from + "-" + to);
+                if (!downloadModel.isResumable())
+                    con.setRequestProperty("User-Agent", downloadModel.getAgent());
                 var out = new FileOutputStream(partFile, partFile.exists());
                 var fileChannel = out.getChannel();
                 fileChannels.add(fileChannel);

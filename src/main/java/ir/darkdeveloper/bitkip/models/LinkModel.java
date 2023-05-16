@@ -19,6 +19,7 @@ public class LinkModel {
     private Boolean resumeable;
     private String name;
     private String path;
+    private transient String agent;
 
     private final List<QueueModel> queues = new ArrayList<>();
 

@@ -20,8 +20,8 @@ import java.util.List;
 import java.util.function.Predicate;
 
 import static ir.darkdeveloper.bitkip.config.AppConfigs.*;
-import static ir.darkdeveloper.bitkip.utils.FileExtensions.*;
-import static ir.darkdeveloper.bitkip.utils.FileExtensions.OTHERS_QUEUE;
+import static ir.darkdeveloper.bitkip.utils.Defaults.*;
+import static ir.darkdeveloper.bitkip.utils.Defaults.OTHERS_QUEUE;
 import static ir.darkdeveloper.bitkip.utils.ShortcutUtils.DELETE_KEY;
 import static ir.darkdeveloper.bitkip.utils.ShortcutUtils.NEW_QUEUE_KEY;
 
@@ -145,7 +145,7 @@ public class SideUtils {
 
         List<Label> lbls;
         List<KeyCodeCombination> keys = null;
-        if (FileExtensions.staticQueueNames.stream().anyMatch(itemName::equals))
+        if (Defaults.staticQueueNames.stream().anyMatch(itemName::equals))
             lbls = List.of(startQueueLbl, stopQueueLbl, queueSettingLbl);
         else {
             lbls = List.of(startQueueLbl, stopQueueLbl, queueSettingLbl, deleteLbl);

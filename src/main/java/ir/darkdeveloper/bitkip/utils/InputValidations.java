@@ -26,8 +26,8 @@ public class InputValidations {
         bytesField.textProperty().addListener((o, old, newValue) -> {
             if (!newValue.matches("\\d*"))
                 bytesField.setText(newValue.replaceAll("\\D", ""));
-            if (chunksField != null)
-                chunksField.setDisable(!bytesField.getText().equals(dm.getSize() + ""));
+            if (chunksField != null && !newValue.equals(dm.getSize() + ""))
+                chunksField.setDisable(!dm.isResumable());
             speedField.setDisable(!bytesField.getText().equals(dm.getSize() + ""));
             if (newValue.isBlank())
                 bytesField.setText("" + dm.getSize());
@@ -156,7 +156,7 @@ public class InputValidations {
     }
 
 
-    public static int maxChunks(){
+    public static int maxChunks() {
         return Runtime.getRuntime().availableProcessors() * 2;
     }
 }

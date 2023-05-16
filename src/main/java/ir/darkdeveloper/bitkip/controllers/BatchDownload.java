@@ -29,8 +29,8 @@ import java.util.concurrent.CompletableFuture;
 
 import static ir.darkdeveloper.bitkip.config.AppConfigs.getQueueSubject;
 import static ir.darkdeveloper.bitkip.config.AppConfigs.log;
-import static ir.darkdeveloper.bitkip.utils.FileExtensions.ALL_DOWNLOADS_QUEUE;
-import static ir.darkdeveloper.bitkip.utils.FileExtensions.extensions;
+import static ir.darkdeveloper.bitkip.utils.Defaults.ALL_DOWNLOADS_QUEUE;
+import static ir.darkdeveloper.bitkip.utils.Defaults.extensions;
 
 public class BatchDownload implements QueueObserver {
     @FXML

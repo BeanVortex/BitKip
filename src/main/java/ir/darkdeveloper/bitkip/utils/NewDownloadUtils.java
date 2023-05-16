@@ -27,7 +27,7 @@ import java.util.UUID;
 import java.util.concurrent.*;
 
 import static ir.darkdeveloper.bitkip.config.AppConfigs.*;
-import static ir.darkdeveloper.bitkip.utils.FileExtensions.*;
+import static ir.darkdeveloper.bitkip.utils.Defaults.*;
 import static ir.darkdeveloper.bitkip.utils.IOUtils.getBytesFromString;
 
 public class NewDownloadUtils {
@@ -41,6 +41,7 @@ public class NewDownloadUtils {
             var conn = (HttpURLConnection) url.openConnection();
             conn.setConnectTimeout(connectTimeout);
             conn.setReadTimeout(readTimeout);
+            conn.setRequestProperty("User-Agent", AGENT);
             return conn;
         } catch (IOException e) {
             var msg = "Connection or read timeout. Connect to the internet or check the url";
@@ -60,19 +61,6 @@ public class NewDownloadUtils {
         return fileSize;
     }
 
-    public static void checkFieldsAfterSizePreparation(long fileSize, Label sizeLabel, TextField chunksField,
-                                                       TextField bytesField, HttpURLConnection connection) {
-        if (!canResume(connection)) {
-            chunksField.setText("" + InputValidations.maxChunks());
-            chunksField.setDisable(true);
-        } else
-            chunksField.setDisable(false);
-        Platform.runLater(() -> {
-            sizeLabel.setText(IOUtils.formatBytes(fileSize));
-            bytesField.setText(fileSize + "");
-        });
-    }
-
     public static boolean canResume(HttpURLConnection connection) {
         var rangeSupport = connection.getHeaderField("Accept-Ranges");
         return rangeSupport != null && !rangeSupport.equals("none");
@@ -87,8 +75,20 @@ public class NewDownloadUtils {
             if (finalConnection[0] == null)
                 finalConnection[0] = connect(urlField.getText(), 3000, 3000);
             var fileSize = getFileSize(finalConnection[0]);
-            checkFieldsAfterSizePreparation(fileSize, sizeLabel, chunksField, bytesField, finalConnection[0]);
-            dm.setResumable(canResume(finalConnection[0]));
+            var resumable = canResume(finalConnection[0]);
+            if (!resumable) {
+                chunksField.setText("0");
+                chunksField.setDisable(true);
+                bytesField.setDisable(true);
+            } else {
+                chunksField.setText("" + InputValidations.maxChunks());
+                chunksField.setDisable(false);
+            }
+            Platform.runLater(() -> {
+                sizeLabel.setText(IOUtils.formatBytes(fileSize));
+                bytesField.setText(fileSize + "");
+            });
+            dm.setResumable(resumable);
             dm.setSize(fileSize);
             return fileSize;
         }, executor);

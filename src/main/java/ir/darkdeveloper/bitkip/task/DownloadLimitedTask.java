@@ -64,11 +64,13 @@ public class DownloadLimitedTask extends DownloadTask {
         if (retries != downloadRetryCount) {
             try {
                 var url = new URL(downloadModel.getUrl());
-                var connection = (HttpURLConnection) url.openConnection();
-                connection.setReadTimeout(3000);
-                connection.setConnectTimeout(3000);
-                configureResume(connection, file);
-                var in = connection.getInputStream();
+                var con = (HttpURLConnection) url.openConnection();
+                con.setReadTimeout(3000);
+                con.setConnectTimeout(3000);
+                if (!downloadModel.isResumable())
+                    con.setRequestProperty("User-Agent", downloadModel.getAgent());
+                configureResume(con, file);
+                var in = con.getInputStream();
                 var fileSize = downloadModel.getSize();
 
                 var out = new FileOutputStream(file, file.exists());
@@ -178,7 +180,7 @@ public class DownloadLimitedTask extends DownloadTask {
                 executor.shutdownNow();
             System.gc();
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            log.error(e.getLocalizedMessage());
         }
 
     }
@@ -211,10 +213,10 @@ public class DownloadLimitedTask extends DownloadTask {
         });
     }
 
-    private void configureResume(HttpURLConnection connection, File file) throws IOException {
+    private void configureResume(HttpURLConnection con, File file) throws IOException {
         if (file.exists()) {
             var existingFileSize = getCurrentFileSize(file);
-            connection.addRequestProperty("Range", "bytes=" + existingFileSize + "-");
+            con.addRequestProperty("Range", "bytes=" + existingFileSize + "-");
         }
     }
 

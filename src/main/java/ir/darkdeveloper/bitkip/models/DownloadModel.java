@@ -9,6 +9,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.Objects;
 import java.util.concurrent.CopyOnWriteArrayList;
 
+import static ir.darkdeveloper.bitkip.utils.Defaults.AGENT;
 import static ir.darkdeveloper.bitkip.utils.MainTableUtils.dFormat;
 
 @Getter
@@ -37,6 +38,7 @@ public class DownloadModel {
     private boolean openAfterComplete;
     private boolean showCompleteDialog;
     private boolean resumable;
+    private transient String agent;
 
     private String sizeString;
     private String downloadedString;
@@ -46,8 +48,6 @@ public class DownloadModel {
     private String addToQueueDateString;
     private String lastTryDateString;
     private String completeDateString;
-
-
 
 
     public static final String DATE_FORMAT = "yyyy/MM/dd - HH:mm:ss";
@@ -102,6 +102,10 @@ public class DownloadModel {
 
     public String getDownloadStatusString() {
         return "%s (%s)".formatted(downloadStatus, dFormat.format(progress) + " %");
+    }
+
+    public String getAgent() {
+        return agent == null ? AGENT : agent;
     }
 
     @Override

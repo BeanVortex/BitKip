@@ -39,8 +39,8 @@ import static com.sun.jna.Platform.*;
 import static ir.darkdeveloper.bitkip.BitKip.getResource;
 import static ir.darkdeveloper.bitkip.config.AppConfigs.*;
 import static ir.darkdeveloper.bitkip.repo.QueuesRepo.*;
-import static ir.darkdeveloper.bitkip.utils.FileExtensions.ALL_DOWNLOADS_QUEUE;
-import static ir.darkdeveloper.bitkip.utils.FileExtensions.staticQueueNames;
+import static ir.darkdeveloper.bitkip.utils.Defaults.ALL_DOWNLOADS_QUEUE;
+import static ir.darkdeveloper.bitkip.utils.Defaults.staticQueueNames;
 import static java.time.DayOfWeek.*;
 
 public class QueueSetting implements FXMLController, QueueObserver {

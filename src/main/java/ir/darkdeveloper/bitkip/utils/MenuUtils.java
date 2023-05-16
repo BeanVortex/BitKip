@@ -18,7 +18,7 @@ import java.io.File;
 import java.util.*;
 
 import static ir.darkdeveloper.bitkip.config.AppConfigs.*;
-import static ir.darkdeveloper.bitkip.utils.FileExtensions.staticQueueNames;
+import static ir.darkdeveloper.bitkip.utils.Defaults.staticQueueNames;
 import static ir.darkdeveloper.bitkip.utils.ShortcutUtils.*;
 
 public class MenuUtils {

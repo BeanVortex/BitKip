@@ -16,7 +16,6 @@ import javafx.stage.Stage;
 import java.io.File;
 import java.net.URL;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.ResourceBundle;
@@ -104,8 +103,7 @@ public class BatchList implements FXMLController {
 
 
     private List<DownloadModel> createDownloads(List<LinkModel> links) {
-        var downloads = new ArrayList<DownloadModel>();
-        links.forEach(lm -> {
+        return links.stream().map(lm -> {
             var dm = new DownloadModel();
             dm.setUrl(lm.getUrl());
             var fileName = lm.getName();
@@ -123,8 +121,8 @@ public class BatchList implements FXMLController {
             dm.setResumable(lm.getResumeable());
             dm.setQueues(new CopyOnWriteArrayList<>(lm.getQueues()));
             dm.setDownloadStatus(DownloadStatus.Paused);
-            downloads.add(dm);
-        });
-        return downloads;
+            dm.setAgent(lm.getAgent());
+            return dm;
+        }).toList();
     }
 }

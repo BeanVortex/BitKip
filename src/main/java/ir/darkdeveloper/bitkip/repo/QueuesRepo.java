@@ -3,7 +3,7 @@ package ir.darkdeveloper.bitkip.repo;
 import ir.darkdeveloper.bitkip.models.DownloadModel;
 import ir.darkdeveloper.bitkip.models.QueueModel;
 import ir.darkdeveloper.bitkip.models.ScheduleModel;
-import ir.darkdeveloper.bitkip.utils.FileExtensions;
+import ir.darkdeveloper.bitkip.utils.Defaults;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -33,7 +33,7 @@ public class QueuesRepo {
     }
 
     public static List<QueueModel> createDefaultRecords() {
-        return FileExtensions.staticQueueNames.stream().map(name -> {
+        return Defaults.staticQueueNames.stream().map(name -> {
             var queue = new QueueModel(name, false);
             if (name.equals("All Downloads"))
                 queue.setCanAddDownload(true);
