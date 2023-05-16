@@ -141,7 +141,7 @@ public class MenuUtils {
                                         ObservableList<DownloadModel> selectedItems) {
         menuItems.get(openLbl).setDisable(selectedItems.isEmpty());
         menuItems.get(openFolderLbl).setDisable(selectedItems.size() != 1);
-        menuItems.get(resumeLbl).setDisable(selectedItems.isEmpty());
+        menuItems.get(resumeLbl).setDisable(selectedItems.isEmpty() || selectedItems.stream().anyMatch(dm -> !dm.isResumable()));
         menuItems.get(pauseLbl).setDisable(selectedItems.isEmpty());
         menuItems.get(restartLbl).setDisable(selectedItems.isEmpty());
         menuItems.get(refreshLbl).setDisable(selectedItems.size() != 1);
@@ -160,7 +160,6 @@ public class MenuUtils {
 
         selectedItems.stream().filter(dm -> dm.getDownloadStatus() == DownloadStatus.Paused)
                 .findFirst().ifPresent(dm -> {
-                    menuItems.get(resumeLbl).setDisable(false);
                     menuItems.get(pauseLbl).setDisable(true);
                     menuItems.get(openLbl).setDisable(true);
                     if (selectedItems.size() == 1)

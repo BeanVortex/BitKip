@@ -135,9 +135,11 @@ public class DownloadingController implements FXMLController {
         downloadedOfLbl.setText(downloadOf);
         progressLbl.setText("Progress: %.2f%%".formatted(downloadModel.getProgress()));
         downloadProgress.setProgress(downloadModel.getProgress() / 100);
-        var resumeableText = new Text(downloadModel.isResumable() ? "Yes" : "No");
-        resumeableText.setFill(downloadModel.isResumable() ? Paint.valueOf("#388E3C") : Paint.valueOf("#EF5350"));
+        var resumable = downloadModel.isResumable();
+        var resumeableText = new Text(resumable ? "Yes" : "No");
+        resumeableText.setFill(resumable ? Paint.valueOf("#388E3C") : Paint.valueOf("#EF5350"));
         resumeableLbl.setGraphic(new HBox(new Text("Resumable: "), resumeableText));
+        controlBtn.setText(isPaused.get() ? (resumable ? "Resume" : "Restart") : "Pause");
         openSwitch.setSelected(downloadModel.isOpenAfterComplete());
         showSwitch.setSelected(downloadModel.isShowCompleteDialog());
         onComplete(downloadModel);
@@ -198,7 +200,6 @@ public class DownloadingController implements FXMLController {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        controlBtn.setText(isPaused.get() ? "Resume" : "Pause");
         remainingLbl.setText("Remaining: Paused");
         isPaused.addListener((o, ol, newValue) -> {
             if (!Platform.isFxApplicationThread())
