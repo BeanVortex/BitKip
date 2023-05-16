@@ -28,7 +28,7 @@
         </VBox>
         <Label fx:id="progressLbl" styleClass="bold" text="progress"/>
         <Label fx:id="remainingLbl" styleClass="bold" text="remaining time"/>
-        <Label fx:id="resumeableLbl" styleClass="bold, title-opacity"/>
+        <Label fx:id="resumableLbl" styleClass="bold, title-opacity"/>
         <Accordion>
             <panes>
                 <TitledPane id="titledPane" animated="false" text="Advanced">

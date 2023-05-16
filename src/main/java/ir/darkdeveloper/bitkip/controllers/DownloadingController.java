@@ -59,7 +59,7 @@ public class DownloadingController implements FXMLController {
     @FXML
     private Label progressLbl;
     @FXML
-    private Label resumeableLbl;
+    private Label resumableLbl;
     @FXML
     private ProgressBar downloadProgress;
     @FXML
@@ -138,7 +138,7 @@ public class DownloadingController implements FXMLController {
         var resumable = downloadModel.isResumable();
         var resumeableText = new Text(resumable ? "Yes" : "No");
         resumeableText.setFill(resumable ? Paint.valueOf("#388E3C") : Paint.valueOf("#EF5350"));
-        resumeableLbl.setGraphic(new HBox(new Text("Resumable: "), resumeableText));
+        resumableLbl.setGraphic(new HBox(new Text("Resumable: "), resumeableText));
         controlBtn.setText(isPaused.get() ? (resumable ? "Resume" : "Restart") : "Pause");
         openSwitch.setSelected(downloadModel.isOpenAfterComplete());
         showSwitch.setSelected(downloadModel.isShowCompleteDialog());

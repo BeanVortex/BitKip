@@ -16,6 +16,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
+import javafx.scene.paint.Paint;
 import javafx.stage.Stage;
 import org.kordamp.ikonli.javafx.FontIcon;
 
@@ -35,6 +36,8 @@ public class SingleDownload implements QueueObserver {
 
     @FXML
     private Label errorLabel;
+    @FXML
+    private Label resumableLabel;
     @FXML
     private Button newQueue;
     @FXML
@@ -148,7 +151,10 @@ public class SingleDownload implements QueueObserver {
         chunksField.setDisable(!urlModel.resumable());
         chunksField.setText(urlModel.resumable() ? maxChunks() + "" : "0");
         speedField.setDisable(false);
-        dm.setResumable(urlModel.resumable());
+        var resumable = urlModel.resumable();
+        resumableLabel.setTextFill(resumable ? Paint.valueOf("#388E3C") : Paint.valueOf("#EF5350"));
+        resumableLabel.setText(resumable ? "Yes" : "No");
+        dm.setResumable(resumable);
         dm.setSize(urlModel.fileSize());
         dm.setAgent(urlModel.agent());
     }
@@ -162,7 +168,8 @@ public class SingleDownload implements QueueObserver {
             var executor = Executors.newFixedThreadPool(2);
             var fileNameLocationFuture = NewDownloadUtils.prepareFileNameAndFieldsAsync(connection, url, nameField, executor)
                     .thenAccept(this::setLocation);
-            var sizeFuture = NewDownloadUtils.prepareFileSizeAndFieldsAsync(connection, urlField, sizeLabel, chunksField, bytesField, dm, executor);
+            var sizeFuture = NewDownloadUtils.prepareFileSizeAndFieldsAsync(connection, urlField, sizeLabel,
+                    resumableLabel, chunksField, bytesField, dm, executor);
             CompletableFuture.allOf(fileNameLocationFuture, sizeFuture)
                     .whenComplete((unused, throwable) -> {
                         NewDownloadUtils.checkIfFileExists(locationField.getText(), nameField.getText(), errorLabel, downloadBtn, addBtn);

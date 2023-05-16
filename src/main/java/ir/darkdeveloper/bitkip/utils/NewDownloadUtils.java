@@ -14,6 +14,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
+import javafx.scene.paint.Paint;
 import javafx.stage.DirectoryChooser;
 import org.controlsfx.control.Notifications;
 import org.controlsfx.control.PopOver;
@@ -67,7 +68,7 @@ public class NewDownloadUtils {
     }
 
     public static CompletableFuture<Long> prepareFileSizeAndFieldsAsync(HttpURLConnection connection, TextField urlField,
-                                                                        Label sizeLabel, TextField chunksField,
+                                                                        Label sizeLabel, Label resumableLabel, TextField chunksField,
                                                                         TextField bytesField, DownloadModel dm,
                                                                         Executor executor) {
         final HttpURLConnection[] finalConnection = {connection};
@@ -76,6 +77,7 @@ public class NewDownloadUtils {
                 finalConnection[0] = connect(urlField.getText(), 3000, 3000);
             var fileSize = getFileSize(finalConnection[0]);
             var resumable = canResume(finalConnection[0]);
+
             if (!resumable) {
                 chunksField.setText("0");
                 chunksField.setDisable(true);
@@ -85,6 +87,8 @@ public class NewDownloadUtils {
                 chunksField.setDisable(false);
             }
             Platform.runLater(() -> {
+                resumableLabel.setTextFill(resumable ? Paint.valueOf("#388E3C") : Paint.valueOf("#EF5350"));
+                resumableLabel.setText(resumable ? "Yes" : "No");
                 sizeLabel.setText(IOUtils.formatBytes(fileSize));
                 bytesField.setText(fileSize + "");
             });
@@ -300,6 +304,7 @@ public class NewDownloadUtils {
         if (btn2 != null)
             btn2.setDisable(true);
         errorLbl.setText(error);
+        log.error(error);
     }
 
     public static String determineLocation(String fileName) {
