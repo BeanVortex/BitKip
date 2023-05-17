@@ -123,7 +123,8 @@ public class BitKip extends Application {
         try {
             server.start();
         } catch (Exception e) {
-            log.error(e.getLocalizedMessage());
+            log.error(e.getMessage());
+            System.exit(1);
         }
     }
 
