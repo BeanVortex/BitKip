@@ -22,6 +22,12 @@
     -fx-icon-size: 20;
 }
 
+#refreshBtn .ikonli-font-icon {
+    -fx-icon-code: "fas-undo";
+    -fx-icon-color: #009688;
+    -fx-icon-size: 20;
+}
+
 #newQueue .ikonli-font-icon {
     -fx-icon-code: "fas-plus";
     -fx-icon-color: #4a677c;
@@ -47,6 +53,7 @@
 }
 
 #questionBtnSpeed,
+#refreshBtn,
 #questionBtnChunks,
 #questionBtnUrl,
 #questionBtnBytes {

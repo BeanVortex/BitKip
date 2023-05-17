@@ -108,12 +108,12 @@ public class BatchDownload implements QueueObserver {
         endField.textProperty().addListener(o -> autoFillLocation());
         urlField.textProperty().addListener((o, ol, n) -> {
             if (n.isBlank())
-                NewDownloadUtils.disableControlsAndShowError("URL is blank", errorLabel, checkBtn, null);
+                NewDownloadUtils.disableControlsAndShowError("URL is blank", errorLabel, checkBtn, null, null);
             else autoFillLocation();
         });
         locationField.textProperty().addListener((o, ol, n) -> {
             if (n.isBlank())
-                NewDownloadUtils.disableControlsAndShowError("Location is blank", errorLabel, checkBtn, null);
+                NewDownloadUtils.disableControlsAndShowError("Location is blank", errorLabel, checkBtn, null, null);
             else onOfflineFieldsChanged();
         });
     }
@@ -140,7 +140,7 @@ public class BatchDownload implements QueueObserver {
                 NewDownloadUtils.checkIfFileExists(locationField.getText(), tempLink.getName(), errorLabel, null, checkBtn);
             }).exceptionally(throwable -> {
                 var errorMsg = throwable.getCause().getLocalizedMessage();
-                Platform.runLater(() -> NewDownloadUtils.disableControlsAndShowError(errorMsg, errorLabel, checkBtn, null));
+                Platform.runLater(() -> NewDownloadUtils.disableControlsAndShowError(errorMsg, errorLabel, checkBtn, null, null));
                 return null;
             });
         } catch (NumberFormatException ignore) {
@@ -148,7 +148,7 @@ public class BatchDownload implements QueueObserver {
             var errorMsg = e.getLocalizedMessage();
             if (e instanceof IndexOutOfBoundsException)
                 errorMsg = "No URLs found";
-            NewDownloadUtils.disableControlsAndShowError(errorMsg, errorLabel, checkBtn, null);
+            NewDownloadUtils.disableControlsAndShowError(errorMsg, errorLabel, checkBtn, null, null);
         }
     }
 
@@ -245,12 +245,12 @@ public class BatchDownload implements QueueObserver {
             var path = locationField.getText();
             if (url.isBlank()) {
                 log.warn("URL is blank");
-                NewDownloadUtils.disableControlsAndShowError("URL is blank", errorLabel, checkBtn, null);
+                NewDownloadUtils.disableControlsAndShowError("URL is blank", errorLabel, checkBtn, null, null);
                 return;
             }
             if (path.isBlank()) {
                 log.warn("Location is blank");
-                NewDownloadUtils.disableControlsAndShowError("Location is blank", errorLabel, checkBtn, null);
+                NewDownloadUtils.disableControlsAndShowError("Location is blank", errorLabel, checkBtn, null, null);
                 return;
             }
             var start = Integer.parseInt(startField.getText());
@@ -270,7 +270,7 @@ public class BatchDownload implements QueueObserver {
                         var msg = "At least one URL exists for this location. Change location or change start, end.\n"
                                 + found.get().getUrl();
                         log.warn(msg);
-                        NewDownloadUtils.disableControlsAndShowError(msg, errorLabel, checkBtn, null);
+                        NewDownloadUtils.disableControlsAndShowError(msg, errorLabel, checkBtn, null, null);
                         return;
                     }
                 }
@@ -293,7 +293,7 @@ public class BatchDownload implements QueueObserver {
             if (e instanceof NumberFormatException)
                 return;
             log.error(e.getLocalizedMessage());
-            NewDownloadUtils.disableControlsAndShowError(e.getLocalizedMessage(), errorLabel, checkBtn, null);
+            NewDownloadUtils.disableControlsAndShowError(e.getLocalizedMessage(), errorLabel, checkBtn, null, null);
         }
     }
 

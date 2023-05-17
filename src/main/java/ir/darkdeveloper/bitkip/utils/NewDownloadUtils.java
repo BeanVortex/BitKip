@@ -298,9 +298,14 @@ public class NewDownloadUtils {
         checkIfFileExists(locationField.getText(), filename, errorLabel, downloadBtn, addBtn);
     }
 
-    public static void disableControlsAndShowError(String error, Label errorLbl, Button btn1, Button btn2) {
+    public static void disableControlsAndShowError(String error, Label errorLbl,
+                                                   Button btn1, Button btn2, Button refreshBtn) {
         errorLbl.setVisible(true);
         btn1.setDisable(true);
+        if (refreshBtn != null){
+            refreshBtn.setDisable(false);
+            refreshBtn.setVisible(true);
+        }
         if (btn2 != null)
             btn2.setDisable(true);
         errorLbl.setText(error);

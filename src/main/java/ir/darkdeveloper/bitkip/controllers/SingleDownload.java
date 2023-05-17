@@ -43,6 +43,8 @@ public class SingleDownload implements QueueObserver {
     @FXML
     private Button addBtn;
     @FXML
+    private Button refreshBtn;
+    @FXML
     private Button downloadBtn;
     @FXML
     private Label sizeLabel;
@@ -104,6 +106,14 @@ public class SingleDownload implements QueueObserver {
         newQueue.setGraphic(new FontIcon());
         downloadBtn.setDisable(true);
         addBtn.setDisable(true);
+        refreshBtn.setGraphic(new FontIcon());
+        refreshBtn.setDisable(true);
+        refreshBtn.setVisible(false);
+        refreshBtn.setOnAction(e -> {
+            refreshBtn.setDisable(true);
+            refreshBtn.setVisible(false);
+            autoFillLocationAndSizeAndName();
+        });
         var questionBtns = new Button[]{questionBtnSpeed, questionBtnBytes, questionBtnChunks};
         var contents = new String[]{
                 "You can limit downloading speed. calculated in MB. (0.8 means 800KB)",
@@ -125,17 +135,17 @@ public class SingleDownload implements QueueObserver {
         queueCombo.getSelectionModel().selectedIndexProperty().addListener(observable -> onQueueChanged());
         urlField.textProperty().addListener((o, ol, n) -> {
             if (n.isBlank())
-                NewDownloadUtils.disableControlsAndShowError("URL is blank", errorLabel, downloadBtn, addBtn);
+                NewDownloadUtils.disableControlsAndShowError("URL is blank", errorLabel, downloadBtn, addBtn, refreshBtn);
             else autoFillLocationAndSizeAndName();
         });
         nameField.textProperty().addListener((o, ol, n) -> {
             if (n.isBlank())
-                NewDownloadUtils.disableControlsAndShowError("Name is blank", errorLabel, downloadBtn, addBtn);
+                NewDownloadUtils.disableControlsAndShowError("Name is blank", errorLabel, downloadBtn, addBtn, refreshBtn);
             else onOfflineFieldsChanged();
         });
         locationField.textProperty().addListener((o, ol, n) -> {
             if (n.isBlank())
-                NewDownloadUtils.disableControlsAndShowError("Location is blank", errorLabel, downloadBtn, addBtn);
+                NewDownloadUtils.disableControlsAndShowError("Location is blank", errorLabel, downloadBtn, addBtn, refreshBtn);
             else onOfflineFieldsChanged();
         });
         if (urlModel == null)
@@ -180,11 +190,11 @@ public class SingleDownload implements QueueObserver {
                             executor.shutdown();
                         var errMsg = throwable.getCause().getLocalizedMessage();
                         Platform.runLater(() ->
-                                NewDownloadUtils.disableControlsAndShowError(errMsg, errorLabel, downloadBtn, addBtn));
+                                NewDownloadUtils.disableControlsAndShowError(errMsg, errorLabel, downloadBtn, addBtn, refreshBtn));
                         return null;
                     });
         } catch (Exception e) {
-            NewDownloadUtils.disableControlsAndShowError(e.getLocalizedMessage(), errorLabel, downloadBtn, addBtn);
+            NewDownloadUtils.disableControlsAndShowError(e.getLocalizedMessage(), errorLabel, downloadBtn, addBtn, refreshBtn);
         }
     }
 
@@ -240,17 +250,17 @@ public class SingleDownload implements QueueObserver {
         var path = locationField.getText();
         if (url.isBlank()) {
             log.warn("URL is blank");
-            NewDownloadUtils.disableControlsAndShowError("URL is blank", errorLabel, downloadBtn, addBtn);
+            NewDownloadUtils.disableControlsAndShowError("URL is blank", errorLabel, downloadBtn, addBtn, refreshBtn);
             return false;
         }
         if (fileName.isBlank()) {
             log.warn("Name is blank");
-            NewDownloadUtils.disableControlsAndShowError("Name is blank", errorLabel, downloadBtn, addBtn);
+            NewDownloadUtils.disableControlsAndShowError("Name is blank", errorLabel, downloadBtn, addBtn, refreshBtn);
             return false;
         }
         if (path.isBlank()) {
             log.warn("Location is blank");
-            NewDownloadUtils.disableControlsAndShowError("Location is blank", errorLabel, downloadBtn, addBtn);
+            NewDownloadUtils.disableControlsAndShowError("Location is blank", errorLabel, downloadBtn, addBtn, refreshBtn);
             return false;
         }
 
@@ -265,7 +275,7 @@ public class SingleDownload implements QueueObserver {
             if (found.isPresent()) {
                 var msg = "This url exists for this location. Change location";
                 log.error(msg);
-                NewDownloadUtils.disableControlsAndShowError(msg, errorLabel, downloadBtn, addBtn);
+                NewDownloadUtils.disableControlsAndShowError(msg, errorLabel, downloadBtn, addBtn, refreshBtn);
                 return false;
             }
         }

@@ -61,7 +61,7 @@
         </HBox>
     </HBox>
 
-       <HBox alignment="BASELINE_LEFT">
+    <HBox alignment="BASELINE_LEFT">
         <HBox spacing="20" alignment="CENTER">
             <Label text="Resumable :" minWidth="60" styleClass="bold"/>
             <Label fx:id="resumableLabel" styleClass="bold"/>
@@ -71,6 +71,12 @@
     <HBox alignment="BASELINE_LEFT">
         <HBox spacing="20" alignment="CENTER">
             <Label fx:id="errorLabel" styleClass="bold"/>
+        </HBox>
+    </HBox>
+
+    <HBox alignment="BASELINE_LEFT">
+        <HBox alignment="CENTER">
+            <Button fx:id="refreshBtn" minWidth="50"/>
         </HBox>
     </HBox>
 
