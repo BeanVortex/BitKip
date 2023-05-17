@@ -28,6 +28,8 @@ import static ir.darkdeveloper.bitkip.config.AppConfigs.*;
 
 public class BitKip extends Application {
 
+    private static Server server;
+
 
     @Override
     public void start(Stage stage) {
@@ -97,7 +99,11 @@ public class BitKip extends Application {
             if (stopScheduler != null)
                 stopScheduler.shutdownNow();
         });
-
+        try {
+            server.stop();
+        }catch (Exception e){
+            log.error(e.getMessage());
+        }
     }
 
 
@@ -109,7 +115,7 @@ public class BitKip extends Application {
 
     private static void startServer() {
         var threadPool = new QueuedThreadPool(5, 1);
-        var server = new Server(threadPool);
+        server = new Server(threadPool);
         var connector = new ServerConnector(server);
         connector.setPort(1354);
         server.setConnectors(new Connector[]{connector});
