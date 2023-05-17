@@ -164,7 +164,7 @@ public class DownloadsRepo {
         return fetchDownloads(sql, false);
     }
 
-    public static void updateDownloadQueue(int download_id, int queue_id) {
+    public static void updateDownloadQueue(int download_id, int queue_id, String addToQueue) {
         var colQueueCount = "queue_count";
         var queueCountSql = """
                 SELECT count(*) AS %s FROM %s d
@@ -205,7 +205,7 @@ public class DownloadsRepo {
                 UPDATE %s SET %s = "%s" WHERE %s = %d;
                 """
                 .formatted(DOWNLOADS_TABLE_NAME,
-                        COL_ADD_TO_QUEUE_DATE, LocalDateTime.now(),
+                        COL_ADD_TO_QUEUE_DATE, addToQueue,
                         COL_ID, download_id);
 
         try (var con = DatabaseHelper.openConnection();

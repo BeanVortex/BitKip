@@ -15,6 +15,7 @@ import javafx.scene.input.KeyCodeCombination;
 import javafx.scene.paint.Paint;
 
 import java.io.File;
+import java.time.LocalDateTime;
 import java.util.*;
 
 import static ir.darkdeveloper.bitkip.config.AppConfigs.*;
@@ -261,7 +262,7 @@ public class MenuUtils {
     public static void deleteFromQueue() {
         var notObserved = new ArrayList<>(mainTableUtils.getSelected());
         var moveFiles = FxUtils.askToMoveFiles(notObserved, null);
-        for (DownloadModel dm : notObserved) {
+        for (var dm : notObserved) {
             mainTableUtils.remove(dm);
             dm.getQueues()
                     .stream()
@@ -285,7 +286,8 @@ public class MenuUtils {
                     var qm = addToQueueItems.get(menuItem);
                     var notObserved = new ArrayList<>(mainTableUtils.getSelected());
                     var moveFiles = FxUtils.askToMoveFiles(notObserved, qm);
-                    notObserved.forEach(dm -> {
+                    for (int i = 0; i < notObserved.size(); i++) {
+                        var dm = notObserved.get(i);
                         if (dm.getQueues().contains(qm))
                             return;
                         if (staticQueueNames.stream().noneMatch(s -> dm.getQueues().get(0).getName().equals(s)))
@@ -298,9 +300,11 @@ public class MenuUtils {
                                 newFilePath = queuesPath + qm.getName() + File.separator + dm.getName();
                             IOUtils.moveDownloadFilesFiles(dm, newFilePath);
                         }
-
-                        DownloadsRepo.updateDownloadQueue(dm.getId(), qm.getId());
-                    });
+                        var addToQueueDate = LocalDateTime.now();
+                        if (i != 0)
+                            addToQueueDate = notObserved.get(i - 1).getAddToQueueDate().plusSeconds(1);
+                        DownloadsRepo.updateDownloadQueue(dm.getId(), qm.getId(), addToQueueDate.toString());
+                    }
                 }));
     }
 

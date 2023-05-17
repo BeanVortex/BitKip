@@ -16,6 +16,7 @@ import javafx.stage.Stage;
 import java.io.File;
 import java.net.URL;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.ResourceBundle;
@@ -94,7 +95,7 @@ public class BatchList implements FXMLController {
     @FXML
     private void onAdd() {
         var links = linkTableUtils.getLinks();
-        var downloads = createDownloads(links);
+        var downloads = new ArrayList<>(createDownloads(links));
         Collections.reverse(downloads);
         DownloadsRepo.insertDownloads(downloads);
         mainTableUtils.addRows(downloads);
@@ -103,7 +104,9 @@ public class BatchList implements FXMLController {
 
 
     private List<DownloadModel> createDownloads(List<LinkModel> links) {
-        return links.stream().map(lm -> {
+        var list = new ArrayList<DownloadModel>();
+        for (int i = 0; i < links.size(); i++) {
+            var lm = links.get(i);
             var dm = new DownloadModel();
             dm.setUrl(lm.getUrl());
             var fileName = lm.getName();
@@ -117,12 +120,16 @@ public class BatchList implements FXMLController {
             dm.setSize(lm.getSize());
             dm.setChunks(lm.getChunks());
             dm.setAddDate(LocalDateTime.now());
-            dm.setAddToQueueDate(LocalDateTime.now());
+            if (i == 0)
+                dm.setAddToQueueDate(LocalDateTime.now());
+            else
+                dm.setAddToQueueDate(list.get(i-1).getAddToQueueDate().plusSeconds(1));
             dm.setResumable(lm.getResumeable());
             dm.setQueues(new CopyOnWriteArrayList<>(lm.getQueues()));
             dm.setDownloadStatus(DownloadStatus.Paused);
             dm.setAgent(lm.getAgent());
-            return dm;
-        }).toList();
+            list.add(dm);
+        }
+        return list;
     }
 }

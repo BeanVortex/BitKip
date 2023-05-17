@@ -13,6 +13,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import javafx.application.Platform;
 
 import java.io.IOException;
+import java.util.Collections;
 import java.util.List;
 
 import static ir.darkdeveloper.bitkip.config.AppConfigs.log;
@@ -26,6 +27,8 @@ public class BatchServlet extends HttpServlet {
         try {
             var urlModel = mapper.readValue(req.getReader(), BatchURLModel.class);
             var links = convertToLinks(urlModel);
+            if (links.isEmpty())
+                throw new IOException("Empty data sent by extension");
             Platform.runLater(() -> FxUtils.newBatchListStage(links));
         } catch (IOException e) {
             try {
@@ -38,19 +41,22 @@ public class BatchServlet extends HttpServlet {
     }
 
     private List<LinkModel> convertToLinks(BatchURLModel urlModel) {
-        var threads = InputValidations.maxChunks();
-        var links = urlModel.links().stream().map(s -> new LinkModel(s, threads)).toList();
+        var links = urlModel.links();
+        if (links == null || links.isEmpty())
+            return Collections.emptyList();
+        var chunks = InputValidations.maxChunks();
         var allDownloadsQueue = QueuesRepo.findByName(ALL_DOWNLOADS_QUEUE, false);
-        var firstUrl = links.get(0).getUrl();
+        var firstUrl = links.get(0);
         var connection = NewDownloadUtils.connect(firstUrl, 3000, 3000);
         var firstFileName = NewDownloadUtils.extractFileName(firstUrl, connection);
         var secondaryQueue = BatchDownload.getSecondaryQueueByFileName(firstFileName);
         var path = NewDownloadUtils.determineLocation(firstFileName);
-        links.forEach(lm -> {
+        return urlModel.links().stream().map(s -> {
+            var lm = new LinkModel(s, chunks);
             lm.getQueues().add(allDownloadsQueue);
             lm.getQueues().add(secondaryQueue);
             lm.setPath(path);
-        });
-        return links;
+            return lm;
+        }).toList();
     }
 }
