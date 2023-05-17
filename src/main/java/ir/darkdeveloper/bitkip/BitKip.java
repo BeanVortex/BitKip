@@ -117,7 +117,7 @@ public class BitKip extends Application {
         var threadPool = new QueuedThreadPool(5, 1);
         server = new Server(threadPool);
         var connector = new ServerConnector(server);
-        connector.setPort(1354);
+        connector.setPort(56423);
         server.setConnectors(new Connector[]{connector});
         var handler = new ServletHandler();
         server.setHandler(handler);
