@@ -235,6 +235,7 @@ public class SingleDownload implements QueueObserver {
     private void onDownload() {
         var prepared = prepareDownload();
         if (prepared) {
+
             DownloadOpUtils.startDownload(dm, speedField.getText(), bytesField.getText(),
                     false, false, null);
             DownloadOpUtils.openDownloadingStage(dm);
@@ -292,6 +293,8 @@ public class SingleDownload implements QueueObserver {
         dm.setChunks(Integer.parseInt(chunksField.getText()));
         dm.setAddDate(LocalDateTime.now());
         dm.setAddToQueueDate(LocalDateTime.now());
+        dm.setShowCompleteDialog(showCompleteDialog);
+        dm.setOpenAfterComplete(false);
         var selectedQueue = queueCombo.getSelectionModel().getSelectedItem();
         var allDownloadsQueue = QueuesRepo.findByName(ALL_DOWNLOADS_QUEUE, false);
         dm.getQueues().add(allDownloadsQueue);

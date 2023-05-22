@@ -26,7 +26,8 @@ public class DownloadModel {
     private String url;
     private String filePath;
     private String remainingTime;
-    private CopyOnWriteArrayList<QueueModel> queues;
+    @Builder.Default
+    private CopyOnWriteArrayList<QueueModel> queues = new CopyOnWriteArrayList<>();
     private int chunks;
     private long speed;
     private DownloadStatus downloadStatus;

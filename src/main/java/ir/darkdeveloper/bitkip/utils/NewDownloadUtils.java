@@ -19,10 +19,8 @@ import java.io.File;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.Executor;
 
 import static ir.darkdeveloper.bitkip.config.AppConfigs.*;
@@ -152,8 +150,11 @@ public class NewDownloadUtils {
     }
 
     private static void determineQueue(DownloadModel dm, String queueName) {
-        if (dm != null)
-            dm.setQueues(new CopyOnWriteArrayList<>(List.of(QueuesRepo.findByName(queueName, false))));
+        if (dm != null){
+            var qm = QueuesRepo.findByName(queueName, false);
+            if (!dm.getQueues().contains(qm))
+                dm.getQueues().add(qm);
+        }
     }
 
     public static void initPopOvers(Button[] questionButtons, String[] contents) {
@@ -170,7 +171,6 @@ public class NewDownloadUtils {
             questionButtons[i].setOnMouseExited(e -> pop.hide());
         }
     }
-
 
 
     public static void selectLocation(ActionEvent e, TextField locationField) {
@@ -241,7 +241,7 @@ public class NewDownloadUtils {
                                                    Button btn1, Button btn2, Button refreshBtn) {
         errorLbl.setVisible(true);
         btn1.setDisable(true);
-        if (refreshBtn != null){
+        if (refreshBtn != null) {
             refreshBtn.setDisable(false);
             refreshBtn.setVisible(true);
         }

@@ -31,7 +31,6 @@ public class DownloadOpUtils {
      *                 mostly using for queue downloading
      */
     private static void triggerDownload(DownloadModel dm, String speed, String bytes, boolean resume, boolean blocking,
-
                                         ExecutorService executor) {
         DownloadTask downloadTask = new DownloadLimitedTask(dm, Long.MAX_VALUE, false);
         if (dm.getChunks() == 0) {
@@ -68,8 +67,6 @@ public class DownloadOpUtils {
                 mainTableUtils.updateDownloadProgress(newV.floatValue() * 100, dm));
         downloadTask.setBlocking(blocking);
         dm.setDownloadTask(downloadTask);
-        dm.setShowCompleteDialog(showCompleteDialog);
-        dm.setOpenAfterComplete(false);
         if (!resume) {
             DownloadsRepo.insertDownload(dm);
             mainTableUtils.addRow(dm);
@@ -107,6 +104,8 @@ public class DownloadOpUtils {
                 .forEach(dm -> {
                     dm.setLastTryDate(LocalDateTime.now());
                     dm.setDownloadStatus(DownloadStatus.Trying);
+                    dm.setShowCompleteDialog(showCompleteDialog);
+                    dm.setOpenAfterComplete(false);
                     DownloadsRepo.updateDownloadLastTryDate(dm);
                     mainTableUtils.refreshTable();
                     if (dm.isResumable()) {
