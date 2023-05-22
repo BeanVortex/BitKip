@@ -209,10 +209,16 @@ public class QueueUtils {
     }
 
     private static void queueDoneNotification(QueueModel qm) {
-        Runnable Notification = () -> Notifications.create()
-                .title("Queue finished")
-                .text("Queue %s finished or stopped".formatted(qm))
-                .showInformation();
+        Runnable Notification = () -> {
+            // when app is in tray an exception is thrown
+            try {
+                Notifications.create()
+                        .title("Queue finished")
+                        .text("Queue %s finished or stopped".formatted(qm))
+                        .showInformation();
+            }catch (NullPointerException ignore){
+            }
+        };
 
         if (Platform.isFxApplicationThread())
             Notification.run();

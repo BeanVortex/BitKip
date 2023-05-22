@@ -157,31 +157,6 @@ public class QueuesRepo {
         return list;
     }
 
-    public static void updateQueue(String[] column, String[] value, int queueId) {
-        var length = column.length;
-        if (length != value.length)
-            throw new RuntimeException("columns and values do not match by length");
-
-        var builder = new StringBuilder("UPDATE ");
-        builder.append(QUEUES_TABLE_NAME).append(" SET ");
-        for (int i = 0; i < length; i++) {
-            boolean isInteger = false;
-            try {
-                Integer.parseInt(value[i]);
-                isInteger = true;
-            } catch (Exception ignore) {
-            }
-            var val = value[i];
-            if (!isInteger)
-                val = "\"" + val + "\"";
-            builder.append(column[i]).append("=").append(val);
-            if (i != length - 1)
-                builder.append(",");
-        }
-        builder.append(" WHERE ").append(COL_ID).append("=").append(queueId).append(";");
-        DatabaseHelper.executeUpdateSql(builder.toString(), false);
-    }
-
     public static void deleteQueue(String name) {
         var sql = """
                 DELETE FROM %s WHERE %s = "%s";
@@ -189,7 +164,6 @@ public class QueuesRepo {
                 .formatted(QUEUES_TABLE_NAME, COL_NAME, name);
         DatabaseHelper.executeUpdateSql(sql, false);
     }
-
 
     public static List<QueueModel> findQueuesOfADownload(int downloadId) {
         var sql = """

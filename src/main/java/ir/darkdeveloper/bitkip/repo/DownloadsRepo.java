@@ -374,4 +374,5 @@ public class DownloadsRepo {
                         COL_ID, downloadId);
         DatabaseHelper.executeUpdateSql(sql, false);
     }
+
 }

@@ -7,14 +7,15 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 
 import static ir.darkdeveloper.bitkip.config.AppConfigs.log;
+import static ir.darkdeveloper.bitkip.repo.DownloadsRepo.COL_ID;
 
 public class DatabaseHelper {
 
 
-    static final String QUEUE_DOWNLOAD_TABLE_NAME = "queue_download",
-            DOWNLOADS_TABLE_NAME = "downloads",
-            QUEUES_TABLE_NAME = "queues",
-            SCHEDULE_TABLE_NAME = "schedules";
+    static final String QUEUE_DOWNLOAD_TABLE_NAME = "queue_download";
+    public static final String DOWNLOADS_TABLE_NAME = "downloads";
+    public static final String QUEUES_TABLE_NAME = "queues";
+    static final String SCHEDULE_TABLE_NAME = "schedules";
 
     static String COL_DOWNLOAD_ID = "download_id",
             COL_QUEUE_ID = "queue_id", COL_QUEUE_NAME = "queue_name";
@@ -48,6 +49,31 @@ public class DatabaseHelper {
             if (!ignoreStackTrace)
                 log.error(e.getLocalizedMessage());
         }
+    }
+
+    public static void updateRow(String[] column, String[] value, String table, int id) {
+        var length = column.length;
+        if (length != value.length)
+            throw new RuntimeException("columns and values do not match by length");
+
+        var builder = new StringBuilder("UPDATE ");
+        builder.append(table).append(" SET ");
+        for (int i = 0; i < length; i++) {
+            boolean isInteger = false;
+            try {
+                Integer.parseInt(value[i]);
+                isInteger = true;
+            } catch (Exception ignore) {
+            }
+            var val = value[i];
+            if (!isInteger && !val.equals("NULL"))
+                val = "\"" + val + "\"";
+            builder.append(column[i]).append("=").append(val);
+            if (i != length - 1)
+                builder.append(",");
+        }
+        builder.append(" WHERE ").append(COL_ID).append("=").append(id).append(";");
+        DatabaseHelper.executeUpdateSql(builder.toString(), false);
     }
 
 

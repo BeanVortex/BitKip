@@ -3,6 +3,7 @@ package ir.darkdeveloper.bitkip.utils;
 import ir.darkdeveloper.bitkip.controllers.DownloadingController;
 import ir.darkdeveloper.bitkip.models.DownloadModel;
 import ir.darkdeveloper.bitkip.models.DownloadStatus;
+import ir.darkdeveloper.bitkip.repo.DatabaseHelper;
 import ir.darkdeveloper.bitkip.repo.DownloadsRepo;
 import ir.darkdeveloper.bitkip.task.DownloadInChunksTask;
 import ir.darkdeveloper.bitkip.task.DownloadLimitedTask;
@@ -20,8 +21,8 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import static com.sun.jna.Platform.*;
-import static ir.darkdeveloper.bitkip.config.AppConfigs.log;
 import static ir.darkdeveloper.bitkip.config.AppConfigs.*;
+import static ir.darkdeveloper.bitkip.repo.DownloadsRepo.*;
 import static ir.darkdeveloper.bitkip.utils.IOUtils.getBytesFromString;
 
 public class DownloadOpUtils {
@@ -82,6 +83,7 @@ public class DownloadOpUtils {
             executor.submit(downloadTask);
 
     }
+
     public static void startDownload(DownloadModel dm, String speedLimit, String byteLimit, boolean resume,
                                      boolean blocking, ExecutorService executor) {
         if (!currentDownloadings.contains(dm)) {
@@ -98,7 +100,7 @@ public class DownloadOpUtils {
 
     /**
      * Resumes downloads non-blocking
-     * */
+     */
     public static void resumeDownloads(List<DownloadModel> dms, String speedLimit, String byteLimit) {
         dms.stream().filter(dm -> !currentDownloadings.contains(dm))
                 .forEach(dm -> {
@@ -126,17 +128,24 @@ public class DownloadOpUtils {
         var v = "Are you sure you want to restart ";
         var content = dms.size() == 1 ? v + dms.get(0).getName() + " ?" : v + "selected downloads?";
         content += "\nIf the files exist, they will be deleted";
-        var copiedDms = new ArrayList<>(dms);
         if (FxUtils.askWarning(header, content))
-            copiedDms.forEach(DownloadOpUtils::restartDownload);
+            dms.forEach(DownloadOpUtils::restartDownload);
     }
 
     private static void restartDownload(DownloadModel dm) {
         log.info("Restarting download : " + dm);
         IOUtils.deleteDownload(dm);
-        DownloadsRepo.deleteDownload(dm);
-        mainTableUtils.remove(dm);
-        triggerDownload(dm, null, null, false, false, null);
+        var lastTryDate = LocalDateTime.now();
+        var dmId = dm.getId();
+        dm.setDownloaded(0);
+        dm.setProgress(0);
+        dm.setCompleteDate(null);
+        dm.setLastTryDate(lastTryDate);
+        String[] cols = {COL_DOWNLOADED, COL_PROGRESS, COL_COMPLETE_DATE, COL_LAST_TRY_DATE};
+        String[] values = {"0", "0", "NULL", lastTryDate.toString()};
+        DatabaseHelper.updateRow(cols, values, DatabaseHelper.DOWNLOADS_TABLE_NAME, dmId);
+        mainTableUtils.refreshTable();
+        triggerDownload(dm, null, null, true, false, null);
     }
 
     public static void pauseDownloads(List<DownloadModel> dms) {

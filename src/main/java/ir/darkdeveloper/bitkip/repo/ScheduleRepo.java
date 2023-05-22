@@ -189,7 +189,7 @@ public class ScheduleRepo {
             insertSchedule(defaultSchedule, queue.getId());
             String[] cols = {COL_SCHEDULE_ID};
             String[] values = {defaultSchedule.getId() + ""};
-            QueuesRepo.updateQueue(cols,values, queue.getId());
+            DatabaseHelper.updateRow(cols, values, QUEUES_TABLE_NAME, queue.getId());
             queue.setSchedule(defaultSchedule);
         }).toList();
     }

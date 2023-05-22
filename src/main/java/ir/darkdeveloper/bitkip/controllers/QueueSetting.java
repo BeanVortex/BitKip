@@ -5,6 +5,7 @@ import ir.darkdeveloper.bitkip.controllers.interfaces.FXMLController;
 import ir.darkdeveloper.bitkip.models.QueueModel;
 import ir.darkdeveloper.bitkip.models.ScheduleModel;
 import ir.darkdeveloper.bitkip.models.TurnOffMode;
+import ir.darkdeveloper.bitkip.repo.DatabaseHelper;
 import ir.darkdeveloper.bitkip.repo.QueuesRepo;
 import ir.darkdeveloper.bitkip.repo.ScheduleRepo;
 import ir.darkdeveloper.bitkip.task.ScheduleTask;
@@ -38,6 +39,7 @@ import java.util.concurrent.Executors;
 import static com.sun.jna.Platform.*;
 import static ir.darkdeveloper.bitkip.BitKip.getResource;
 import static ir.darkdeveloper.bitkip.config.AppConfigs.*;
+import static ir.darkdeveloper.bitkip.repo.DatabaseHelper.QUEUES_TABLE_NAME;
 import static ir.darkdeveloper.bitkip.repo.QueuesRepo.*;
 import static ir.darkdeveloper.bitkip.utils.Defaults.ALL_DOWNLOADS_QUEUE;
 import static ir.darkdeveloper.bitkip.utils.Defaults.staticQueueNames;
@@ -414,7 +416,7 @@ public class QueueSetting implements FXMLController, QueueObserver {
             String[] qCols = {COL_SPEED_LIMIT, COL_SIMUL_DOWNLOAD, COL_HAS_FOLDER, COL_DOWN_TOP};
             String[] qValues = {queue.getSpeed(), queue.getSimultaneouslyDownload() + "",
                     (queue.hasFolder() ? 1 : 0) + "", (queue.isDownloadFromTop() ? 1 : 0) + ""};
-            QueuesRepo.updateQueue(qCols, qValues, queue.getId());
+            DatabaseHelper.updateRow(qCols, qValues, QUEUES_TABLE_NAME, queue.getId());
             IOUtils.createOrDeleteFolderForQueue(queue.hasFolder(), queue);
             ScheduleRepo.updateSchedule(schedule);
             var updatedQueues = QueuesRepo.getAllQueues(false, true);
