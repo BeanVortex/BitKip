@@ -94,14 +94,19 @@ public class IOUtils {
         return false;
     }
 
-    public static void deleteDownload(DownloadModel download) {
+    public static void deleteDownload(DownloadModel dm) {
         try {
-            if (download.getChunks() == 0)
-                Files.deleteIfExists(Path.of(download.getFilePath()));
+            if (dm.getChunks() == 0)
+                Files.deleteIfExists(Path.of(dm.getFilePath()));
             else {
-                for (int i = 0; i < download.getChunks(); i++)
-                    Files.deleteIfExists(Path.of(download.getFilePath() + "#" + i));
-                Files.deleteIfExists(Path.of(download.getFilePath()));
+                var parentPath = Path.of(dm.getFilePath()).getParent() + File.separator;
+                var tempPath = Path.of(parentPath + ".temp");
+                for (int i = 0; i < dm.getChunks(); i++) {
+                    if (Files.exists(tempPath))
+                        Files.deleteIfExists(Path.of(tempPath + File.separator + dm.getName() + "#" + i));
+                    else Files.deleteIfExists(Path.of(dm.getFilePath() + "#" + i));
+                }
+                Files.deleteIfExists(Path.of(dm.getFilePath()));
             }
         } catch (IOException e) {
             log.error(e.getLocalizedMessage());

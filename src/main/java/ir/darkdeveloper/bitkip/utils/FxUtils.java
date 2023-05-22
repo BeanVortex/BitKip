@@ -454,9 +454,9 @@ public class FxUtils {
     public static void setClipboard(String value) {
         var clip = Clipboard.getSystemClipboard();
         var content = new ClipboardContent();
-        log.info("Clipboard set : " + content);
         content.putString(value);
         clip.setContent(content);
+        log.info("Clipboard set : " + content);
     }
 }
 
