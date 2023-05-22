@@ -127,8 +127,9 @@ public class DownloadOpUtils {
         var v = "Are you sure you want to restart ";
         var content = dms.size() == 1 ? v + dms.get(0).getName() + " ?" : v + "selected downloads?";
         content += "\nIf the files exist, they will be deleted";
+        var copiedDms = new ArrayList<>(dms);
         if (FxUtils.askWarning(header, content))
-            dms.forEach(DownloadOpUtils::restartDownload);
+            copiedDms.forEach(DownloadOpUtils::restartDownload);
     }
 
     private static void restartDownload(DownloadModel dm) {

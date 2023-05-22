@@ -268,12 +268,13 @@ public class SingleDownload implements QueueObserver {
         if (!byURL.isEmpty()) {
             var found = byURL.stream()
                     .filter(dm -> {
-                        var s = Paths.get(dm.getFilePath()).getParent().toString() + File.separator;
-                        return s.equals(path);
+                        var p = Paths.get(dm.getFilePath()).getParent().toString() + File.separator;
+                        var n = dm.getName();
+                        return p.equals(path) && n.equals(fileName);
                     })
                     .findFirst();
             if (found.isPresent()) {
-                var msg = "This url exists for this location. Change location";
+                var msg = "This url and name exists for this location. Change location or name";
                 log.error(msg);
                 NewDownloadUtils.disableControlsAndShowError(msg, errorLabel, downloadBtn, addBtn, refreshBtn);
                 return false;

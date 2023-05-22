@@ -58,10 +58,12 @@ public class QueueUtils {
         executor.submit(() -> {
             var simulDownloads = new AtomicInteger(0);
             var sDownloads = qm.getSimultaneouslyDownload();
-            var pauseCount = qm.getDownloads().stream().filter(dm -> dm.getDownloadStatus() == DownloadStatus.Paused).count();
             for (int i = 0; i < qm.getDownloads().size(); i++) {
+                var pauseCount = qm.getDownloads().stream().filter(dm -> dm.getDownloadStatus() == DownloadStatus.Paused).count();
                 var dm = qm.getDownloads().get(i);
                 if (dm.getDownloadStatus() == DownloadStatus.Paused) {
+                    dm.setOpenAfterComplete(false);
+                    dm.setShowCompleteDialog(false);
                     dm = mainTableUtils.getObservedDownload(dm);
                     if (!dm.getQueues().contains(qm))
                         dm.getQueues().add(qm);
@@ -79,11 +81,12 @@ public class QueueUtils {
                     break;
             }
 
+            var pauseCount = qm.getDownloads().stream().filter(dm -> dm.getDownloadStatus() == DownloadStatus.Paused).count();
             // when queue is done or paused all manually and one simultaneously download
             if (sDownloads == 1 && startedQueues.contains(qm) && pauseCount != 0)
                 whenQueueDone(qm, startItem, stopItem, executor);
-
-            waitToFinishForLessPausedDownloads(qm, startItem, stopItem, executor, simulDownloads, pauseCount);
+            else
+                waitToFinishForLessPausedDownloads(qm, startItem, stopItem, executor);
 
         });
 
@@ -121,7 +124,7 @@ public class QueueUtils {
      * it is useful when queue simultaneously downloads are greater than current paused downloads in queue
      * it starts all downloads non-blocking and the waiting to finish is done later in waitToFinishForLessPausedDownloads method
      *
-     * @see QueueUtils#waitToFinishForLessPausedDownloads(QueueModel, MenuItem, MenuItem, ExecutorService, AtomicInteger, long)
+     * @see QueueUtils#waitToFinishForLessPausedDownloads(QueueModel, MenuItem, MenuItem, ExecutorService)
      */
     private static void performSimultaneousDownloadDontWaitForPrev(long pauseCount, AtomicInteger simulDownloads,
                                                                    DownloadModel dm, String speedLimit) {
@@ -138,20 +141,17 @@ public class QueueUtils {
      * @see QueueUtils#performSimultaneousDownloadDontWaitForPrev(long, AtomicInteger, DownloadModel, String)
      */
     private static void waitToFinishForLessPausedDownloads(QueueModel qm, MenuItem startItem, MenuItem stopItem,
-                                                           ExecutorService executor, AtomicInteger simulDownloads,
-                                                           long pauseCount) {
-        if (simulDownloads.get() == pauseCount) {
-            var count = currentDownloadings.stream().filter(d -> d.getQueues().contains(qm)).count();
-            while (count != 0) {
-                try {
-                    Thread.sleep(3000);
-                    count = currentDownloadings.stream().filter(d -> d.getQueues().contains(qm)).count();
-                } catch (InterruptedException e) {
-                    throw new RuntimeException(e);
-                }
+                                                           ExecutorService executor) {
+        var count = currentDownloadings.stream().filter(d -> d.getQueues().contains(qm)).count();
+        while (count != 0) {
+            try {
+                Thread.sleep(3000);
+                count = currentDownloadings.stream().filter(d -> d.getQueues().contains(qm)).count();
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
             }
-            whenQueueDone(qm, startItem, stopItem, executor);
         }
+        whenQueueDone(qm, startItem, stopItem, executor);
     }
 
     private static void whenQueueDone(QueueModel qm, MenuItem startItem, MenuItem stopItem, ExecutorService executor) {
@@ -171,6 +171,7 @@ public class QueueUtils {
         }
         if (executor != null)
             executor.shutdown();
+        log.info("Queue stopped automatically: " + qm.toStringModel());
     }
 
 
