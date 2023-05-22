@@ -111,6 +111,7 @@ public class DownloadLimitedTask extends DownloadTask {
                                       long existingFileSize) throws IOException, InterruptedException {
         var byteChannel = Channels.newChannel(in);
         log.info("Downloading speed limited: " + downloadModel);
+        var lock = fileChannel.lock();
         do {
             var beforeDown = System.currentTimeMillis();
             fileChannel.transferFrom(byteChannel, existingFileSize, limit);
@@ -128,13 +129,16 @@ public class DownloadLimitedTask extends DownloadTask {
             updateProgress(currentFileSize, fileSize);
             updateValue(existingFileSize);
         } while (existingFileSize < fileSize && !paused);
+        lock.release();
     }
 
     private void downloadSizeLimited(FileChannel fileChannel, InputStream in,
                                      long limit, long existingFileSize) throws IOException {
         log.info("Downloading size limited: " + downloadModel);
         var byteChannel = Channels.newChannel(in);
+        var lock = fileChannel.lock();
         fileChannel.transferFrom(byteChannel, existingFileSize, limit);
+        lock.release();
     }
 
     @Override

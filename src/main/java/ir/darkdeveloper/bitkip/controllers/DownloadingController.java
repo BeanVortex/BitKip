@@ -205,6 +205,7 @@ public class DownloadingController implements FXMLController {
             if (!Platform.isFxApplicationThread())
                 Platform.runLater(() -> updatePause(newValue));
             else updatePause(newValue);
+            controlBtn.setDisable(false);
         });
 
         openSwitch.selectedProperty().addListener((o, old, newVal) -> {
@@ -259,13 +260,15 @@ public class DownloadingController implements FXMLController {
 
         if (isPaused.get()) {
             statusLbl.setText("Status: " + DownloadStatus.Trying);
-            DownloadOpUtils.resumeDownloads(List.of(downloadModel),
-                    speedField.getText(), bytesField.getText());
+            controlBtn.setDisable(true);
+            DownloadOpUtils.resumeDownloads(List.of(downloadModel), speedField.getText(), bytesField.getText());
+            controlBtn.setDisable(false);
             isPaused.set(false);
         } else {
             var dt = getDownloadTask();
             if (dt != null)
                 dt.pause();
+            controlBtn.setDisable(true);
             isPaused.set(true);
         }
 

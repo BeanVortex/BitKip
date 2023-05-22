@@ -3,11 +3,7 @@ package ir.darkdeveloper.bitkip.utils;
 import ir.darkdeveloper.bitkip.config.AppConfigs;
 import ir.darkdeveloper.bitkip.models.DownloadModel;
 import ir.darkdeveloper.bitkip.models.QueueModel;
-import ir.darkdeveloper.bitkip.repo.DownloadsRepo;
 import ir.darkdeveloper.bitkip.repo.QueuesRepo;
-import ir.darkdeveloper.bitkip.task.DownloadInChunksTask;
-import ir.darkdeveloper.bitkip.task.DownloadLimitedTask;
-import ir.darkdeveloper.bitkip.task.DownloadTask;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.scene.control.Button;
@@ -25,11 +21,13 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.List;
 import java.util.UUID;
-import java.util.concurrent.*;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.Executor;
 
 import static ir.darkdeveloper.bitkip.config.AppConfigs.*;
-import static ir.darkdeveloper.bitkip.utils.Defaults.*;
-import static ir.darkdeveloper.bitkip.utils.IOUtils.getBytesFromString;
+import static ir.darkdeveloper.bitkip.utils.Defaults.AGENT;
+import static ir.darkdeveloper.bitkip.utils.Defaults.extensions;
 
 public class NewDownloadUtils {
 
@@ -173,65 +171,6 @@ public class NewDownloadUtils {
         }
     }
 
-
-    /**
-     * @param blocking of course, it should be done in concurrent environment otherwise it will block the main thread.
-     *                 mostly using for queue downloading
-     */
-    public static void startDownload(DownloadModel dm, String speed, String bytes, boolean resume, boolean blocking,
-                                     ExecutorService executor) {
-        DownloadTask downloadTask = new DownloadLimitedTask(dm, Long.MAX_VALUE, false);
-        if (dm.getChunks() == 0) {
-            if (speed != null) {
-                if (speed.equals("0")) {
-                    if (bytes != null) {
-                        if (bytes.equals(dm.getSize() + ""))
-                            downloadTask = new DownloadLimitedTask(dm, Long.MAX_VALUE, false);
-                        else
-                            downloadTask = new DownloadLimitedTask(dm, Long.parseLong(bytes), false);
-                    }
-                } else
-                    downloadTask = new DownloadLimitedTask(dm, getBytesFromString(speed), true);
-            }
-        } else {
-            if (speed != null) {
-                if (speed.equals("0"))
-                    downloadTask = new DownloadInChunksTask(dm, null);
-                else
-                    downloadTask = new DownloadInChunksTask(dm, getBytesFromString(speed));
-            } else
-                downloadTask = new DownloadInChunksTask(dm, null);
-        }
-
-        downloadTask.valueProperty().addListener((observable, oldValue, newValue) -> {
-            if (oldValue == null)
-                oldValue = newValue;
-            var currentSpeed = (newValue - oldValue);
-            if (newValue == 0)
-                currentSpeed = 0;
-            mainTableUtils.updateDownloadSpeedAndRemaining(currentSpeed, dm, newValue);
-        });
-        downloadTask.progressProperty().addListener((o, old, newV) ->
-                mainTableUtils.updateDownloadProgress(newV.floatValue() * 100, dm));
-        downloadTask.setBlocking(blocking);
-        dm.setDownloadTask(downloadTask);
-        dm.setShowCompleteDialog(showCompleteDialog);
-        dm.setOpenAfterComplete(false);
-        if (!resume) {
-            DownloadsRepo.insertDownload(dm);
-            mainTableUtils.addRow(dm);
-        }
-        currentDownloadings.add(dm);
-        if (executor == null)
-            executor = Executors.newCachedThreadPool();
-        downloadTask.setExecutor(executor);
-        log.info(("Starting %s download in " + (blocking ? "blocking" : "non-blocking")).formatted(dm.getName()));
-        if (blocking)
-            downloadTask.run();
-        else
-            executor.submit(downloadTask);
-
-    }
 
 
     public static void selectLocation(ActionEvent e, TextField locationField) {

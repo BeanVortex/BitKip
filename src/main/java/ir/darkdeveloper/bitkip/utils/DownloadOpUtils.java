@@ -4,6 +4,9 @@ import ir.darkdeveloper.bitkip.controllers.DownloadingController;
 import ir.darkdeveloper.bitkip.models.DownloadModel;
 import ir.darkdeveloper.bitkip.models.DownloadStatus;
 import ir.darkdeveloper.bitkip.repo.DownloadsRepo;
+import ir.darkdeveloper.bitkip.task.DownloadInChunksTask;
+import ir.darkdeveloper.bitkip.task.DownloadLimitedTask;
+import ir.darkdeveloper.bitkip.task.DownloadTask;
 import javafx.collections.ObservableList;
 import org.controlsfx.control.Notifications;
 
@@ -14,14 +17,89 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import static com.sun.jna.Platform.*;
 import static ir.darkdeveloper.bitkip.config.AppConfigs.log;
 import static ir.darkdeveloper.bitkip.config.AppConfigs.*;
+import static ir.darkdeveloper.bitkip.utils.IOUtils.getBytesFromString;
 
 public class DownloadOpUtils {
 
-    /*
+    /**
+     * @param blocking of course, it should be done in concurrent environment otherwise it will block the main thread.
+     *                 mostly using for queue downloading
+     */
+    private static void triggerDownload(DownloadModel dm, String speed, String bytes, boolean resume, boolean blocking,
+
+                                        ExecutorService executor) {
+        DownloadTask downloadTask = new DownloadLimitedTask(dm, Long.MAX_VALUE, false);
+        if (dm.getChunks() == 0) {
+            if (speed != null) {
+                if (speed.equals("0")) {
+                    if (bytes != null) {
+                        if (bytes.equals(dm.getSize() + ""))
+                            downloadTask = new DownloadLimitedTask(dm, Long.MAX_VALUE, false);
+                        else
+                            downloadTask = new DownloadLimitedTask(dm, Long.parseLong(bytes), false);
+                    }
+                } else
+                    downloadTask = new DownloadLimitedTask(dm, getBytesFromString(speed), true);
+            }
+        } else {
+            if (speed != null) {
+                if (speed.equals("0"))
+                    downloadTask = new DownloadInChunksTask(dm, null);
+                else
+                    downloadTask = new DownloadInChunksTask(dm, getBytesFromString(speed));
+            } else
+                downloadTask = new DownloadInChunksTask(dm, null);
+        }
+
+        downloadTask.valueProperty().addListener((observable, oldValue, newValue) -> {
+            if (oldValue == null)
+                oldValue = newValue;
+            var currentSpeed = (newValue - oldValue);
+            if (newValue == 0)
+                currentSpeed = 0;
+            mainTableUtils.updateDownloadSpeedAndRemaining(currentSpeed, dm, newValue);
+        });
+        downloadTask.progressProperty().addListener((o, old, newV) ->
+                mainTableUtils.updateDownloadProgress(newV.floatValue() * 100, dm));
+        downloadTask.setBlocking(blocking);
+        dm.setDownloadTask(downloadTask);
+        dm.setShowCompleteDialog(showCompleteDialog);
+        dm.setOpenAfterComplete(false);
+        if (!resume) {
+            DownloadsRepo.insertDownload(dm);
+            mainTableUtils.addRow(dm);
+        }
+        currentDownloadings.add(dm);
+        if (executor == null)
+            executor = Executors.newCachedThreadPool();
+        downloadTask.setExecutor(executor);
+        log.info(("Starting %s download in " + (blocking ? "blocking" : "non-blocking")).formatted(dm.getName()));
+        if (blocking)
+            downloadTask.run();
+        else
+            executor.submit(downloadTask);
+
+    }
+    public static void startDownload(DownloadModel dm, String speedLimit, String byteLimit, boolean resume,
+                                     boolean blocking, ExecutorService executor) {
+        if (!currentDownloadings.contains(dm)) {
+            log.info("Starting download : " + dm);
+            dm.setLastTryDate(LocalDateTime.now());
+            dm.setDownloadStatus(DownloadStatus.Trying);
+            DownloadsRepo.updateDownloadLastTryDate(dm);
+            mainTableUtils.refreshTable();
+            triggerDownload(dm, speedLimit, byteLimit, resume, blocking, executor);
+            openDownloadings.stream().filter(dc -> dc.getDownloadModel().equals(dm))
+                    .forEach(DownloadingController::initDownloadListeners);
+        }
+    }
+
+    /**
      * Resumes downloads non-blocking
      * */
     public static void resumeDownloads(List<DownloadModel> dms, String speedLimit, String byteLimit) {
@@ -33,7 +111,7 @@ public class DownloadOpUtils {
                     mainTableUtils.refreshTable();
                     if (dm.isResumable()) {
                         log.info("Resuming download : " + dm);
-                        NewDownloadUtils.startDownload(dm, speedLimit, byteLimit, true, false, null);
+                        startDownload(dm, speedLimit, byteLimit, true, false, null);
                     } else {
                         dm.setDownloadStatus(DownloadStatus.Restarting);
                         mainTableUtils.refreshTable();
@@ -42,20 +120,6 @@ public class DownloadOpUtils {
                     openDownloadings.stream().filter(dc -> dc.getDownloadModel().equals(dm))
                             .forEach(DownloadingController::initDownloadListeners);
                 });
-    }
-
-    public static void startDownload(DownloadModel dm, String speedLimit, String byteLimit, boolean resume,
-                                     boolean blocking, ExecutorService executor) {
-        if (!currentDownloadings.contains(dm)) {
-            log.info("Starting download : " + dm);
-            dm.setLastTryDate(LocalDateTime.now());
-            dm.setDownloadStatus(DownloadStatus.Trying);
-            DownloadsRepo.updateDownloadLastTryDate(dm);
-            mainTableUtils.refreshTable();
-            NewDownloadUtils.startDownload(dm, speedLimit, byteLimit, resume, blocking, executor);
-            openDownloadings.stream().filter(dc -> dc.getDownloadModel().equals(dm))
-                    .forEach(DownloadingController::initDownloadListeners);
-        }
     }
 
     public static void restartDownloads(List<DownloadModel> dms) {
@@ -72,7 +136,7 @@ public class DownloadOpUtils {
         IOUtils.deleteDownload(dm);
         DownloadsRepo.deleteDownload(dm);
         mainTableUtils.remove(dm);
-        startDownload(dm, null, null, false, false, null);
+        triggerDownload(dm, null, null, false, false, null);
     }
 
     public static void pauseDownloads(List<DownloadModel> dms) {
@@ -179,7 +243,6 @@ public class DownloadOpUtils {
                     .showError();
         }
     }
-
 
     public static void refreshDownload(ObservableList<DownloadModel> selected) {
         if (selected.size() != 1)

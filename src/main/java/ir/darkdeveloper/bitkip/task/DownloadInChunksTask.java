@@ -180,7 +180,9 @@ public class DownloadInChunksTask extends DownloadTask {
                 var fileChannel = out.getChannel();
                 fileChannels.add(fileChannel);
                 var byteChannel = Channels.newChannel(con.getInputStream());
+                var lock = fileChannel.lock();
                 fileChannel.transferFrom(byteChannel, existingFileSize, Long.MAX_VALUE);
+                lock.release();
                 fileChannel.close();
                 con.disconnect();
             } catch (SocketTimeoutException | UnknownHostException | SocketException s) {
@@ -214,11 +216,13 @@ public class DownloadInChunksTask extends DownloadTask {
                 fileChannels.add(fileChannel);
                 var byteChannel = Channels.newChannel(con.getInputStream());
                 long finalExistingFileSize = existingFileSize;
+                var lock = fileChannel.lock();
                 while (fromContinue + finalExistingFileSize < to) {
                     fileChannel.transferFrom(byteChannel, finalExistingFileSize, bytesToDownloadEachInCycle);
                     finalExistingFileSize += bytesToDownloadEachInCycle;
                     Thread.sleep(ONE_SEC);
                 }
+                lock.release();
                 fileChannel.close();
                 con.disconnect();
             } catch (SocketTimeoutException | UnknownHostException s) {
