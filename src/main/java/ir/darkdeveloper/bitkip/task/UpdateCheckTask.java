@@ -43,11 +43,12 @@ public class UpdateCheckTask extends Task<UpdateModel> {
                 var fileATag = row.select("a").get(0);
                 var fileTitle = fileATag.select("span").text();
                 if (isWindows() && !fileTitle.contains("win") && !fileTitle.contains("exe") && !fileTitle.contains("msi")
-                        && !(fileTitle.contains("Source code") && fileTitle.contains("zip")))
+                        && !(fileTitle.contains("Source code") && fileTitle.contains("zip")) && !fileTitle.contains("extension"))
                     continue;
-                if (isLinux() && !fileTitle.contains("linux") && !fileTitle.contains("tar.gz"))
+                if (isLinux() && !fileTitle.contains("linux") && !fileTitle.contains("tar.gz") && !fileTitle.contains("extension"))
                     continue;
-                if (isMac() && !fileTitle.contains("mac") && !fileTitle.contains("dmg") && !fileTitle.contains("tar.gz"))
+                if (isMac() && !fileTitle.contains("mac") && !fileTitle.contains("dmg")
+                        && !fileTitle.contains("tar.gz") && !fileTitle.contains("extension"))
                     continue;
                 var fileLink = "https://github.com" + fileATag.attr("href");
                 var fileSize = row.select("div > span").get(0).text();
