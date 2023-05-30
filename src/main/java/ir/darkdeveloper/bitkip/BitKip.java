@@ -12,6 +12,8 @@ import ir.darkdeveloper.bitkip.utils.IOUtils;
 import ir.darkdeveloper.bitkip.utils.MoreUtils;
 import javafx.application.Application;
 import javafx.application.Platform;
+import javafx.scene.control.Alert;
+import javafx.scene.control.ButtonType;
 import javafx.stage.Stage;
 import org.eclipse.jetty.server.Connector;
 import org.eclipse.jetty.server.Server;
@@ -49,6 +51,7 @@ public class BitKip extends Application {
         MoreUtils.checkUpdates(false);
         IOUtils.moveChunkFilesToTemp(downloadPath);
         initTray(stage);
+        startServer();
     }
 
 
@@ -101,7 +104,7 @@ public class BitKip extends Application {
         });
         try {
             server.stop();
-        }catch (Exception e){
+        } catch (Exception e) {
             log.error(e.getMessage());
         }
     }
@@ -109,7 +112,6 @@ public class BitKip extends Application {
 
     public static void main(String[] args) {
         initLogger();
-        startServer();
         launch();
     }
 
@@ -130,7 +132,9 @@ public class BitKip extends Application {
             server.start();
         } catch (Exception e) {
             log.error(e.getMessage());
-            System.exit(1);
+            if (FxUtils.askWithDialog(Alert.AlertType.ERROR, "Failed to run",
+                    e.getLocalizedMessage(), ButtonType.CLOSE, null))
+                System.exit(1);
         }
     }
 

@@ -304,14 +304,24 @@ public class FxUtils {
     }
 
     public static boolean askWarning(String header, String content, ButtonType primary, ButtonType secondary) {
-        var alert = new Alert(Alert.AlertType.WARNING, content, primary, secondary);
-        alert.setTitle("Warning");
+        return askWithDialog(Alert.AlertType.WARNING, header, content, primary, secondary);
+    }
+
+    public static boolean askWithDialog(Alert.AlertType alertType, String header, String content,
+                                        ButtonType primary, ButtonType secondary) {
+        Alert alert;
+        if (secondary == null)
+            alert = new Alert(alertType, content, primary);
+        else
+            alert = new Alert(alertType, content, primary, secondary);
+        alert.setTitle(alertType.name());
         alert.setHeaderText(header);
         var stage = (Stage) alert.getDialogPane().getScene().getWindow();
         var logoPath = getResource("icons/logo.png");
         if (logoPath != null)
             stage.getIcons().add(new Image(logoPath.toExternalForm()));
         var res = alert.showAndWait();
+
         return res.orElse(secondary) == primary;
     }
 
