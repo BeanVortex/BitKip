@@ -83,6 +83,7 @@ public class DownloadInChunksTask extends DownloadTask {
         var bytesForEach = fileSize / chunks;
         var futures = new ArrayList<CompletableFuture<Void>>();
         var to = bytesForEach;
+        System.out.println(bytesForEach);
         var from = 0L;
         var fromContinue = 0L;
         var tempFolderPath = Paths.get(downloadModel.getFilePath()).getParent().toString() + File.separator;
@@ -91,57 +92,54 @@ public class DownloadInChunksTask extends DownloadTask {
         if (!Files.exists(Path.of(tempFolderPath)))
             new File(tempFolderPath).mkdir();
         var lastPartSize = fileSize - ((chunks - 1) * bytesForEach);
-        for (int i = 0; i < chunks; i++, fromContinue = to, to += bytesForEach) {
+        for (int i = 0; i < chunks; i++, from = to, to += bytesForEach) {
             var filePath = tempFolderPath + downloadModel.getName() + "#" + i;
             filePaths.add(Paths.get(filePath));
             var partFile = new File(filePath);
             var existingFileSize = 0L;
-            if (!partFile.exists()) {
+            if (!partFile.exists())
                 partFile.createNewFile();
-                from = fromContinue;
-            } else {
+            else {
                 existingFileSize = getCurrentFileSize(partFile);
                 if (i + 1 != chunks && existingFileSize == bytesForEach)
                     continue;
 
                 if (i + 1 == chunks && existingFileSize == lastPartSize)
                     continue;
-
-                if (fromContinue == 0) {
-                    if (i == 0) {
-                        if (fromContinue >= to)
-                            continue;
-                        if (existingFileSize != 0)
-                            from = existingFileSize + 1;
-                    } else
-                        from = fromContinue + existingFileSize;
-                } else
-                    from = fromContinue + existingFileSize;
             }
+
+//            if (fromContinue == 0) {
+//                if (i == 0) {
+//                    if (fromContinue >= to)
+//                        continue;
+//                    if (existingFileSize != 0)
+//                        fromContinue = existingFileSize + 1;
+//                } else
+//            } else
+//                fromContinue = existingFileSize;
+            fromContinue = from + existingFileSize;
 
             if (i + 1 == chunks && to != fileSize) {
                 to = fileSize;
-                if (from == to)
+                if (fromContinue == to)
                     break;
             }
-            if (from != 0 && i == 0)
-                from--;
+//            if (fromContinue != 0 && i == 0)
+//                fromContinue--;
 
-            var finalTo = to - 1;
-            var finalFrom = from;
-
-            addFutures(url, existingFileSize, futures, partFile, finalTo, finalFrom, fromContinue);
+            var finalTo = to -1;
+            addFutures(url, existingFileSize, futures, partFile, fromContinue, from, finalTo);
         }
         return futures;
     }
 
     private void addFutures(URL url, long fileSize, ArrayList<CompletableFuture<Void>> futures,
-                            File partFile, long finalTo, long finalFrom, long fromContinue) {
+                            File partFile, long fromContinue, long from, long to) {
         CompletableFuture<Void> c;
         if (isLimited) {
             c = CompletableFuture.supplyAsync(() -> {
                 try {
-                    performLimitedDownload(url, fromContinue, finalFrom, finalTo, partFile, fileSize);
+                    performLimitedDownload(url, fromContinue, from, to, partFile, fileSize);
                 } catch (IOException | InterruptedException e) {
                     if (e instanceof IOException)
                         log.error(e.getMessage());
@@ -152,7 +150,7 @@ public class DownloadInChunksTask extends DownloadTask {
         } else {
             c = CompletableFuture.supplyAsync(() -> {
                 try {
-                    performDownload(url, fromContinue, finalFrom, finalTo, partFile, fileSize);
+                    performDownload(url, fromContinue, from, to, partFile, fileSize);
                 } catch (IOException | InterruptedException e) {
                     if (e instanceof IOException)
                         log.error(e.getMessage());
@@ -173,16 +171,19 @@ public class DownloadInChunksTask extends DownloadTask {
                 var con = (HttpURLConnection) url.openConnection();
                 con.setReadTimeout(3000);
                 con.setConnectTimeout(3000);
-                con.addRequestProperty("Range", "bytes=" + from + "-" + to);
+                con.addRequestProperty("Range", "bytes=" + fromContinue + "-" + to);
+                System.out.printf("Downloading range %d-%d now at %d-%d : %s\n", from, to, fromContinue, to, partFile.getName());
+                if (partFile.getName().contains("#0")) {
+                    System.out.println("heel");
+                }
                 if (!downloadModel.isResumable())
                     con.setRequestProperty("User-Agent", downloadModel.getAgent());
                 var out = new FileOutputStream(partFile, partFile.exists());
                 var fileChannel = out.getChannel();
                 fileChannels.add(fileChannel);
                 var byteChannel = Channels.newChannel(con.getInputStream());
-                var lock = fileChannel.lock();
-                fileChannel.transferFrom(byteChannel, existingFileSize, Long.MAX_VALUE);
-                lock.release();
+                fileChannel.transferFrom(byteChannel, existingFileSize, to - fromContinue + 1);
+                fileChannels.remove(fileChannel);
                 fileChannel.close();
                 con.disconnect();
             } catch (SocketTimeoutException | UnknownHostException | SocketException s) {
@@ -191,13 +192,20 @@ public class DownloadInChunksTask extends DownloadTask {
                     log.warn("Downloading part " + partFile.getName() + " failed. retry count : " + retries);
                     Thread.sleep(2000);
                     var currFileSize = getCurrentFileSize(partFile);
-                    performDownload(url, fromContinue, fromContinue + currFileSize, to, partFile, currFileSize);
+                    performDownload(url, from + currFileSize, from, to, partFile, currFileSize);
                 }
             } catch (ClosedChannelException ignore) {
+            } catch (Exception e) {
+                e.printStackTrace();
             }
+
+            // for when connection is lost
             var currFileSize = getCurrentFileSize(partFile);
-            if (!paused && currFileSize != (to - fromContinue + 1))
-                performDownload(url, fromContinue, fromContinue + currFileSize, to, partFile, currFileSize);
+            if (partFile.getName().contains("#0")) {
+                System.out.println("heel");
+            }
+            if (!paused && currFileSize != (to - from + 1))
+                performDownload(url, from + currFileSize, from, to, partFile, currFileSize);
         }
     }
 
@@ -217,7 +225,7 @@ public class DownloadInChunksTask extends DownloadTask {
                 var byteChannel = Channels.newChannel(con.getInputStream());
                 long finalExistingFileSize = existingFileSize;
                 var lock = fileChannel.lock();
-                while (fromContinue + finalExistingFileSize < to) {
+                while (from + finalExistingFileSize < to) {
                     fileChannel.transferFrom(byteChannel, finalExistingFileSize, bytesToDownloadEachInCycle);
                     finalExistingFileSize += bytesToDownloadEachInCycle;
                     Thread.sleep(ONE_SEC);
@@ -231,12 +239,12 @@ public class DownloadInChunksTask extends DownloadTask {
                     log.warn("Downloading part " + partFile.getName() + " failed. retry count : " + retries);
                     Thread.sleep(2000);
                     var currFileSize = getCurrentFileSize(partFile);
-                    performLimitedDownload(url, fromContinue, fromContinue + currFileSize, to, partFile, currFileSize);
+                    performLimitedDownload(url, from + currFileSize, from, to, partFile, currFileSize);
                 }
             }
             var currFileSize = getCurrentFileSize(partFile);
-            if (!paused && currFileSize != (to - fromContinue + 1))
-                performLimitedDownload(url, fromContinue, fromContinue + currFileSize, to, partFile, currFileSize);
+            if (!paused && currFileSize != (to - from + 1))
+                performLimitedDownload(url, from + currFileSize, from, to, partFile, currFileSize);
         }
     }
 
