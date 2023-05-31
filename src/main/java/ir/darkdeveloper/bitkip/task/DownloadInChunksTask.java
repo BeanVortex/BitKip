@@ -83,7 +83,6 @@ public class DownloadInChunksTask extends DownloadTask {
         var bytesForEach = fileSize / chunks;
         var futures = new ArrayList<CompletableFuture<Void>>();
         var to = bytesForEach;
-        System.out.println(bytesForEach);
         var from = 0L;
         var fromContinue = 0L;
         var tempFolderPath = Paths.get(downloadModel.getFilePath()).getParent().toString() + File.separator;
@@ -108,15 +107,6 @@ public class DownloadInChunksTask extends DownloadTask {
                     continue;
             }
 
-//            if (fromContinue == 0) {
-//                if (i == 0) {
-//                    if (fromContinue >= to)
-//                        continue;
-//                    if (existingFileSize != 0)
-//                        fromContinue = existingFileSize + 1;
-//                } else
-//            } else
-//                fromContinue = existingFileSize;
             fromContinue = from + existingFileSize;
 
             if (i + 1 == chunks && to != fileSize) {
@@ -124,10 +114,8 @@ public class DownloadInChunksTask extends DownloadTask {
                 if (fromContinue == to)
                     break;
             }
-//            if (fromContinue != 0 && i == 0)
-//                fromContinue--;
 
-            var finalTo = to -1;
+            var finalTo = to - 1;
             addFutures(url, existingFileSize, futures, partFile, fromContinue, from, finalTo);
         }
         return futures;
@@ -173,9 +161,6 @@ public class DownloadInChunksTask extends DownloadTask {
                 con.setConnectTimeout(3000);
                 con.addRequestProperty("Range", "bytes=" + fromContinue + "-" + to);
                 System.out.printf("Downloading range %d-%d now at %d-%d : %s\n", from, to, fromContinue, to, partFile.getName());
-                if (partFile.getName().contains("#0")) {
-                    System.out.println("heel");
-                }
                 if (!downloadModel.isResumable())
                     con.setRequestProperty("User-Agent", downloadModel.getAgent());
                 var out = new FileOutputStream(partFile, partFile.exists());
@@ -195,15 +180,10 @@ public class DownloadInChunksTask extends DownloadTask {
                     performDownload(url, from + currFileSize, from, to, partFile, currFileSize);
                 }
             } catch (ClosedChannelException ignore) {
-            } catch (Exception e) {
-                e.printStackTrace();
             }
 
-            // for when connection is lost
+            // when connection has been closed by the server
             var currFileSize = getCurrentFileSize(partFile);
-            if (partFile.getName().contains("#0")) {
-                System.out.println("heel");
-            }
             if (!paused && currFileSize != (to - from + 1))
                 performDownload(url, from + currFileSize, from, to, partFile, currFileSize);
         }
@@ -218,7 +198,7 @@ public class DownloadInChunksTask extends DownloadTask {
                 var con = (HttpURLConnection) url.openConnection();
                 con.setReadTimeout(3000);
                 con.setConnectTimeout(3000);
-                con.addRequestProperty("Range", "bytes=" + from + "-" + to);
+                con.addRequestProperty("Range", "bytes=" + fromContinue + "-" + to);
                 var out = new FileOutputStream(partFile, partFile.exists());
                 var fileChannel = out.getChannel();
                 fileChannels.add(fileChannel);
@@ -241,6 +221,7 @@ public class DownloadInChunksTask extends DownloadTask {
                     var currFileSize = getCurrentFileSize(partFile);
                     performLimitedDownload(url, from + currFileSize, from, to, partFile, currFileSize);
                 }
+            } catch (ClosedChannelException ignore) {
             }
             var currFileSize = getCurrentFileSize(partFile);
             if (!paused && currFileSize != (to - from + 1))
