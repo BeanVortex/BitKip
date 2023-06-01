@@ -145,13 +145,14 @@ public class QueueUtils {
         var count = currentDownloadings.stream().filter(d -> d.getQueues().contains(qm)).count();
         while (count != 0) {
             try {
-                Thread.sleep(3000);
+                Thread.sleep(2000);
                 count = currentDownloadings.stream().filter(d -> d.getQueues().contains(qm)).count();
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             }
         }
-        whenQueueDone(qm, startItem, stopItem, executor);
+        if (startedQueues.contains(qm))
+            whenQueueDone(qm, startItem, stopItem, executor);
     }
 
     private static void whenQueueDone(QueueModel qm, MenuItem startItem, MenuItem stopItem, ExecutorService executor) {
@@ -216,7 +217,7 @@ public class QueueUtils {
                         .title("Queue finished")
                         .text("Queue %s finished or stopped".formatted(qm))
                         .showInformation();
-            }catch (NullPointerException ignore){
+            } catch (NullPointerException ignore) {
             }
         };
 
