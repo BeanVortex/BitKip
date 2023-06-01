@@ -69,7 +69,7 @@ public class DownloadLimitedTask extends DownloadTask {
                 con.setConnectTimeout(3000);
                 if (!downloadModel.isResumable())
                     con.setRequestProperty("User-Agent", downloadModel.getAgent());
-                configureResume(con, file);
+                configureResume(con, file, downloadModel.getSize());
                 var in = con.getInputStream();
                 var fileSize = downloadModel.getSize();
 
@@ -136,9 +136,8 @@ public class DownloadLimitedTask extends DownloadTask {
                                      long limit, long existingFileSize) throws IOException {
         log.info("Downloading size limited: " + downloadModel);
         var byteChannel = Channels.newChannel(in);
-        var lock = fileChannel.lock();
         fileChannel.transferFrom(byteChannel, existingFileSize, limit);
-        lock.release();
+        fileChannel.close();
     }
 
     @Override
@@ -217,10 +216,10 @@ public class DownloadLimitedTask extends DownloadTask {
         });
     }
 
-    private void configureResume(HttpURLConnection con, File file) throws IOException {
+    private void configureResume(HttpURLConnection con, File file, long fileSize) throws IOException {
         if (file.exists()) {
             var existingFileSize = getCurrentFileSize(file);
-            con.addRequestProperty("Range", "bytes=" + existingFileSize + "-");
+            con.addRequestProperty("Range", "bytes=" + existingFileSize + "-" + (fileSize - 1));
         }
     }
 
@@ -229,6 +228,7 @@ public class DownloadLimitedTask extends DownloadTask {
     public void pause() {
         paused = true;
         log.info("Paused download: " + downloadModel);
+        retries = 0;
         succeeded();
     }
 

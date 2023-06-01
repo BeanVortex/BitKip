@@ -37,7 +37,6 @@ public class DownloadInChunksTask extends DownloadTask {
     private volatile boolean isCalculating;
     private final boolean isLimited;
     private ExecutorService executor;
-    private int retries = 0;
     private boolean blocking;
 
     public DownloadInChunksTask(DownloadModel downloadModel, Long limit) {
@@ -127,7 +126,7 @@ public class DownloadInChunksTask extends DownloadTask {
         if (isLimited) {
             c = CompletableFuture.supplyAsync(() -> {
                 try {
-                    performLimitedDownload(url, fromContinue, from, to, partFile, fileSize);
+                    performLimitedDownload(url, fromContinue, from, to, partFile, fileSize, 0, 0);
                 } catch (IOException | InterruptedException e) {
                     if (e instanceof IOException)
                         log.error(e.getMessage());
@@ -138,7 +137,7 @@ public class DownloadInChunksTask extends DownloadTask {
         } else {
             c = CompletableFuture.supplyAsync(() -> {
                 try {
-                    performDownload(url, fromContinue, from, to, partFile, fileSize);
+                    performDownload(url, fromContinue, from, to, partFile, fileSize, 0, 0);
                 } catch (IOException | InterruptedException e) {
                     if (e instanceof IOException)
                         log.error(e.getMessage());
@@ -152,7 +151,8 @@ public class DownloadInChunksTask extends DownloadTask {
     }
 
 
-    private void performDownload(URL url, long fromContinue, long from, long to, File partFile, long existingFileSize)
+    private void performDownload(URL url, long fromContinue, long from, long to, File partFile,
+                                 long existingFileSize, int rateLimitCount, int retries)
             throws InterruptedException, IOException {
         if (retries != downloadRetryCount) {
             try {
@@ -160,7 +160,6 @@ public class DownloadInChunksTask extends DownloadTask {
                 con.setReadTimeout(3000);
                 con.setConnectTimeout(3000);
                 con.addRequestProperty("Range", "bytes=" + fromContinue + "-" + to);
-                System.out.printf("Downloading range %d-%d now at %d-%d : %s\n", from, to, fromContinue, to, partFile.getName());
                 if (!downloadModel.isResumable())
                     con.setRequestProperty("User-Agent", downloadModel.getAgent());
                 var out = new FileOutputStream(partFile, partFile.exists());
@@ -177,21 +176,24 @@ public class DownloadInChunksTask extends DownloadTask {
                     log.warn("Downloading part " + partFile.getName() + " failed. retry count : " + retries);
                     Thread.sleep(2000);
                     var currFileSize = getCurrentFileSize(partFile);
-                    performDownload(url, from + currFileSize, from, to, partFile, currFileSize);
+                    performDownload(url, from + currFileSize, from, to, partFile, currFileSize, rateLimitCount, retries);
                 }
             } catch (ClosedChannelException ignore) {
             }
 
             // when connection has been closed by the server
             var currFileSize = getCurrentFileSize(partFile);
-            if (!paused && currFileSize != (to - from + 1))
-                performDownload(url, from + currFileSize, from, to, partFile, currFileSize);
+            if (!paused && currFileSize != (to - from + 1) && downloadRateLimitCount < rateLimitCount) {
+                rateLimitCount++;
+                performDownload(url, from + currFileSize, from, to, partFile, currFileSize, rateLimitCount, retries);
+            }
         }
     }
 
 
-    private void performLimitedDownload(URL url, long fromContinue, long from, long to, File partFile, long existingFileSize)
-            throws IOException, InterruptedException {
+    private void performLimitedDownload(URL url, long fromContinue, long from, long to,
+                                        File partFile, long existingFileSize,
+                                        int rateLimitCount, int retries) throws IOException, InterruptedException {
         if (retries != downloadRetryCount) {
             try {
                 var bytesToDownloadEachInCycle = limit / chunks;
@@ -219,13 +221,15 @@ public class DownloadInChunksTask extends DownloadTask {
                     log.warn("Downloading part " + partFile.getName() + " failed. retry count : " + retries);
                     Thread.sleep(2000);
                     var currFileSize = getCurrentFileSize(partFile);
-                    performLimitedDownload(url, from + currFileSize, from, to, partFile, currFileSize);
+                    performLimitedDownload(url, from + currFileSize, from, to, partFile, currFileSize, rateLimitCount, retries);
                 }
             } catch (ClosedChannelException ignore) {
             }
             var currFileSize = getCurrentFileSize(partFile);
-            if (!paused && currFileSize != (to - from + 1))
-                performLimitedDownload(url, from + currFileSize, from, to, partFile, currFileSize);
+            if (!paused && currFileSize != (to - from + 1) && downloadRateLimitCount < rateLimitCount) {
+                rateLimitCount++;
+                performLimitedDownload(url, from + currFileSize, from, to, partFile, currFileSize, rateLimitCount, retries);
+            }
         }
     }
 

@@ -53,6 +53,7 @@ public class AppConfigs {
     public static final String queuesPath = downloadPath + "Queues" + File.separator;
 
     public static int downloadRetryCount = 10;
+    public static int downloadRateLimitCount = 20;
     public static HostServices hostServices;
 
     public static final List<DownloadModel> currentDownloadings = new ArrayList<>();
