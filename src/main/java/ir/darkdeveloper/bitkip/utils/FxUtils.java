@@ -178,6 +178,32 @@ public class FxUtils {
         openStages.put(LOGS_STAGE, stage);
     }
 
+
+    public static void newSettingsStage(){
+        FXMLLoader loader;
+        Stage stage = new Stage();
+        VBox root;
+        try {
+            loader = new FXMLLoader(getResource("fxml/settings.fxml"));
+            root = loader.load();
+        } catch (IOException e) {
+            log.error(e.getLocalizedMessage());
+            throw new RuntimeException(e);
+        }
+        var scene = new Scene(root);
+        stage.setScene(scene);
+        stage.setMinWidth(root.getMinWidth());
+        stage.setMinHeight(root.getMinHeight());
+        stage.setTitle("Settings");
+        var logoPath = getResource("icons/logo.png");
+        if (logoPath != null)
+            stage.getIcons().add(new Image(logoPath.toExternalForm()));
+        FXMLController controller = loader.getController();
+        controller.setStage(stage);
+//        stage.setOnCloseRequest(e -> );
+        stage.show();
+    }
+
     public static void newDownloadingStage(DownloadModel dm) {
         FXMLLoader loader;
         var stage = new Stage();

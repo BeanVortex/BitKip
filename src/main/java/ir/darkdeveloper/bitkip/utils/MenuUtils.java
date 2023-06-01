@@ -42,7 +42,7 @@ public class MenuUtils {
         menuFile.setOnMouseClicked(event -> c.show(menuFile, Side.BOTTOM, 0, 0));
         menuItems.get(addLink).setOnAction(e -> DownloadOpUtils.newDownload(true));
         menuItems.get(batchDownload).setOnAction(e -> DownloadOpUtils.newDownload(false));
-        menuItems.get(settings).setOnAction(e -> System.out.println("settings"));
+        menuItems.get(settings).setOnAction(e -> FxUtils.newSettingsStage());
         menuItems.get(exit).setOnAction(e -> Platform.exit());
     }
 

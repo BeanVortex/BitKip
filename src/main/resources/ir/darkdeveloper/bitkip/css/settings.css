@@ -1,5 +1,6 @@
+
 #parent{
-    -fx-padding: 20 40;
+    -fx-padding: 10;
 }
 .settingTile {
     -fx-font-size: 15;
