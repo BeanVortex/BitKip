@@ -293,7 +293,7 @@ public class FxUtils {
         openStages.put(QUEUE_SETTING_STAGE, stage);
     }
 
-    public static boolean askToMoveFiles(List<DownloadModel> downloads, QueueModel desQueue) {
+    public static boolean askToMoveFilesForQueues(List<DownloadModel> downloads, QueueModel desQueue) {
         var downloadsHasFolder = downloads.stream().filter(dm ->
                 !dm.getQueues().stream().filter(QueueModel::hasFolder).toList().isEmpty()
         ).toList();
@@ -326,7 +326,6 @@ public class FxUtils {
         var yes = new ButtonType("Yes", ButtonBar.ButtonData.YES);
         var no = new ButtonType("No", ButtonBar.ButtonData.NO);
         return askWarning(header, content, yes, no);
-
     }
 
     public static boolean askWarning(String header, String content, ButtonType primary, ButtonType secondary) {
@@ -426,7 +425,7 @@ public class FxUtils {
             try {
                 for (int i = 10; i >= 0; i--) {
                     var finalI = i;
-                    Platform.runLater(() -> countDownLbl.setText(finalI + ""));
+                    Platform.runLater(() -> countDownLbl.setText(String.valueOf(finalI)));
                     Thread.sleep(1000);
                 }
                 Platform.runLater(() -> {

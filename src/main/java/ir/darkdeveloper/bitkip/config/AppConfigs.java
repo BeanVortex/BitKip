@@ -27,6 +27,11 @@ public class AppConfigs {
             + File.separator + "Downloads"
             + File.separator + "BitKip" + File.separator;
 
+    public static String theme = "light";
+
+    public static boolean serverEnabled = true;
+    public static int port = 9563;
+
 
     public static Logger log;
     public static final ObjectMapper mapper = new ObjectMapper();

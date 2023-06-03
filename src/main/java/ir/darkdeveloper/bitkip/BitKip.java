@@ -35,6 +35,7 @@ public class BitKip extends Application {
 
     @Override
     public void start(Stage stage) {
+        IOUtils.readConfig();
         IOUtils.createSaveLocations();
         DownloadsRepo.createTable();
         ScheduleRepo.createSchedulesTable();
@@ -119,7 +120,7 @@ public class BitKip extends Application {
         var threadPool = new QueuedThreadPool(5, 1);
         server = new Server(threadPool);
         var connector = new ServerConnector(server);
-        connector.setPort(9563);
+        connector.setPort(port);
         server.setConnectors(new Connector[]{connector});
         var handler = new ServletHandler();
         server.setHandler(handler);

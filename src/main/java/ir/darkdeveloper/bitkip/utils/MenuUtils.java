@@ -261,7 +261,7 @@ public class MenuUtils {
 
     public static void deleteFromQueue() {
         var notObserved = new ArrayList<>(mainTableUtils.getSelected());
-        var moveFiles = FxUtils.askToMoveFiles(notObserved, null);
+        var moveFiles = FxUtils.askToMoveFilesForQueues(notObserved, null);
         for (var dm : notObserved) {
             mainTableUtils.remove(dm);
             dm.getQueues()
@@ -285,7 +285,7 @@ public class MenuUtils {
                 menuItem.setOnAction(e -> {
                     var qm = addToQueueItems.get(menuItem);
                     var notObserved = new ArrayList<>(mainTableUtils.getSelected());
-                    var moveFiles = FxUtils.askToMoveFiles(notObserved, qm);
+                    var moveFiles = FxUtils.askToMoveFilesForQueues(notObserved, qm);
                     for (int i = 0; i < notObserved.size(); i++) {
                         var dm = notObserved.get(i);
                         if (dm.getQueues().contains(qm))

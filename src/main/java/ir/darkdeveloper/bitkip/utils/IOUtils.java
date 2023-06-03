@@ -189,7 +189,7 @@ public class IOUtils {
             var res = createFolderInSaveLocation("Queues" + File.separator + queue.getName());
             if (res) {
                 var downloadsByQueueName = DownloadsRepo.getDownloadsByQueueName(queue.getName());
-                if (FxUtils.askToMoveFiles(downloadsByQueueName, queue)) {
+                if (FxUtils.askToMoveFilesForQueues(downloadsByQueueName, queue)) {
                     downloadsByQueueName.forEach(dm -> {
                         var newFilePath = queuesPath + queue.getName() + File.separator + dm.getName();
                         moveDownloadFilesFiles(dm, newFilePath);
@@ -197,6 +197,70 @@ public class IOUtils {
                 }
             }
         } else moveFilesAndDeleteQueueFolder(queue.getName());
+    }
+
+    public static void saveConfigs() {
+        try {
+            var file = new File(dataPath + "config.cfg");
+            if (!file.exists())
+                file.createNewFile();
+
+            var writer = new FileWriter(file);
+            writer.append("save_location=").append(downloadPath)
+                    .append("\n")
+                    .append("theme=").append(theme)
+                    .append("\n")
+                    .append("server_enabled=").append(String.valueOf(serverEnabled))
+                    .append("\n")
+                    .append("port=").append(String.valueOf(port));
+            writer.flush();
+            writer.close();
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void readConfig() {
+        try {
+            var file = new File(dataPath + "config.cfg");
+            if (file.exists()) {
+                var reader = new BufferedReader(new FileReader(file));
+                String cfg;
+                while ((cfg = reader.readLine()) != null) {
+                    var key = cfg.split("=")[0];
+                    var value = cfg.split("=")[1];
+                    switch (key) {
+                        case "save_location" -> downloadPath = value;
+                        case "theme" -> theme = value;
+                        case "server_enabled" -> serverEnabled = value.equals("true");
+                        case "port" -> port = Integer.parseInt(value);
+                    }
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void moveAndDeletePreviousData(String prevPath, String nextPath) {
+        var nextDir = new File(nextPath);
+        if (!nextDir.exists())
+            nextDir.mkdir();
+        var prevDir = new File(prevPath);
+        var files = prevDir.listFiles();
+        if (files != null) {
+            for (var file : files) {
+                if (file.isFile())
+                    file.renameTo(new File(nextPath + file.getName()));
+                else if (file.isDirectory()){
+                    var innerPrevPath = prevPath + file.getName() + File.separator;
+                    var innerNextPath = nextPath + file.getName() + File.separator;
+                    moveAndDeletePreviousData(innerPrevPath, innerNextPath);
+                }
+            }
+        }
+        prevDir.delete();
     }
 
 }
