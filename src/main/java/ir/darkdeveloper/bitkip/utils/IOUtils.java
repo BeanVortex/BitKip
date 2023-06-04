@@ -249,18 +249,31 @@ public class IOUtils {
             nextDir.mkdir();
         var prevDir = new File(prevPath);
         var files = prevDir.listFiles();
-        if (files != null) {
+        if (files != null)
             for (var file : files) {
                 if (file.isFile())
                     file.renameTo(new File(nextPath + file.getName()));
-                else if (file.isDirectory()){
+                else if (file.isDirectory()) {
                     var innerPrevPath = prevPath + file.getName() + File.separator;
                     var innerNextPath = nextPath + file.getName() + File.separator;
                     moveAndDeletePreviousData(innerPrevPath, innerNextPath);
                 }
             }
-        }
         prevDir.delete();
     }
 
+    public static void deleteFolderWithContent(String dirPath) {
+        var file = new File(dirPath);
+        if (file.isFile()) {
+            if (file.exists())
+                file.delete();
+            return;
+        }
+        var files = file.listFiles();
+        if (files != null)
+            for (var f : files)
+                if (file.isDirectory())
+                    deleteFolderWithContent(f.getPath());
+        file.delete();
+    }
 }

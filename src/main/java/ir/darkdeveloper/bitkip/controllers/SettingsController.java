@@ -1,6 +1,7 @@
 package ir.darkdeveloper.bitkip.controllers;
 
 import ir.darkdeveloper.bitkip.controllers.interfaces.FXMLController;
+import ir.darkdeveloper.bitkip.repo.DownloadsRepo;
 import ir.darkdeveloper.bitkip.utils.FxUtils;
 import ir.darkdeveloper.bitkip.utils.IOUtils;
 import javafx.event.ActionEvent;
@@ -14,7 +15,6 @@ import javafx.scene.shape.Circle;
 import javafx.scene.shape.Line;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.Stage;
-import org.controlsfx.control.Notifications;
 
 import java.io.File;
 import java.net.URL;
@@ -79,11 +79,12 @@ public class SettingsController implements FXMLController {
             IOUtils.createSaveLocations();
             IOUtils.saveConfigs();
             lblLocation.setText(downloadPath);
-            var header = "Move downloaded files?";
-            var content = "Would you also like to move download files to the new location?";
-            if (FxUtils.askWarning(header, content)){
+            var header = "Move downloaded files and folders?";
+            var content = "Would you also like to move download files and folders to the new location?" +
+                    " This might take some time to move files, so DO NOT close app in any circumstances";
+            if (FxUtils.askWarning(header, content)) {
                 IOUtils.moveAndDeletePreviousData(prevDownloadPath, downloadPath);
-                BooksRepo.updateBooksPath(Configs.getSaveLocation());
+                DownloadsRepo.updateDownloadLocation(prevDownloadPath, downloadPath);
             }
 
         }

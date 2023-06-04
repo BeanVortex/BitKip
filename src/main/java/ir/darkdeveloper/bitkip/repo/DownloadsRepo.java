@@ -75,7 +75,7 @@ public class DownloadsRepo {
 
         var showDialog = dm.isShowCompleteDialog() ? 1 : 0;
         var openFile = dm.isOpenAfterComplete() ? 1 : 0;
-        var resumeable = dm.isResumable() ? 1 : 0;
+        var resumable = dm.isResumable() ? 1 : 0;
 
         var downloadSql = """
                 INSERT INTO %s (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
@@ -96,7 +96,7 @@ public class DownloadsRepo {
                 lastTryDate,
                 showDialog,
                 openFile,
-                resumeable);
+                resumable);
 
         try (var con = DatabaseHelper.openConnection();
              var stmt = con.createStatement()) {
@@ -161,6 +161,14 @@ public class DownloadsRepo {
                 SELECT * FROM %s WHERE %s="%s";
                 """
                 .formatted(DOWNLOADS_TABLE_NAME, COL_URL, url);
+        return fetchDownloads(sql, false);
+    }
+
+    public static List<DownloadModel> findById(int id) {
+        var sql = """
+                SELECT * FROM %s WHERE %s="%s";
+                """
+                .formatted(DOWNLOADS_TABLE_NAME, COL_ID, id);
         return fetchDownloads(sql, false);
     }
 
@@ -375,4 +383,13 @@ public class DownloadsRepo {
         DatabaseHelper.executeUpdateSql(sql, false);
     }
 
+    public static void updateDownloadLocation(String prevDownloadPath, String downloadPath) {
+        var sql = """
+                UPDATE %s SET %s="%s%s" WHERE %s = "%s%s";
+                """
+                .formatted(DOWNLOADS_TABLE_NAME,
+                        COL_PATH, downloadPath, COL_NAME,
+                        COL_PATH, prevDownloadPath, COL_NAME);
+        DatabaseHelper.executeUpdateSql(sql, false);
+    }
 }

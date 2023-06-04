@@ -30,7 +30,7 @@ module ir.darkdeveloper.bitkip {
     opens ir.darkdeveloper.bitkip.controllers to javafx.fxml, javafx.base, org.eclipse.jetty.servlet, org.eclipse.jetty.server;
     opens ir.darkdeveloper.bitkip.models to javafx.fxml, javafx.base, com.fasterxml.jackson.databind;
     opens ir.darkdeveloper.bitkip.controllers.interfaces to javafx.base, javafx.fxml;
-    exports ir.darkdeveloper.bitkip;
     opens ir.darkdeveloper.bitkip.servlets to javafx.base, javafx.fxml,
             org.eclipse.jetty.server, org.eclipse.jetty.servlet, com.fasterxml.jackson.databind;
+    exports ir.darkdeveloper.bitkip;
 }

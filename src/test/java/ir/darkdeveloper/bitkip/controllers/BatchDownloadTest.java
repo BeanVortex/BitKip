@@ -8,7 +8,7 @@ class BatchDownloadTest {
 
     @Test
     void generateLinks1Digits() {
-        var batchDown = new BatchDownload();
+        var batchDown = new ir.darkdeveloper.bitkip.controllers.BatchDownload();
         int start = 1;
         int end = 9;
         var l = batchDown.generateLinks("https://www.file.com/file$$$$.so", start, end, 5, false);
@@ -19,7 +19,7 @@ class BatchDownloadTest {
 
     @Test
     void generateLinks2Digits() {
-        var batchDown = new BatchDownload();
+        var batchDown = new ir.darkdeveloper.bitkip.controllers.BatchDownload();
         int start = 5;
         int end = 16;
         var l = batchDown.generateLinks("https://www.file.com/file$$$$.so", start, end, 5, false);
@@ -33,7 +33,7 @@ class BatchDownloadTest {
 
     @Test
     void generateLinks3Digits() {
-        var batchDown = new BatchDownload();
+        var batchDown = new ir.darkdeveloper.bitkip.controllers.BatchDownload();
         int start = 56;
         int end = 126;
         var l = batchDown.generateLinks("https://www.file.com/file$$$.so", start, end, 5, false);
@@ -47,7 +47,7 @@ class BatchDownloadTest {
 
     @Test
     void generateLinks4Digits() {
-        var batchDown = new BatchDownload();
+        var batchDown = new ir.darkdeveloper.bitkip.controllers.BatchDownload();
         int start = 926;
         int end = 1260;
         var l = batchDown.generateLinks("https://www.file.com/file$$$$.so", start, end, 5, false);
@@ -61,7 +61,7 @@ class BatchDownloadTest {
 
     @Test
     void generateLinks3Digits2Patterns() {
-        var batchDown = new BatchDownload();
+        var batchDown = new ir.darkdeveloper.bitkip.controllers.BatchDownload();
         int start = 56;
         int end = 126;
         assertThrows(IllegalArgumentException.class,
