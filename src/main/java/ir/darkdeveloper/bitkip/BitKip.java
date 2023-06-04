@@ -36,6 +36,7 @@ public class BitKip extends Application {
     @Override
     public void start(Stage stage) {
         IOUtils.readConfig();
+        AppConfigs.initPaths();
         IOUtils.createSaveLocations();
         DownloadsRepo.createTable();
         ScheduleRepo.createSchedulesTable();

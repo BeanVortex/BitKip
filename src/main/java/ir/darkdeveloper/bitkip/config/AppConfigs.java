@@ -47,15 +47,25 @@ public class AppConfigs {
         log = LoggerFactory.getLogger("BitKip");
     }
 
-    public static final String compressedPath = downloadPath + "Compressed" + File.separator;
-    public static final String programsPath = downloadPath + "Programs" + File.separator;
-    public static final String videosPath = downloadPath + "Videos" + File.separator;
-    public static final String documentPath = downloadPath + "Documents" + File.separator;
-    public static final String musicPath = downloadPath + "Music" + File.separator;
-    public static final String othersPath = downloadPath + "Others" + File.separator;
-    public static final List<String> defaultDownloadPaths = List.of(compressedPath, programsPath, videosPath,
-            documentPath, musicPath, othersPath);
-    public static final String queuesPath = downloadPath + "Queues" + File.separator;
+    public static String compressedPath;
+    public static String programsPath;
+    public static String videosPath;
+    public static String documentPath;
+    public static String musicPath;
+    public static String othersPath;
+    public static List<String> defaultDownloadPaths;
+    public static String queuesPath;
+
+    public static void initPaths() {
+        compressedPath = downloadPath + "Compressed" + File.separator;
+        programsPath = downloadPath + "Programs" + File.separator;
+        videosPath = downloadPath + "Videos" + File.separator;
+        documentPath = downloadPath + "Documents" + File.separator;
+        musicPath = downloadPath + "Music" + File.separator;
+        othersPath = downloadPath + "Others" + File.separator;
+        defaultDownloadPaths = List.of(compressedPath, programsPath, videosPath, documentPath, musicPath, othersPath);
+        queuesPath = downloadPath + "Queues" + File.separator;
+    }
 
     public static int downloadRetryCount = 10;
     public static int downloadRateLimitCount = 20;

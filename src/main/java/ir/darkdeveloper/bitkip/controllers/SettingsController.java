@@ -52,7 +52,7 @@ public class SettingsController implements FXMLController {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-
+        lblLocation.setText(downloadPath);
     }
 
 
