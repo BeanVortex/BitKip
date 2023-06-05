@@ -36,7 +36,7 @@ class DownloadsRepoTest {
         var newPath = System.getProperty("user.home")
                 + File.separator + "Desktop"
                 + File.separator + "BitKip-test-folder-new" + File.separator;
-        DownloadsRepo.updateDownloadLocation(downloadPath, newPath);
+        DownloadsRepo.updateDownloadLocation(newPath, dmId);
         var byId = DownloadsRepo.findById(dmId);
 
         assert byId.size() == 1;

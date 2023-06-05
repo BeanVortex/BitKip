@@ -383,13 +383,13 @@ public class DownloadsRepo {
         DatabaseHelper.executeUpdateSql(sql, false);
     }
 
-    public static void updateDownloadLocation(String prevDownloadPath, String downloadPath) {
+    public static void updateDownloadLocation(String downloadPath, int id) {
         var sql = """
-                UPDATE %s SET %s="%s%s" WHERE %s = "%s%s";
+                UPDATE %s SET %s="%s" || %s WHERE %s = %d;
                 """
                 .formatted(DOWNLOADS_TABLE_NAME,
                         COL_PATH, downloadPath, COL_NAME,
-                        COL_PATH, prevDownloadPath, COL_NAME);
+                        COL_ID, id);
         DatabaseHelper.executeUpdateSql(sql, false);
     }
 }

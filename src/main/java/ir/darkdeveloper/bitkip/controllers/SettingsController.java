@@ -1,5 +1,6 @@
 package ir.darkdeveloper.bitkip.controllers;
 
+import ir.darkdeveloper.bitkip.config.AppConfigs;
 import ir.darkdeveloper.bitkip.controllers.interfaces.FXMLController;
 import ir.darkdeveloper.bitkip.task.FileMoveTask;
 import ir.darkdeveloper.bitkip.utils.FxUtils;
@@ -82,29 +83,18 @@ public class SettingsController implements FXMLController {
             downloadPath = selectedDir.getPath() + File.separator + "BitKip" + File.separator;
             IOUtils.createSaveLocations();
             IOUtils.saveConfigs();
+            AppConfigs.initPaths();
             lblLocation.setText(downloadPath);
             var header = "Move downloaded files and folders?";
             var content = "Would you also like to move download files and folders to the new location?" +
-                    " This might take some time to move files, so DO NOT close app in any circumstances";
+                    " This might take some time to move files, some downloads that are saved outside BitKip folders, might not be accessed through the app";
             if (FxUtils.askWarning(header, content)) {
                 try {
                     var size = IOUtils.getFolderSize(prevDownloadPath);
                     var executor = Executors.newCachedThreadPool();
-                    var fileMoveTask = new FileMoveTask(prevDownloadPath, downloadPath,size, executor);
-                    fileMoveTask.progressProperty().addListener((o,ol,n) -> {
-                        System.out.println(n);
-                    });
-
-                    fileMoveTask.valueProperty().addListener((o,ol,n) -> {
-                        if (ol == null)
-                            ol = n;
-                        var currentSpeed = (n - ol);
-                        if (n == 0)
-                            currentSpeed = 0;
-                        System.out.println(IOUtils.formatBytes(currentSpeed));
-                    });
-
+                    var fileMoveTask = new FileMoveTask(prevDownloadPath, downloadPath, size, executor);
                     executor.submit(fileMoveTask);
+                    FxUtils.fileTransferDialog(fileMoveTask);
                 } catch (IOException ex) {
                     log.error("Failed to move files and folders: " + ex.getMessage());
                     Notifications.create()

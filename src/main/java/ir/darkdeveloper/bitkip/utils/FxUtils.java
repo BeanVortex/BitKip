@@ -4,6 +4,7 @@ package ir.darkdeveloper.bitkip.utils;
 import ir.darkdeveloper.bitkip.controllers.*;
 import ir.darkdeveloper.bitkip.controllers.interfaces.FXMLController;
 import ir.darkdeveloper.bitkip.models.*;
+import ir.darkdeveloper.bitkip.task.FileMoveTask;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXMLLoader;
@@ -113,51 +114,29 @@ public class FxUtils {
         stage.setMinWidth(root.getMinWidth());
         stage.setMinHeight(root.getMinHeight());
         stage.setTitle("New Queue");
-        NewQueueController controller = loader.getController();
+        FXMLController controller = loader.getController();
         controller.setStage(stage);
         stage.showAndWait();
     }
 
     public static void newAboutStage() {
-        if (openStages.containsKey(ABOUT_STAGE)) {
-            openStages.get(ABOUT_STAGE).toFront();
-            return;
-        }
-        FXMLLoader loader;
-        Stage stage = new Stage();
-        VBox root;
-        try {
-            loader = new FXMLLoader(getResource("fxml/about.fxml"));
-            root = loader.load();
-        } catch (IOException e) {
-            log.error(e.getLocalizedMessage());
-            throw new RuntimeException(e);
-        }
-        var scene = new Scene(root);
-        stage.setScene(scene);
-        stage.setMinWidth(root.getMinWidth());
-        stage.setMinHeight(root.getMinHeight());
-        stage.setTitle("About");
-        var logoPath = getResource("icons/logo.png");
-        if (logoPath != null)
-            stage.getIcons().add(new Image(logoPath.toExternalForm()));
-        FXMLController controller = loader.getController();
-        controller.setStage(stage);
-        stage.setOnCloseRequest(e -> openStages.remove(ABOUT_STAGE));
-        stage.show();
-        openStages.put(ABOUT_STAGE, stage);
+        newOnceStageWindow(ABOUT_STAGE, "fxml/about.fxml", "About");
     }
 
     public static void newLogsStage() {
-        if (openStages.containsKey(LOGS_STAGE)) {
-            openStages.get(LOGS_STAGE).toFront();
+        newOnceStageWindow(LOGS_STAGE, "fxml/logs.fxml", "Logs");
+    }
+
+    public static void newOnceStageWindow(String key, String resource, String title) {
+        if (openStages.containsKey(key)) {
+            openStages.get(key).toFront();
             return;
         }
         FXMLLoader loader;
         Stage stage = new Stage();
         VBox root;
         try {
-            loader = new FXMLLoader(getResource("fxml/logs.fxml"));
+            loader = new FXMLLoader(getResource(resource));
             root = loader.load();
         } catch (IOException e) {
             log.error(e.getLocalizedMessage());
@@ -167,19 +146,18 @@ public class FxUtils {
         stage.setScene(scene);
         stage.setMinWidth(root.getMinWidth());
         stage.setMinHeight(root.getMinHeight());
-        stage.setTitle("Logs");
+        stage.setTitle(title);
         var logoPath = getResource("icons/logo.png");
         if (logoPath != null)
             stage.getIcons().add(new Image(logoPath.toExternalForm()));
         FXMLController controller = loader.getController();
         controller.setStage(stage);
-        stage.setOnCloseRequest(e -> openStages.remove(LOGS_STAGE));
+        stage.setOnCloseRequest(e -> openStages.remove(key));
         stage.show();
-        openStages.put(LOGS_STAGE, stage);
+        openStages.put(key, stage);
     }
 
-
-    public static void newSettingsStage(){
+    public static void newSettingsStage() {
         FXMLLoader loader;
         Stage stage = new Stage();
         VBox root;
@@ -200,7 +178,6 @@ public class FxUtils {
             stage.getIcons().add(new Image(logoPath.toExternalForm()));
         FXMLController controller = loader.getController();
         controller.setStage(stage);
-//        stage.setOnCloseRequest(e -> );
         stage.show();
     }
 
@@ -491,4 +468,35 @@ public class FxUtils {
         clip.setContent(content);
         log.info("Clipboard set : " + content);
     }
+
+    public static void fileTransferDialog(FileMoveTask fileMoveTask) {
+        var dialog = new Dialog<Boolean>();
+        dialog.setTitle("Moving files");
+        dialog.setHeaderText("Moving files...");
+        var progressBar = new ProgressBar();
+        progressBar.setPrefWidth(180);
+        var contentLabel = new Label();
+        contentLabel.setText("Moving files from \n" + fileMoveTask.getPrevPath() + "\nto\n" + fileMoveTask.getNextPath());
+        var container = new VBox();
+        contentLabel.setWrapText(true);
+        container.setStyle("-fx-padding: 10");
+        container.setPrefWidth(200);
+        container.setSpacing(10);
+        container.setAlignment(Pos.CENTER_LEFT);
+        container.getChildren().addAll(contentLabel, progressBar);
+        dialog.getDialogPane().setContent(container);
+
+        var logoPath = getResource("icons/logo.png");
+        if (logoPath != null)
+            ((Stage) dialog.getDialogPane().getScene().getWindow()).getIcons().add(new Image(logoPath.toExternalForm()));
+        fileMoveTask.progressProperty().addListener((o, ol, n) -> {
+            progressBar.setProgress(n.doubleValue());
+            if (n.doubleValue() == 1) {
+                dialog.setResult(true);
+                dialog.hide();
+            }
+        });
+        dialog.show();
+    }
+
 }

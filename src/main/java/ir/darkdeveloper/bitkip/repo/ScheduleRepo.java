@@ -188,7 +188,7 @@ public class ScheduleRepo {
             var defaultSchedule = new ScheduleModel();
             insertSchedule(defaultSchedule, queue.getId());
             String[] cols = {COL_SCHEDULE_ID};
-            String[] values = {defaultSchedule.getId() + ""};
+            String[] values = {String.valueOf(defaultSchedule.getId())};
             DatabaseHelper.updateRow(cols, values, QUEUES_TABLE_NAME, queue.getId());
             queue.setSchedule(defaultSchedule);
         }).toList();
