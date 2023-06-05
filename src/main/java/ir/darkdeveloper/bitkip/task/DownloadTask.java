@@ -3,18 +3,19 @@ package ir.darkdeveloper.bitkip.task;
 
 import ir.darkdeveloper.bitkip.models.DownloadModel;
 import ir.darkdeveloper.bitkip.models.DownloadStatus;
+import ir.darkdeveloper.bitkip.utils.IOUtils;
 import ir.darkdeveloper.bitkip.utils.MainTableUtils;
 import javafx.concurrent.Task;
 
 import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.concurrent.ExecutorService;
 
 import static ir.darkdeveloper.bitkip.config.AppConfigs.currentDownloadings;
 import static ir.darkdeveloper.bitkip.config.AppConfigs.log;
 
+/**
+ * Value returned by tasks is for transfer speed
+ * */
 public abstract class DownloadTask extends Task<Long> {
 
     protected static final long ONE_SEC = 1000;
@@ -26,14 +27,11 @@ public abstract class DownloadTask extends Task<Long> {
         this.downloadModel = downloadModel;
     }
 
-    static long getCurrentFileSize(File file) throws IOException {
-        return Files.size(Path.of(file.getPath()));
-    }
 
     protected boolean isCompleted(DownloadModel download, File file, MainTableUtils mainTableUtils) {
         try {
             var fs = download.getSize();
-            var existingFileSize = getCurrentFileSize(file);
+            var existingFileSize = IOUtils.getFileSize(file);
             if (fs != 0 && existingFileSize == fs) {
                 download.setDownloadStatus(DownloadStatus.Completed);
                 mainTableUtils.refreshTable();

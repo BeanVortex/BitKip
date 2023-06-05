@@ -79,14 +79,14 @@ public class NewDownloadUtils {
                 chunksField.setDisable(true);
                 bytesField.setDisable(true);
             } else {
-                chunksField.setText("" + InputValidations.maxChunks());
+                chunksField.setText(String.valueOf(InputValidations.maxChunks()));
                 chunksField.setDisable(false);
             }
             Platform.runLater(() -> {
                 resumableLabel.setTextFill(resumable ? Paint.valueOf("#388E3C") : Paint.valueOf("#EF5350"));
                 resumableLabel.setText(resumable ? "Yes" : "No");
                 sizeLabel.setText(IOUtils.formatBytes(fileSize));
-                bytesField.setText(fileSize + "");
+                bytesField.setText(String.valueOf(fileSize));
             });
             dm.setResumable(resumable);
             dm.setSize(fileSize);
@@ -260,7 +260,7 @@ public class NewDownloadUtils {
                 return defaultDownloadPaths.stream().filter(p -> p.contains(entry.getKey()))
                         .findFirst().orElse(othersPath);
         }
-        return null;
+        return othersPath;
     }
 }
 

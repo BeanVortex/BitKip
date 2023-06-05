@@ -314,6 +314,10 @@ public class FxUtils {
                 "Would you also like to move download files to the new location?", yes, no);
         alert.setTitle("Confirmation");
         alert.setHeaderText("Move files?");
+        return showAlert(yes, no, alert);
+    }
+
+    private static boolean showAlert(ButtonType yes, ButtonType no, Alert alert) {
         var stage = (Stage) alert.getDialogPane().getScene().getWindow();
         var logoPath = getResource("icons/logo.png");
         if (logoPath != null)
@@ -341,13 +345,7 @@ public class FxUtils {
             alert = new Alert(alertType, content, primary, secondary);
         alert.setTitle(alertType.name());
         alert.setHeaderText(header);
-        var stage = (Stage) alert.getDialogPane().getScene().getWindow();
-        var logoPath = getResource("icons/logo.png");
-        if (logoPath != null)
-            stage.getIcons().add(new Image(logoPath.toExternalForm()));
-        var res = alert.showAndWait();
-
-        return res.orElse(secondary) == primary;
+        return showAlert(primary, secondary, alert);
     }
 
     public static void newRefreshStage(DownloadModel dm) {
@@ -494,4 +492,3 @@ public class FxUtils {
         log.info("Clipboard set : " + content);
     }
 }
-

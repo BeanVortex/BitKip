@@ -5,6 +5,7 @@ import ir.darkdeveloper.bitkip.models.DownloadModel;
 import ir.darkdeveloper.bitkip.models.DownloadStatus;
 import ir.darkdeveloper.bitkip.repo.DownloadsRepo;
 import ir.darkdeveloper.bitkip.utils.DownloadOpUtils;
+import ir.darkdeveloper.bitkip.utils.IOUtils;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -56,7 +57,7 @@ public class DownloadLimitedTask extends DownloadTask {
                 log.error(e.getLocalizedMessage());
             this.pause();
         }
-        return getCurrentFileSize(file);
+        return IOUtils.getFileSize(file);
     }
 
 
@@ -78,7 +79,7 @@ public class DownloadLimitedTask extends DownloadTask {
 
                 var existingFileSize = 0L;
                 if (file.exists())
-                    existingFileSize = getCurrentFileSize(file);
+                    existingFileSize = IOUtils.getFileSize(file);
 
                 if (isSpeedLimited)
                     downloadSpeedLimited(fileChannel, in, file, limit, fileSize, existingFileSize);
@@ -95,7 +96,7 @@ public class DownloadLimitedTask extends DownloadTask {
                 }
             } catch (ClosedChannelException ignore) {
             }
-            var currFileSize = getCurrentFileSize(file);
+            var currFileSize = IOUtils.getFileSize(file);
             if (!paused && currFileSize != downloadModel.getSize())
                 performDownload();
         }
@@ -124,7 +125,7 @@ public class DownloadLimitedTask extends DownloadTask {
             else
                 timeToWait = 0;
             Thread.sleep(timeToWait);
-            var currentFileSize = getCurrentFileSize(file);
+            var currentFileSize = IOUtils.getFileSize(file);
             existingFileSize = currentFileSize;
             updateProgress(currentFileSize, fileSize);
             updateValue(existingFileSize);
@@ -152,7 +153,7 @@ public class DownloadLimitedTask extends DownloadTask {
                 var download = dmOpt.get();
                 download.setDownloadStatus(DownloadStatus.Paused);
                 downloadModel.setDownloadStatus(DownloadStatus.Paused);
-                if (file.exists() && getCurrentFileSize(file) == downloadModel.getSize()) {
+                if (file.exists() && IOUtils.getFileSize(file) == downloadModel.getSize()) {
                     log.info("File successfully downloaded: " + download);
                     download.setCompleteDate(LocalDateTime.now());
                     download.setDownloadStatus(DownloadStatus.Completed);
@@ -173,7 +174,7 @@ public class DownloadLimitedTask extends DownloadTask {
                 } else openDownloadings.stream().filter(dc -> dc.getDownloadModel().equals(download))
                         .forEach(DownloadingController::onPause);
 
-                download.setDownloaded(getCurrentFileSize(file));
+                download.setDownloaded(IOUtils.getFileSize(file));
                 DownloadsRepo.updateDownloadProgress(download);
                 DownloadsRepo.updateDownloadLastTryDate(download);
                 currentDownloadings.remove(download);
@@ -203,7 +204,7 @@ public class DownloadLimitedTask extends DownloadTask {
                 isCalculating = true;
                 while (!paused) {
                     Thread.sleep(ONE_SEC);
-                    var currentFileSize = getCurrentFileSize(file);
+                    var currentFileSize = IOUtils.getFileSize(file);
                     updateProgress(currentFileSize, fileSize);
                     updateValue(currentFileSize);
                 }
@@ -218,7 +219,7 @@ public class DownloadLimitedTask extends DownloadTask {
 
     private void configureResume(HttpURLConnection con, File file, long fileSize) throws IOException {
         if (file.exists()) {
-            var existingFileSize = getCurrentFileSize(file);
+            var existingFileSize = IOUtils.getFileSize(file);
             con.addRequestProperty("Range", "bytes=" + existingFileSize + "-" + (fileSize - 1));
         }
     }

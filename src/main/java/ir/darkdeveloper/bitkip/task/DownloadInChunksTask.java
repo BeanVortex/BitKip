@@ -98,7 +98,7 @@ public class DownloadInChunksTask extends DownloadTask {
             if (!partFile.exists())
                 partFile.createNewFile();
             else {
-                existingFileSize = getCurrentFileSize(partFile);
+                existingFileSize = IOUtils.getFileSize(partFile);
                 if (i + 1 != chunks && existingFileSize == bytesForEach)
                     continue;
 
@@ -175,14 +175,14 @@ public class DownloadInChunksTask extends DownloadTask {
                     retries++;
                     log.warn("Downloading part " + partFile.getName() + " failed. retry count : " + retries);
                     Thread.sleep(2000);
-                    var currFileSize = getCurrentFileSize(partFile);
+                    var currFileSize = IOUtils.getFileSize(partFile);
                     performDownload(url, from + currFileSize, from, to, partFile, currFileSize, rateLimitCount, retries);
                 }
             } catch (ClosedChannelException ignore) {
             }
 
             // when connection has been closed by the server
-            var currFileSize = getCurrentFileSize(partFile);
+            var currFileSize = IOUtils.getFileSize(partFile);
             if (!paused && currFileSize != (to - from + 1) && downloadRateLimitCount < rateLimitCount) {
                 rateLimitCount++;
                 performDownload(url, from + currFileSize, from, to, partFile, currFileSize, rateLimitCount, retries);
@@ -220,12 +220,12 @@ public class DownloadInChunksTask extends DownloadTask {
                     retries++;
                     log.warn("Downloading part " + partFile.getName() + " failed. retry count : " + retries);
                     Thread.sleep(2000);
-                    var currFileSize = getCurrentFileSize(partFile);
+                    var currFileSize = IOUtils.getFileSize(partFile);
                     performLimitedDownload(url, from + currFileSize, from, to, partFile, currFileSize, rateLimitCount, retries);
                 }
             } catch (ClosedChannelException ignore) {
             }
-            var currFileSize = getCurrentFileSize(partFile);
+            var currFileSize = IOUtils.getFileSize(partFile);
             if (!paused && currFileSize != (to - from + 1) && downloadRateLimitCount < rateLimitCount) {
                 rateLimitCount++;
                 performLimitedDownload(url, from + currFileSize, from, to, partFile, currFileSize, rateLimitCount, retries);
@@ -293,8 +293,8 @@ public class DownloadInChunksTask extends DownloadTask {
                     download.setDownloaded(download.getSize());
                     download.setProgress(100);
                     mainTableUtils.refreshTable();
-                    updateProgress(1, 1);
                     DownloadsRepo.updateDownloadCompleteDate(download);
+                    updateProgress(1, 1);
                     openDownloadings.stream().filter(dc -> dc.getDownloadModel().equals(download))
                             .findFirst().ifPresentOrElse(dc -> dc.onComplete(download),
                                     () -> {

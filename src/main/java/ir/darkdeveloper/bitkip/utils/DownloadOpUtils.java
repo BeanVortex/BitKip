@@ -38,7 +38,7 @@ public class DownloadOpUtils {
             if (speed != null) {
                 if (speed.equals("0")) {
                     if (bytes != null) {
-                        if (bytes.equals(dm.getSize() + ""))
+                        if (bytes.equals(String.valueOf(dm.getSize())))
                             downloadTask = new DownloadLimitedTask(dm, Long.MAX_VALUE, false);
                         else
                             downloadTask = new DownloadLimitedTask(dm, Long.parseLong(bytes), false);

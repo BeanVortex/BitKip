@@ -1,7 +1,7 @@
 package ir.darkdeveloper.bitkip.controllers;
 
 import ir.darkdeveloper.bitkip.controllers.interfaces.FXMLController;
-import ir.darkdeveloper.bitkip.repo.DownloadsRepo;
+import ir.darkdeveloper.bitkip.task.FileMoveTask;
 import ir.darkdeveloper.bitkip.utils.FxUtils;
 import ir.darkdeveloper.bitkip.utils.IOUtils;
 import javafx.event.ActionEvent;
@@ -15,12 +15,16 @@ import javafx.scene.shape.Circle;
 import javafx.scene.shape.Line;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.Stage;
+import org.controlsfx.control.Notifications;
 
 import java.io.File;
+import java.io.IOException;
 import java.net.URL;
 import java.util.ResourceBundle;
+import java.util.concurrent.Executors;
 
 import static ir.darkdeveloper.bitkip.config.AppConfigs.downloadPath;
+import static ir.darkdeveloper.bitkip.config.AppConfigs.log;
 
 public class SettingsController implements FXMLController {
 
@@ -83,8 +87,31 @@ public class SettingsController implements FXMLController {
             var content = "Would you also like to move download files and folders to the new location?" +
                     " This might take some time to move files, so DO NOT close app in any circumstances";
             if (FxUtils.askWarning(header, content)) {
-                IOUtils.moveAndDeletePreviousData(prevDownloadPath, downloadPath);
-                DownloadsRepo.updateDownloadLocation(prevDownloadPath, downloadPath);
+                try {
+                    var size = IOUtils.getFolderSize(prevDownloadPath);
+                    var executor = Executors.newCachedThreadPool();
+                    var fileMoveTask = new FileMoveTask(prevDownloadPath, downloadPath,size, executor);
+                    fileMoveTask.progressProperty().addListener((o,ol,n) -> {
+                        System.out.println(n);
+                    });
+
+                    fileMoveTask.valueProperty().addListener((o,ol,n) -> {
+                        if (ol == null)
+                            ol = n;
+                        var currentSpeed = (n - ol);
+                        if (n == 0)
+                            currentSpeed = 0;
+                        System.out.println(IOUtils.formatBytes(currentSpeed));
+                    });
+
+                    executor.submit(fileMoveTask);
+                } catch (IOException ex) {
+                    log.error("Failed to move files and folders: " + ex.getMessage());
+                    Notifications.create()
+                            .title("Failed to move")
+                            .text("Failed to move files and folders")
+                            .showError();
+                }
             }
 
         }

@@ -23,6 +23,7 @@ import org.eclipse.jetty.util.thread.QueuedThreadPool;
 
 import java.awt.*;
 import java.awt.event.ActionListener;
+import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
 
@@ -112,7 +113,8 @@ public class BitKip extends Application {
     }
 
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
+        System.out.println(IOUtils.getFolderSize("L:\\BitKip"));
         initLogger();
         launch();
     }

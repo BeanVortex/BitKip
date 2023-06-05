@@ -276,4 +276,24 @@ public class IOUtils {
                     deleteFolderWithContent(f.getPath());
         file.delete();
     }
+
+    public static long getFileSize(File file) throws IOException {
+        return getFileSize(Path.of(file.getPath()));
+    }
+
+    public static long getFileSize(Path path) throws IOException {
+        return Files.size(path);
+    }
+
+    public static long getFolderSize(String dirPath) throws IOException {
+        var file = new File(dirPath);
+        var files = file.listFiles();
+        long size = 0;
+        if (files != null)
+            for (var f : files)
+                if (f.isFile()) size += Files.size(Path.of(f.getPath()));
+                else size += getFolderSize(f.getPath());
+
+        return size;
+    }
 }
