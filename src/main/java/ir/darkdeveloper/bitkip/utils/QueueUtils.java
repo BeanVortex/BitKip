@@ -1,6 +1,7 @@
 package ir.darkdeveloper.bitkip.utils;
 
 import ir.darkdeveloper.bitkip.config.AppConfigs;
+import ir.darkdeveloper.bitkip.config.observers.QueueSubject;
 import ir.darkdeveloper.bitkip.models.DownloadModel;
 import ir.darkdeveloper.bitkip.models.DownloadStatus;
 import ir.darkdeveloper.bitkip.models.QueueModel;
@@ -20,6 +21,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import static ir.darkdeveloper.bitkip.config.AppConfigs.log;
 import static ir.darkdeveloper.bitkip.config.AppConfigs.*;
+import static ir.darkdeveloper.bitkip.config.observers.QueueSubject.addAllQueues;
+import static ir.darkdeveloper.bitkip.config.observers.QueueSubject.getQueues;
 
 public class QueueUtils {
 
@@ -234,7 +237,7 @@ public class QueueUtils {
         if (FxUtils.askWarning(header, content)) {
             IOUtils.moveFilesAndDeleteQueueFolder(name);
             QueuesRepo.deleteQueue(name);
-            AppConfigs.deleteQueue(name);
+            QueueSubject.deleteQueue(name);
         }
     }
 }

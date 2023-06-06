@@ -28,15 +28,16 @@ public class AppConfigs {
             + File.separator + "BitKip" + File.separator;
 
     public static String theme = "light";
-
     public static boolean serverEnabled = true;
     public static int serverPort = 9563;
     public static boolean showCompleteDialog = true;
+    public static int downloadRetryCount = 10;
+    public static int downloadRateLimitCount = 20;
 
 
-    public static Logger log;
     public static final ObjectMapper mapper = new ObjectMapper();
 
+    public static Logger log;
 
     public static void initLogger() {
         new File(dataPath).mkdir();
@@ -68,49 +69,18 @@ public class AppConfigs {
         queuesPath = downloadPath + "Queues" + File.separator;
     }
 
-    public static int downloadRetryCount = 10;
-    public static int downloadRateLimitCount = 20;
-    public static HostServices hostServices;
+
 
     public static final List<DownloadModel> currentDownloadings = new ArrayList<>();
     public static final List<QueueModel> startedQueues = new ArrayList<>();
     public static final List<DownloadingController> openDownloadings = new ArrayList<>();
     // integer represents scheduleModelId
     public static final Map<Integer, ScheduleModel> currentSchedules = new HashMap<>();
+
+
     public static MainTableUtils mainTableUtils;
     public static QueueModel selectedQueue;
-
     public static String userPassword;
+    public static HostServices hostServices;
 
-
-    public static void setHostServices(HostServices hostServices) {
-        AppConfigs.hostServices = hostServices;
-    }
-
-    private static final QueueSubject queueSubject = new QueueSubject();
-    private static final List<QueueModel> queues = new ArrayList<>();
-
-    public static void addQueue(QueueModel queue) {
-        queues.add(queue);
-        queueSubject.notifyAllObservers();
-    }
-
-    public static void deleteQueue(String name) {
-        getQueues().removeIf(qm -> qm.getName().equals(name));
-        queueSubject.notifyAllObservers();
-    }
-
-    public static List<QueueModel> getQueues() {
-        return queues;
-    }
-
-    public static void addAllQueues(List<QueueModel> queues) {
-        AppConfigs.queues.clear();
-        AppConfigs.queues.addAll(queues);
-        queueSubject.notifyAllObservers();
-    }
-
-    public static QueueSubject getQueueSubject() {
-        return queueSubject;
-    }
 }

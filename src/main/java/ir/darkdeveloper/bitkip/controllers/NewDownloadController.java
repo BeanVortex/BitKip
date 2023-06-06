@@ -1,6 +1,6 @@
 package ir.darkdeveloper.bitkip.controllers;
 
-import ir.darkdeveloper.bitkip.config.QueueObserver;
+import ir.darkdeveloper.bitkip.config.observers.QueueObserver;
 import ir.darkdeveloper.bitkip.controllers.interfaces.FXMLController;
 import ir.darkdeveloper.bitkip.models.SingleURLModel;
 import javafx.fxml.FXML;
@@ -16,8 +16,8 @@ import java.net.URL;
 import java.util.ResourceBundle;
 
 import static ir.darkdeveloper.bitkip.BitKip.getResource;
-import static ir.darkdeveloper.bitkip.config.AppConfigs.getQueueSubject;
 import static ir.darkdeveloper.bitkip.config.AppConfigs.log;
+import static ir.darkdeveloper.bitkip.config.observers.QueueSubject.getQueueSubject;
 
 public class NewDownloadController implements FXMLController {
 

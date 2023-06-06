@@ -1,7 +1,8 @@
 package ir.darkdeveloper.bitkip.controllers;
 
 import ir.darkdeveloper.bitkip.config.AppConfigs;
-import ir.darkdeveloper.bitkip.config.QueueObserver;
+import ir.darkdeveloper.bitkip.config.observers.QueueObserver;
+import ir.darkdeveloper.bitkip.config.observers.QueueSubject;
 import ir.darkdeveloper.bitkip.models.DownloadModel;
 import ir.darkdeveloper.bitkip.models.DownloadStatus;
 import ir.darkdeveloper.bitkip.models.QueueModel;
@@ -29,6 +30,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executors;
 
 import static ir.darkdeveloper.bitkip.config.AppConfigs.*;
+import static ir.darkdeveloper.bitkip.config.observers.QueueSubject.getQueueSubject;
 import static ir.darkdeveloper.bitkip.utils.Defaults.ALL_DOWNLOADS_QUEUE;
 import static ir.darkdeveloper.bitkip.utils.InputValidations.maxChunks;
 
@@ -93,7 +95,7 @@ public class SingleDownload implements QueueObserver {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        var queues = AppConfigs.getQueues();
+        var queues = QueueSubject.getQueues();
         if (queues.isEmpty())
             queues = QueuesRepo.getAllQueues(false, false);
         queues = queues.stream().filter(QueueModel::isCanAddDownload).toList();
@@ -157,9 +159,9 @@ public class SingleDownload implements QueueObserver {
         nameField.setText(urlModel.filename());
         setLocation(urlModel.filename());
         sizeLabel.setText(IOUtils.formatBytes(urlModel.fileSize()));
-        bytesField.setText(urlModel.fileSize() + "");
+        bytesField.setText(String.valueOf(urlModel.fileSize()));
         chunksField.setDisable(!urlModel.resumable());
-        chunksField.setText(urlModel.resumable() ? maxChunks() + "" : "0");
+        chunksField.setText(urlModel.resumable() ? String.valueOf(maxChunks()) : "0");
         speedField.setDisable(false);
         var resumable = urlModel.resumable();
         resumableLabel.setTextFill(resumable ? Paint.valueOf("#388E3C") : Paint.valueOf("#EF5350"));
@@ -307,7 +309,7 @@ public class SingleDownload implements QueueObserver {
 
     @Override
     public void updateQueue() {
-        var queues = AppConfigs.getQueues();
+        var queues = QueueSubject.getQueues();
         if (queues.isEmpty())
             queues = QueuesRepo.getAllQueues(false, false);
         queues = queues.stream().filter(QueueModel::isCanAddDownload).toList();

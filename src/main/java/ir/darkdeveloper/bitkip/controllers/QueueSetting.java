@@ -1,6 +1,7 @@
 package ir.darkdeveloper.bitkip.controllers;
 
-import ir.darkdeveloper.bitkip.config.QueueObserver;
+import ir.darkdeveloper.bitkip.config.observers.QueueObserver;
+import ir.darkdeveloper.bitkip.config.observers.QueueSubject;
 import ir.darkdeveloper.bitkip.controllers.interfaces.FXMLController;
 import ir.darkdeveloper.bitkip.models.QueueModel;
 import ir.darkdeveloper.bitkip.models.ScheduleModel;
@@ -39,6 +40,7 @@ import java.util.concurrent.Executors;
 import static com.sun.jna.Platform.*;
 import static ir.darkdeveloper.bitkip.BitKip.getResource;
 import static ir.darkdeveloper.bitkip.config.AppConfigs.*;
+import static ir.darkdeveloper.bitkip.config.observers.QueueSubject.getQueueSubject;
 import static ir.darkdeveloper.bitkip.repo.DatabaseHelper.QUEUES_TABLE_NAME;
 import static ir.darkdeveloper.bitkip.repo.QueuesRepo.*;
 import static ir.darkdeveloper.bitkip.utils.Defaults.ALL_DOWNLOADS_QUEUE;
@@ -210,7 +212,7 @@ public class QueueSetting implements FXMLController, QueueObserver {
             horLine2.setPrefWidth(width);
             rightContainer.setPrefWidth(width - queueList.getPrefWidth());
         });
-        selectedQueue.set(getQueues().get(0));
+        selectedQueue.set(QueueSubject.getQueues().get(0));
         stage.heightProperty().addListener((o, o2, n) -> {
             var height = n.longValue();
             queueList.setPrefHeight(height);
@@ -295,7 +297,7 @@ public class QueueSetting implements FXMLController, QueueObserver {
 
     private void initQueuesList() {
         queueList.getItems().clear();
-        queueList.getItems().addAll(getQueues());
+        queueList.getItems().addAll(QueueSubject.getQueues());
         queueList.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
         queueList.setCellFactory(param -> new ListCell<>() {
             @Override
@@ -420,7 +422,7 @@ public class QueueSetting implements FXMLController, QueueObserver {
             IOUtils.createOrDeleteFolderForQueue(queue.hasFolder(), queue);
             ScheduleRepo.updateSchedule(schedule);
             var updatedQueues = QueuesRepo.getAllQueues(false, true);
-            addAllQueues(updatedQueues);
+            QueueSubject.addAllQueues(updatedQueues);
             queueList.getItems().clear();
             queueList.getItems().addAll(updatedQueues);
             queueList.getSelectionModel().select(queue);

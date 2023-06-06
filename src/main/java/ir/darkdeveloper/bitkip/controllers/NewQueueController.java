@@ -1,6 +1,7 @@
 package ir.darkdeveloper.bitkip.controllers;
 
 import ir.darkdeveloper.bitkip.config.AppConfigs;
+import ir.darkdeveloper.bitkip.config.observers.QueueSubject;
 import ir.darkdeveloper.bitkip.controllers.interfaces.FXMLController;
 import ir.darkdeveloper.bitkip.models.QueueModel;
 import ir.darkdeveloper.bitkip.models.ScheduleModel;
@@ -72,7 +73,7 @@ public class NewQueueController implements FXMLController {
         QueuesRepo.insertQueue(queueModel);
         schedule.setQueueId(queueModel.getId());
         ScheduleRepo.updateScheduleQueueId(schedule.getId(), schedule.getQueueId());
-        AppConfigs.addQueue(queueModel);
+        QueueSubject.addQueue(queueModel);
         log.info("Created queue : " + queueModel.toStringModel());
         stage.close();
     }

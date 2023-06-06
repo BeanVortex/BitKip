@@ -1,7 +1,8 @@
 package ir.darkdeveloper.bitkip.controllers;
 
 import ir.darkdeveloper.bitkip.config.AppConfigs;
-import ir.darkdeveloper.bitkip.config.QueueObserver;
+import ir.darkdeveloper.bitkip.config.observers.QueueObserver;
+import ir.darkdeveloper.bitkip.config.observers.QueueSubject;
 import ir.darkdeveloper.bitkip.models.LinkModel;
 import ir.darkdeveloper.bitkip.models.QueueModel;
 import ir.darkdeveloper.bitkip.repo.DownloadsRepo;
@@ -27,8 +28,8 @@ import java.util.List;
 import java.util.ResourceBundle;
 import java.util.concurrent.CompletableFuture;
 
-import static ir.darkdeveloper.bitkip.config.AppConfigs.getQueueSubject;
 import static ir.darkdeveloper.bitkip.config.AppConfigs.log;
+import static ir.darkdeveloper.bitkip.config.observers.QueueSubject.getQueueSubject;
 import static ir.darkdeveloper.bitkip.utils.Defaults.ALL_DOWNLOADS_QUEUE;
 import static ir.darkdeveloper.bitkip.utils.Defaults.extensions;
 
@@ -83,7 +84,7 @@ public class BatchDownload implements QueueObserver {
         openLocation.setGraphic(new FontIcon());
         questionBtnUrl.setGraphic(new FontIcon());
         newQueue.setGraphic(new FontIcon());
-        var queues = AppConfigs.getQueues();
+        var queues = QueueSubject.getQueues();
         if (queues.isEmpty())
             queues = QueuesRepo.getAllQueues(false, false);
         queues = queues.stream().filter(QueueModel::isCanAddDownload).toList();
@@ -326,7 +327,7 @@ public class BatchDownload implements QueueObserver {
 
     @Override
     public void updateQueue() {
-        var queues = AppConfigs.getQueues();
+        var queues = QueueSubject.getQueues();
         if (queues.isEmpty())
             queues = QueuesRepo.getAllQueues(false, false);
         queues = queues.stream().filter(QueueModel::isCanAddDownload).toList();

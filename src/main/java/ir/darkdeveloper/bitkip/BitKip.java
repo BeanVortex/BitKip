@@ -1,6 +1,7 @@
 package ir.darkdeveloper.bitkip;
 
 import ir.darkdeveloper.bitkip.config.AppConfigs;
+import ir.darkdeveloper.bitkip.config.observers.QueueSubject;
 import ir.darkdeveloper.bitkip.servlets.BatchServlet;
 import ir.darkdeveloper.bitkip.servlets.SingleServlet;
 import ir.darkdeveloper.bitkip.repo.DownloadsRepo;
@@ -46,9 +47,9 @@ public class BitKip extends Application {
         if (queues.isEmpty())
             queues = QueuesRepo.createDefaultRecords();
         queues = ScheduleRepo.createDefaultSchedulesForQueues(queues);
-        AppConfigs.addAllQueues(queues);
+        QueueSubject.addAllQueues(queues);
         IOUtils.createFoldersForQueue();
-        AppConfigs.setHostServices(getHostServices());
+        hostServices = getHostServices();
         FxUtils.startMainStage(stage);
         ScheduleTask.startSchedules();
         MoreUtils.checkUpdates(false);
