@@ -211,8 +211,7 @@ public class IOUtils {
                     .append("server_enabled=").append(String.valueOf(serverEnabled)).append("\n")
                     .append("port=").append(String.valueOf(serverPort)).append("\n")
                     .append("is_new_download_file=").append(String.valueOf(isNewDownloadFile)).append("\n")
-                    .append("show_complete_dialog=").append(String.valueOf(showCompleteDialog)).append("\n")
-                    .append("open_after_complete=").append(String.valueOf(openAfterComplete));
+                    .append("show_complete_dialog=").append(String.valueOf(showCompleteDialog));
             writer.flush();
             writer.close();
 
@@ -237,7 +236,6 @@ public class IOUtils {
                         case "port" -> serverPort = Integer.parseInt(value);
                         case "is_new_download_file" -> isNewDownloadFile = value.equals("true");
                         case "show_complete_dialog" -> showCompleteDialog = value.equals("true");
-                        case "open_after_complete" -> openAfterComplete = value.equals("true");
                     }
                 }
             }

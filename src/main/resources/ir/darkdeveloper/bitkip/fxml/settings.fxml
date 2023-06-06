@@ -64,13 +64,8 @@
                   styleClass="settingDescription" onAction="#onNewFileCheck"/>
         <Label styleClass="settingDescription, opacity_7"
                text="If a link assigned to a location, this will not prevent downloading a new link to that location."/>
-
         <CheckBox text="Show complete dialog" fx:id="completeDialogCheck" onAction="#onCompleteDialogCheck"
                   styleClass="settingDescription"/>
-        <CheckBox text="Open after complete" fx:id="openCompleteDialogCheck" onAction="#onOpenCompleteDialogCheck"
-                  styleClass="settingDescription"/>
-
-
     </VBox>
 
 </VBox>

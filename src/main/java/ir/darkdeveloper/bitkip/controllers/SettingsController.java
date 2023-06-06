@@ -8,15 +8,12 @@ import ir.darkdeveloper.bitkip.utils.IOUtils;
 import ir.darkdeveloper.bitkip.utils.InputValidations;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
-import javafx.scene.layout.Background;
 import javafx.scene.layout.VBox;
-import javafx.scene.paint.Paint;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Line;
 import javafx.stage.DirectoryChooser;
@@ -36,8 +33,6 @@ public class SettingsController implements FXMLController {
 
     @FXML
     private CheckBox completeDialogCheck;
-    @FXML
-    private CheckBox openCompleteDialogCheck;
     @FXML
     private Label lblLocation;
     @FXML
@@ -80,7 +75,6 @@ public class SettingsController implements FXMLController {
         lblLocation.setText(downloadPath);
         serverCheck.setSelected(serverEnabled);
         portField.setText(String.valueOf(serverPort));
-        openCompleteDialogCheck.setSelected(openAfterComplete);
         completeDialogCheck.setSelected(showCompleteDialog);
         newFileCheck.setSelected(isNewDownloadFile);
     }
@@ -167,12 +161,6 @@ public class SettingsController implements FXMLController {
     @FXML
     private void onCompleteDialogCheck() {
         showCompleteDialog = completeDialogCheck.isSelected();
-        IOUtils.saveConfigs();
-    }
-
-    @FXML
-    private void onOpenCompleteDialogCheck() {
-        openAfterComplete = openCompleteDialogCheck.isSelected();
         IOUtils.saveConfigs();
     }
 

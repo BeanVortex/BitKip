@@ -31,7 +31,7 @@ public class FileMoveTask extends Task<Long> {
         calculateSpeedAndProgress();
         IOUtils.moveAndDeletePreviousData(prevPath, nextPath);
         DownloadsRepo.getDownloadsByQueueName(ALL_DOWNLOADS_QUEUE).forEach(dm -> {
-            if (dm.getFilePath().contains("BitKip")){
+            if (dm.getFilePath().contains("BitKip")) {
                 var downloadPath = NewDownloadUtils.determineLocation(dm.getName());
                 var id = dm.getId();
                 DownloadsRepo.updateDownloadLocation(downloadPath, id);
@@ -39,22 +39,25 @@ public class FileMoveTask extends Task<Long> {
         });
         isCompleted = true;
         executor.shutdownNow();
+        if (size == 0)
+            updateProgress(1.0d, 1.0d);
         return size;
     }
 
     private void calculateSpeedAndProgress() {
-        executor.submit(() -> {
-            Thread.currentThread().setName("calculator: " + Thread.currentThread().getName());
-            try {
-                while (!isCompleted || !isCanceled) {
-                    var currentFileSize = getFolderSize(nextPath);
-                    updateProgress(currentFileSize, size);
-                    updateValue(currentFileSize);
+        if (size != 0)
+            executor.submit(() -> {
+                Thread.currentThread().setName("calculator: " + Thread.currentThread().getName());
+                try {
+                    while (!isCompleted || !isCanceled) {
+                        var currentFileSize = getFolderSize(nextPath);
+                        updateProgress(currentFileSize, size);
+                        updateValue(currentFileSize);
+                    }
+                } catch (IOException e) {
+                    e.printStackTrace();
                 }
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        });
+            });
     }
 
     public void pause() {
