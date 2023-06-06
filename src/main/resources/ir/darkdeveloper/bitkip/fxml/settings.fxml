@@ -8,7 +8,9 @@
 <?import java.net.URL?>
 <VBox xmlns="http://javafx.com/javafx"
       xmlns:fx="http://javafx.com/fxml"
+      alignment="TOP_CENTER"
       fx:id="parent"
+      style="-fx-padding: 10"
       fx:controller="ir.darkdeveloper.bitkip.controllers.SettingsController"
       prefHeight="600.0" prefWidth="450.0" minHeight="600" minWidth="450" spacing="10">
 
@@ -22,42 +24,51 @@
         <HBox prefWidth="430" alignment="CENTER">
             <Label styleClass="settingDescription" text="Current Location: " fx:id="lblLocation"/>
             <Region HBox.hgrow="ALWAYS"/>
-            <Button text="change" styleClass="download_now_btn" onAction="#changeSaveDir" fx:id="btnChangeDir"/>
+            <Button text="change" styleClass="download_now_btn" onAction="#changeSaveDir"/>
         </HBox>
     </VBox>
 
-    <Line endX="450" stroke="lightgray" fx:id="line1"/>
+    <Line stroke="lightgray" endX="100" fx:id="line1" styleClass="padding_10"/>
 
     <VBox spacing="10" alignment="BASELINE_LEFT">
         <HBox alignment="CENTER">
             <Label styleClass="settingTile" text="Theme:"/>
             <Region HBox.hgrow="ALWAYS"/>
-            <Circle radius="10.0" fill="#fff" stroke="#333" fx:id="circleTheme"/>
+            <Circle radius="10.0" fill="#fff" stroke="#333" fx:id="circleTheme" onMouseClicked="#onThemeChange"/>
         </HBox>
     </VBox>
 
-    <Line endX="450" stroke="lightgray" fx:id="line2"/>
+    <Line stroke="lightgray" fx:id="line2" styleClass="padding_10"/>
 
     <VBox spacing="10">
         <Label styleClass="settingTile" text="Server"/>
-        <CheckBox text="Listen to links from Browser" styleClass="settingDescription" fx:id="serverCheck"/>
-        <HBox alignment="CENTER_LEFT" spacing="5">
-            <Label text="Listening port:" styleClass="settingDescription"/>
-            <TextField fx:id="portField"/>
-        </HBox>
+        <CheckBox text="Listen to links from Browser" styleClass="settingDescription" fx:id="serverCheck"
+                  onAction="#onServerCheck"/>
+        <VBox spacing="5">
+            <HBox alignment="CENTER_LEFT" spacing="5">
+                <Label text="Listening port:" styleClass="settingDescription"/>
+                <TextField fx:id="portField"/>
+                <Region HBox.hgrow="ALWAYS"/>
+                <Button text="Save" styleClass="download_now_btn" onAction="#onPortSave"/>
+            </HBox>
+            <Label styleClass="settingDescription, opacity_7" text="Server settings will apply on restart"/>
+        </VBox>
     </VBox>
 
-    <Line endX="450" stroke="lightgray" fx:id="line3"/>
+    <Line stroke="lightgray" fx:id="line3"/>
 
 
     <VBox alignment="BASELINE_LEFT" spacing="10">
         <Label styleClass="settingTile" text="Download"/>
-        <CheckBox text="Download if link exists for that location" fx:id="newFileCheck" styleClass="settingDescription"/>
+        <CheckBox text="Download if link exists for that location" fx:id="newFileCheck"
+                  styleClass="settingDescription" onAction="#onNewFileCheck"/>
         <Label styleClass="settingDescription, opacity_7"
                text="If a link assigned to a location, this will not prevent downloading a new link to that location."/>
 
-        <CheckBox text="Show complete dialog" fx:id="completeDialogCheck" styleClass="settingDescription"/>
-        <CheckBox text="Open after complete" fx:id="openCompleteDialogCheck" styleClass="settingDescription"/>
+        <CheckBox text="Show complete dialog" fx:id="completeDialogCheck" onAction="#onCompleteDialogCheck"
+                  styleClass="settingDescription"/>
+        <CheckBox text="Open after complete" fx:id="openCompleteDialogCheck" onAction="#onOpenCompleteDialogCheck"
+                  styleClass="settingDescription"/>
 
 
     </VBox>

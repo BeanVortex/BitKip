@@ -10,6 +10,7 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
+import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
@@ -497,6 +498,20 @@ public class FxUtils {
             }
         });
         dialog.show();
+    }
+
+    public static <T> List<T> getAllNodes(Parent root, Class<T> tClass) {
+        var nodes = new ArrayList<T>();
+        addAllDescendents(root, nodes, tClass);
+        return nodes;
+    }
+    private static <T> void addAllDescendents(Parent root, ArrayList<T> nodes, Class<T> tClass) {
+        for (var node : root.getChildrenUnmodifiable()) {
+            if (tClass.isInstance(node))
+                nodes.add(tClass.cast(node));
+            if (node instanceof Parent p)
+                addAllDescendents(p, nodes, tClass);
+        }
     }
 
 }

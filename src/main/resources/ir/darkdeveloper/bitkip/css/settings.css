@@ -1,7 +1,5 @@
 
-#parent{
-    -fx-padding: 10;
-}
+
 .settingTile {
     -fx-font-size: 15;
     -fx-font-weight: bold;

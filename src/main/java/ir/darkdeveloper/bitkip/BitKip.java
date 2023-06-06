@@ -103,7 +103,8 @@ public class BitKip extends Application {
                 stopScheduler.shutdownNow();
         });
         try {
-            server.stop();
+            if (server != null)
+                server.stop();
         } catch (Exception e) {
             log.error(e.getMessage());
         }
@@ -112,31 +113,32 @@ public class BitKip extends Application {
 
 
     public static void main(String[] args) throws IOException {
-        System.out.println(IOUtils.getFolderSize("L:\\BitKip"));
         initLogger();
         launch();
     }
 
     private static void startServer() {
-        var threadPool = new QueuedThreadPool(5, 1);
-        server = new Server(threadPool);
-        var connector = new ServerConnector(server);
-        connector.setPort(port);
-        server.setConnectors(new Connector[]{connector});
-        var handler = new ServletHandler();
-        server.setHandler(handler);
+        if (serverEnabled) {
+            var threadPool = new QueuedThreadPool(5, 1);
+            server = new Server(threadPool);
+            var connector = new ServerConnector(server);
+            connector.setPort(serverPort);
+            server.setConnectors(new Connector[]{connector});
+            var handler = new ServletHandler();
+            server.setHandler(handler);
 
-        handler.addServletWithMapping(SingleServlet.class, "/single");
-        handler.addServletWithMapping(BatchServlet.class, "/batch");
+            handler.addServletWithMapping(SingleServlet.class, "/single");
+            handler.addServletWithMapping(BatchServlet.class, "/batch");
 
-        // Start the server
-        try {
-            server.start();
-        } catch (Exception e) {
-            log.error(e.getMessage());
-            if (FxUtils.askWithDialog(Alert.AlertType.ERROR, "Failed to run",
-                    e.getLocalizedMessage(), ButtonType.CLOSE, null))
-                System.exit(1);
+            // Start the server
+            try {
+                server.start();
+            } catch (Exception e) {
+                log.error(e.getMessage());
+                if (FxUtils.askWithDialog(Alert.AlertType.ERROR, "Failed to run",
+                        e.getLocalizedMessage(), ButtonType.CLOSE, null))
+                    System.exit(1);
+            }
         }
     }
 

@@ -5,13 +5,18 @@ import ir.darkdeveloper.bitkip.controllers.interfaces.FXMLController;
 import ir.darkdeveloper.bitkip.task.FileMoveTask;
 import ir.darkdeveloper.bitkip.utils.FxUtils;
 import ir.darkdeveloper.bitkip.utils.IOUtils;
+import ir.darkdeveloper.bitkip.utils.InputValidations;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
+import javafx.scene.input.MouseButton;
+import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.Background;
 import javafx.scene.layout.VBox;
+import javafx.scene.paint.Paint;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Line;
 import javafx.stage.DirectoryChooser;
@@ -21,11 +26,11 @@ import org.controlsfx.control.Notifications;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.util.List;
 import java.util.ResourceBundle;
 import java.util.concurrent.Executors;
 
-import static ir.darkdeveloper.bitkip.config.AppConfigs.downloadPath;
-import static ir.darkdeveloper.bitkip.config.AppConfigs.log;
+import static ir.darkdeveloper.bitkip.config.AppConfigs.*;
 
 public class SettingsController implements FXMLController {
 
@@ -35,8 +40,6 @@ public class SettingsController implements FXMLController {
     private CheckBox openCompleteDialogCheck;
     @FXML
     private Label lblLocation;
-    @FXML
-    private Button btnChangeDir;
     @FXML
     private Circle circleTheme;
     @FXML
@@ -56,16 +59,30 @@ public class SettingsController implements FXMLController {
 
 
     private Stage stage;
+    private List<Label> labels;
 
 
     @Override
     public void initAfterStage() {
-
+        parent.prefWidthProperty().bind(stage.widthProperty());
+        parent.widthProperty().addListener((ob, o, n) -> {
+            var endX = n.doubleValue() - 20;
+            line1.setEndX(endX);
+            line2.setEndX(endX);
+            line3.setEndX(endX);
+        });
     }
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
+        labels = FxUtils.getAllNodes(parent, Label.class);
+        InputValidations.validIntInputCheck(portField, (long) serverPort);
         lblLocation.setText(downloadPath);
+        serverCheck.setSelected(serverEnabled);
+        portField.setText(String.valueOf(serverPort));
+        openCompleteDialogCheck.setSelected(openAfterComplete);
+        completeDialogCheck.setSelected(showCompleteDialog);
+        newFileCheck.setSelected(isNewDownloadFile);
     }
 
 
@@ -113,5 +130,55 @@ public class SettingsController implements FXMLController {
             }
 
         }
+    }
+
+    @FXML
+    private void onThemeChange(MouseEvent mouseEvent) {
+        if (mouseEvent.getButton() != MouseButton.PRIMARY)
+            return;
+//        if (getTheme().equals("light")) {
+//            circleTheme.setFill(Paint.valueOf("#fff"));
+//            circleTheme.setStroke(Paint.valueOf("#333"));
+//            parent.setBackground(Background.fill(Paint.valueOf("#333")));
+//            labels.forEach(label -> label.setTextFill(Paint.valueOf("#fff")));
+//            setTheme("dark");
+//        } else {
+//            circleTheme.setFill(Paint.valueOf("#333"));
+//            circleTheme.setStroke(Paint.valueOf("#fff"));
+//            parent.setBackground(Background.fill(Paint.valueOf("#fff")));
+//            labels.forEach(label -> label.setTextFill(Paint.valueOf("#111")));
+//            setTheme("light");
+//        }
+        IOUtils.saveConfigs();
+    }
+
+    @FXML
+    private void onServerCheck() {
+        serverEnabled = serverCheck.isSelected();
+        IOUtils.saveConfigs();
+    }
+
+    @FXML
+    private void onNewFileCheck() {
+        isNewDownloadFile = newFileCheck.isSelected();
+        IOUtils.saveConfigs();
+    }
+
+    @FXML
+    private void onCompleteDialogCheck() {
+        showCompleteDialog = completeDialogCheck.isSelected();
+        IOUtils.saveConfigs();
+    }
+
+    @FXML
+    private void onOpenCompleteDialogCheck() {
+        openAfterComplete = openCompleteDialogCheck.isSelected();
+        IOUtils.saveConfigs();
+    }
+
+    @FXML
+    private void onPortSave() {
+        serverPort = Integer.parseInt(portField.getText());
+        IOUtils.saveConfigs();
     }
 }

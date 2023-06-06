@@ -30,7 +30,11 @@ public class AppConfigs {
     public static String theme = "light";
 
     public static boolean serverEnabled = true;
-    public static int port = 9563;
+    public static int serverPort = 9563;
+
+    public static boolean isNewDownloadFile = false;
+    public static boolean openAfterComplete = false;
+    public static boolean showCompleteDialog = true;
 
 
     public static Logger log;
@@ -78,7 +82,6 @@ public class AppConfigs {
     public static final Map<Integer, ScheduleModel> currentSchedules = new HashMap<>();
     public static MainTableUtils mainTableUtils;
     public static QueueModel selectedQueue;
-    public static boolean showCompleteDialog = true;
 
     public static String userPassword;
 
