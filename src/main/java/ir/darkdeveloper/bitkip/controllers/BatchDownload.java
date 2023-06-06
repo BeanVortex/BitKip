@@ -1,6 +1,5 @@
 package ir.darkdeveloper.bitkip.controllers;
 
-import ir.darkdeveloper.bitkip.config.AppConfigs;
 import ir.darkdeveloper.bitkip.config.observers.QueueObserver;
 import ir.darkdeveloper.bitkip.config.observers.QueueSubject;
 import ir.darkdeveloper.bitkip.models.LinkModel;
@@ -137,13 +136,14 @@ public class BatchDownload implements QueueObserver {
             var connection = NewDownloadUtils.connect(link.getUrl(), 3000, 3000);
             var fileNameLocationFuture = CompletableFuture.supplyAsync(() -> NewDownloadUtils.extractFileName(link.getUrl(), connection))
                     .thenAccept(this::setLocation);
-            fileNameLocationFuture.whenComplete((unused, throwable) -> {
-                NewDownloadUtils.checkIfFileIsOKToSave(locationField.getText(), tempLink.getName(), errorLabel, null, checkBtn);
-            }).exceptionally(throwable -> {
-                var errorMsg = throwable.getCause().getLocalizedMessage();
-                Platform.runLater(() -> NewDownloadUtils.disableControlsAndShowError(errorMsg, errorLabel, checkBtn, null, null));
-                return null;
-            });
+            fileNameLocationFuture
+                    .whenComplete((unused, throwable) ->
+                            NewDownloadUtils.checkIfFileIsOKToSave(locationField.getText(), tempLink.getName(), errorLabel, null, checkBtn))
+                    .exceptionally(throwable -> {
+                        var errorMsg = throwable.getCause().getLocalizedMessage();
+                        Platform.runLater(() -> NewDownloadUtils.disableControlsAndShowError(errorMsg, errorLabel, checkBtn, null, null));
+                        return null;
+                    });
         } catch (NumberFormatException ignore) {
         } catch (Exception e) {
             var errorMsg = e.getLocalizedMessage();

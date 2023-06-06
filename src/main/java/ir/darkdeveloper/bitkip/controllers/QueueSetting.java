@@ -416,8 +416,8 @@ public class QueueSetting implements FXMLController, QueueObserver {
             queue.setDownloadFromTop(downloadOrderCheck.isSelected());
             queue.setSchedule(schedule);
             String[] qCols = {COL_SPEED_LIMIT, COL_SIMUL_DOWNLOAD, COL_HAS_FOLDER, COL_DOWN_TOP};
-            String[] qValues = {queue.getSpeed(), queue.getSimultaneouslyDownload() + "",
-                    (queue.hasFolder() ? 1 : 0) + "", (queue.isDownloadFromTop() ? 1 : 0) + ""};
+            String[] qValues = {queue.getSpeed(), String.valueOf(queue.getSimultaneouslyDownload()),
+                    String.valueOf(queue.hasFolder() ? 1 : 0), String.valueOf(queue.isDownloadFromTop() ? 1 : 0)};
             DatabaseHelper.updateRow(qCols, qValues, QUEUES_TABLE_NAME, queue.getId());
             IOUtils.createOrDeleteFolderForQueue(queue.hasFolder(), queue);
             ScheduleRepo.updateSchedule(schedule);

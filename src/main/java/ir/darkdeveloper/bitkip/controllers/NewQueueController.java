@@ -1,6 +1,5 @@
 package ir.darkdeveloper.bitkip.controllers;
 
-import ir.darkdeveloper.bitkip.config.AppConfigs;
 import ir.darkdeveloper.bitkip.config.observers.QueueSubject;
 import ir.darkdeveloper.bitkip.controllers.interfaces.FXMLController;
 import ir.darkdeveloper.bitkip.models.QueueModel;

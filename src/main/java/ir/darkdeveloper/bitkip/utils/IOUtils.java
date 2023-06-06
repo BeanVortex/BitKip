@@ -17,6 +17,7 @@ import java.util.List;
 
 import static ir.darkdeveloper.bitkip.config.AppConfigs.log;
 import static ir.darkdeveloper.bitkip.config.AppConfigs.*;
+import static ir.darkdeveloper.bitkip.config.observers.QueueSubject.getQueues;
 import static ir.darkdeveloper.bitkip.repo.DownloadsRepo.COL_PATH;
 
 

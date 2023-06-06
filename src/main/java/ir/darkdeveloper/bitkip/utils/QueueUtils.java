@@ -1,6 +1,5 @@
 package ir.darkdeveloper.bitkip.utils;
 
-import ir.darkdeveloper.bitkip.config.AppConfigs;
 import ir.darkdeveloper.bitkip.config.observers.QueueSubject;
 import ir.darkdeveloper.bitkip.models.DownloadModel;
 import ir.darkdeveloper.bitkip.models.DownloadStatus;
