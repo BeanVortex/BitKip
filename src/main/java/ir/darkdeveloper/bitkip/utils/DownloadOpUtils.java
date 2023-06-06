@@ -8,6 +8,7 @@ import ir.darkdeveloper.bitkip.repo.DownloadsRepo;
 import ir.darkdeveloper.bitkip.task.DownloadInChunksTask;
 import ir.darkdeveloper.bitkip.task.DownloadLimitedTask;
 import ir.darkdeveloper.bitkip.task.DownloadTask;
+import javafx.application.Platform;
 import javafx.collections.ObservableList;
 import org.controlsfx.control.Notifications;
 
@@ -207,10 +208,10 @@ public class DownloadOpUtils {
         var desktop = Desktop.getDesktop();
         log.info("Opening file : " + dm.getFilePath());
         if (!new File(dm.getFilePath()).exists()) {
-            Notifications.create()
+            Platform.runLater(() -> Notifications.create()
                     .title("File not found")
                     .text("%s has been moved or removed".formatted(dm.getName()))
-                    .showError();
+                    .showError());
             log.error("File does not exists : " + dm.getFilePath());
             return;
         }

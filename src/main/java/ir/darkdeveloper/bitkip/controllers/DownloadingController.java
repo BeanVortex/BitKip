@@ -22,7 +22,6 @@ import javafx.scene.paint.Paint;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import org.apache.commons.lang3.time.DurationFormatUtils;
-import org.controlsfx.control.Notifications;
 import org.controlsfx.control.PopOver;
 import org.controlsfx.control.ToggleSwitch;
 
@@ -247,14 +246,6 @@ public class DownloadingController implements FXMLController {
     @FXML
     private void onControl() {
         if (isComplete) {
-            if (!new File(downloadModel.getFilePath()).exists()) {
-                Notifications.create()
-                        .title("File not found")
-                        .text("File has been moved or removed")
-                        .showError();
-                stage.close();
-                return;
-            }
             openFile(downloadModel);
             stage.close();
             return;
