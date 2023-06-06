@@ -13,7 +13,9 @@ import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.Background;
 import javafx.scene.layout.VBox;
+import javafx.scene.paint.Paint;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Line;
 import javafx.stage.DirectoryChooser;
@@ -28,6 +30,7 @@ import java.util.ResourceBundle;
 import java.util.concurrent.Executors;
 
 import static ir.darkdeveloper.bitkip.config.AppConfigs.*;
+import static ir.darkdeveloper.bitkip.config.observers.ThemeSubject.setTheme;
 
 public class SettingsController implements FXMLController {
 
@@ -126,19 +129,23 @@ public class SettingsController implements FXMLController {
     private void onThemeChange(MouseEvent mouseEvent) {
         if (mouseEvent.getButton() != MouseButton.PRIMARY)
             return;
-//        if (getTheme().equals("light")) {
-//            circleTheme.setFill(Paint.valueOf("#fff"));
-//            circleTheme.setStroke(Paint.valueOf("#333"));
-//            parent.setBackground(Background.fill(Paint.valueOf("#333")));
-//            labels.forEach(label -> label.setTextFill(Paint.valueOf("#fff")));
-//            setTheme("dark");
-//        } else {
-//            circleTheme.setFill(Paint.valueOf("#333"));
-//            circleTheme.setStroke(Paint.valueOf("#fff"));
-//            parent.setBackground(Background.fill(Paint.valueOf("#fff")));
-//            labels.forEach(label -> label.setTextFill(Paint.valueOf("#111")));
-//            setTheme("light");
-//        }
+        if (theme.equals("light")) {
+            circleTheme.setFill(Paint.valueOf("#fff"));
+            circleTheme.setStroke(Paint.valueOf("#333"));
+            completeDialogCheck.setTextFill(Paint.valueOf("#fff"));
+            serverCheck.setTextFill(Paint.valueOf("#fff"));
+            parent.setBackground(Background.fill(Paint.valueOf("#333")));
+            labels.forEach(label -> label.setTextFill(Paint.valueOf("#fff")));
+            setTheme("dark");
+        } else {
+            circleTheme.setFill(Paint.valueOf("#333"));
+            circleTheme.setStroke(Paint.valueOf("#fff"));
+            completeDialogCheck.setTextFill(Paint.valueOf("#333"));
+            serverCheck.setTextFill(Paint.valueOf("#333"));
+            parent.setBackground(Background.fill(Paint.valueOf("#fff")));
+            labels.forEach(label -> label.setTextFill(Paint.valueOf("#111")));
+            setTheme("light");
+        }
         IOUtils.saveConfigs();
     }
 

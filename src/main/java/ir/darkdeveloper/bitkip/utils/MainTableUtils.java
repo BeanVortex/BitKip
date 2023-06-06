@@ -1,6 +1,7 @@
 package ir.darkdeveloper.bitkip.utils;
 
 import ir.darkdeveloper.bitkip.config.AppConfigs;
+import ir.darkdeveloper.bitkip.config.observers.QueueSubject;
 import ir.darkdeveloper.bitkip.models.DownloadModel;
 import ir.darkdeveloper.bitkip.models.DownloadStatus;
 import ir.darkdeveloper.bitkip.models.QueueModel;
@@ -144,7 +145,7 @@ public class MainTableUtils {
 
     private void initAddToQueueMenu(Menu addToQueueMenu) {
         var addToQueueItems = new LinkedHashMap<MenuItem, QueueModel>();
-        var queues = AppConfigs.getQueues();
+        var queues = QueueSubject.getQueues();
         if (queues.isEmpty())
             queues = QueuesRepo.getAllQueues(false, false);
         queues.forEach(qm -> {

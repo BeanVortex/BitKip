@@ -17,6 +17,7 @@ import static com.sun.jna.Platform.isLinux;
 import static com.sun.jna.Platform.isMac;
 import static ir.darkdeveloper.bitkip.config.AppConfigs.log;
 import static ir.darkdeveloper.bitkip.config.AppConfigs.*;
+import static ir.darkdeveloper.bitkip.config.observers.QueueSubject.getQueues;
 
 
 public class ScheduleTask {
