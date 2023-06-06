@@ -31,8 +31,6 @@ public class AppConfigs {
 
     public static boolean serverEnabled = true;
     public static int serverPort = 9563;
-
-    public static boolean isNewDownloadFile = false;
     public static boolean showCompleteDialog = true;
 
 

@@ -210,7 +210,6 @@ public class IOUtils {
                     .append("theme=").append(theme).append("\n")
                     .append("server_enabled=").append(String.valueOf(serverEnabled)).append("\n")
                     .append("port=").append(String.valueOf(serverPort)).append("\n")
-                    .append("is_new_download_file=").append(String.valueOf(isNewDownloadFile)).append("\n")
                     .append("show_complete_dialog=").append(String.valueOf(showCompleteDialog));
             writer.flush();
             writer.close();
@@ -234,7 +233,6 @@ public class IOUtils {
                         case "theme" -> theme = value;
                         case "server_enabled" -> serverEnabled = value.equals("true");
                         case "port" -> serverPort = Integer.parseInt(value);
-                        case "is_new_download_file" -> isNewDownloadFile = value.equals("true");
                         case "show_complete_dialog" -> showCompleteDialog = value.equals("true");
                     }
                 }

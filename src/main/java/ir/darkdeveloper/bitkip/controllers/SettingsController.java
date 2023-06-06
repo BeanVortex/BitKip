@@ -49,9 +49,6 @@ public class SettingsController implements FXMLController {
     private TextField portField;
     @FXML
     private VBox parent;
-    @FXML
-    private CheckBox newFileCheck;
-
 
     private Stage stage;
     private List<Label> labels;
@@ -76,7 +73,6 @@ public class SettingsController implements FXMLController {
         serverCheck.setSelected(serverEnabled);
         portField.setText(String.valueOf(serverPort));
         completeDialogCheck.setSelected(showCompleteDialog);
-        newFileCheck.setSelected(isNewDownloadFile);
     }
 
 
@@ -149,12 +145,6 @@ public class SettingsController implements FXMLController {
     @FXML
     private void onServerCheck() {
         serverEnabled = serverCheck.isSelected();
-        IOUtils.saveConfigs();
-    }
-
-    @FXML
-    private void onNewFileCheck() {
-        isNewDownloadFile = newFileCheck.isSelected();
         IOUtils.saveConfigs();
     }
 

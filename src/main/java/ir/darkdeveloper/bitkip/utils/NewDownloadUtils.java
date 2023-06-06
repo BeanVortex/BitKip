@@ -150,7 +150,7 @@ public class NewDownloadUtils {
     }
 
     private static void determineQueue(DownloadModel dm, String queueName) {
-        if (dm != null){
+        if (dm != null) {
             var qm = QueuesRepo.findByName(queueName, false);
             if (!dm.getQueues().contains(qm))
                 dm.getQueues().add(qm);
@@ -191,8 +191,8 @@ public class NewDownloadUtils {
                 .showError();
     }
 
-    public static void checkIfFileExists(String location, String name,
-                                         Label errorLabel, Button downloadBtn, Button addBtn) {
+    public static void checkIfFileIsOKToSave(String location, String name,
+                                             Label errorLabel, Button downloadBtn, Button addBtn) {
         var file = new File(location + name);
         var chunkFile = new File(location + name + "#0");
         if (file.exists() || chunkFile.exists()) {
@@ -234,7 +234,7 @@ public class NewDownloadUtils {
             determineLocationAndQueue(locationField, filename, dm);
             openLocation.setDisable(false);
         }
-        checkIfFileExists(locationField.getText(), filename, errorLabel, downloadBtn, addBtn);
+        checkIfFileIsOKToSave(locationField.getText(), filename, errorLabel, downloadBtn, addBtn);
     }
 
     public static void disableControlsAndShowError(String error, Label errorLbl,

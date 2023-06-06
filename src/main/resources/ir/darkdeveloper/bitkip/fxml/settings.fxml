@@ -60,10 +60,6 @@
 
     <VBox alignment="BASELINE_LEFT" spacing="10">
         <Label styleClass="settingTile" text="Download"/>
-        <CheckBox text="Download if link exists for that location" fx:id="newFileCheck"
-                  styleClass="settingDescription" onAction="#onNewFileCheck"/>
-        <Label styleClass="settingDescription, opacity_7"
-               text="If a link assigned to a location, this will not prevent downloading a new link to that location."/>
         <CheckBox text="Show complete dialog" fx:id="completeDialogCheck" onAction="#onCompleteDialogCheck"
                   styleClass="settingDescription"/>
     </VBox>

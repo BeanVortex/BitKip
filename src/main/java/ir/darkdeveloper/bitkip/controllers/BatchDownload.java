@@ -137,7 +137,7 @@ public class BatchDownload implements QueueObserver {
             var fileNameLocationFuture = CompletableFuture.supplyAsync(() -> NewDownloadUtils.extractFileName(link.getUrl(), connection))
                     .thenAccept(this::setLocation);
             fileNameLocationFuture.whenComplete((unused, throwable) -> {
-                NewDownloadUtils.checkIfFileExists(locationField.getText(), tempLink.getName(), errorLabel, null, checkBtn);
+                NewDownloadUtils.checkIfFileIsOKToSave(locationField.getText(), tempLink.getName(), errorLabel, null, checkBtn);
             }).exceptionally(throwable -> {
                 var errorMsg = throwable.getCause().getLocalizedMessage();
                 Platform.runLater(() -> NewDownloadUtils.disableControlsAndShowError(errorMsg, errorLabel, checkBtn, null, null));
@@ -235,7 +235,7 @@ public class BatchDownload implements QueueObserver {
     private void onSelectLocation(ActionEvent e) {
         NewDownloadUtils.selectLocation(e, locationField);
         if (tempLink != null)
-            NewDownloadUtils.checkIfFileExists(locationField.getText(), tempLink.getName(), errorLabel, null, checkBtn);
+            NewDownloadUtils.checkIfFileIsOKToSave(locationField.getText(), tempLink.getName(), errorLabel, null, checkBtn);
     }
 
     @FXML
