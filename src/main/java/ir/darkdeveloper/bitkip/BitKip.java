@@ -72,10 +72,7 @@ public class BitKip extends Application {
                 else stage.show();
             });
             openItem.addActionListener(openListener);
-            exitItem.addActionListener(e -> {
-                stop();
-                System.exit(0);
-            });
+            exitItem.addActionListener(e -> stop());
             popup.add(openItem);
             popup.add(exitItem);
             var trayIcon = new TrayIcon(image, "BitKip", popup);
@@ -110,6 +107,7 @@ public class BitKip extends Application {
         } catch (Exception e) {
             log.error(e.getMessage());
         }
+        System.exit(0);
     }
 
 

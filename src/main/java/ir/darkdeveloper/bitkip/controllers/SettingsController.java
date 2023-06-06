@@ -30,6 +30,10 @@ import static ir.darkdeveloper.bitkip.config.AppConfigs.log;
 public class SettingsController implements FXMLController {
 
     @FXML
+    private CheckBox completeDialogCheck;
+    @FXML
+    private CheckBox openCompleteDialogCheck;
+    @FXML
     private Label lblLocation;
     @FXML
     private Button btnChangeDir;
@@ -37,6 +41,10 @@ public class SettingsController implements FXMLController {
     private Circle circleTheme;
     @FXML
     private Line line1;
+    @FXML
+    private Line line2;
+    @FXML
+    private Line line3;
     @FXML
     private CheckBox serverCheck;
     @FXML

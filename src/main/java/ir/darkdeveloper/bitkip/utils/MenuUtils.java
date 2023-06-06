@@ -33,9 +33,10 @@ public class MenuUtils {
         var addLink = new Label("New download");
         var batchDownload = new Label("New batch download");
         var settings = new Label("Settings");
+        var queueSettings = new Label("Queue Settings");
         var exit = new Label("exit");
-        var lbls = List.of(addLink, batchDownload, settings, exit);
-        var keyCodes = List.of(NEW_DOWNLOAD_KEY, NEW_BATCH_KEY, SETTINGS_KEY, QUIT_KEY);
+        var lbls = List.of(addLink, batchDownload, settings, queueSettings, exit);
+        var keyCodes = Arrays.asList(NEW_DOWNLOAD_KEY, NEW_BATCH_KEY, SETTINGS_KEY, null, QUIT_KEY);
         var menuItems = createMapMenuItems(lbls, keyCodes);
         c.getItems().addAll(menuItems.values());
         menuFile.setContextMenu(c);
@@ -43,6 +44,7 @@ public class MenuUtils {
         menuItems.get(addLink).setOnAction(e -> DownloadOpUtils.newDownload(true));
         menuItems.get(batchDownload).setOnAction(e -> DownloadOpUtils.newDownload(false));
         menuItems.get(settings).setOnAction(e -> FxUtils.newSettingsStage());
+        menuItems.get(queueSettings).setOnAction(e -> FxUtils.newQueueSettingStage(null));
         menuItems.get(exit).setOnAction(e -> Platform.exit());
     }
 

@@ -5,45 +5,61 @@
 
 <?import javafx.scene.shape.Line?>
 <?import javafx.scene.shape.Circle?>
+<?import java.net.URL?>
 <VBox xmlns="http://javafx.com/javafx"
       xmlns:fx="http://javafx.com/fxml"
-      stylesheets="@../css/settings.css"
       fx:id="parent"
       fx:controller="ir.darkdeveloper.bitkip.controllers.SettingsController"
       prefHeight="600.0" prefWidth="450.0" minHeight="600" minWidth="450" spacing="10">
+
+    <stylesheets>
+        <URL value="@../css/settings.css"/>
+        <URL value="@../css/newDownload.css"/>
+    </stylesheets>
 
     <VBox alignment="BASELINE_LEFT">
         <Label styleClass="settingTile" text="Save Location"/>
         <HBox prefWidth="430" alignment="CENTER">
             <Label styleClass="settingDescription" text="Current Location: " fx:id="lblLocation"/>
             <Region HBox.hgrow="ALWAYS"/>
-            <Button text="change" onAction="#changeSaveDir" fx:id="btnChangeDir"/>
+            <Button text="change" styleClass="download_now_btn" onAction="#changeSaveDir" fx:id="btnChangeDir"/>
         </HBox>
     </VBox>
 
     <Line endX="450" stroke="lightgray" fx:id="line1"/>
 
-    <VBox>
-        <Label styleClass="settingTile" text="Customize"/>
-        <VBox spacing="10" alignment="BASELINE_LEFT">
-            <HBox>
-                <Label styleClass="settingDescription" text="Theme:"/>
-                <Region HBox.hgrow="ALWAYS"/>
-                <Circle radius="10.0" fill="#fff" stroke="#333" fx:id="circleTheme"/>
-            </HBox>
-            <VBox spacing="5">
-                <CheckBox text="Listen to links from Browser" fx:id="serverCheck"/>
-                <HBox>
-                    <Label styleClass="settingDescription" text="Listening port:"/>
-                    <TextField fx:id="portField"/>
-                </HBox>
-            </VBox>
-        </VBox>
+    <VBox spacing="10" alignment="BASELINE_LEFT">
+        <HBox alignment="CENTER">
+            <Label styleClass="settingTile" text="Theme:"/>
+            <Region HBox.hgrow="ALWAYS"/>
+            <Circle radius="10.0" fill="#fff" stroke="#333" fx:id="circleTheme"/>
+        </HBox>
     </VBox>
 
-    <VBox alignment="BASELINE_LEFT" spacing="5">
-        <CheckBox text="Download if link exists for that location" fx:id="newFileCheck"/>
-        <Label styleClass="settingDescription" text="If a link assigned to a location, this will not prevent downloading a new link to that location."/>
+    <Line endX="450" stroke="lightgray" fx:id="line2"/>
+
+    <VBox spacing="10">
+        <Label styleClass="settingTile" text="Server"/>
+        <CheckBox text="Listen to links from Browser" styleClass="settingDescription" fx:id="serverCheck"/>
+        <HBox alignment="CENTER_LEFT" spacing="5">
+            <Label text="Listening port:" styleClass="settingDescription"/>
+            <TextField fx:id="portField"/>
+        </HBox>
+    </VBox>
+
+    <Line endX="450" stroke="lightgray" fx:id="line3"/>
+
+
+    <VBox alignment="BASELINE_LEFT" spacing="10">
+        <Label styleClass="settingTile" text="Download"/>
+        <CheckBox text="Download if link exists for that location" fx:id="newFileCheck" styleClass="settingDescription"/>
+        <Label styleClass="settingDescription, opacity_7"
+               text="If a link assigned to a location, this will not prevent downloading a new link to that location."/>
+
+        <CheckBox text="Show complete dialog" fx:id="completeDialogCheck" styleClass="settingDescription"/>
+        <CheckBox text="Open after complete" fx:id="openCompleteDialogCheck" styleClass="settingDescription"/>
+
+
     </VBox>
 
 </VBox>

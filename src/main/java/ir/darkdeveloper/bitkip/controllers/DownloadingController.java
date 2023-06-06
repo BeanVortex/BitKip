@@ -118,7 +118,7 @@ public class DownloadingController implements FXMLController {
 
     private void initDownloadData() {
         InputValidations.validInputChecks(null, bytesField, speedField, downloadModel);
-        bytesField.setText(downloadModel.getSize() + "");
+        bytesField.setText(String.valueOf(downloadModel.getSize()));
         link.setText(downloadModel.getUrl());
         locationLbl.setText("Path: " + new File(downloadModel.getFilePath()).getParentFile().getAbsolutePath());
         var end = downloadModel.getName().length();
@@ -252,9 +252,11 @@ public class DownloadingController implements FXMLController {
                         .title("File not found")
                         .text("File has been moved or removed")
                         .showError();
+                stage.close();
                 return;
             }
             openFile(downloadModel);
+            stage.close();
             return;
         }
 
@@ -318,6 +320,7 @@ public class DownloadingController implements FXMLController {
     @FXML
     private void onFolderOpen() {
         DownloadOpUtils.openContainingFolder(downloadModel);
+        stage.close();
     }
 
 
