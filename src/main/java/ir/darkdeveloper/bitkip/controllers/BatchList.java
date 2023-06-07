@@ -74,6 +74,7 @@ public class BatchList implements FXMLController {
 
     @Override
     public void initAfterStage() {
+        updateTheme(stage.getScene());
         stage.widthProperty().addListener((ob, o, n) -> linkTable.setPrefWidth(n.doubleValue() + 90));
         var logoPath = getResource("icons/logo.png");
         if (logoPath != null) {
