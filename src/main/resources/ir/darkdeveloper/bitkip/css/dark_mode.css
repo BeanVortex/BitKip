@@ -113,7 +113,8 @@
 }
 
 
-.menu-item .label {
+.menu-item .label,
+.radio-button {
     -fx-text-fill: #fff;
 }
 
@@ -130,15 +131,16 @@
 }
 
 .accordion .titled-pane,
-.accordion .titled-pane > *.content{
+.accordion .titled-pane > *.content {
     -fx-background-color: #506e83;
     -fx-text-box-border: #fff;
     -fx-text-fill: #fff;
 }
 
-.progress-bar .bar{
+.progress-bar .bar {
     -fx-background-color: #506e83;
 }
+
 .progress-bar .track {
     -fx-background-color: #fff;
 }
@@ -147,3 +149,137 @@
     -fx-background-color: #fff;
 }
 
+.text-field {
+    -fx-background-color: #506e83;
+    -fx-border-color: #fff;
+    -fx-text-fill: #fff;
+    -fx-border-radius: 8;
+    -fx-background-radius: 8;
+}
+
+.no {
+    -fx-text-fill: #EF5350;
+}
+
+.yes {
+    -fx-text-fill: #51b055;
+}
+
+.add_btn:disabled,
+.download_now_btn:disabled {
+    -fx-text-fill: #fff !important;
+}
+
+.popover .content {
+    -fx-background-color: #293944;
+    -fx-padding: 0 5;
+}
+
+.popover .arrow-button {
+    -fx-border-style: none;
+    -fx-padding: 0;
+    -fx-border-width: 0;
+    -fx-fill: #293944;
+}
+
+#newQueue,
+#openLocation {
+    -fx-border-color: #fff !important;
+}
+
+#refreshBtn .ikonli-font-icon,
+#openLocation .ikonli-font-icon,
+#newQueue .ikonli-font-icon {
+    -fx-icon-color: #fff !important;
+}
+
+.combo-box .arrow-button {
+    -fx-background-color: #506e83;
+}
+
+.combo-box .arrow{
+    -fx-background-color: #fff;
+}
+
+.combo-box .increment-arrow,
+.combo-box .decrement-arrow {
+    -fx-background-color: #fff;
+}
+
+.spinner,
+.date-picker {
+    -fx-background-color: #506e83;
+    -fx-border-color: #fff;
+    -fx-text-fill: #fff;
+    -fx-border-radius: 8;
+    -fx-background-radius: 8;
+}
+
+.spinner .text-field,
+.date-picker .text-field {
+    -fx-border-color: transparent;
+    -fx-border-radius: 8 0 0 8;
+    -fx-background-radius: 8 0 0 8;
+}
+
+.spinner .increment-arrow-button,
+.spinner .decrement-arrow-button {
+    -fx-background-color: #506e83;
+    -fx-border-radius: 0 8 8 0;
+    -fx-background-radius: 0 8 8 0;
+}
+
+.spinner .increment-arrow,
+.spinner .decrement-arrow {
+    -fx-background-color: #fff;
+}
+
+.date-picker .arrow-button {
+    -fx-background-color: transparent;
+}
+.date-picker .arrow{
+    -fx-background-color: #fff;
+}
+
+.date-picker-popup{
+    -fx-background-color: #506e83;
+}
+
+.date-picker-popup .spinner .button .left-arrow,
+.date-picker-popup .spinner .button .right-arrow {
+    -fx-background-color: white;
+}
+.date-picker-popup .spinner .button .left-arrow-button,
+.date-picker-popup .spinner .button .right-arrow-button {
+    -fx-background-color: #506e83;
+}
+
+.date-picker-popup .spinner .button:hover,
+.date-picker-popup .spinner .button:hover,
+.date-picker-popup .spinner .button:focused,
+.date-picker-popup .spinner .button:focused
+{
+    -fx-background-color: #506e83;
+    -fx-background-radius: 5;
+}
+
+.date-picker-popup .month-year-pane {
+    -fx-background-color: #506e83;
+}
+.date-picker-popup .month-year-pane .label {
+    -fx-text-fill: white;
+}
+.date-picker-popup .week-number-cell {
+    -fx-text-fill: #506e83;
+}
+
+.date-picker .cell {
+    -fx-background-color: #506e83;
+    -fx-text-fill: #fff;
+}
+.date-picker .cell:hover {
+    -fx-background-color: #223b4d;
+}
+.date-picker .cell:focused {
+    -fx-background-color: #223b4d;
+}

@@ -16,10 +16,7 @@ import javafx.beans.property.SimpleBooleanProperty;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
-import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
-import javafx.scene.paint.Paint;
-import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import org.apache.commons.lang3.time.DurationFormatUtils;
 import org.controlsfx.control.PopOver;
@@ -136,9 +133,15 @@ public class DownloadingController implements FXMLController {
         progressLbl.setText("Progress: %.2f%%".formatted(downloadModel.getProgress()));
         downloadProgress.setProgress(downloadModel.getProgress() / 100);
         var resumable = downloadModel.isResumable();
-        var resumeableText = new Text(resumable ? "Yes" : "No");
-        resumeableText.setFill(resumable ? Paint.valueOf("#388E3C") : Paint.valueOf("#EF5350"));
-        resumableLbl.setGraphic(new HBox(new Text("Resumable: "), resumeableText));
+        if (resumable) {
+            resumableLbl.getStyleClass().add("yes");
+            resumableLbl.getStyleClass().remove("no");
+            resumableLbl.setText("Yes");
+        } else {
+            resumableLbl.getStyleClass().add("no");
+            resumableLbl.getStyleClass().remove("yes");
+            resumableLbl.setText("No");
+        }
         controlBtn.setText(isPaused.get() ? (resumable ? "Resume" : "Restart") : "Pause");
         openSwitch.setSelected(downloadModel.isOpenAfterComplete());
         showSwitch.setSelected(downloadModel.isShowCompleteDialog());

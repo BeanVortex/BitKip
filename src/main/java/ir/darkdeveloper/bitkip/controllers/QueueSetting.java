@@ -197,7 +197,7 @@ public class QueueSetting implements FXMLController, QueueObserver {
                 super.updateItem(date, empty);
                 if (date.isBefore(LocalDate.now())) {
                     setDisable(true);
-                    setStyle("-fx-background-color: #ffc0cb;");
+                    setStyle("-fx-background-color: darkgray;");
                 }
             }
         });

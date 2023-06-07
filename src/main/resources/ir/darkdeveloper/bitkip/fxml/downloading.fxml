@@ -28,7 +28,10 @@
         </VBox>
         <Label fx:id="progressLbl" styleClass="bold" text="progress"/>
         <Label fx:id="remainingLbl" styleClass="bold" text="remaining time"/>
-        <Label fx:id="resumableLbl" styleClass="bold, title-opacity"/>
+        <HBox spacing="5">
+            <Label styleClass="bold" text="Resumable:"/>
+            <Label fx:id="resumableLbl" styleClass="bold, title-opacity"/>
+        </HBox>
         <Accordion>
             <panes>
                 <TitledPane id="titledPane" animated="false" text="Advanced">

@@ -16,7 +16,6 @@ import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
-import javafx.scene.paint.Paint;
 import javafx.stage.Stage;
 import org.kordamp.ikonli.javafx.FontIcon;
 
@@ -164,8 +163,15 @@ public class SingleDownload implements QueueObserver {
         chunksField.setText(urlModel.resumable() ? String.valueOf(maxChunks()) : "0");
         speedField.setDisable(false);
         var resumable = urlModel.resumable();
-        resumableLabel.setTextFill(resumable ? Paint.valueOf("#388E3C") : Paint.valueOf("#EF5350"));
-        resumableLabel.setText(resumable ? "Yes" : "No");
+        if (resumable){
+            resumableLabel.setText("Yes");
+            resumableLabel.getStyleClass().add("yes");
+            resumableLabel.getStyleClass().remove("no");
+        }else {
+            resumableLabel.setText("No");
+            resumableLabel.getStyleClass().add("no");
+            resumableLabel.getStyleClass().remove("yes");
+        }
         dm.setResumable(resumable);
         dm.setSize(urlModel.fileSize());
         dm.setAgent(urlModel.agent());
