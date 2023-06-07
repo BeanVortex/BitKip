@@ -176,6 +176,11 @@
     -fx-border-color: -fx-dark-primary-color;
 }
 
+.text-area .text{
+    -fx-line-spacing: 10px;
+}
+
+
 #refreshBtn .ikonli-font-icon,
 #openLocation .ikonli-font-icon,
 #newQueue .ikonli-font-icon {

@@ -13,5 +13,5 @@
         <Label text="Logs on date : "/>
         <ComboBox fx:id="comboSelectFile" onAction="#fileSelected"/>
     </HBox>
-    <TextArea fx:id="logArea" editable="false"/>
+    <TextArea fx:id="logArea" editable="false" />
 </VBox>

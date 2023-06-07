@@ -14,14 +14,17 @@
     -fx-fill: -fx-white-color !important;
 }
 
-.text-field,
-.text-area .content,
-.text-area{
+.text-field{
     -fx-background-color: -fx-primary-color2 !important;
     -fx-border-color: -fx-white-color !important;
     -fx-text-fill: -fx-text-color;
     -fx-border-radius: 8;
     -fx-background-radius: 8;
+}
+.text-area .content,
+.text-area{
+    -fx-background-color: -fx-primary-color2 !important;
+    -fx-text-fill: -fx-text-color;
 }
 
 #newQueue,
