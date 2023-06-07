@@ -46,7 +46,7 @@ public class NewDownloadController implements FXMLController {
         this.stage = stage;
         this.stage.setOnCloseRequest(e -> {
             getQueueSubject().removeObserver(prevController);
-            getThemeSubject().removeObserver(prevController);
+            getThemeSubject().removeObserver(this);
         });
         initAfterStage();
     }
@@ -134,17 +134,16 @@ public class NewDownloadController implements FXMLController {
             if (fxmlName.equals("singleDownload"))
                 ((SingleDownload)controller).setUrlModel(urlModel);
 
-            if (prevController != null){
+            if (prevController != null)
                 getQueueSubject().removeObserver(prevController);
-                getThemeSubject().removeObserver(prevController);
-            }
+
+
 
             details.setId("download_details");
             controller.setStage(stage);
-            getQueueSubject().addObserver(controller);
-            getThemeSubject().addObserver(controller, stage.getScene());
-            prevController = controller;
             container.getChildren().add(details);
+            getQueueSubject().addObserver(controller);
+            prevController = controller;
         } catch (IOException e) {
             log.error(e.getLocalizedMessage());
             throw new RuntimeException(e);

@@ -17,6 +17,7 @@
     <stylesheets>
         <URL value="@../css/settings.css"/>
         <URL value="@../css/newDownload.css"/>
+        <URL value="@../css/light_mode.css"/>
     </stylesheets>
 
     <VBox alignment="BASELINE_LEFT">

@@ -11,6 +11,7 @@
         <URL value="@../css/main.css"/>
         <URL value="@../css/newDownload.css"/>
         <URL value="@../css/queueSetting.css"/>
+        <URL value="@../css/light_mode.css"/>
     </stylesheets>
 
     <HBox>

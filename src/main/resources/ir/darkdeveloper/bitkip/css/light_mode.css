@@ -1,62 +1,224 @@
-.root{
-    -fx-background-color: #fff;
-}
-.label{
-    -fx-text-fill: #111;
-}
-.check-box{
-    -fx-text-fill: #111;
-}
-.circleTheme{
-    -fx-stroke: #fff;
-    -fx-fill: #293944;
-}
-.tree-cell {
-    -fx-background-color: #fff;
-    -fx-text-fill: #111;
+* {
+    -fx-white-color: #fff;
+    -fx-text-color: #111;
+    -fx-primary-color: #f3f3f3;
+    -fx-primary-color2: #e8e8e8;
+    -fx-arrow-color: #111;
+    -fx-secondary-color: lightgray;
+    -fx-secondary-color2: darkgray;
+    -fx-dark-primary-color: #293944;
+    -fx-red-color: #EF5350 !important;
+    -fx-green-color: #51b055 !important;
 }
 
-.tree-cell > .tree-disclosure-node > .arrow {
-    -fx-background-color: #000;
-}
-
-.table-cell{
-    -fx-background-color: transparent;
-    -fx-text-fill: #111;
-}
-
-.table-row-cell:odd:selected{
-    -fx-background-color: #e1e1e1;
-}
-.table-row-cell:even:selected{
-    -fx-background-color: #e1e1e1;
-}
-
+.root,
+.container,
+.accordion,
+.date-picker .cell:focused,
+.date-picker .cell:hover,
+.table-view .column-header-background,
+.tab-pane .tab,
 .table-view,
-.table-view .virtual-flow .scroll-bar:vertical,
-.table-view .virtual-flow .scroll-bar:vertical .track,
-.table-view .virtual-flow .scroll-bar:vertical .track-background,
-.table-view .virtual-flow .scroll-bar:horizontal,
-.table-view .virtual-flow .scroll-bar:horizontal .track,
-.table-view .virtual-flow .scroll-bar:horizontal .track-background {
-    -fx-background-color: #fff;
+.list-view,
+.tab-pane,
+.menu-item,
+.menu,
+.menu-bar,
+.context-menu,
+.scroll-pane > .viewport{
+    -fx-background-color: -fx-primary-color;
 }
 
-.table-view .virtual-flow .scroll-bar:vertical .thumb{
-    -fx-background-color:  lightgray;
+#scrollPane,
+.scroll-bar:vertical,
+.scroll-bar:vertical .track,
+.scroll-bar:vertical .track-background,
+.scroll-bar:horizontal,
+.scroll-bar:horizontal .track,
+.scroll-bar:horizontal .track-background,
+.scroll-pane > .corner {
+    -fx-background-color: -fx-secondary-color;
 }
-.table-view .virtual-flow .scroll-bar:horizontal .thumb {
-    -fx-background-color:  lightgray;
+
+.scroll-bar:horizontal .thumb,
+.scroll-bar:vertical .thumb{
+    -fx-background-color: -fx-secondary-color2;
 }
-.table-view .column-header-background{
-    -fx-background-color: lightgray;
+
+.table-row-cell:odd:selected,
+.table-row-cell:even:selected,
+.list-cell:odd:selected,
+.list-cell:even:selected,
+.date-picker-popup .month-year-pane,
+.date-picker-popup .week-number-cell,
+.date-picker-popup,
+.date-picker-popup .spinner .button .left-arrow-button,
+.date-picker-popup .spinner .button .right-arrow-button,
+.progress-bar .bar,
+.menu-item:hover,
+.combo-box .arrow-button {
+    -fx-background-color: -fx-secondary-color;
 }
+
+.table-view .column-header .sort-order-dot,
+.progress-bar .track,
+.accordion .titled-pane > .title > .arrow-button > .arrow,
+.combo-box .arrow,
+.combo-box .increment-arrow,
+.combo-box .decrement-arrow,
+.date-picker-popup .spinner .button .left-arrow,
+.date-picker-popup .spinner .button .right-arrow,
+.date-picker .arrow,
+.spinner .increment-arrow,
+.spinner .decrement-arrow,
+.tree-cell > .tree-disclosure-node > .arrow {
+    -fx-background-color: -fx-arrow-color;
+}
+
+
+.label,
+.check-box,
+.tab-pane .tab-label,
+.menu-item .label,
+.radio-button,
+.date-picker-popup .month-year-pane .label,
+.add_btn:disabled,
+.download_now_btn:disabled {
+    -fx-text-fill: -fx-text-color !important;
+}
+
+
+.circleTheme {
+    -fx-fill: -fx-dark-primary-color;
+    -fx-cursor: hand;
+}
+
+.tree-cell {
+    -fx-background-color: -fx-primary-color;
+    -fx-text-fill: -fx-text-color;
+}
+
+
+.table-cell {
+    -fx-border-color: transparent;
+    -fx-text-fill: -fx-text-color;
+}
+
+.table-row-cell:odd,
+.list-cell:odd {
+    -fx-background-color: -fx-primary-color;
+    -fx-text-fill: -fx-text-color;
+}
+
+.table-row-cell:even,
+.list-cell:even,
+.tab-pane .tab:selected {
+    -fx-background-color: -fx-primary-color2;
+    -fx-text-fill: -fx-text-color;
+}
+
+
+.tab-pane .tab-header-area .tab-header-background,
+.date-picker .arrow-button,
+.table-view .corner,
+.menu-item:hover:disabled,
+.accordion .titled-pane .title,
 .table-view .column-header {
     -fx-background-color: transparent;
 }
-.table-view .column-header .label{
+
+
+.table-view .column-header .label {
     -fx-alignment: baseline-left;
 }
-.table-view .corner {
-    -fx-background-color: transparent;
+
+
+.accordion .titled-pane,
+.accordion .titled-pane > *.content {
+    -fx-background-color: -fx-secondary-color;
+    -fx-text-box-border: -fx-white-color;
+    -fx-text-fill: -fx-text-color;
 }
+
+
+.text-field {
+    -fx-background-color: -fx-primary-color2;
+    -fx-border-color: -fx-white-color;
+    -fx-text-fill: -fx-text-color;
+    -fx-border-radius: 8;
+    -fx-background-radius: 8;
+}
+
+.no {
+    -fx-text-fill: -fx-red-color !important;
+}
+
+.yes {
+    -fx-text-fill: -fx-green-color !important;
+}
+
+
+.popover .content {
+    -fx-background-color: -fx-primary-color;
+    -fx-padding: 0 5;
+}
+
+.popover .arrow-button {
+    -fx-border-style: none;
+    -fx-padding: 0;
+    -fx-border-width: 0;
+    -fx-fill: -fx-primary-color;
+}
+
+#newQueue,
+#openLocation,
+.text-field{
+    -fx-border-color: -fx-dark-primary-color;
+}
+
+#refreshBtn .ikonli-font-icon,
+#openLocation .ikonli-font-icon,
+#newQueue .ikonli-font-icon {
+    -fx-icon-color: -fx-dark-primary-color ;
+}
+#errorLabel{
+    -fx-text-fill: -fx-red-color !important;
+}
+
+.spinner,
+.date-picker {
+    -fx-background-color: -fx-secondary-color;
+    -fx-border-color: -fx-white-color;
+    -fx-text-fill: -fx-text-color;
+    -fx-border-radius: 8;
+    -fx-background-radius: 8;
+}
+
+.spinner .text-field,
+.date-picker .text-field {
+    -fx-border-color: transparent;
+    -fx-border-radius: 8 0 0 8;
+    -fx-background-radius: 8 0 0 8;
+}
+
+.spinner .increment-arrow-button,
+.spinner .decrement-arrow-button {
+    -fx-background-color: -fx-secondary-color;
+    -fx-border-radius: 0 8 8 0;
+    -fx-background-radius: 0 8 8 0;
+}
+
+
+.date-picker-popup .spinner .button:hover,
+.date-picker-popup .spinner .button:hover,
+.date-picker-popup .spinner .button:focused,
+.date-picker-popup .spinner .button:focused {
+    -fx-background-color: -fx-secondary-color;
+    -fx-background-radius: 5;
+}
+
+.date-picker .cell {
+    -fx-background-color: -fx-secondary-color;
+    -fx-text-fill: -fx-text-color;
+}
+

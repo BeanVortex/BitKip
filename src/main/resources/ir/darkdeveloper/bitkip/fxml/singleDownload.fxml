@@ -4,6 +4,7 @@
 <?import javafx.scene.layout.*?>
 <VBox xmlns="http://javafx.com/javafx"
       xmlns:fx="http://javafx.com/fxml"
+      stylesheets="@../css/light_mode.css"
       fx:controller="ir.darkdeveloper.bitkip.controllers.SingleDownload"
       spacing="10">
 

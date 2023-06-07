@@ -10,6 +10,7 @@
     <stylesheets>
         <URL value="@../css/main.css"/>
         <URL value="@../css/newDownload.css"/>
+        <URL value="@../css/light_mode.css"/>
     </stylesheets>
     <HBox minWidth="600" alignment="CENTER" minHeight="40">
         <Button styleClass="tab_btn" minWidth="300" text="Single" fx:id="singleButton" onAction="#showSingle"/>

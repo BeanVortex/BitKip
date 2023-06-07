@@ -1,163 +1,27 @@
 * {
     -fx-white-color: #fff;
-    -fx-primary-color: #293944;
-    -fx-primary-color2: #192b3a;
-    -fx-secondary-color: #506e83;
-    -fx-red-color: #EF5350;
-    -fx-green-color: #51b055;
+    -fx-text-color: #fff !important;
+    -fx-primary-color: #293944 !important;
+    -fx-arrow-color: #fff !important;
+    -fx-primary-color2: #192b3a !important;
+    -fx-secondary-color: #506e83 !important;
+    -fx-red-color: #EF5350 !important;
+    -fx-green-color: #51b055 !important;
 }
-
-.root,
-.container,
-#scrollPane,
-.accordion,
-.date-picker .cell:focused,
-.date-picker .cell:hover,
-.table-view .column-header-background,
-.tab-pane .tab,
-.table-view,
-.list-view,
-.tab-pane,
-.menu-item,
-.menu,
-.menu-bar,
-.context-menu,
-.scroll-bar:vertical,
-.scroll-bar:vertical .track,
-.scroll-bar:vertical .track-background,
-.scroll-bar:horizontal,
-.scroll-bar:horizontal .track,
-.scroll-bar:horizontal .track-background,
-.scroll-pane > .viewport,
-.scroll-pane > .corner {
-    -fx-background-color: -fx-primary-color;
-}
-
-.table-row-cell:odd:selected,
-.table-row-cell:even:selected,
-.list-cell:odd:selected,
-.list-cell:even:selected,
-.date-picker-popup .month-year-pane,
-.date-picker-popup .week-number-cell,
-.date-picker-popup,
-.date-picker-popup .spinner .button .left-arrow-button,
-.date-picker-popup .spinner .button .right-arrow-button,
-.progress-bar .bar,
-.menu-item:hover,
-.combo-box .arrow-button {
-    -fx-background-color: -fx-secondary-color;
-}
-
-.scroll-bar:horizontal .thumb,
-.scroll-bar:vertical .thumb,
-.table-view .column-header .sort-order-dot,
-.progress-bar .track,
-.accordion .titled-pane > .title > .arrow-button > .arrow,
-.combo-box .arrow,
-.combo-box .increment-arrow,
-.combo-box .decrement-arrow,
-.date-picker-popup .spinner .button .left-arrow,
-.date-picker-popup .spinner .button .right-arrow,
-.date-picker .arrow,
-.spinner .increment-arrow,
-.spinner .decrement-arrow,
-.tree-cell > .tree-disclosure-node > .arrow{
-    -fx-background-color: -fx-white-color;
-}
-
-
-.label,
-.check-box,
-.tab-pane .tab-label,
-.menu-item .label,
-.radio-button,
-.date-picker-popup .month-year-pane .label,
-.add_btn:disabled,
-.download_now_btn:disabled {
-    -fx-text-fill: -fx-white-color !important;
-}
-
 
 .circleTheme {
-    -fx-stroke: -fx-primary-color;
-    -fx-fill: -fx-white-color;
+    -fx-stroke: -fx-primary-color !important;
+    -fx-fill: -fx-white-color !important;
 }
 
-.tree-cell {
-    -fx-background-color: -fx-primary-color;
-    -fx-text-fill: -fx-white-color;
-}
-
-
-.table-cell {
-    -fx-border-color: transparent;
-    -fx-text-fill: -fx-white-color;
-}
-
-.table-row-cell:odd,
-.list-cell:odd {
-    -fx-background-color: -fx-primary-color;
-    -fx-text-fill: -fx-white-color;
-}
-
-.table-row-cell:even,
-.list-cell:even,
-.tab-pane .tab:selected{
-    -fx-background-color: -fx-primary-color2;
-    -fx-text-fill: -fx-white-color;
-}
-
-
-.tab-pane .tab-header-area .tab-header-background,
-.date-picker .arrow-button,
-.table-view .corner,
-.menu-item:hover:disabled,
-.accordion .titled-pane .title,
-.table-view .column-header {
-    -fx-background-color: transparent;
-}
-
-
-.table-view .column-header .label {
-    -fx-alignment: baseline-left;
-}
-
-
-.accordion .titled-pane,
-.accordion .titled-pane > *.content {
-    -fx-background-color: -fx-secondary-color;
-    -fx-text-box-border: -fx-white-color;
-    -fx-text-fill: -fx-white-color;
-}
-
-
-.text-field {
-    -fx-background-color: -fx-secondary-color;
-    -fx-border-color: -fx-white-color;
-    -fx-text-fill: -fx-white-color;
+.text-field,
+.text-area .content,
+.text-area{
+    -fx-background-color: -fx-primary-color2 !important;
+    -fx-border-color: -fx-white-color !important;
+    -fx-text-fill: -fx-text-color;
     -fx-border-radius: 8;
     -fx-background-radius: 8;
-}
-
-.no {
-    -fx-text-fill: -fx-red-color;
-}
-
-.yes {
-    -fx-text-fill: -fx-green-color;
-}
-
-
-.popover .content {
-    -fx-background-color: -fx-primary-color;
-    -fx-padding: 0 5;
-}
-
-.popover .arrow-button {
-    -fx-border-style: none;
-    -fx-padding: 0;
-    -fx-border-width: 0;
-    -fx-fill: -fx-primary-color;
 }
 
 #newQueue,
@@ -169,42 +33,5 @@
 #openLocation .ikonli-font-icon,
 #newQueue .ikonli-font-icon {
     -fx-icon-color: -fx-white-color !important;
-}
-
-.spinner,
-.date-picker {
-    -fx-background-color: -fx-secondary-color;
-    -fx-border-color: -fx-white-color;
-    -fx-text-fill: -fx-white-color;
-    -fx-border-radius: 8;
-    -fx-background-radius: 8;
-}
-
-.spinner .text-field,
-.date-picker .text-field {
-    -fx-border-color: transparent;
-    -fx-border-radius: 8 0 0 8;
-    -fx-background-radius: 8 0 0 8;
-}
-
-.spinner .increment-arrow-button,
-.spinner .decrement-arrow-button {
-    -fx-background-color: -fx-secondary-color;
-    -fx-border-radius: 0 8 8 0;
-    -fx-background-radius: 0 8 8 0;
-}
-
-
-.date-picker-popup .spinner .button:hover,
-.date-picker-popup .spinner .button:hover,
-.date-picker-popup .spinner .button:focused,
-.date-picker-popup .spinner .button:focused {
-    -fx-background-color: -fx-secondary-color;
-    -fx-background-radius: 5;
-}
-
-.date-picker .cell {
-    -fx-background-color: -fx-secondary-color;
-    -fx-text-fill: -fx-white-color;
 }
 

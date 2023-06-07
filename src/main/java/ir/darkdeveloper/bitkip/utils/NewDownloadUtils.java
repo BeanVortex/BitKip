@@ -10,7 +10,6 @@ import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
-import javafx.scene.paint.Paint;
 import javafx.stage.DirectoryChooser;
 import org.controlsfx.control.Notifications;
 import org.controlsfx.control.PopOver;
@@ -54,7 +53,7 @@ public class NewDownloadUtils {
     public static long getFileSize(HttpURLConnection connection) {
         var fileSize = connection.getContentLengthLong();
         if (fileSize == -1)
-            throw new RuntimeException("Connection failed");
+            log.error("Connection failed");
         return fileSize;
     }
 
@@ -73,18 +72,22 @@ public class NewDownloadUtils {
                 finalConnection[0] = connect(urlField.getText(), 3000, 3000);
             var fileSize = getFileSize(finalConnection[0]);
             var resumable = canResume(finalConnection[0]);
-
-            if (!resumable) {
-                chunksField.setText("0");
-                chunksField.setDisable(true);
-                bytesField.setDisable(true);
-            } else {
-                chunksField.setText(String.valueOf(InputValidations.maxChunks()));
-                chunksField.setDisable(false);
-            }
             Platform.runLater(() -> {
-                resumableLabel.setTextFill(resumable ? Paint.valueOf("#388E3C") : Paint.valueOf("#EF5350"));
-                resumableLabel.setText(resumable ? "Yes" : "No");
+                if (resumable){
+                    chunksField.setText("0");
+                    chunksField.setDisable(true);
+                    bytesField.setDisable(true);
+                    resumableLabel.setText("Yes");
+                    resumableLabel.getStyleClass().add("yes");
+                    resumableLabel.getStyleClass().remove("no");
+                }else {
+                    resumableLabel.setText("No");
+                    resumableLabel.getStyleClass().add("no");
+                    resumableLabel.getStyleClass().remove("yes");
+                    chunksField.setText("0");
+                    chunksField.setDisable(true);
+                    bytesField.setDisable(true);
+                }
                 sizeLabel.setText(IOUtils.formatBytes(fileSize));
                 bytesField.setText(String.valueOf(fileSize));
             });

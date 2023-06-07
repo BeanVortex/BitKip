@@ -14,6 +14,7 @@
     <stylesheets>
         <URL value="@../css/main.css"/>
         <URL value="@../css/newDownload.css"/>
+        <URL value="@../css/light_mode.css"/>
     </stylesheets>
 
 

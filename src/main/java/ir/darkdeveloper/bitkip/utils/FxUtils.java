@@ -90,6 +90,7 @@ public class FxUtils {
         stage.setTitle("New Download");
         NewDownloadController controller = loader.getController();
         controller.setStage(stage);
+        getThemeSubject().addObserver(controller, scene);
         controller.setUrlModel(urlModel);
         controller.setIsSingle(isSingle);
         // onclose request has set in controller
@@ -289,6 +290,33 @@ public class FxUtils {
         openStages.put(QUEUE_SETTING_STAGE, stage);
     }
 
+    public static void newRefreshStage(DownloadModel dm) {
+        FXMLLoader loader;
+        Stage stage = new Stage();
+        VBox root;
+        try {
+            loader = new FXMLLoader(getResource("fxml/refreshLink.fxml"));
+            root = loader.load();
+        } catch (IOException e) {
+            log.error(e.getLocalizedMessage());
+            throw new RuntimeException(e);
+        }
+        var scene = new Scene(root);
+        stage.setScene(scene);
+        stage.setMinWidth(root.getPrefWidth());
+        stage.setMinHeight(root.getPrefHeight());
+        stage.setTitle("Refreshing URL");
+        var logoPath = getResource("icons/logo.png");
+        if (logoPath != null)
+            stage.getIcons().add(new Image(logoPath.toExternalForm()));
+        RefreshController controller = loader.getController();
+        controller.setStage(stage);
+        getThemeSubject().addObserver(controller, scene);
+        stage.setOnCloseRequest(e -> getThemeSubject().removeObserver(controller));
+        controller.setDownload(dm);
+        stage.showAndWait();
+    }
+
     public static boolean askToMoveFilesForQueues(List<DownloadModel> downloads, QueueModel desQueue) {
         var downloadsHasFolder = downloads.stream().filter(dm ->
                 !dm.getQueues().stream().filter(QueueModel::hasFolder).toList().isEmpty()
@@ -342,31 +370,6 @@ public class FxUtils {
         alert.setTitle(alertType.name());
         alert.setHeaderText(header);
         return showAlert(primary, secondary, alert);
-    }
-
-    public static void newRefreshStage(DownloadModel dm) {
-        FXMLLoader loader;
-        Stage stage = new Stage();
-        VBox root;
-        try {
-            loader = new FXMLLoader(getResource("fxml/refreshLink.fxml"));
-            root = loader.load();
-        } catch (IOException e) {
-            log.error(e.getLocalizedMessage());
-            throw new RuntimeException(e);
-        }
-        var scene = new Scene(root);
-        stage.setScene(scene);
-        stage.setMinWidth(root.getPrefWidth());
-        stage.setMinHeight(root.getPrefHeight());
-        stage.setTitle("Refreshing URL");
-        var logoPath = getResource("icons/logo.png");
-        if (logoPath != null)
-            stage.getIcons().add(new Image(logoPath.toExternalForm()));
-        RefreshController controller = loader.getController();
-        controller.setStage(stage);
-        controller.setDownload(dm);
-        stage.showAndWait();
     }
 
     public static boolean askForPassword(String header, String content) {

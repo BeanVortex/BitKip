@@ -13,6 +13,7 @@
     <stylesheets>
         <URL value="@../css/settings.css"/>
         <URL value="@../css/newDownload.css"/>
+        <URL value="@../css/light_mode.css"/>
     </stylesheets>
 
     <ImageView fitHeight="180" fitWidth="180" fx:id="logoImg"/>

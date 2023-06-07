@@ -5,9 +5,9 @@
 
 <VBox xmlns="http://javafx.com/javafx"
       xmlns:fx="http://javafx.com/fxml"
+      stylesheets="@../css/light_mode.css"
       fx:controller="ir.darkdeveloper.bitkip.controllers.BatchDownload"
       spacing="10">
-
 
     <HBox spacing="20" alignment="CENTER">
         <Label text="URL :" minWidth="60" styleClass="bold"/>

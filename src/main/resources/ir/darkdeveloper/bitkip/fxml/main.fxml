@@ -3,11 +3,16 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 <?import javafx.geometry.Insets?>
+<?import java.net.URL?>
 
-<VBox minHeight="515" prefHeight="600" minWidth="933" prefWidth="1050" stylesheets="@../css/main.css"
+<VBox minHeight="515" prefHeight="600" minWidth="933" prefWidth="1050"
       xmlns="http://javafx.com/javafx/16"
       xmlns:fx="http://javafx.com/fxml/1" fx:controller="ir.darkdeveloper.bitkip.controllers.MainController">
 
+    <stylesheets>
+        <URL value="@../css/main.css"/>
+        <URL value="@../css/light_mode.css"/>
+    </stylesheets>
 
     <HBox styleClass="csm_toolbar" minWidth="835" prefWidth="1000">
         <HBox maxWidth="2" minWidth="2" styleClass="csm_toolbar"/>
