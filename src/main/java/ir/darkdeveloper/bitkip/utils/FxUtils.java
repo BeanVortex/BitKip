@@ -10,7 +10,6 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
-import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
@@ -30,6 +29,7 @@ import java.util.concurrent.Executors;
 import static ir.darkdeveloper.bitkip.BitKip.getResource;
 import static ir.darkdeveloper.bitkip.config.AppConfigs.*;
 import static ir.darkdeveloper.bitkip.config.observers.QueueSubject.getQueueSubject;
+import static ir.darkdeveloper.bitkip.config.observers.ThemeSubject.getThemeSubject;
 import static ir.darkdeveloper.bitkip.utils.Defaults.ALL_DOWNLOADS_QUEUE;
 import static ir.darkdeveloper.bitkip.utils.Defaults.staticQueueNames;
 
@@ -49,6 +49,7 @@ public class FxUtils {
             var scene = new Scene(root, stage.getWidth(), stage.getHeight());
             MainController controller = loader.getController();
             getQueueSubject().addObserver(controller);
+            getThemeSubject().addObserver(controller, scene);
             stage.setScene(scene);
             stage.setMinWidth(root.getMinWidth());
             stage.setMinHeight(root.getMinHeight());
@@ -117,7 +118,9 @@ public class FxUtils {
         stage.setMinHeight(root.getMinHeight());
         stage.setTitle("New Queue");
         FXMLController controller = loader.getController();
+        getThemeSubject().addObserver(controller, scene);
         controller.setStage(stage);
+        stage.setOnCloseRequest(e -> getThemeSubject().removeObserver(controller));
         stage.showAndWait();
     }
 
@@ -153,8 +156,12 @@ public class FxUtils {
         if (logoPath != null)
             stage.getIcons().add(new Image(logoPath.toExternalForm()));
         FXMLController controller = loader.getController();
+        getThemeSubject().addObserver(controller, scene);
         controller.setStage(stage);
-        stage.setOnCloseRequest(e -> openStages.remove(key));
+        stage.setOnCloseRequest(e -> {
+            openStages.remove(key);
+            getThemeSubject().removeObserver(controller);
+        });
         stage.show();
         openStages.put(key, stage);
     }
@@ -179,7 +186,9 @@ public class FxUtils {
         if (logoPath != null)
             stage.getIcons().add(new Image(logoPath.toExternalForm()));
         FXMLController controller = loader.getController();
+        getThemeSubject().addObserver(controller, scene);
         controller.setStage(stage);
+        stage.setOnCloseRequest(e -> getThemeSubject().removeObserver(controller));
         stage.show();
     }
 
@@ -205,8 +214,12 @@ public class FxUtils {
         DownloadingController controller = loader.getController();
         controller.setStage(stage);
         openDownloadings.add(controller);
+        getThemeSubject().addObserver(controller, scene);
         controller.setDownloadModel(dm);
-        stage.setOnCloseRequest(e -> openDownloadings.remove(controller));
+        stage.setOnCloseRequest(e -> {
+            openDownloadings.remove(controller);
+            getThemeSubject().removeObserver(controller);
+        });
         stage.show();
     }
 
@@ -227,8 +240,10 @@ public class FxUtils {
         stage.setMinHeight(root.getPrefHeight());
         stage.setTitle("Links");
         BatchList controller = loader.getController();
+        getThemeSubject().addObserver(controller, scene);
         controller.setStage(stage);
         controller.setData(links);
+        stage.setOnCloseRequest(e -> getThemeSubject().removeObserver(controller));
         stage.show();
         stage.setAlwaysOnTop(true);
         stage.setAlwaysOnTop(false);
@@ -262,9 +277,11 @@ public class FxUtils {
         controller.setStage(stage);
         controller.setSelectedQueue(selectedQueue);
         getQueueSubject().addObserver(controller);
+        getThemeSubject().addObserver(controller, scene);
         stage.setOnCloseRequest(e -> {
             openStages.remove(QUEUE_SETTING_STAGE);
             getQueueSubject().removeObserver(controller);
+            getThemeSubject().removeObserver(controller);
         });
         stage.show();
         stage.setAlwaysOnTop(true);
@@ -499,20 +516,6 @@ public class FxUtils {
             }
         });
         dialog.show();
-    }
-
-    public static <T> List<T> getAllNodes(Parent root, Class<T> tClass) {
-        var nodes = new ArrayList<T>();
-        addAllDescendents(root, nodes, tClass);
-        return nodes;
-    }
-    private static <T> void addAllDescendents(Parent root, ArrayList<T> nodes, Class<T> tClass) {
-        for (var node : root.getChildrenUnmodifiable()) {
-            if (tClass.isInstance(node))
-                nodes.add(tClass.cast(node));
-            if (node instanceof Parent p)
-                addAllDescendents(p, nodes, tClass);
-        }
     }
 
 }

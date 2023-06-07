@@ -85,6 +85,7 @@ public class DownloadingController implements FXMLController {
 
     @Override
     public void initAfterStage() {
+        updateTheme(stage.getScene());
         var logoPath = getResource("icons/logo.png");
         if (logoPath != null) {
             var img = new Image(logoPath.toExternalForm());
@@ -313,6 +314,4 @@ public class DownloadingController implements FXMLController {
         DownloadOpUtils.openContainingFolder(downloadModel);
         stage.close();
     }
-
-
 }

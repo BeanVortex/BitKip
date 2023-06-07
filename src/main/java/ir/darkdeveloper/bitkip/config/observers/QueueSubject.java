@@ -24,7 +24,7 @@ public class QueueSubject {
         observers.remove(o);
     }
 
-    public void notifyAllObservers() {
+    private void notifyAllObservers() {
         observers.forEach(QueueObserver::updateQueue);
     }
 

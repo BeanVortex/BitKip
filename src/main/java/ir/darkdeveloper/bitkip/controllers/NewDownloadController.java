@@ -18,6 +18,7 @@ import java.util.ResourceBundle;
 import static ir.darkdeveloper.bitkip.BitKip.getResource;
 import static ir.darkdeveloper.bitkip.config.AppConfigs.log;
 import static ir.darkdeveloper.bitkip.config.observers.QueueSubject.getQueueSubject;
+import static ir.darkdeveloper.bitkip.config.observers.ThemeSubject.getThemeSubject;
 
 public class NewDownloadController implements FXMLController {
 
@@ -43,7 +44,10 @@ public class NewDownloadController implements FXMLController {
     @Override
     public void setStage(Stage stage) {
         this.stage = stage;
-        this.stage.setOnCloseRequest(e -> getQueueSubject().removeObserver(prevController));
+        this.stage.setOnCloseRequest(e -> {
+            getQueueSubject().removeObserver(prevController);
+            getThemeSubject().removeObserver(prevController);
+        });
         initAfterStage();
     }
 
@@ -61,6 +65,7 @@ public class NewDownloadController implements FXMLController {
 
     @Override
     public void initAfterStage() {
+        updateTheme(stage.getScene());
         stage.widthProperty().addListener((ob, o, n) -> {
             var width = n.longValue();
             var buttonWidth = width / 2;
@@ -129,12 +134,15 @@ public class NewDownloadController implements FXMLController {
             if (fxmlName.equals("singleDownload"))
                 ((SingleDownload)controller).setUrlModel(urlModel);
 
-            if (prevController != null)
+            if (prevController != null){
                 getQueueSubject().removeObserver(prevController);
+                getThemeSubject().removeObserver(prevController);
+            }
 
             details.setId("download_details");
             controller.setStage(stage);
             getQueueSubject().addObserver(controller);
+            getThemeSubject().addObserver(controller, stage.getScene());
             prevController = controller;
             container.getChildren().add(details);
         } catch (IOException e) {

@@ -1,5 +1,19 @@
 package ir.darkdeveloper.bitkip.config.observers;
 
+import javafx.scene.Scene;
+
+import static ir.darkdeveloper.bitkip.BitKip.getResource;
+import static ir.darkdeveloper.bitkip.config.AppConfigs.theme;
+
 public interface ThemeObserver {
-    void updateTheme();
+    default void updateTheme(Scene scene){
+        var stylesheets = scene.getStylesheets();
+        if (theme.equals("light")) {
+            stylesheets.add(getResource("css/light_mode.css").toExternalForm());
+            stylesheets.remove(getResource("css/dark_mode.css").toExternalForm());
+        } else {
+            stylesheets.add(getResource("css/dark_mode.css").toExternalForm());
+            stylesheets.remove(getResource("css/light_mode.css").toExternalForm());
+        }
+    }
 }

@@ -3,18 +3,24 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.VBox?>
-<VBox minHeight="350.0" minWidth="450.0" spacing="20" stylesheets="@../css/about.css"
+<?import java.net.URL?>
+<VBox minHeight="350.0" minWidth="450.0" spacing="20"
       style="-fx-padding: 10"
       xmlns="http://javafx.com/javafx/16" xmlns:fx="http://javafx.com/fxml/1"
       fx:controller="ir.darkdeveloper.bitkip.controllers.AboutController"
       alignment="TOP_CENTER">
 
+    <stylesheets>
+        <URL value="@../css/settings.css"/>
+        <URL value="@../css/newDownload.css"/>
+    </stylesheets>
+
     <ImageView fitHeight="180" fitWidth="180" fx:id="logoImg"/>
 
     <VBox alignment="CENTER" spacing="5">
         <Label text="BitKip" style="-fx-font-size: 18"/>
-        <Label text="version" fx:id="versionLbl" styleClass="descText"/>
-        <Button text="check for updates" onAction="#checkForUpdates"/>
+        <Label text="version" fx:id="versionLbl" styleClass="settingTile"/>
+        <Button text="check for updates" onAction="#checkForUpdates" styleClass="download_now_btn"/>
     </VBox>
 
     <VBox alignment="CENTER">

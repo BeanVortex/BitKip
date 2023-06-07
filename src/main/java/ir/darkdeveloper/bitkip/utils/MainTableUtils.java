@@ -1,6 +1,5 @@
 package ir.darkdeveloper.bitkip.utils;
 
-import ir.darkdeveloper.bitkip.config.AppConfigs;
 import ir.darkdeveloper.bitkip.config.observers.QueueSubject;
 import ir.darkdeveloper.bitkip.models.DownloadModel;
 import ir.darkdeveloper.bitkip.models.DownloadStatus;
@@ -163,8 +162,11 @@ public class MainTableUtils {
     private EventHandler<? super MouseEvent> onItemsClicked() {
         return event -> {
             if (event.getButton().equals(MouseButton.PRIMARY) && event.getClickCount() == 2) {
-                var dm = getSelected().get(0);
-                DownloadOpUtils.openDownloadingStage(dm);
+                var selected = getSelected();
+                if (selected.size() > 0){
+                    var dm = getSelected().get(0);
+                    DownloadOpUtils.openDownloadingStage(dm);
+                }
             }
         };
     }

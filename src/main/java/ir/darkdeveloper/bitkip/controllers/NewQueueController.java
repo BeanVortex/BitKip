@@ -44,6 +44,7 @@ public class NewQueueController implements FXMLController {
 
     @Override
     public void initAfterStage() {
+        updateTheme(stage.getScene());
         var logoPath = getResource("icons/logo.png");
         if (logoPath != null) {
             var img = new Image(logoPath.toExternalForm());
@@ -76,5 +77,4 @@ public class NewQueueController implements FXMLController {
         log.info("Created queue : " + queueModel.toStringModel());
         stage.close();
     }
-
 }

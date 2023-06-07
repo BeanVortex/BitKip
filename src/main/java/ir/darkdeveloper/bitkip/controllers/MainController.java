@@ -70,6 +70,7 @@ public class MainController implements FXMLController, QueueObserver {
 
     @Override
     public void initAfterStage() {
+        updateTheme(stage.getScene());
         mainTableUtils = new MainTableUtils(contentTable);
         AppConfigs.mainTableUtils = mainTableUtils;
         mainTableUtils.tableInits();
@@ -171,4 +172,5 @@ public class MainController implements FXMLController, QueueObserver {
             SideUtils.prepareSideTree(sideTree, queues);
         MenuUtils.initOperationMenu(operationMenu);
     }
+
 }

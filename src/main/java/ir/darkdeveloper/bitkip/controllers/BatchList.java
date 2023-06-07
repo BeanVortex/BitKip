@@ -132,4 +132,5 @@ public class BatchList implements FXMLController {
         }
         return list;
     }
+
 }

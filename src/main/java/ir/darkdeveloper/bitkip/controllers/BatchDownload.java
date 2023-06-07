@@ -73,6 +73,7 @@ public class BatchDownload implements QueueObserver {
 
     @Override
     public void initAfterStage() {
+        updateTheme(stage.getScene());
     }
 
     @Override

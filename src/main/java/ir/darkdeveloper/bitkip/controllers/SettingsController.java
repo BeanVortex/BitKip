@@ -13,10 +13,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
-import javafx.scene.layout.Background;
 import javafx.scene.layout.VBox;
-import javafx.scene.paint.Paint;
-import javafx.scene.shape.Circle;
 import javafx.scene.shape.Line;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.Stage;
@@ -25,7 +22,6 @@ import org.controlsfx.control.Notifications;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
-import java.util.List;
 import java.util.ResourceBundle;
 import java.util.concurrent.Executors;
 
@@ -38,8 +34,6 @@ public class SettingsController implements FXMLController {
     private CheckBox completeDialogCheck;
     @FXML
     private Label lblLocation;
-    @FXML
-    private Circle circleTheme;
     @FXML
     private Line line1;
     @FXML
@@ -54,11 +48,11 @@ public class SettingsController implements FXMLController {
     private VBox parent;
 
     private Stage stage;
-    private List<Label> labels;
 
 
     @Override
     public void initAfterStage() {
+        updateTheme(stage.getScene());
         parent.prefWidthProperty().bind(stage.widthProperty());
         parent.widthProperty().addListener((ob, o, n) -> {
             var endX = n.doubleValue() - 20;
@@ -70,7 +64,6 @@ public class SettingsController implements FXMLController {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        labels = FxUtils.getAllNodes(parent, Label.class);
         InputValidations.validIntInputCheck(portField, (long) serverPort);
         lblLocation.setText(downloadPath);
         serverCheck.setSelected(serverEnabled);
@@ -129,26 +122,10 @@ public class SettingsController implements FXMLController {
     private void onThemeChange(MouseEvent mouseEvent) {
         if (mouseEvent.getButton() != MouseButton.PRIMARY)
             return;
-        if (theme.equals("light")) {
-            circleTheme.setFill(Paint.valueOf("#fff"));
-            circleTheme.setStroke(Paint.valueOf("#333"));
-            completeDialogCheck.setTextFill(Paint.valueOf("#fff"));
-            serverCheck.setTextFill(Paint.valueOf("#fff"));
-            parent.setBackground(Background.fill(Paint.valueOf("#333")));
-            labels.forEach(label -> label.setTextFill(Paint.valueOf("#fff")));
-            setTheme("dark");
-        } else {
-            circleTheme.setFill(Paint.valueOf("#333"));
-            circleTheme.setStroke(Paint.valueOf("#fff"));
-            completeDialogCheck.setTextFill(Paint.valueOf("#333"));
-            serverCheck.setTextFill(Paint.valueOf("#333"));
-            parent.setBackground(Background.fill(Paint.valueOf("#fff")));
-            labels.forEach(label -> label.setTextFill(Paint.valueOf("#111")));
-            setTheme("light");
-        }
+        if (theme.equals("light")) setTheme("dark");
+        else setTheme("light");
         IOUtils.saveConfigs();
     }
-
     @FXML
     private void onServerCheck() {
         serverEnabled = serverCheck.isSelected();

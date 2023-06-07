@@ -90,6 +90,7 @@ public class SingleDownload implements QueueObserver {
 
     @Override
     public void initAfterStage() {
+        updateTheme(stage.getScene());
     }
 
     @Override

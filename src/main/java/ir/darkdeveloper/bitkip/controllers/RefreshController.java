@@ -42,6 +42,7 @@ public class RefreshController implements FXMLController {
 
     @Override
     public void initAfterStage() {
+        updateTheme(stage.getScene());
         urlField.textProperty().addListener((o, ol, n) -> {
             errorLabel.setVisible(false);
             saveBtn.setDisable(false);

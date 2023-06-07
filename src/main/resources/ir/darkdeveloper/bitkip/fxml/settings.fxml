@@ -34,7 +34,7 @@
         <HBox alignment="CENTER">
             <Label styleClass="settingTile" text="Theme:"/>
             <Region HBox.hgrow="ALWAYS"/>
-            <Circle radius="10.0" fill="#fff" stroke="#333" fx:id="circleTheme" onMouseClicked="#onThemeChange"/>
+            <Circle radius="10.0" fill="#fff" stroke="#333" styleClass="circleTheme" onMouseClicked="#onThemeChange"/>
         </HBox>
     </VBox>
 

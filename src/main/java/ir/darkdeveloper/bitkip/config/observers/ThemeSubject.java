@@ -2,23 +2,24 @@ package ir.darkdeveloper.bitkip.config.observers;
 
 
 import ir.darkdeveloper.bitkip.config.AppConfigs;
+import javafx.scene.Scene;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
 public class ThemeSubject {
 
-    private final List<ThemeObserver> observers = new ArrayList<>();
+    private final Map<ThemeObserver, Scene> observers = new HashMap<>();
     private static final ThemeSubject themeSubject = new ThemeSubject();
 
     private ThemeSubject() {
     }
 
-    private void addObserver(ThemeObserver o) {
-        observers.add(o);
+    public void addObserver(ThemeObserver o, Scene scene) {
+        observers.put(o, scene);
     }
 
-    private void removeObserver(ThemeObserver o) {
+    public void removeObserver(ThemeObserver o) {
         observers.remove(o);
     }
 
@@ -27,11 +28,11 @@ public class ThemeSubject {
     }
 
 
-
     public static void setTheme(String theme) {
         AppConfigs.theme = theme;
         themeSubject.notifyAllObservers();
     }
+
     public static ThemeSubject getThemeSubject() {
         return themeSubject;
     }

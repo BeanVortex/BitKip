@@ -2,6 +2,7 @@ package ir.darkdeveloper.bitkip.controllers;
 
 import ir.darkdeveloper.bitkip.BitKip;
 import ir.darkdeveloper.bitkip.config.AppConfigs;
+import ir.darkdeveloper.bitkip.config.observers.ThemeObserver;
 import ir.darkdeveloper.bitkip.controllers.interfaces.FXMLController;
 import ir.darkdeveloper.bitkip.utils.MoreUtils;
 import javafx.event.ActionEvent;
@@ -15,7 +16,7 @@ import javafx.stage.Stage;
 import java.net.URL;
 import java.util.ResourceBundle;
 
-public class AboutController implements FXMLController {
+public class AboutController implements FXMLController, ThemeObserver {
 
     @FXML
     private ImageView logoImg;
@@ -33,7 +34,7 @@ public class AboutController implements FXMLController {
 
     @Override
     public void initAfterStage() {
-
+        updateTheme(getStage().getScene());
     }
 
     @FXML
@@ -57,4 +58,5 @@ public class AboutController implements FXMLController {
     private void checkForUpdates() {
         MoreUtils.checkUpdates(true);
     }
+
 }

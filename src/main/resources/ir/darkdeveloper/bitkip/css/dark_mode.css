@@ -1,0 +1,72 @@
+.root{
+    -fx-background-color: #293944;
+}
+.label{
+    -fx-text-fill: #fff;
+}
+.check-box{
+    -fx-text-fill: #fff;
+}
+.circleTheme{
+    -fx-stroke: #293944;
+    -fx-fill: #fff;
+}
+.tree-cell {
+    -fx-background-color: #293944;
+    -fx-text-fill: #fff;
+}
+
+.tree-cell > .tree-disclosure-node > .arrow {
+    -fx-background-color: #fff;
+}
+
+.table-cell {
+    -fx-border-color: transparent;
+    -fx-text-fill: #fff;
+}
+
+.table-row-cell:odd{
+    -fx-background-color: #293944;
+}
+.table-row-cell:even{
+    -fx-background-color: #192b3a;
+}
+
+.table-row-cell:odd:selected{
+    -fx-background-color: #506e83;
+}
+.table-row-cell:even:selected{
+    -fx-background-color: #506e83;
+}
+.table-view,
+.table-view .virtual-flow .scroll-bar:vertical,
+.table-view .virtual-flow .scroll-bar:vertical .track,
+.table-view .virtual-flow .scroll-bar:vertical .track-background,
+.table-view .virtual-flow .scroll-bar:horizontal,
+.table-view .virtual-flow .scroll-bar:horizontal .track,
+.table-view .virtual-flow .scroll-bar:horizontal .track-background {
+    -fx-background-color: #293944;
+}
+
+.table-view .virtual-flow .scroll-bar:vertical .thumb{
+    -fx-background-color:  darkgray;
+}
+.table-view .virtual-flow .scroll-bar:horizontal .thumb {
+    -fx-background-color:  darkgray;
+}
+
+.table-view .column-header-background{
+    -fx-background-color: #223b4d;
+}
+.table-view .column-header{
+    -fx-background-color: transparent;
+}
+.table-view .column-header .label{
+    -fx-alignment: baseline-left;
+}
+.table-view .column-header .sort-order-dot{
+    -fx-background-color: #fff;
+}
+.table-view .corner {
+    -fx-background-color: transparent;
+}

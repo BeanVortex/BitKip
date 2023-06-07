@@ -205,7 +205,7 @@ public class QueueSetting implements FXMLController, QueueObserver {
 
     @Override
     public void initAfterStage() {
-
+        updateTheme(stage.getScene());
         stage.widthProperty().addListener((o, o2, n) -> {
             var width = n.longValue();
             horLine1.setPrefWidth(width);

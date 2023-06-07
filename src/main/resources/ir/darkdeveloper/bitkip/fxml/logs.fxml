@@ -3,7 +3,7 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.layout.HBox?>
-<VBox minHeight="400.0" minWidth="500.0" spacing="20" stylesheets="@../css/about.css"
+<VBox minHeight="400.0" minWidth="500.0" spacing="20"
       style="-fx-padding: 10"
       xmlns="http://javafx.com/javafx/16" xmlns:fx="http://javafx.com/fxml/1"
       fx:controller="ir.darkdeveloper.bitkip.controllers.LogsController"

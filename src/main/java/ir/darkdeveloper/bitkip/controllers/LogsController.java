@@ -36,6 +36,7 @@ public class LogsController implements FXMLController {
 
     @Override
     public void initAfterStage() {
+        updateTheme(stage.getScene());
         logArea.setPrefHeight(stage.getHeight());
         stage.widthProperty().addListener((o, ol, n) -> logArea.setPrefWidth(n.doubleValue()));
         stage.heightProperty().addListener((o, ol, n) -> logArea.setPrefHeight(n.doubleValue()));
