@@ -71,6 +71,9 @@
         </HBox>
         <Label styleClass="settingDescription, opacity_7" text="Hint: Some links has rate limit so you can't download more than certain bytes"/>
     </VBox>
+    <HBox alignment="CENTER_LEFT" styleClass="padding_10">
+        <Label styleClass="bold" fx:id="savedLabel" visible="false"/>
+    </HBox>
     <Region VBox.vgrow="ALWAYS"/>
     <HBox alignment="BASELINE_RIGHT">
         <Button text="Save" styleClass="download_now_btn" onAction="#onFieldSave"/>

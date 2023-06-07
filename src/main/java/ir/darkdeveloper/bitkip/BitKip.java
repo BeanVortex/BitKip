@@ -2,19 +2,17 @@ package ir.darkdeveloper.bitkip;
 
 import ir.darkdeveloper.bitkip.config.AppConfigs;
 import ir.darkdeveloper.bitkip.config.observers.QueueSubject;
-import ir.darkdeveloper.bitkip.servlets.BatchServlet;
-import ir.darkdeveloper.bitkip.servlets.SingleServlet;
 import ir.darkdeveloper.bitkip.repo.DownloadsRepo;
 import ir.darkdeveloper.bitkip.repo.QueuesRepo;
 import ir.darkdeveloper.bitkip.repo.ScheduleRepo;
+import ir.darkdeveloper.bitkip.servlets.BatchServlet;
+import ir.darkdeveloper.bitkip.servlets.SingleServlet;
 import ir.darkdeveloper.bitkip.task.ScheduleTask;
 import ir.darkdeveloper.bitkip.utils.FxUtils;
 import ir.darkdeveloper.bitkip.utils.IOUtils;
 import ir.darkdeveloper.bitkip.utils.MoreUtils;
 import javafx.application.Application;
 import javafx.application.Platform;
-import javafx.scene.control.Alert;
-import javafx.scene.control.ButtonType;
 import javafx.stage.Stage;
 import org.eclipse.jetty.server.Connector;
 import org.eclipse.jetty.server.Server;
@@ -136,8 +134,8 @@ public class BitKip extends Application {
                 server.start();
             } catch (Exception e) {
                 log.error(e.getMessage());
-                if (FxUtils.askWithDialog(Alert.AlertType.ERROR, "Failed to run",
-                        e.getLocalizedMessage(), ButtonType.CLOSE, null))
+                var header = "Failed to start server. Is there another instance running?\nIf not you may need to change application server port and restart";
+                if (FxUtils.showFailedToStart(header, e.getLocalizedMessage()))
                     System.exit(1);
             }
         }

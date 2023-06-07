@@ -6,6 +6,7 @@ import ir.darkdeveloper.bitkip.task.FileMoveTask;
 import ir.darkdeveloper.bitkip.utils.FxUtils;
 import ir.darkdeveloper.bitkip.utils.IOUtils;
 import ir.darkdeveloper.bitkip.utils.InputValidations;
+import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.CheckBox;
@@ -14,6 +15,7 @@ import javafx.scene.control.TextField;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.VBox;
+import javafx.scene.paint.Paint;
 import javafx.scene.shape.Line;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.Stage;
@@ -51,6 +53,8 @@ public class SettingsController implements FXMLController {
     private TextField retryField;
     @FXML
     private TextField rateLimitField;
+    @FXML
+    private Label savedLabel;
 
 
     private Stage stage;
@@ -155,5 +159,22 @@ public class SettingsController implements FXMLController {
         downloadRetryCount = Integer.parseInt(retryField.getText());
         downloadRateLimitCount = Integer.parseInt(rateLimitField.getText());
         IOUtils.saveConfigs();
+        showSavedMessage();
     }
+
+    private void showSavedMessage() {
+        var executor = Executors.newSingleThreadExecutor();
+        executor.submit(() -> {
+            try {
+                Platform.runLater(() -> savedLabel.setText("Successfully Saved"));
+                savedLabel.setTextFill(Paint.valueOf("#009688"));
+                savedLabel.setVisible(true);
+                Thread.sleep(2500);
+                savedLabel.setVisible(false);
+            } catch (InterruptedException ignore) {
+            }
+            executor.shutdown();
+        });
+    }
+
 }

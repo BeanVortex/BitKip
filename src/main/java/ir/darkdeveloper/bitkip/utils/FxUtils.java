@@ -521,4 +521,44 @@ public class FxUtils {
         dialog.show();
     }
 
+    public static boolean showFailedToStart(String header, String content) {
+        var dialog = new Dialog<String>();
+        dialog.setTitle("Failed to start server");
+        dialog.setHeaderText(header);
+        dialog.getDialogPane().getButtonTypes().addAll(ButtonType.APPLY, ButtonType.CANCEL);
+
+        var portField = new TextField();
+        InputValidations.validIntInputCheck(portField, (long) serverPort);
+        portField.setText(String.valueOf(serverPort));
+        var contentLabel = new Label();
+        contentLabel.setText(content);
+        contentLabel.setWrapText(true);
+        var container = new VBox();
+        container.setAlignment(Pos.CENTER_LEFT);
+        container.setStyle("-fx-padding: 10");
+        container.setSpacing(10);
+        container.getChildren().addAll(contentLabel, portField);
+        dialog.getDialogPane().setContent(container);
+        dialog.setResultConverter(dialogButton -> {
+            if (dialogButton == ButtonType.APPLY) {
+                if (portField.getText().isBlank())
+                    return null;
+                return portField.getText();
+            }
+            return null;
+        });
+
+        var logoPath = getResource("icons/logo.png");
+        if (logoPath != null)
+            ((Stage) dialog.getDialogPane().getScene().getWindow()).getIcons().add(new Image(logoPath.toExternalForm()));
+        var result = dialog.showAndWait();
+        if (result.isPresent()) {
+            var port = result.get();
+            serverPort = Integer.parseInt(port);
+            IOUtils.saveConfigs();
+            log.info("Port set to: " + port);
+            return true;
+        }
+        return false;
+    }
 }
