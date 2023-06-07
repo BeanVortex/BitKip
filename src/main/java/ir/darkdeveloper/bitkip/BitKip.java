@@ -136,7 +136,7 @@ public class BitKip extends Application {
                 log.error(e.getMessage());
                 var header = "Failed to start server. Is there another instance running?\nIf not you may need to change application server port and restart";
                 if (FxUtils.showFailedToStart(header, e.getLocalizedMessage()))
-                    System.exit(1);
+                    Platform.exit();
             }
         }
     }

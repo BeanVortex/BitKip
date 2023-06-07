@@ -557,8 +557,7 @@ public class FxUtils {
             serverPort = Integer.parseInt(port);
             IOUtils.saveConfigs();
             log.info("Port set to: " + port);
-            return true;
         }
-        return false;
+        return true;
     }
 }
