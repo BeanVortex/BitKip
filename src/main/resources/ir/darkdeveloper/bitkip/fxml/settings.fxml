@@ -12,7 +12,7 @@
       fx:id="parent"
       style="-fx-padding: 10"
       fx:controller="ir.darkdeveloper.bitkip.controllers.SettingsController"
-      prefHeight="600.0" prefWidth="450.0" minHeight="600" minWidth="450" spacing="10">
+      prefHeight="600.0" prefWidth="500.0" minHeight="600" minWidth="500" spacing="10">
 
     <stylesheets>
         <URL value="@../css/settings.css"/>
@@ -22,14 +22,14 @@
 
     <VBox alignment="BASELINE_LEFT">
         <Label styleClass="settingTile" text="Save Location"/>
-        <HBox prefWidth="430" alignment="CENTER">
+        <HBox prefWidth="480" alignment="CENTER">
             <Label styleClass="settingDescription" text="Current Location: " fx:id="lblLocation"/>
             <Region HBox.hgrow="ALWAYS"/>
             <Button text="change" styleClass="download_now_btn" onAction="#changeSaveDir"/>
         </HBox>
     </VBox>
 
-    <Line stroke="lightgray" endX="100" fx:id="line1" styleClass="padding_10"/>
+    <Line stroke="lightgray" fx:id="line1" styleClass="padding_10"/>
 
     <VBox spacing="10" alignment="BASELINE_LEFT">
         <HBox alignment="CENTER">
@@ -49,8 +49,6 @@
             <HBox alignment="CENTER_LEFT" spacing="5">
                 <Label text="Listening port:" styleClass="settingDescription"/>
                 <TextField fx:id="portField"/>
-                <Region HBox.hgrow="ALWAYS"/>
-                <Button text="Save" styleClass="download_now_btn" onAction="#onPortSave"/>
             </HBox>
             <Label styleClass="settingDescription, opacity_7" text="Server settings will apply on restart"/>
         </VBox>
@@ -63,6 +61,19 @@
         <Label styleClass="settingTile" text="Download"/>
         <CheckBox text="Show complete dialog" fx:id="completeDialogCheck" onAction="#onCompleteDialogCheck"
                   styleClass="settingDescription"/>
+        <HBox alignment="CENTER_LEFT" spacing="5">
+            <Label text="Fail retry count:" styleClass="settingDescription"/>
+            <TextField fx:id="retryField"/>
+        </HBox>
+        <HBox alignment="CENTER_LEFT" spacing="5">
+            <Label text="Rate limit retry count:" styleClass="settingDescription"/>
+            <TextField fx:id="rateLimitField"/>
+        </HBox>
+        <Label styleClass="settingDescription, opacity_7" text="Hint: Some links has rate limit so you can't download more than certain bytes"/>
     </VBox>
+    <Region VBox.vgrow="ALWAYS"/>
+    <HBox alignment="BASELINE_RIGHT">
+        <Button text="Save" styleClass="download_now_btn" onAction="#onFieldSave"/>
+    </HBox>
 
 </VBox>

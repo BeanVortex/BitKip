@@ -211,12 +211,14 @@ public class IOUtils {
                     .append("theme=").append(theme).append("\n")
                     .append("server_enabled=").append(String.valueOf(serverEnabled)).append("\n")
                     .append("port=").append(String.valueOf(serverPort)).append("\n")
-                    .append("show_complete_dialog=").append(String.valueOf(showCompleteDialog));
+                    .append("show_complete_dialog=").append(String.valueOf(showCompleteDialog)).append("\n")
+                    .append("retry_count=").append(String.valueOf(downloadRetryCount)).append("\n")
+                    .append("rate_limit_count=").append(String.valueOf(downloadRateLimitCount));
             writer.flush();
             writer.close();
 
         } catch (IOException e) {
-            e.printStackTrace();
+            log.error(e.getLocalizedMessage());
         }
     }
 
@@ -235,11 +237,13 @@ public class IOUtils {
                         case "server_enabled" -> serverEnabled = value.equals("true");
                         case "port" -> serverPort = Integer.parseInt(value);
                         case "show_complete_dialog" -> showCompleteDialog = value.equals("true");
+                        case "retry_count" -> downloadRetryCount = Integer.parseInt(value);
+                        case "rate_limit_count" -> downloadRateLimitCount = Integer.parseInt(value);
                     }
                 }
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            log.error(e.getLocalizedMessage());
         }
     }
 

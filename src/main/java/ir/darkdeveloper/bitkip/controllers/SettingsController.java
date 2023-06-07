@@ -30,6 +30,9 @@ import static ir.darkdeveloper.bitkip.config.observers.ThemeSubject.setTheme;
 
 public class SettingsController implements FXMLController {
 
+
+    @FXML
+    private VBox parent;
     @FXML
     private CheckBox completeDialogCheck;
     @FXML
@@ -45,7 +48,10 @@ public class SettingsController implements FXMLController {
     @FXML
     private TextField portField;
     @FXML
-    private VBox parent;
+    private TextField retryField;
+    @FXML
+    private TextField rateLimitField;
+
 
     private Stage stage;
 
@@ -65,9 +71,13 @@ public class SettingsController implements FXMLController {
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         InputValidations.validIntInputCheck(portField, (long) serverPort);
+        InputValidations.validIntInputCheck(retryField, (long) downloadRetryCount);
+        InputValidations.validIntInputCheck(rateLimitField, (long) downloadRateLimitCount);
         lblLocation.setText(downloadPath);
         serverCheck.setSelected(serverEnabled);
         portField.setText(String.valueOf(serverPort));
+        retryField.setText(String.valueOf(downloadRetryCount));
+        rateLimitField.setText(String.valueOf(downloadRateLimitCount));
         completeDialogCheck.setSelected(showCompleteDialog);
     }
 
@@ -126,6 +136,7 @@ public class SettingsController implements FXMLController {
         else setTheme("light");
         IOUtils.saveConfigs();
     }
+
     @FXML
     private void onServerCheck() {
         serverEnabled = serverCheck.isSelected();
@@ -139,8 +150,10 @@ public class SettingsController implements FXMLController {
     }
 
     @FXML
-    private void onPortSave() {
+    public void onFieldSave() {
         serverPort = Integer.parseInt(portField.getText());
+        downloadRetryCount = Integer.parseInt(retryField.getText());
+        downloadRateLimitCount = Integer.parseInt(rateLimitField.getText());
         IOUtils.saveConfigs();
     }
 }

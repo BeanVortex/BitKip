@@ -32,6 +32,7 @@ public class DownloadLimitedTask extends DownloadTask {
     private ExecutorService executor;
     private FileChannel fileChannel;
     private int retries = 0;
+    private int rateLimitCount = 0;
     private boolean blocking;
 
 
@@ -97,8 +98,10 @@ public class DownloadLimitedTask extends DownloadTask {
             } catch (ClosedChannelException ignore) {
             }
             var currFileSize = IOUtils.getFileSize(file);
-            if (!paused && currFileSize != downloadModel.getSize())
+            if (!paused && currFileSize != downloadModel.getSize() && downloadRateLimitCount < rateLimitCount) {
+                rateLimitCount++;
                 performDownload();
+            }
         }
         if (blocking && paused) {
             succeeded();
@@ -230,6 +233,7 @@ public class DownloadLimitedTask extends DownloadTask {
         paused = true;
         log.info("Paused download: " + downloadModel);
         retries = 0;
+        rateLimitCount = 0;
         succeeded();
     }
 
