@@ -387,8 +387,8 @@ public class FxUtils {
         contentLabel.setText(content);
         contentLabel.setWrapText(true);
         var container = new VBox();
-        container.setAlignment(Pos.CENTER_LEFT);
         container.setStyle("-fx-padding: 10");
+        container.setAlignment(Pos.CENTER_LEFT);
         container.setSpacing(10);
         container.getChildren().addAll(contentLabel, pwd);
         dialog.getDialogPane().setContent(container);
