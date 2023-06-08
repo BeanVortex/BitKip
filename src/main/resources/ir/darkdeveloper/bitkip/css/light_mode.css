@@ -25,7 +25,10 @@
 .menu,
 .menu-bar,
 .context-menu,
-.scroll-pane > .viewport{
+.scroll-pane > .viewport,
+.dialog-pane,
+.dialog-pane *.header-panel,
+.notification-bar > .pane{
     -fx-background-color: -fx-primary-color;
 }
 
@@ -41,7 +44,7 @@
 }
 
 .scroll-bar:horizontal .thumb,
-.scroll-bar:vertical .thumb{
+.scroll-bar:vertical .thumb {
     -fx-background-color: -fx-secondary-color2;
 }
 
@@ -54,14 +57,13 @@
 .date-picker-popup,
 .date-picker-popup .spinner .button .left-arrow-button,
 .date-picker-popup .spinner .button .right-arrow-button,
-.progress-bar .bar,
 .menu-item:hover,
 .combo-box .arrow-button {
     -fx-background-color: -fx-secondary-color;
 }
 
+
 .table-view .column-header .sort-order-dot,
-.progress-bar .track,
 .accordion .titled-pane > .title > .arrow-button > .arrow,
 .combo-box .arrow,
 .combo-box .increment-arrow,
@@ -73,6 +75,14 @@
 .spinner .decrement-arrow,
 .tree-cell > .tree-disclosure-node > .arrow {
     -fx-background-color: -fx-arrow-color;
+}
+
+.progress-bar .track {
+    -fx-background-color: -fx-secondary-color;
+}
+
+.progress-bar .bar {
+    -fx-background-color: -fx-dark-primary-color;
 }
 
 
@@ -172,11 +182,11 @@
 
 #newQueue,
 #openLocation,
-.text-field{
+.text-field {
     -fx-border-color: -fx-dark-primary-color;
 }
 
-.text-area .text{
+.text-area .text {
     -fx-line-spacing: 10px;
 }
 
@@ -184,9 +194,10 @@
 #refreshBtn .ikonli-font-icon,
 #openLocation .ikonli-font-icon,
 #newQueue .ikonli-font-icon {
-    -fx-icon-color: -fx-dark-primary-color ;
+    -fx-icon-color: -fx-dark-primary-color;
 }
-#errorLabel{
+
+#errorLabel {
     -fx-text-fill: -fx-red-color !important;
 }
 
