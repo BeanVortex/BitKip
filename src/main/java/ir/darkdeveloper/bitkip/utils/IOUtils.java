@@ -9,7 +9,6 @@ import ir.darkdeveloper.bitkip.models.QueueModel;
 import ir.darkdeveloper.bitkip.repo.DownloadsRepo;
 import ir.darkdeveloper.bitkip.repo.QueuesRepo;
 import javafx.event.ActionEvent;
-import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
 import org.controlsfx.control.Notifications;
 
@@ -21,11 +20,9 @@ import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.text.DecimalFormat;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
-import static ir.darkdeveloper.bitkip.config.AppConfigs.log;
 import static ir.darkdeveloper.bitkip.config.AppConfigs.*;
 import static ir.darkdeveloper.bitkip.config.observers.QueueSubject.getQueues;
 import static ir.darkdeveloper.bitkip.repo.DownloadsRepo.COL_PATH;

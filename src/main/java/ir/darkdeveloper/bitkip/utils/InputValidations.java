@@ -26,15 +26,15 @@ public class InputValidations {
         bytesField.textProperty().addListener((o, old, newValue) -> {
             if (!newValue.matches("\\d*"))
                 bytesField.setText(newValue.replaceAll("\\D", ""));
-            if (chunksField != null && !newValue.equals(dm.getSize() + ""))
+            if (chunksField != null && !newValue.equals(String.valueOf(dm.getSize())))
                 chunksField.setDisable(!dm.isResumable());
-            speedField.setDisable(!bytesField.getText().equals(dm.getSize() + ""));
+            speedField.setDisable(!bytesField.getText().equals(String.valueOf(dm.getSize())));
             if (newValue.isBlank())
-                bytesField.setText("" + dm.getSize());
+                bytesField.setText(String.valueOf(dm.getSize()));
         });
         bytesField.focusedProperty().addListener((o, old, newValue) -> {
             if (!newValue && bytesField.getText().isBlank())
-                bytesField.setText("" + dm.getSize());
+                bytesField.setText(String.valueOf(dm.getSize()));
         });
     }
 
@@ -55,7 +55,7 @@ public class InputValidations {
         if (chunksField == null)
             return;
         var threads = maxChunks();
-        chunksField.setText(threads + "");
+        chunksField.setText(String.valueOf(threads));
         chunksField.textProperty().addListener((o, old, newValue) -> {
             if (!newValue.matches("\\d*"))
                 chunksField.setText(newValue.replaceAll("\\D", ""));
@@ -65,12 +65,12 @@ public class InputValidations {
                     chunks = threads;
                 if (chunks == 1)
                     chunks = 2;
-                chunksField.setText(chunks + "");
+                chunksField.setText(String.valueOf(chunks));
             }
         });
         chunksField.focusedProperty().addListener((o, old, newValue) -> {
             if (!newValue && chunksField.getText().isBlank())
-                chunksField.setText(threads + "");
+                chunksField.setText(String.valueOf(threads));
         });
     }
 
@@ -81,12 +81,12 @@ public class InputValidations {
             if (!newValue.matches("\\d*")) {
                 field.setText(newValue.replaceAll("\\D", ""));
                 if (defaultVal != null && field.getText().isBlank())
-                    field.setText("" + defaultVal);
+                    field.setText(String.valueOf(defaultVal));
             }
         });
         field.focusedProperty().addListener((o, old, newValue) -> {
             if (defaultVal != null && !newValue && field.getText().isBlank())
-                field.setText("" + defaultVal);
+                field.setText(String.valueOf(defaultVal));
         });
     }
 
@@ -97,19 +97,19 @@ public class InputValidations {
             if (!newValue.matches("\\d*")) {
                 field.setText(newValue.replaceAll("\\D", ""));
                 if (field.getText().isBlank())
-                    field.setText("" + defaultVal);
+                    field.setText(String.valueOf(defaultVal));
             } else {
                 if (newValue.isBlank())
                     return;
                 if (Long.parseLong(newValue) > maxValue)
-                    field.setText("" + maxValue);
+                    field.setText(String.valueOf(maxValue));
                 if (Long.parseLong(newValue) < minValue)
-                    field.setText("" + minValue);
+                    field.setText(String.valueOf(minValue));
             }
         });
         field.focusedProperty().addListener((o, old, newValue) -> {
             if (!newValue && field.getText().isBlank())
-                field.setText("" + defaultVal);
+                field.setText(String.valueOf(defaultVal));
         });
     }
 
@@ -137,6 +137,11 @@ public class InputValidations {
             if (!n.isBlank() && Integer.parseInt(n) > 23)
                 hourSpinner.getEditor().setText("23");
         });
+        zeroToSixtySpinner(minuteSpinner);
+        zeroToSixtySpinner(secondSpinner);
+    }
+
+    private static void zeroToSixtySpinner(Spinner<Integer> minuteSpinner) {
         minuteSpinner.getEditor().textProperty().addListener((o, o2, n) -> {
             if (n == null)
                 return;
@@ -144,14 +149,6 @@ public class InputValidations {
                 minuteSpinner.getEditor().setText("0");
             if (!n.isBlank() && Integer.parseInt(n) > 59)
                 minuteSpinner.getEditor().setText("59");
-        });
-        secondSpinner.getEditor().textProperty().addListener((o, o2, n) -> {
-            if (n == null)
-                return;
-            if (n.isBlank())
-                secondSpinner.getEditor().setText("0");
-            if (!n.isBlank() && Integer.parseInt(n) > 59)
-                secondSpinner.getEditor().setText("59");
         });
     }
 
