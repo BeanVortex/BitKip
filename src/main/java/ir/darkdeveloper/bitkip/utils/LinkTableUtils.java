@@ -33,7 +33,7 @@ public class LinkTableUtils {
         var nameCol = new TableColumn<LinkModel, String>("Name");
         var sizeCol = new TableColumn<LinkModel, String>("Size");
         var chunksCol = new TableColumn<LinkModel, Integer>("Chunks");
-        var resumeCol = new TableColumn<LinkModel, String>("Resumeable");
+        var resumeCol = new TableColumn<LinkModel, String>("Resumable");
         var queuesCol = new TableColumn<LinkModel, String>("Queues");
         var linkCol = new TableColumn<LinkModel, String>("Link");
 
@@ -50,7 +50,7 @@ public class LinkTableUtils {
         nameCol.setCellValueFactory(new PropertyValueFactory<>("name"));
         sizeCol.setCellValueFactory(new PropertyValueFactory<>("sizeString"));
         chunksCol.setCellValueFactory(new PropertyValueFactory<>("chunks"));
-        resumeCol.setCellValueFactory(new PropertyValueFactory<>("resumeableString"));
+        resumeCol.setCellValueFactory(new PropertyValueFactory<>("resumableString"));
         queuesCol.setCellValueFactory(new PropertyValueFactory<>("queuesString"));
         linkCol.setCellValueFactory(new PropertyValueFactory<>("url"));
 
@@ -107,7 +107,7 @@ public class LinkTableUtils {
         if (l != null) {
             l.setSize(lm.getSize());
             l.setName(lm.getName());
-            l.setResumeable(l.getResumeable());
+            l.setResumable(l.getResumable());
             refreshTable();
         }
     }

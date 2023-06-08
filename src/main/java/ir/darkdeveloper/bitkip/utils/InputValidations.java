@@ -7,15 +7,15 @@ import javafx.scene.input.Clipboard;
 
 public class InputValidations {
 
-    public static void validInputChecks(TextField chunksField, TextField bytesField,
-                                        TextField speedField, DownloadModel dm) {
-        validChunksInputChecks(chunksField);
-        validSpeedInputChecks(speedField);
-        validBytesInputChecks(bytesField, chunksField, speedField, dm);
+    public static void validateInputChecks(TextField chunksField, TextField bytesField,
+                                           TextField speedField, DownloadModel dm) {
+        validateChunksInputChecks(chunksField);
+        validateSpeedInputChecks(speedField);
+        validateBytesInputChecks(bytesField, chunksField, speedField, dm);
     }
 
-    private static void validBytesInputChecks(TextField bytesField, TextField chunksField,
-                                              TextField speedField, DownloadModel dm) {
+    private static void validateBytesInputChecks(TextField bytesField, TextField chunksField,
+                                                 TextField speedField, DownloadModel dm) {
         if (bytesField == null || speedField == null)
             return;
         bytesField.setDisable(true);
@@ -38,7 +38,7 @@ public class InputValidations {
         });
     }
 
-    public static void validSpeedInputChecks(TextField speedField) {
+    public static void validateSpeedInputChecks(TextField speedField) {
         if (speedField == null)
             return;
         speedField.textProperty().addListener((o, old, newValue) -> {
@@ -51,7 +51,7 @@ public class InputValidations {
         });
     }
 
-    public static void validChunksInputChecks(TextField chunksField) {
+    public static void validateChunksInputChecks(TextField chunksField) {
         if (chunksField == null)
             return;
         var threads = maxChunks();
@@ -74,7 +74,7 @@ public class InputValidations {
         });
     }
 
-    public static void validIntInputCheck(TextField field, Long defaultVal) {
+    public static void validateIntInputCheck(TextField field, Long defaultVal) {
         if (field == null)
             return;
         field.textProperty().addListener((o, old, newValue) -> {
@@ -90,7 +90,7 @@ public class InputValidations {
         });
     }
 
-    public static void validIntInputCheck(TextField field, long defaultVal, long minValue, long maxValue) {
+    public static void validateIntInputCheck(TextField field, long defaultVal, long minValue, long maxValue) {
         if (field == null)
             return;
         field.textProperty().addListener((o, old, newValue) -> {
@@ -122,12 +122,12 @@ public class InputValidations {
             urlField.setText(clipContent);
     }
 
-    public static void validTimePickerInputs(Spinner<Integer> hourSpinner,
-                                             Spinner<Integer> minuteSpinner,
-                                             Spinner<Integer> secondSpinner) {
-        validIntInputCheck(hourSpinner.getEditor(), null);
-        validIntInputCheck(minuteSpinner.getEditor(), null);
-        validIntInputCheck(secondSpinner.getEditor(), null);
+    public static void validateTimePickerInputs(Spinner<Integer> hourSpinner,
+                                                Spinner<Integer> minuteSpinner,
+                                                Spinner<Integer> secondSpinner) {
+        validateIntInputCheck(hourSpinner.getEditor(), null);
+        validateIntInputCheck(minuteSpinner.getEditor(), null);
+        validateIntInputCheck(secondSpinner.getEditor(), null);
 
         hourSpinner.getEditor().textProperty().addListener((o, o2, n) -> {
             if (n == null)
@@ -158,5 +158,9 @@ public class InputValidations {
 
     public static int maxChunks() {
         return Runtime.getRuntime().availableProcessors() * 2;
+    }
+
+    public static boolean validateUrl(String url){
+        return url.startsWith("http") || url.startsWith("https") || url.startsWith("ftp");
     }
 }

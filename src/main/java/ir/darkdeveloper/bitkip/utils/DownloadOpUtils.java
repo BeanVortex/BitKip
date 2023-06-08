@@ -10,6 +10,7 @@ import ir.darkdeveloper.bitkip.task.DownloadLimitedTask;
 import ir.darkdeveloper.bitkip.task.DownloadTask;
 import javafx.application.Platform;
 import javafx.collections.ObservableList;
+import javafx.event.ActionEvent;
 import org.controlsfx.control.Notifications;
 
 import java.awt.*;
@@ -258,5 +259,21 @@ public class DownloadOpUtils {
         if (selected.size() != 1)
             return;
         FxUtils.newRefreshStage(selected.get(0));
+    }
+
+    public static void importLinks(ActionEvent e) {
+        var links = IOUtils.readLinksFromFile(e);
+        if (links == null || links.isEmpty()) {
+            log.warn("No links found in the file");
+            Notifications.create()
+                    .title("No links found")
+                    .text("The file you choose does not have any http url, make sure that links are separated by enter character")
+                    .showWarning();
+            return;
+        }
+        FxUtils.newBatchListStage(links);
+    }
+
+    public static void exportLinks() {
     }
 }
