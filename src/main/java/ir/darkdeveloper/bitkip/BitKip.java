@@ -32,8 +32,6 @@ public class BitKip extends Application {
 
     private static Server server;
 
-    // todo: adding offline links, size, name and location will calculated later on starting, if could not, show error
-
     @Override
     public void start(Stage stage) {
         IOUtils.readConfig();
