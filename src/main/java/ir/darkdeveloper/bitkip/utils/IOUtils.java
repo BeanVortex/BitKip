@@ -1,9 +1,16 @@
 package ir.darkdeveloper.bitkip.utils;
 
+import ir.darkdeveloper.bitkip.config.AppConfigs;
+import ir.darkdeveloper.bitkip.controllers.BatchDownload;
 import ir.darkdeveloper.bitkip.models.DownloadModel;
 import ir.darkdeveloper.bitkip.models.FileType;
+import ir.darkdeveloper.bitkip.models.LinkModel;
 import ir.darkdeveloper.bitkip.models.QueueModel;
 import ir.darkdeveloper.bitkip.repo.DownloadsRepo;
+import ir.darkdeveloper.bitkip.repo.QueuesRepo;
+import javafx.event.ActionEvent;
+import javafx.stage.FileChooser;
+import org.controlsfx.control.Notifications;
 
 import java.io.*;
 import java.nio.ByteBuffer;
@@ -14,11 +21,12 @@ import java.nio.file.StandardCopyOption;
 import java.text.DecimalFormat;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
-import static ir.darkdeveloper.bitkip.config.AppConfigs.log;
 import static ir.darkdeveloper.bitkip.config.AppConfigs.*;
 import static ir.darkdeveloper.bitkip.config.observers.QueueSubject.getQueues;
 import static ir.darkdeveloper.bitkip.repo.DownloadsRepo.COL_PATH;
+import static ir.darkdeveloper.bitkip.utils.Defaults.ALL_DOWNLOADS_QUEUE;
 
 
 public class IOUtils {
@@ -299,5 +307,69 @@ public class IOUtils {
                 else size += getFolderSize(f.getPath());
 
         return size;
+    }
+
+    public static List<LinkModel> readLinksFromFile(ActionEvent e) {
+        var fileChooser = new FileChooser();
+        fileChooser.setTitle("Select txt file containing links");
+        fileChooser.setInitialDirectory(new File(AppConfigs.downloadPath));
+        var selectedFile = fileChooser.showOpenDialog(FxUtils.getStageFromEvent(e));
+        if (selectedFile != null)
+            return IOUtils.convertFileToLinks(selectedFile);
+
+        Notifications.create()
+                .title("No File")
+                .text("Location is wrong!")
+                .showError();
+        return null;
+    }
+
+    private static List<LinkModel> convertFileToLinks(File file) {
+        try {
+            var reader = new BufferedReader(new FileReader(file));
+            var linesStream = reader.lines();
+            if (linesStream == null)
+                return null;
+            var lines = linesStream.toList();
+            if (lines.isEmpty())
+                return null;
+
+            var chunks = InputValidations.maxChunks();
+            var allDownloadsQueue = QueuesRepo.findByName(ALL_DOWNLOADS_QUEUE, false);
+            var firstUrl = lines.get(0);
+            var connection = NewDownloadUtils.connect(firstUrl, 3000, 3000);
+            var firstFileName = NewDownloadUtils.extractFileName(firstUrl, connection);
+            var secondaryQueue = BatchDownload.getSecondaryQueueByFileName(firstFileName);
+            var path = NewDownloadUtils.determineLocation(firstFileName);
+
+            return lines.stream().map(li -> {
+                        if (!InputValidations.validateUrl(li))
+                            return null;
+                        var lm = new LinkModel(li, chunks);
+                        lm.getQueues().add(allDownloadsQueue);
+                        lm.getQueues().add(secondaryQueue);
+                        lm.setPath(path);
+                        return lm;
+                    })
+                    .filter(Objects::nonNull)
+                    .toList();
+        } catch (FileNotFoundException e) {
+            log.error(e.getLocalizedMessage());
+        }
+        return null;
+    }
+
+
+    public static void writeLinksToFile(List<String> urls) throws IOException {
+        var output = new File(downloadPath + "exported_links.txt");
+        if (output.exists()) output.delete();
+        else output.createNewFile();
+        var writer = new BufferedWriter(new FileWriter(output));
+        for (var url : urls) {
+            writer.write(url);
+            writer.write('\n');
+        }
+        writer.flush();
+        writer.close();
     }
 }

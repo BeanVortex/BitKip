@@ -1,6 +1,7 @@
 package ir.darkdeveloper.bitkip.utils;
 
 
+import ir.darkdeveloper.bitkip.config.observers.ThemeObserver;
 import ir.darkdeveloper.bitkip.controllers.*;
 import ir.darkdeveloper.bitkip.controllers.interfaces.FXMLController;
 import ir.darkdeveloper.bitkip.models.*;
@@ -341,14 +342,7 @@ public class FxUtils {
         return showAlert(yes, no, alert);
     }
 
-    private static boolean showAlert(ButtonType yes, ButtonType no, Alert alert) {
-        var stage = (Stage) alert.getDialogPane().getScene().getWindow();
-        var logoPath = getResource("icons/logo.png");
-        if (logoPath != null)
-            stage.getIcons().add(new Image(logoPath.toExternalForm()));
-        var res = alert.showAndWait();
-        return res.orElse(no) == yes;
-    }
+
 
     public static boolean askWarning(String header, String content) {
         var yes = new ButtonType("Yes", ButtonBar.ButtonData.YES);
@@ -371,6 +365,15 @@ public class FxUtils {
         alert.setHeaderText(header);
         return showAlert(primary, secondary, alert);
     }
+    private static boolean showAlert(ButtonType yes, ButtonType no, Alert alert) {
+        var stage = (Stage) alert.getDialogPane().getScene().getWindow();
+        ThemeObserver.updateThemeNotObserved(stage.getScene());
+        var logoPath = getResource("icons/logo.png");
+        if (logoPath != null)
+            stage.getIcons().add(new Image(logoPath.toExternalForm()));
+        var res = alert.showAndWait();
+        return res.orElse(no) == yes;
+    }
 
     public static boolean askForPassword(String header, String content) {
         var dialog = new Dialog<String>();
@@ -384,8 +387,8 @@ public class FxUtils {
         contentLabel.setText(content);
         contentLabel.setWrapText(true);
         var container = new VBox();
-        container.setAlignment(Pos.CENTER_LEFT);
         container.setStyle("-fx-padding: 10");
+        container.setAlignment(Pos.CENTER_LEFT);
         container.setSpacing(10);
         container.getChildren().addAll(contentLabel, pwd);
         dialog.getDialogPane().setContent(container);
@@ -509,8 +512,10 @@ public class FxUtils {
         dialog.getDialogPane().setContent(container);
 
         var logoPath = getResource("icons/logo.png");
+        var stage = ((Stage) dialog.getDialogPane().getScene().getWindow());
         if (logoPath != null)
-            ((Stage) dialog.getDialogPane().getScene().getWindow()).getIcons().add(new Image(logoPath.toExternalForm()));
+            stage.getIcons().add(new Image(logoPath.toExternalForm()));
+        ThemeObserver.updateThemeNotObserved(stage.getScene());
         fileMoveTask.progressProperty().addListener((o, ol, n) -> {
             progressBar.setProgress(n.doubleValue());
             if (n.doubleValue() == 1) {
@@ -528,7 +533,7 @@ public class FxUtils {
         dialog.getDialogPane().getButtonTypes().addAll(ButtonType.APPLY, ButtonType.CANCEL);
 
         var portField = new TextField();
-        InputValidations.validIntInputCheck(portField, (long) serverPort);
+        InputValidations.validateIntInputCheck(portField, (long) serverPort);
         portField.setText(String.valueOf(serverPort));
         var contentLabel = new Label();
         contentLabel.setText(content);

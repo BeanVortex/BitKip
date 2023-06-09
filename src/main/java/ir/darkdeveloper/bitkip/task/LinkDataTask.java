@@ -24,7 +24,7 @@ public class LinkDataTask extends Task<Flux<LinkModel>> {
                 var fileName = NewDownloadUtils.extractFileName(lm.getUrl(), connection);
                 lm.setName(fileName);
                 lm.setSize(fileSize);
-                lm.setResumeable(NewDownloadUtils.canResume(connection));
+                lm.setResumable(NewDownloadUtils.canResume(connection));
                 fluxSink.next(lm);
             });
             fluxSink.complete();

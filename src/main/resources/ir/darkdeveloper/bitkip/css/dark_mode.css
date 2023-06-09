@@ -27,6 +27,16 @@
     -fx-text-fill: -fx-text-color;
 }
 
+
+.progress-bar .track {
+    -fx-background-color: -fx-arrow-color !important;
+}
+
+.progress-bar .bar {
+    -fx-background-color: -fx-secondary-color !important;
+}
+
+
 #newQueue,
 #openLocation {
     -fx-border-color: -fx-white-color !important;

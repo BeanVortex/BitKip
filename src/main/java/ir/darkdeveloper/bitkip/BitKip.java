@@ -32,7 +32,6 @@ public class BitKip extends Application {
 
     private static Server server;
 
-
     @Override
     public void start(Stage stage) {
         IOUtils.readConfig();

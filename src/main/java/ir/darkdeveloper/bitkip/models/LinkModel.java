@@ -16,7 +16,7 @@ public class LinkModel {
     private String url;
     private long size;
     private int chunks;
-    private Boolean resumeable;
+    private Boolean resumable;
     private String name;
     private String path;
     private transient String agent;
@@ -24,7 +24,7 @@ public class LinkModel {
     private final List<QueueModel> queues = new ArrayList<>();
 
     private String sizeString;
-    private String resumeableString;
+    private String resumableString;
     private String queuesString;
 
 
@@ -37,10 +37,10 @@ public class LinkModel {
         return IOUtils.formatBytes(size);
     }
 
-    public String getResumeableString() {
-        if (resumeable == null)
+    public String getResumableString() {
+        if (resumable == null)
             return "";
-        return resumeable ? "yes" : "no";
+        return resumable ? "yes" : "no";
     }
 
     public String getQueuesString() {

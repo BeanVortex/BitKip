@@ -123,7 +123,7 @@ public class SingleDownload implements QueueObserver {
         };
 
         NewDownloadUtils.initPopOvers(questionBtns, contents);
-        InputValidations.validInputChecks(chunksField, bytesField, speedField, dm);
+        InputValidations.validateInputChecks(chunksField, bytesField, speedField, dm);
 
     }
 

@@ -74,9 +74,9 @@ public class SettingsController implements FXMLController {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        InputValidations.validIntInputCheck(portField, (long) serverPort);
-        InputValidations.validIntInputCheck(retryField, (long) downloadRetryCount);
-        InputValidations.validIntInputCheck(rateLimitField, (long) downloadRateLimitCount);
+        InputValidations.validateIntInputCheck(portField, (long) serverPort);
+        InputValidations.validateIntInputCheck(retryField, (long) downloadRetryCount);
+        InputValidations.validateIntInputCheck(rateLimitField, (long) downloadRateLimitCount);
         lblLocation.setText(downloadPath);
         serverCheck.setSelected(serverEnabled);
         portField.setText(String.valueOf(serverPort));

@@ -10,6 +10,7 @@ import ir.darkdeveloper.bitkip.task.DownloadLimitedTask;
 import ir.darkdeveloper.bitkip.task.DownloadTask;
 import javafx.application.Platform;
 import javafx.collections.ObservableList;
+import javafx.event.ActionEvent;
 import org.controlsfx.control.Notifications;
 
 import java.awt.*;
@@ -24,6 +25,7 @@ import java.util.concurrent.Executors;
 import static com.sun.jna.Platform.*;
 import static ir.darkdeveloper.bitkip.config.AppConfigs.*;
 import static ir.darkdeveloper.bitkip.repo.DownloadsRepo.*;
+import static ir.darkdeveloper.bitkip.utils.Defaults.ALL_DOWNLOADS_QUEUE;
 import static ir.darkdeveloper.bitkip.utils.IOUtils.getBytesFromString;
 
 public class DownloadOpUtils {
@@ -258,5 +260,38 @@ public class DownloadOpUtils {
         if (selected.size() != 1)
             return;
         FxUtils.newRefreshStage(selected.get(0));
+    }
+
+    public static void importLinks(ActionEvent e) {
+        var links = IOUtils.readLinksFromFile(e);
+        if (links == null || links.isEmpty()) {
+            log.warn("No links found in the file");
+            Notifications.create()
+                    .title("No links found")
+                    .text("The file you choose does not have any http url, make sure that links are separated by enter character")
+                    .showWarning();
+            return;
+        }
+        FxUtils.newBatchListStage(links);
+    }
+
+    public static void exportLinks() {
+        try {
+            var urls = DownloadsRepo.getDownloadsByQueueName(ALL_DOWNLOADS_QUEUE)
+                    .stream().map(DownloadModel::getUrl)
+                    .toList();
+            IOUtils.writeLinksToFile(urls);
+        }catch (IOException e){
+            log.error(e.getLocalizedMessage());
+            Notifications.create()
+                    .title("Some unexpected thing happened")
+                    .text(e.getLocalizedMessage())
+                    .showError();
+            return;
+        }
+        Notifications.create()
+                .title("Export successful")
+                .text("File exported successfully to " + downloadPath)
+                .showInformation();
     }
 }

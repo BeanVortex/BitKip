@@ -114,7 +114,7 @@ public class DownloadingController implements FXMLController {
     }
 
     private void initDownloadData() {
-        InputValidations.validInputChecks(null, bytesField, speedField, downloadModel);
+        InputValidations.validateInputChecks(null, bytesField, speedField, downloadModel);
         bytesField.setText(String.valueOf(downloadModel.getSize()));
         link.setText(downloadModel.getUrl());
         locationLbl.setText("Path: " + new File(downloadModel.getFilePath()).getParentFile().getAbsolutePath());
