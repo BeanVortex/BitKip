@@ -293,4 +293,21 @@ public class DownloadOpUtils {
                 .text("File exported successfully to " + exportedLinksPath)
                 .showInformation();
     }
+
+    public static void exportLinks(List<String> urls){
+        try {
+            IOUtils.writeLinksToFile(urls, "selected");
+        }catch (IOException e){
+            log.error(e.getLocalizedMessage());
+            Notifications.create()
+                    .title("Some unexpected thing happened")
+                    .text(e.getLocalizedMessage())
+                    .showError();
+            return;
+        }
+        Notifications.create()
+                .title("Export successful")
+                .text("File exported successfully to " + exportedLinksPath)
+                .showInformation();
+    }
 }
