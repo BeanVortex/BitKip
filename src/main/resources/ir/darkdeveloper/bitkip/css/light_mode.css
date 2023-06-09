@@ -17,6 +17,7 @@
 .date-picker .cell:focused,
 .date-picker .cell:hover,
 .table-view .column-header-background,
+.table-view .filler,
 .tab-pane .tab,
 .table-view,
 .list-view,
@@ -28,9 +29,10 @@
 .scroll-pane > .viewport,
 .dialog-pane,
 .dialog-pane *.header-panel,
-.notification-bar > .pane{
+.notification-bar > .pane {
     -fx-background-color: -fx-primary-color;
 }
+
 
 #scrollPane,
 .scroll-bar:vertical,
@@ -77,7 +79,7 @@
     -fx-background-color: -fx-arrow-color;
 }
 
-.tree-cell:selected{
+.tree-cell:selected {
     -fx-background-color: -fx-secondary-color;
 }
 
