@@ -25,7 +25,6 @@ import java.util.concurrent.Executors;
 import static com.sun.jna.Platform.*;
 import static ir.darkdeveloper.bitkip.config.AppConfigs.*;
 import static ir.darkdeveloper.bitkip.repo.DownloadsRepo.*;
-import static ir.darkdeveloper.bitkip.utils.Defaults.ALL_DOWNLOADS_QUEUE;
 import static ir.darkdeveloper.bitkip.utils.IOUtils.getBytesFromString;
 
 public class DownloadOpUtils {
@@ -275,12 +274,12 @@ public class DownloadOpUtils {
         FxUtils.newBatchListStage(links);
     }
 
-    public static void exportLinks() {
+    public static void exportLinks(String queue) {
         try {
-            var urls = DownloadsRepo.getDownloadsByQueueName(ALL_DOWNLOADS_QUEUE)
+            var urls = DownloadsRepo.getDownloadsByQueueName(queue)
                     .stream().map(DownloadModel::getUrl)
                     .toList();
-            IOUtils.writeLinksToFile(urls);
+            IOUtils.writeLinksToFile(urls, queue);
         }catch (IOException e){
             log.error(e.getLocalizedMessage());
             Notifications.create()
@@ -291,7 +290,7 @@ public class DownloadOpUtils {
         }
         Notifications.create()
                 .title("Export successful")
-                .text("File exported successfully to " + downloadPath)
+                .text("File exported successfully to " + exportedLinksPath)
                 .showInformation();
     }
 }

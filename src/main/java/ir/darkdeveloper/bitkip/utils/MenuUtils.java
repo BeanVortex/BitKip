@@ -19,6 +19,7 @@ import java.time.LocalDateTime;
 import java.util.*;
 
 import static ir.darkdeveloper.bitkip.config.AppConfigs.*;
+import static ir.darkdeveloper.bitkip.utils.Defaults.ALL_DOWNLOADS_QUEUE;
 import static ir.darkdeveloper.bitkip.utils.Defaults.staticQueueNames;
 import static ir.darkdeveloper.bitkip.utils.ShortcutUtils.*;
 
@@ -48,7 +49,7 @@ public class MenuUtils {
         menuItems.get(settings).setOnAction(e -> FxUtils.newSettingsStage());
         menuItems.get(queueSettings).setOnAction(e -> FxUtils.newQueueSettingStage(null));
         menuItems.get(importLinks).setOnAction(DownloadOpUtils::importLinks);
-        menuItems.get(exportLinks).setOnAction(e -> DownloadOpUtils.exportLinks());
+        menuItems.get(exportLinks).setOnAction(e -> DownloadOpUtils.exportLinks(ALL_DOWNLOADS_QUEUE));
         menuItems.get(exit).setOnAction(e -> Platform.exit());
     }
 

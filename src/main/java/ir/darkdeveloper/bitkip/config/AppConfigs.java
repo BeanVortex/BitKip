@@ -23,6 +23,8 @@ public class AppConfigs {
             + File.separator + "Documents"
             + File.separator + "BitKip" + File.separator;
 
+    public static final String exportedLinksPath = dataPath + "exported_links" + File.separator;
+
     public static String downloadPath = System.getProperty("user.home")
             + File.separator + "Downloads"
             + File.separator + "BitKip" + File.separator;
@@ -68,7 +70,6 @@ public class AppConfigs {
         defaultDownloadPaths = List.of(compressedPath, programsPath, videosPath, documentPath, musicPath, othersPath);
         queuesPath = downloadPath + "Queues" + File.separator;
     }
-
 
 
     public static final List<DownloadModel> currentDownloadings = new ArrayList<>();
