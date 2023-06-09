@@ -359,6 +359,17 @@ public class IOUtils {
         return null;
     }
 
-    public static void exportLinks() {
+
+    public static void writeLinksToFile(List<String> urls) throws IOException {
+        var output = new File(downloadPath + "exported_links.txt");
+        if (output.exists()) output.delete();
+        else output.createNewFile();
+        var writer = new BufferedWriter(new FileWriter(output));
+        for (var url : urls) {
+            writer.write(url);
+            writer.write('\n');
+        }
+        writer.flush();
+        writer.close();
     }
 }

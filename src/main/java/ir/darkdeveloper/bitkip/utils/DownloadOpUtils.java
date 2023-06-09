@@ -5,6 +5,7 @@ import ir.darkdeveloper.bitkip.models.DownloadModel;
 import ir.darkdeveloper.bitkip.models.DownloadStatus;
 import ir.darkdeveloper.bitkip.repo.DatabaseHelper;
 import ir.darkdeveloper.bitkip.repo.DownloadsRepo;
+import ir.darkdeveloper.bitkip.repo.QueuesRepo;
 import ir.darkdeveloper.bitkip.task.DownloadInChunksTask;
 import ir.darkdeveloper.bitkip.task.DownloadLimitedTask;
 import ir.darkdeveloper.bitkip.task.DownloadTask;
@@ -25,6 +26,7 @@ import java.util.concurrent.Executors;
 import static com.sun.jna.Platform.*;
 import static ir.darkdeveloper.bitkip.config.AppConfigs.*;
 import static ir.darkdeveloper.bitkip.repo.DownloadsRepo.*;
+import static ir.darkdeveloper.bitkip.utils.Defaults.ALL_DOWNLOADS_QUEUE;
 import static ir.darkdeveloper.bitkip.utils.IOUtils.getBytesFromString;
 
 public class DownloadOpUtils {
@@ -275,5 +277,22 @@ public class DownloadOpUtils {
     }
 
     public static void exportLinks() {
+        try {
+            var urls = DownloadsRepo.getDownloadsByQueueName(ALL_DOWNLOADS_QUEUE)
+                    .stream().map(DownloadModel::getUrl)
+                    .toList();
+            IOUtils.writeLinksToFile(urls);
+        }catch (IOException e){
+            log.error(e.getLocalizedMessage());
+            Notifications.create()
+                    .title("Some unexpected thing happened")
+                    .text(e.getLocalizedMessage())
+                    .showError();
+            return;
+        }
+        Notifications.create()
+                .title("Export successful")
+                .text("File exported successfully to " + downloadPath)
+                .showInformation();
     }
 }
