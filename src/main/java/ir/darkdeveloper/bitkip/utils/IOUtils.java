@@ -19,7 +19,9 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.text.DecimalFormat;
+import java.text.SimpleDateFormat;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 
@@ -34,6 +36,7 @@ public class IOUtils {
 
     public static void createSaveLocations() {
         mkdir(downloadPath);
+        mkdir(exportedLinksPath);
         Arrays.stream(FileType.values()).forEach(fileType -> {
             mkdir(fileType.getPath());
             if (fileType != FileType.QUEUES)
@@ -360,10 +363,12 @@ public class IOUtils {
     }
 
 
-    public static void writeLinksToFile(List<String> urls) throws IOException {
-        var output = new File(downloadPath + "exported_links.txt");
-        if (output.exists()) output.delete();
-        else output.createNewFile();
+    public static void writeLinksToFile(List<String> urls, String queue) throws IOException {
+        var dateFormat = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss");
+        var timestamp = dateFormat.format(new Date());
+        var filename = "exported_links_%s_%s.txt".formatted(timestamp, queue);
+        var output = new File(exportedLinksPath + filename);
+        output.createNewFile();
         var writer = new BufferedWriter(new FileWriter(output));
         for (var url : urls) {
             writer.write(url);

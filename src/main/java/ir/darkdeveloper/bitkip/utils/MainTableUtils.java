@@ -98,13 +98,15 @@ public class MainTableUtils {
                     var copyLbl = new Label("Copy URL");
                     var restartLbl = new Label("Restart");
                     var downloadingLbl = new Label("Details");
+                    var exportLinkLbl = new Label("Export selected");
                     var deleteFromQueueLbl = new Label("Delete from this queue");
                     var deleteLbl = new Label("Delete");
                     var deleteWithFileLbl = new Label("Delete with file");
-                    var lbls = List.of(openLbl, openFolderLbl, resumeLbl, pauseLbl, refreshLbl, copyLbl, restartLbl, downloadingLbl, deleteFromQueueLbl,
+                    var lbls = List.of(openLbl, openFolderLbl, resumeLbl, pauseLbl,
+                            refreshLbl, copyLbl, restartLbl, downloadingLbl, exportLinkLbl, deleteFromQueueLbl,
                             deleteLbl, deleteWithFileLbl);
                     var keyCodes = Arrays.asList(OPEN_KEY, OPEN_FOLDER_KEY, RESUME_KEY, PAUSE_KEY,
-                            REFRESH_KEY, COPY_KEY, RESTART_KEY, DOWNLOADING_STAGE_KEY, null, DELETE_KEY, DELETE_FILE_KEY);
+                            REFRESH_KEY, COPY_KEY, RESTART_KEY, DOWNLOADING_STAGE_KEY, null, null, DELETE_KEY, DELETE_FILE_KEY);
                     var menuItems = MenuUtils.createMapMenuItems(lbls, keyCodes);
 
                     var addToQueueMenu = new Menu();
@@ -118,7 +120,7 @@ public class MainTableUtils {
                     }
 
                     menuItems.put(addToQueueLbl, addToQueueMenu);
-                    MenuUtils.disableMenuItems(resumeLbl, pauseLbl, openLbl,openFolderLbl, deleteFromQueueLbl, refreshLbl, copyLbl, restartLbl,
+                    MenuUtils.disableMenuItems(resumeLbl, pauseLbl, openLbl, openFolderLbl, deleteFromQueueLbl, refreshLbl, copyLbl, restartLbl,
                             addToQueueLbl, deleteLbl, deleteWithFileLbl, menuItems, selectedItems);
 
                     menuItems.get(openLbl).setOnAction(e -> DownloadOpUtils.openFiles(getSelected()));
@@ -129,6 +131,7 @@ public class MainTableUtils {
                     menuItems.get(copyLbl).setOnAction(e -> FxUtils.setClipboard(getSelected().get(0).getUrl()));
                     menuItems.get(restartLbl).setOnAction(e -> DownloadOpUtils.restartDownloads(getSelected()));
                     menuItems.get(downloadingLbl).setOnAction(e -> getSelected().forEach(FxUtils::newDownloadingStage));
+                    menuItems.get(exportLinkLbl).setOnAction(e -> DownloadOpUtils.exportLinks(getSelectedUrls()));
                     menuItems.get(deleteFromQueueLbl).setOnAction(e -> MenuUtils.deleteFromQueue());
                     menuItems.get(deleteLbl).setOnAction(e -> DownloadOpUtils.deleteDownloads(getSelected(), false));
                     menuItems.get(deleteWithFileLbl).setOnAction(ev -> DownloadOpUtils.deleteDownloads(getSelected(), true));
@@ -163,7 +166,7 @@ public class MainTableUtils {
         return event -> {
             if (event.getButton().equals(MouseButton.PRIMARY) && event.getClickCount() == 2) {
                 var selected = getSelected();
-                if (selected.size() > 0){
+                if (selected.size() > 0) {
                     var dm = getSelected().get(0);
                     DownloadOpUtils.openDownloadingStage(dm);
                 }
@@ -204,7 +207,7 @@ public class MainTableUtils {
                     var remaining = DurationFormatUtils.formatDuration((delta / speed) * 1000, "dd:HH:mm:ss");
                     i.setRemainingTime(remaining);
                 }
-                contentTable.refresh();
+                refreshTable();
             }
         }
     }
@@ -223,7 +226,21 @@ public class MainTableUtils {
             }
         }
         refreshTable();
+    }
 
+    public void updateDownloadedNoSize(long bytes, DownloadModel dm) {
+        var downTask = dm.getDownloadTask();
+        if (!downTask.isPaused() && currentDownloadings.contains(dm)) {
+            var i = findDownload(dm.getId());
+            if (i != null) {
+                i.setSpeed(0);
+                i.setDownloadStatus(DownloadStatus.Downloading);
+                i.setSpeedString(IOUtils.formatBytes(0));
+                i.setDownloaded(bytes);
+                i.setRemainingTime("Not Clear");
+                refreshTable();
+            }
+        }
     }
 
     public DownloadModel findDownload(int id) {
@@ -239,6 +256,12 @@ public class MainTableUtils {
 
     public ObservableList<DownloadModel> getSelected() {
         return contentTable.getSelectionModel().getSelectedItems();
+    }
+
+    public List<String> getSelectedUrls() {
+        return getSelected().stream()
+                .map(DownloadModel::getUrl)
+                .toList();
     }
 
     public void remove(ObservableList<DownloadModel> selectedItems) {
@@ -261,5 +284,6 @@ public class MainTableUtils {
     public DownloadModel getObservedDownload(DownloadModel dm) {
         return findDownload(dm.getId());
     }
+
 
 }

@@ -141,15 +141,16 @@ public class SideUtils {
         var startQueueLbl = new Label("Start queue");
         var stopQueueLbl = new Label("Stop queue");
         var queueSettingLbl = new Label("Settings");
+        var exportLbl = new Label("Export this queue");
         var deleteLbl = new Label("Delete");
 
         List<Label> lbls;
         List<KeyCodeCombination> keys = null;
         if (Defaults.staticQueueNames.stream().anyMatch(itemName::equals))
-            lbls = List.of(startQueueLbl, stopQueueLbl, queueSettingLbl);
+            lbls = List.of(startQueueLbl, stopQueueLbl, queueSettingLbl, exportLbl);
         else {
-            lbls = List.of(startQueueLbl, stopQueueLbl, queueSettingLbl, deleteLbl);
-            keys = Arrays.asList(null, null, null, DELETE_KEY);
+            lbls = List.of(startQueueLbl, stopQueueLbl, queueSettingLbl, exportLbl, deleteLbl);
+            keys = Arrays.asList(null, null, null, null, DELETE_KEY);
         }
         var menuItems = MenuUtils.createMapMenuItems(lbls, keys);
         cMenu.getItems().addAll(menuItems.values());
@@ -162,6 +163,7 @@ public class SideUtils {
         menuItems.get(stopQueueLbl).setOnAction(e ->
                 QueueUtils.stopQueue(qm, menuItems.get(startQueueLbl), menuItems.get(stopQueueLbl)));
         menuItems.get(queueSettingLbl).setOnAction(e -> FxUtils.newQueueSettingStage(qm));
+        menuItems.get(exportLbl).setOnAction(e -> DownloadOpUtils.exportLinks(qm.getName()));
         if (menuItems.containsKey(deleteLbl))
             menuItems.get(deleteLbl).setOnAction(e -> QueueUtils.deleteQueue(itemName));
         return cMenu;

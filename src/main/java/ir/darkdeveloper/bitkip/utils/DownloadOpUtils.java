@@ -25,7 +25,6 @@ import java.util.concurrent.Executors;
 import static com.sun.jna.Platform.*;
 import static ir.darkdeveloper.bitkip.config.AppConfigs.*;
 import static ir.darkdeveloper.bitkip.repo.DownloadsRepo.*;
-import static ir.darkdeveloper.bitkip.utils.Defaults.ALL_DOWNLOADS_QUEUE;
 import static ir.darkdeveloper.bitkip.utils.IOUtils.getBytesFromString;
 
 public class DownloadOpUtils {
@@ -59,16 +58,20 @@ public class DownloadOpUtils {
                 downloadTask = new DownloadInChunksTask(dm, null);
         }
 
-        downloadTask.valueProperty().addListener((observable, oldValue, newValue) -> {
-            if (oldValue == null)
-                oldValue = newValue;
-            var currentSpeed = (newValue - oldValue);
-            if (newValue == 0)
-                currentSpeed = 0;
-            mainTableUtils.updateDownloadSpeedAndRemaining(currentSpeed, dm, newValue);
-        });
-        downloadTask.progressProperty().addListener((o, old, newV) ->
-                mainTableUtils.updateDownloadProgress(newV.floatValue() * 100, dm));
+        if (dm.getSize() == -1)
+            downloadTask.valueProperty().addListener((ob, o, n) -> mainTableUtils.updateDownloadedNoSize(n, dm));
+        else
+            downloadTask.valueProperty().addListener((ob, o, n) -> {
+                if (o == null)
+                    o = n;
+                var currentSpeed = (n - o);
+                if (n == 0)
+                    currentSpeed = 0;
+                mainTableUtils.updateDownloadSpeedAndRemaining(currentSpeed, dm, n);
+            });
+
+        downloadTask.progressProperty().addListener((ob, o, n) ->
+                mainTableUtils.updateDownloadProgress(n.floatValue() * 100, dm));
         downloadTask.setBlocking(blocking);
         dm.setDownloadTask(downloadTask);
         if (!resume) {
@@ -275,13 +278,13 @@ public class DownloadOpUtils {
         FxUtils.newBatchListStage(links);
     }
 
-    public static void exportLinks() {
+    public static void exportLinks(String queue) {
         try {
-            var urls = DownloadsRepo.getDownloadsByQueueName(ALL_DOWNLOADS_QUEUE)
+            var urls = DownloadsRepo.getDownloadsByQueueName(queue)
                     .stream().map(DownloadModel::getUrl)
                     .toList();
-            IOUtils.writeLinksToFile(urls);
-        }catch (IOException e){
+            IOUtils.writeLinksToFile(urls, queue);
+        } catch (IOException e) {
             log.error(e.getLocalizedMessage());
             Notifications.create()
                     .title("Some unexpected thing happened")
@@ -291,7 +294,24 @@ public class DownloadOpUtils {
         }
         Notifications.create()
                 .title("Export successful")
-                .text("File exported successfully to " + downloadPath)
+                .text("File exported successfully to " + exportedLinksPath)
+                .showInformation();
+    }
+
+    public static void exportLinks(List<String> urls) {
+        try {
+            IOUtils.writeLinksToFile(urls, "selected");
+        } catch (IOException e) {
+            log.error(e.getLocalizedMessage());
+            Notifications.create()
+                    .title("Some unexpected thing happened")
+                    .text(e.getLocalizedMessage())
+                    .showError();
+            return;
+        }
+        Notifications.create()
+                .title("Export successful")
+                .text("File exported successfully to " + exportedLinksPath)
                 .showInformation();
     }
 }

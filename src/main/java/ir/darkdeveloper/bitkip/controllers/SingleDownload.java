@@ -190,7 +190,8 @@ public class SingleDownload implements QueueObserver {
                     resumableLabel, chunksField, bytesField, dm, executor);
             CompletableFuture.allOf(fileNameLocationFuture, sizeFuture)
                     .whenComplete((unused, throwable) -> {
-                        NewDownloadUtils.checkIfFileIsOKToSave(locationField.getText(), nameField.getText(), errorLabel, downloadBtn, addBtn);
+                        NewDownloadUtils.checkIfFileIsOKToSave(locationField.getText(),
+                                nameField.getText(), errorLabel, downloadBtn, addBtn, refreshBtn);
                         executor.shutdown();
                     })
                     .exceptionally(throwable -> {
@@ -213,7 +214,8 @@ public class SingleDownload implements QueueObserver {
     @FXML
     private void onSelectLocation(ActionEvent e) {
         NewDownloadUtils.selectLocation(e, locationField);
-        NewDownloadUtils.checkIfFileIsOKToSave(locationField.getText(), nameField.getText(), errorLabel, downloadBtn, addBtn);
+        NewDownloadUtils.checkIfFileIsOKToSave(locationField.getText(), nameField.getText(),
+                errorLabel, downloadBtn, addBtn, refreshBtn);
     }
 
     @FXML
@@ -331,7 +333,7 @@ public class SingleDownload implements QueueObserver {
 
     private void onOfflineFieldsChanged() {
         NewDownloadUtils.onOfflineFieldsChanged(locationField, nameField.getText(), dm, queueCombo,
-                errorLabel, downloadBtn, addBtn, openLocation);
+                errorLabel, downloadBtn, addBtn, openLocation, refreshBtn);
     }
 
 

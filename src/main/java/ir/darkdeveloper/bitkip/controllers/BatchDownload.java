@@ -122,7 +122,7 @@ public class BatchDownload implements QueueObserver {
     private void onOfflineFieldsChanged() {
         if (tempLink != null)
             NewDownloadUtils.onOfflineFieldsChanged(locationField, tempLink.getName(), null, queueCombo,
-                    errorLabel, null, checkBtn, openLocation);
+                    errorLabel, null, checkBtn, openLocation, null);
     }
 
     private void autoFillLocation() {
@@ -139,10 +139,13 @@ public class BatchDownload implements QueueObserver {
                     .thenAccept(this::setLocation);
             fileNameLocationFuture
                     .whenComplete((unused, throwable) ->
-                            NewDownloadUtils.checkIfFileIsOKToSave(locationField.getText(), tempLink.getName(), errorLabel, null, checkBtn))
+                            NewDownloadUtils.checkIfFileIsOKToSave(locationField.getText(),
+                                    tempLink.getName(), errorLabel, null, checkBtn, null))
                     .exceptionally(throwable -> {
                         var errorMsg = throwable.getCause().getLocalizedMessage();
-                        Platform.runLater(() -> NewDownloadUtils.disableControlsAndShowError(errorMsg, errorLabel, checkBtn, null, null));
+                        Platform.runLater(() ->
+                                NewDownloadUtils.disableControlsAndShowError(errorMsg, errorLabel,
+                                        checkBtn, null, null));
                         return null;
                     });
         } catch (NumberFormatException ignore) {
@@ -237,7 +240,8 @@ public class BatchDownload implements QueueObserver {
     private void onSelectLocation(ActionEvent e) {
         NewDownloadUtils.selectLocation(e, locationField);
         if (tempLink != null)
-            NewDownloadUtils.checkIfFileIsOKToSave(locationField.getText(), tempLink.getName(), errorLabel, null, checkBtn);
+            NewDownloadUtils.checkIfFileIsOKToSave(locationField.getText(), tempLink.getName(),
+                    errorLabel, null, checkBtn, null);
     }
 
     @FXML

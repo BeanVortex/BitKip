@@ -19,6 +19,7 @@ import java.time.LocalDateTime;
 import java.util.*;
 
 import static ir.darkdeveloper.bitkip.config.AppConfigs.*;
+import static ir.darkdeveloper.bitkip.utils.Defaults.ALL_DOWNLOADS_QUEUE;
 import static ir.darkdeveloper.bitkip.utils.Defaults.staticQueueNames;
 import static ir.darkdeveloper.bitkip.utils.ShortcutUtils.*;
 
@@ -48,7 +49,7 @@ public class MenuUtils {
         menuItems.get(settings).setOnAction(e -> FxUtils.newSettingsStage());
         menuItems.get(queueSettings).setOnAction(e -> FxUtils.newQueueSettingStage(null));
         menuItems.get(importLinks).setOnAction(DownloadOpUtils::importLinks);
-        menuItems.get(exportLinks).setOnAction(e -> DownloadOpUtils.exportLinks());
+        menuItems.get(exportLinks).setOnAction(e -> DownloadOpUtils.exportLinks(ALL_DOWNLOADS_QUEUE));
         menuItems.get(exit).setOnAction(e -> Platform.exit());
     }
 
@@ -62,6 +63,7 @@ public class MenuUtils {
         var refreshLbl = new Label("Refresh URL");
         var copyLbl = new Label("Copy URL");
         var restartLbl = new Label("Restart");
+        var exportLinkLbl = new Label("Export selected");
         var deleteLbl = new Label("Delete selected");
         var deleteWithFileLbl = new Label("Delete selected with file");
         var newQueueLbl = new Label("New queue");
@@ -71,8 +73,10 @@ public class MenuUtils {
         var stopQueueLbl = new Label("Stop queue");
         var queueSettingLbl = new Label("Queue settings");
 
-        var lbls = List.of(openLbl, openFolderLbl, resumeLbl, pauseLbl, refreshLbl, copyLbl, restartLbl, deleteLbl, deleteWithFileLbl);
-        var keyCodes = List.of(OPEN_KEY, OPEN_FOLDER_KEY, RESUME_KEY, PAUSE_KEY, REFRESH_KEY, COPY_KEY, RESTART_KEY, DELETE_KEY, DELETE_FILE_KEY);
+        var lbls = List.of(openLbl, openFolderLbl, resumeLbl, pauseLbl, refreshLbl, copyLbl,
+                restartLbl, exportLinkLbl, deleteLbl, deleteWithFileLbl);
+        var keyCodes = Arrays.asList(OPEN_KEY, OPEN_FOLDER_KEY, RESUME_KEY, PAUSE_KEY,
+                REFRESH_KEY, COPY_KEY, RESTART_KEY, null, DELETE_KEY, DELETE_FILE_KEY);
         var menuItems = createMapMenuItems(lbls, keyCodes);
 
         var split = new SeparatorMenuItem();
@@ -121,6 +125,7 @@ public class MenuUtils {
                 mainTableUtils.getSelected(), null, null));
         menuItems.get(pauseLbl).setOnAction(e -> DownloadOpUtils.pauseDownloads(mainTableUtils.getSelected()));
         menuItems.get(restartLbl).setOnAction(e -> DownloadOpUtils.restartDownloads(mainTableUtils.getSelected()));
+        menuItems.get(exportLinkLbl).setOnAction(e -> DownloadOpUtils.exportLinks(mainTableUtils.getSelectedUrls()));
         menuItems.get(refreshLbl).setOnAction(e -> DownloadOpUtils.refreshDownload(mainTableUtils.getSelected()));
         menuItems.get(copyLbl).setOnAction(e -> FxUtils.setClipboard(mainTableUtils.getSelected().get(0).getUrl()));
         menuItems.get(deleteLbl).setOnAction(e -> DownloadOpUtils.deleteDownloads(mainTableUtils.getSelected(), false));

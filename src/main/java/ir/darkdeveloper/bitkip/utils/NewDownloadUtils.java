@@ -73,14 +73,14 @@ public class NewDownloadUtils {
             var fileSize = getFileSize(finalConnection[0]);
             var resumable = canResume(finalConnection[0]);
             Platform.runLater(() -> {
-                if (resumable){
+                if (resumable) {
                     chunksField.setText("0");
                     chunksField.setDisable(true);
                     bytesField.setDisable(true);
                     resumableLabel.setText("Yes");
                     resumableLabel.getStyleClass().add("yes");
                     resumableLabel.getStyleClass().remove("no");
-                }else {
+                } else {
                     resumableLabel.setText("No");
                     resumableLabel.getStyleClass().add("no");
                     resumableLabel.getStyleClass().remove("yes");
@@ -195,7 +195,7 @@ public class NewDownloadUtils {
     }
 
     public static void checkIfFileIsOKToSave(String location, String name,
-                                             Label errorLabel, Button downloadBtn, Button addBtn) {
+                                             Label errorLabel, Button downloadBtn, Button addBtn, Button refreshBtn) {
         var file = new File(location + name);
         var chunkFile = new File(location + name + "#0");
         if (file.exists() || chunkFile.exists()) {
@@ -203,18 +203,27 @@ public class NewDownloadUtils {
             if (downloadBtn != null)
                 downloadBtn.setDisable(true);
             addBtn.setDisable(true);
+            if (refreshBtn != null){
+                refreshBtn.setDisable(false);
+                refreshBtn.setVisible(true);
+            }
             Platform.runLater(() -> errorLabel.setText("At least one file with this name exists in this location"));
         } else {
             errorLabel.setVisible(false);
             if (downloadBtn != null)
                 downloadBtn.setDisable(false);
+            if (refreshBtn != null){
+                refreshBtn.setDisable(true);
+                refreshBtn.setVisible(false);
+            }
             addBtn.setDisable(false);
         }
     }
 
     public static void onOfflineFieldsChanged(TextField locationField, String filename, DownloadModel dm,
                                               ComboBox<QueueModel> queueCombo, Label errorLabel,
-                                              Button downloadBtn, Button addBtn, Button openLocation) {
+                                              Button downloadBtn, Button addBtn, Button openLocation,
+                                              Button refreshBtn) {
         // when saving outside BitKip folder
         var selectedQueue = queueCombo.getSelectionModel().getSelectedItem();
         if (!locationField.getText().contains("BitKip")
@@ -237,7 +246,7 @@ public class NewDownloadUtils {
             determineLocationAndQueue(locationField, filename, dm);
             openLocation.setDisable(false);
         }
-        checkIfFileIsOKToSave(locationField.getText(), filename, errorLabel, downloadBtn, addBtn);
+        checkIfFileIsOKToSave(locationField.getText(), filename, errorLabel, downloadBtn, addBtn, refreshBtn);
     }
 
     public static void disableControlsAndShowError(String error, Label errorLbl,
