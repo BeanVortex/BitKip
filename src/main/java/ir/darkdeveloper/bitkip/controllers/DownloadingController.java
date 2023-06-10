@@ -166,31 +166,43 @@ public class DownloadingController implements FXMLController {
     }
 
     private void bytesDownloadedListener(DownloadTask dt) {
-        dt.valueProperty().addListener((o, oldValue, bytesDownloaded) -> {
-            if (!isPaused.get()) {
-                if (oldValue == null)
-                    oldValue = bytesDownloaded;
-                var speed = (bytesDownloaded - oldValue);
-                if (bytesDownloaded == 0)
-                    speed = 0;
+        if (downloadModel.getSize() != -1)
+            dt.valueProperty().addListener((ob, o, bytes) -> {
+                if (!isPaused.get()) {
+                    if (o == null)
+                        o = bytes;
+                    var speed = (bytes - o);
+                    if (bytes == 0)
+                        speed = 0;
 
-                downloadModel.setSpeed(speed);
-                downloadModel.setDownloadStatus(DownloadStatus.Downloading);
-                downloadModel.setDownloaded(bytesDownloaded);
+                    downloadModel.setSpeed(speed);
+                    downloadModel.setDownloadStatus(DownloadStatus.Downloading);
+                    downloadModel.setDownloaded(bytes);
 
-                speedLbl.setText(IOUtils.formatBytes(speed));
-                statusLbl.setText("Status: " + DownloadStatus.Downloading);
-                var downloadOf = "%s / %s"
-                        .formatted(IOUtils.formatBytes(bytesDownloaded),
-                                IOUtils.formatBytes(downloadModel.getSize()));
-                downloadedOfLbl.setText(downloadOf);
-                if (speed != 0) {
-                    long delta = downloadModel.getSize() - bytesDownloaded;
-                    var remaining = DurationFormatUtils.formatDuration((delta / speed) * 1000, "dd:HH:mm:ss");
-                    remainingLbl.setText("Remaining: " + remaining);
+                    speedLbl.setText(IOUtils.formatBytes(speed));
+                    statusLbl.setText("Status: " + DownloadStatus.Downloading);
+                    var downloadOf = "%s / %s"
+                            .formatted(IOUtils.formatBytes(bytes),
+                                    IOUtils.formatBytes(downloadModel.getSize()));
+                    downloadedOfLbl.setText(downloadOf);
+                    if (speed != 0) {
+                        long delta = downloadModel.getSize() - bytes;
+                        var remaining = DurationFormatUtils.formatDuration((delta / speed) * 1000, "dd:HH:mm:ss");
+                        remainingLbl.setText("Remaining: " + remaining);
+                    }
                 }
-            }
-        });
+            });
+        else
+            dt.valueProperty().addListener((ob, o, bytes) -> {
+                if (!isPaused.get()) {
+                    downloadModel.setDownloadStatus(DownloadStatus.Downloading);
+                    downloadModel.setDownloaded(bytes);
+                    statusLbl.setText("Status: " + DownloadStatus.Downloading);
+                    var downloadOf = "%s / %s".formatted(IOUtils.formatBytes(bytes), IOUtils.formatBytes(0));
+                    downloadedOfLbl.setText(downloadOf);
+                    remainingLbl.setText("Not Clear");
+                }
+            });
     }
 
     private void progressListener(DownloadTask dt) {

@@ -58,16 +58,20 @@ public class DownloadOpUtils {
                 downloadTask = new DownloadInChunksTask(dm, null);
         }
 
-        downloadTask.valueProperty().addListener((observable, oldValue, newValue) -> {
-            if (oldValue == null)
-                oldValue = newValue;
-            var currentSpeed = (newValue - oldValue);
-            if (newValue == 0)
-                currentSpeed = 0;
-            mainTableUtils.updateDownloadSpeedAndRemaining(currentSpeed, dm, newValue);
-        });
-        downloadTask.progressProperty().addListener((o, old, newV) ->
-                mainTableUtils.updateDownloadProgress(newV.floatValue() * 100, dm));
+        if (dm.getSize() == -1)
+            downloadTask.valueProperty().addListener((ob, o, n) -> mainTableUtils.updateDownloadedNoSize(n, dm));
+        else
+            downloadTask.valueProperty().addListener((ob, o, n) -> {
+                if (o == null)
+                    o = n;
+                var currentSpeed = (n - o);
+                if (n == 0)
+                    currentSpeed = 0;
+                mainTableUtils.updateDownloadSpeedAndRemaining(currentSpeed, dm, n);
+            });
+
+        downloadTask.progressProperty().addListener((ob, o, n) ->
+                mainTableUtils.updateDownloadProgress(n.floatValue() * 100, dm));
         downloadTask.setBlocking(blocking);
         dm.setDownloadTask(downloadTask);
         if (!resume) {
@@ -280,7 +284,7 @@ public class DownloadOpUtils {
                     .stream().map(DownloadModel::getUrl)
                     .toList();
             IOUtils.writeLinksToFile(urls, queue);
-        }catch (IOException e){
+        } catch (IOException e) {
             log.error(e.getLocalizedMessage());
             Notifications.create()
                     .title("Some unexpected thing happened")
@@ -294,10 +298,10 @@ public class DownloadOpUtils {
                 .showInformation();
     }
 
-    public static void exportLinks(List<String> urls){
+    public static void exportLinks(List<String> urls) {
         try {
             IOUtils.writeLinksToFile(urls, "selected");
-        }catch (IOException e){
+        } catch (IOException e) {
             log.error(e.getLocalizedMessage());
             Notifications.create()
                     .title("Some unexpected thing happened")

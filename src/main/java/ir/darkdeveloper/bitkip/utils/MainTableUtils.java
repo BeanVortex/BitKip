@@ -207,7 +207,7 @@ public class MainTableUtils {
                     var remaining = DurationFormatUtils.formatDuration((delta / speed) * 1000, "dd:HH:mm:ss");
                     i.setRemainingTime(remaining);
                 }
-                contentTable.refresh();
+                refreshTable();
             }
         }
     }
@@ -226,7 +226,21 @@ public class MainTableUtils {
             }
         }
         refreshTable();
+    }
 
+    public void updateDownloadedNoSize(long bytes, DownloadModel dm) {
+        var downTask = dm.getDownloadTask();
+        if (!downTask.isPaused() && currentDownloadings.contains(dm)) {
+            var i = findDownload(dm.getId());
+            if (i != null) {
+                i.setSpeed(0);
+                i.setDownloadStatus(DownloadStatus.Downloading);
+                i.setSpeedString(IOUtils.formatBytes(0));
+                i.setDownloaded(bytes);
+                i.setRemainingTime("Not Clear");
+                refreshTable();
+            }
+        }
     }
 
     public DownloadModel findDownload(int id) {
@@ -270,5 +284,6 @@ public class MainTableUtils {
     public DownloadModel getObservedDownload(DownloadModel dm) {
         return findDownload(dm.getId());
     }
+
 
 }

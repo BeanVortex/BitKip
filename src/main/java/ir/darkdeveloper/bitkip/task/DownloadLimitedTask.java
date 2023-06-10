@@ -12,13 +12,13 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.*;
+import java.nio.ByteBuffer;
 import java.nio.channels.Channels;
 import java.nio.channels.ClosedChannelException;
 import java.nio.channels.FileChannel;
 import java.time.LocalDateTime;
 import java.util.concurrent.ExecutorService;
 
-import static ir.darkdeveloper.bitkip.config.AppConfigs.log;
 import static ir.darkdeveloper.bitkip.config.AppConfigs.*;
 import static ir.darkdeveloper.bitkip.utils.DownloadOpUtils.openFile;
 
@@ -52,13 +52,50 @@ public class DownloadLimitedTask extends DownloadTask {
         if (file.exists() && isCompleted(downloadModel, file, mainTableUtils))
             return 0L;
         try {
-            performDownload();
+            if (downloadModel.getSize() == -1)
+                performDownloadInStream();
+            else
+                performDownload();
         } catch (IOException | InterruptedException e) {
             if (e instanceof IOException)
                 log.error(e.getLocalizedMessage());
             this.pause();
         }
         return IOUtils.getFileSize(file);
+    }
+
+    private void performDownloadInStream() {
+        try {
+            var downloadUrl = new URL(downloadModel.getUrl());
+            var inputStream = downloadUrl.openStream();
+            var readableByteChannel = Channels.newChannel(inputStream);
+
+            var out = new FileOutputStream(file, file.exists());
+            fileChannel = out.getChannel();
+
+            updateProgress(0, 1);
+
+            var buffer = ByteBuffer.allocate(1024);
+            while (readableByteChannel.read(buffer) != -1) {
+                buffer.flip();
+                fileChannel.write(buffer);
+                updateValue(fileChannel.position());
+                buffer.clear();
+            }
+
+
+            var size = fileChannel.size();
+            downloadModel.setSize(size);
+            fileChannel.close();
+            out.close();
+            readableByteChannel.close();
+            inputStream.close();
+            DownloadsRepo.updateDownloadProperty(DownloadsRepo.COL_SIZE, String.valueOf(size), downloadModel.getId());
+
+
+        } catch (IOException e) {
+            log.error(e.getMessage());
+        }
     }
 
 
@@ -88,6 +125,7 @@ public class DownloadLimitedTask extends DownloadTask {
                     calculateSpeedAndProgress(file, fileSize);
                     downloadSizeLimited(fileChannel, in, limit, existingFileSize);
                 }
+                out.close();
             } catch (SocketTimeoutException | UnknownHostException | SocketException s) {
                 if (!paused) {
                     retries++;
