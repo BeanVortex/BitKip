@@ -50,6 +50,8 @@
                 <Label text="Listening port:" styleClass="settingDescription"/>
                 <TextField fx:id="portField"/>
             </HBox>
+            <Label styleClass="settingDescription, opacity_7"
+                   text="If you changed the port, don't forget to change it on extension"/>
             <Label styleClass="settingDescription, opacity_7" text="Server settings will apply on restart"/>
         </VBox>
     </VBox>
