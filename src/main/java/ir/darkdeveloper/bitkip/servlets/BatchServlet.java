@@ -5,7 +5,7 @@ import ir.darkdeveloper.bitkip.models.BatchURLModel;
 import ir.darkdeveloper.bitkip.models.LinkModel;
 import ir.darkdeveloper.bitkip.repo.QueuesRepo;
 import ir.darkdeveloper.bitkip.utils.FxUtils;
-import ir.darkdeveloper.bitkip.utils.InputValidations;
+import ir.darkdeveloper.bitkip.utils.Validations;
 import ir.darkdeveloper.bitkip.utils.NewDownloadUtils;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
@@ -44,7 +44,7 @@ public class BatchServlet extends HttpServlet {
         var links = urlModel.links();
         if (links == null || links.isEmpty())
             return Collections.emptyList();
-        var chunks = InputValidations.maxChunks();
+        var chunks = Validations.maxChunks();
         var allDownloadsQueue = QueuesRepo.findByName(ALL_DOWNLOADS_QUEUE, false);
         var firstUrl = links.get(0);
         var connection = NewDownloadUtils.connect(firstUrl, 3000, 3000);

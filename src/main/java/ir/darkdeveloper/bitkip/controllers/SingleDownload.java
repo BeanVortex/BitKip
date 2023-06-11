@@ -30,7 +30,7 @@ import java.util.concurrent.Executors;
 import static ir.darkdeveloper.bitkip.config.AppConfigs.*;
 import static ir.darkdeveloper.bitkip.config.observers.QueueSubject.getQueueSubject;
 import static ir.darkdeveloper.bitkip.utils.Defaults.ALL_DOWNLOADS_QUEUE;
-import static ir.darkdeveloper.bitkip.utils.InputValidations.maxChunks;
+import static ir.darkdeveloper.bitkip.utils.Validations.maxChunks;
 
 public class SingleDownload implements QueueObserver {
 
@@ -123,7 +123,7 @@ public class SingleDownload implements QueueObserver {
         };
 
         NewDownloadUtils.initPopOvers(questionBtns, contents);
-        InputValidations.validateInputChecks(chunksField, bytesField, speedField, dm);
+        Validations.validateInputChecks(chunksField, bytesField, speedField, dm);
 
     }
 
@@ -131,7 +131,7 @@ public class SingleDownload implements QueueObserver {
         if (urlModel != null)
             setInputValuesFromExtension(urlModel);
         else
-            InputValidations.prepareLinkFromClipboard(urlField);
+            Validations.prepareLinkFromClipboard(urlField);
 
         queueCombo.getSelectionModel().selectedIndexProperty().addListener(observable -> onQueueChanged());
         urlField.textProperty().addListener((o, ol, n) -> {

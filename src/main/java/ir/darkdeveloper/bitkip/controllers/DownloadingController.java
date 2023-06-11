@@ -9,7 +9,7 @@ import ir.darkdeveloper.bitkip.task.DownloadTask;
 import ir.darkdeveloper.bitkip.utils.DownloadOpUtils;
 import ir.darkdeveloper.bitkip.utils.FxUtils;
 import ir.darkdeveloper.bitkip.utils.IOUtils;
-import ir.darkdeveloper.bitkip.utils.InputValidations;
+import ir.darkdeveloper.bitkip.utils.Validations;
 import javafx.application.Platform;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -114,7 +114,7 @@ public class DownloadingController implements FXMLController {
     }
 
     private void initDownloadData() {
-        InputValidations.validateInputChecks(null, bytesField, speedField, downloadModel);
+        Validations.validateInputChecks(null, bytesField, speedField, downloadModel);
         bytesField.setText(String.valueOf(downloadModel.getSize()));
         link.setText(downloadModel.getUrl());
         locationLbl.setText("Path: " + new File(downloadModel.getFilePath()).getParentFile().getAbsolutePath());

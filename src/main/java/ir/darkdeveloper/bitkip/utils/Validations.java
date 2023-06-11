@@ -1,11 +1,15 @@
 package ir.darkdeveloper.bitkip.utils;
 
 import ir.darkdeveloper.bitkip.models.DownloadModel;
+import ir.darkdeveloper.bitkip.repo.DownloadsRepo;
 import javafx.scene.control.Spinner;
 import javafx.scene.control.TextField;
 import javafx.scene.input.Clipboard;
 
-public class InputValidations {
+import static ir.darkdeveloper.bitkip.config.AppConfigs.mainTableUtils;
+import static ir.darkdeveloper.bitkip.config.AppConfigs.openDownloadings;
+
+public class Validations {
 
     public static void validateInputChecks(TextField chunksField, TextField bytesField,
                                            TextField speedField, DownloadModel dm) {
@@ -157,7 +161,29 @@ public class InputValidations {
         return Runtime.getRuntime().availableProcessors() * 2;
     }
 
-    public static boolean validateUrl(String url){
+    public static boolean validateUrl(String url) {
         return url.startsWith("http") || url.startsWith("https") || url.startsWith("ftp");
+    }
+
+    public static void validateDownloadModel(DownloadModel dm) {
+        if (dm.getSize() != -1)
+            return;
+
+        var connection = NewDownloadUtils.connect(dm.getUrl(), 3000, 3000);
+        var canResume = NewDownloadUtils.canResume(connection);
+        var fileSize = NewDownloadUtils.getFileSize(connection);
+        dm.setSize(fileSize);
+        dm.setResumable(canResume);
+        if (!canResume)
+            dm.setChunks(0);
+        var observedDownload = mainTableUtils.getObservedDownload(dm);
+        observedDownload.setSize(fileSize);
+        observedDownload.setResumable(canResume);
+        openDownloadings.stream()
+                .filter(dc -> dc.getDownloadModel().equals(dm))
+                .forEach(dc -> dc.setDownloadModel(dm));
+        DownloadsRepo.updateDownloadProperty(DownloadsRepo.COL_SIZE, String.valueOf(fileSize), dm.getId());
+        DownloadsRepo.updateDownloadProperty(DownloadsRepo.COL_RESUMABLE, String.valueOf(canResume), dm.getId());
+
     }
 }

@@ -4,7 +4,7 @@ import ir.darkdeveloper.bitkip.controllers.interfaces.FXMLController;
 import ir.darkdeveloper.bitkip.models.DownloadModel;
 import ir.darkdeveloper.bitkip.repo.DownloadsRepo;
 import ir.darkdeveloper.bitkip.utils.DownloadOpUtils;
-import ir.darkdeveloper.bitkip.utils.InputValidations;
+import ir.darkdeveloper.bitkip.utils.Validations;
 import ir.darkdeveloper.bitkip.utils.NewDownloadUtils;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
@@ -69,7 +69,7 @@ public class RefreshController implements FXMLController {
     private void setDownloadData() {
         nameLbl.setText("Name: " + dm.getName());
         urlField.setText(dm.getUrl());
-        InputValidations.prepareLinkFromClipboard(urlField);
+        Validations.prepareLinkFromClipboard(urlField);
     }
 
     @Override

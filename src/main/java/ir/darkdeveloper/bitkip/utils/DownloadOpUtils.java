@@ -35,6 +35,9 @@ public class DownloadOpUtils {
      */
     private static void triggerDownload(DownloadModel dm, String speed, String bytes, boolean resume, boolean blocking,
                                         ExecutorService executor) {
+
+        Validations.validateDownloadModel(dm);
+
         DownloadTask downloadTask = new DownloadLimitedTask(dm, Long.MAX_VALUE, false);
         if (dm.getChunks() == 0) {
             if (speed != null) {

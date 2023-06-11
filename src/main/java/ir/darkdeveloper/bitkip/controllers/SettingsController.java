@@ -5,7 +5,7 @@ import ir.darkdeveloper.bitkip.controllers.interfaces.FXMLController;
 import ir.darkdeveloper.bitkip.task.FileMoveTask;
 import ir.darkdeveloper.bitkip.utils.FxUtils;
 import ir.darkdeveloper.bitkip.utils.IOUtils;
-import ir.darkdeveloper.bitkip.utils.InputValidations;
+import ir.darkdeveloper.bitkip.utils.Validations;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -74,9 +74,9 @@ public class SettingsController implements FXMLController {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        InputValidations.validateIntInputCheck(portField, (long) serverPort);
-        InputValidations.validateIntInputCheck(retryField, (long) downloadRetryCount);
-        InputValidations.validateIntInputCheck(rateLimitField, (long) downloadRateLimitCount);
+        Validations.validateIntInputCheck(portField, (long) serverPort);
+        Validations.validateIntInputCheck(retryField, (long) downloadRetryCount);
+        Validations.validateIntInputCheck(rateLimitField, (long) downloadRateLimitCount);
         lblLocation.setText(downloadPath);
         serverCheck.setSelected(serverEnabled);
         portField.setText(String.valueOf(serverPort));
