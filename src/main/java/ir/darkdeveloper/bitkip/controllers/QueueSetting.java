@@ -12,7 +12,7 @@ import ir.darkdeveloper.bitkip.repo.ScheduleRepo;
 import ir.darkdeveloper.bitkip.task.ScheduleTask;
 import ir.darkdeveloper.bitkip.utils.FxUtils;
 import ir.darkdeveloper.bitkip.utils.IOUtils;
-import ir.darkdeveloper.bitkip.utils.InputValidations;
+import ir.darkdeveloper.bitkip.utils.Validations;
 import javafx.application.Platform;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
@@ -185,10 +185,10 @@ public class QueueSetting implements FXMLController, QueueObserver {
         stopSecondSpinner.setEditable(true);
         simulDownloadSpinner.setEditable(true);
 
-        InputValidations.validateTimePickerInputs(startHourSpinner, startMinuteSpinner, startSecondSpinner);
-        InputValidations.validateTimePickerInputs(stopHourSpinner, stopMinuteSpinner, stopSecondSpinner);
-        InputValidations.validateSpeedInputChecks(speedField);
-        InputValidations.validateIntInputCheck(simulDownloadSpinner.getEditor(), 1, 1, 5);
+        Validations.validateTimePickerInputs(startHourSpinner, startMinuteSpinner, startSecondSpinner);
+        Validations.validateTimePickerInputs(stopHourSpinner, stopMinuteSpinner, stopSecondSpinner);
+        Validations.validateSpeedInputChecks(speedField);
+        Validations.validateIntInputCheck(simulDownloadSpinner.getEditor(), 1, 1, 5);
 
 
         datePicker.setDayCellFactory(dp -> new DateCell() {

@@ -69,7 +69,8 @@
             <Label text="Rate limit retry count:" styleClass="settingDescription"/>
             <TextField fx:id="rateLimitField"/>
         </HBox>
-        <Label styleClass="settingDescription, opacity_7" text="Hint: Some links has rate limit so you can't download more than certain bytes"/>
+        <Label styleClass="settingDescription, opacity_7"
+               text="Hint: Some links has rate limit so you can't download more than certain bytes"/>
     </VBox>
     <HBox alignment="CENTER_LEFT" styleClass="padding_10">
         <Label styleClass="bold" fx:id="savedLabel" visible="false"/>

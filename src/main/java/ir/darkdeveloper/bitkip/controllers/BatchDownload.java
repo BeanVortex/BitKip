@@ -7,7 +7,7 @@ import ir.darkdeveloper.bitkip.models.QueueModel;
 import ir.darkdeveloper.bitkip.repo.DownloadsRepo;
 import ir.darkdeveloper.bitkip.repo.QueuesRepo;
 import ir.darkdeveloper.bitkip.utils.FxUtils;
-import ir.darkdeveloper.bitkip.utils.InputValidations;
+import ir.darkdeveloper.bitkip.utils.Validations;
 import ir.darkdeveloper.bitkip.utils.NewDownloadUtils;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
@@ -92,10 +92,10 @@ public class BatchDownload implements QueueObserver {
         queueCombo.setValue(queues.get(0));
         errorLabel.setVisible(false);
         checkBtn.setDisable(true);
-        InputValidations.prepareLinkFromClipboard(urlField);
-        InputValidations.validateChunksInputChecks(chunksField);
-        InputValidations.validateIntInputCheck(startField, 0L);
-        InputValidations.validateIntInputCheck(endField, 0L);
+        Validations.prepareLinkFromClipboard(urlField);
+        Validations.validateChunksInputChecks(chunksField);
+        Validations.validateIntInputCheck(startField, 0L);
+        Validations.validateIntInputCheck(endField, 0L);
         var questionBtns = new Button[]{questionBtnUrl, questionBtnChunks};
         var contents = new String[]{
                 "You want to download several files, clarify where urls are different by $ sign." +

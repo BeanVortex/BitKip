@@ -337,7 +337,7 @@ public class IOUtils {
             if (lines.isEmpty())
                 return null;
 
-            var chunks = InputValidations.maxChunks();
+            var chunks = Validations.maxChunks();
             var allDownloadsQueue = QueuesRepo.findByName(ALL_DOWNLOADS_QUEUE, false);
             var firstUrl = lines.get(0);
             var connection = NewDownloadUtils.connect(firstUrl, 3000, 3000);
@@ -346,7 +346,7 @@ public class IOUtils {
             var path = NewDownloadUtils.determineLocation(firstFileName);
 
             return lines.stream().map(li -> {
-                        if (!InputValidations.validateUrl(li))
+                        if (!Validations.validateUrl(li))
                             return null;
                         var lm = new LinkModel(li, chunks);
                         lm.getQueues().add(allDownloadsQueue);
