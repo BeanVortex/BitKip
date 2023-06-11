@@ -61,9 +61,15 @@ public class DownloadsRepo {
 
     private static void alters() {
         var addAlters = """
-                ALTER TABLE %s ADD COLUMN %s INTEGER DEFAULT 1
+                ALTER TABLE %s ADD COLUMN %s INTEGER DEFAULT 1;
+                ALTER TABLE %s ADD COLUMN %s INTEGER DEFAULT 0;
+                ALTER TABLE %s ADD COLUMN %s VARCHAR DEFAULT "%s";
+                ALTER TABLE %s ADD COLUMN %s INTEGER DEFAULT 1;
                 """
-                .formatted(DOWNLOADS_TABLE_NAME, COL_RESUMABLE);
+                .formatted(DOWNLOADS_TABLE_NAME, COL_SHOW_COMPLETE_DIALOG,
+                        DOWNLOADS_TABLE_NAME, COL_OPEN_AFTER_COMPLETE,
+                        DOWNLOADS_TABLE_NAME, COL_ADD_TO_QUEUE_DATE, LocalDateTime.now().toString(),
+                        DOWNLOADS_TABLE_NAME, COL_RESUMABLE);
         DatabaseHelper.executeUpdateSql(addAlters, true);
     }
 
