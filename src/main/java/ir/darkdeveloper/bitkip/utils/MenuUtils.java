@@ -53,7 +53,6 @@ public class MenuUtils {
         menuItems.get(exit).setOnAction(e -> Platform.exit());
     }
 
-
     public static void initOperationMenu(Button operationMenu) {
         var c = new ContextMenu();
         var openLbl = new Label("Open");
@@ -208,10 +207,11 @@ public class MenuUtils {
     public static void initMoreMenu(Button moreBtn, TableView<DownloadModel> table) {
         var c = new ContextMenu();
         var checkForUpdatesLbl = new Label("Check updates");
+        var installExtensionLbl = new Label("Install extension");
         var logsLbl = new Label("Logs");
         var aboutLbl = new Label("About");
 
-        var lbls = List.of(checkForUpdatesLbl, logsLbl, aboutLbl);
+        var lbls = List.of(logsLbl, checkForUpdatesLbl, installExtensionLbl, aboutLbl);
         var menuItems = createMapMenuItems(lbls, null);
         c.getItems().addAll(menuItems.values());
         moreBtn.setContextMenu(c);
@@ -220,8 +220,9 @@ public class MenuUtils {
             c.show(moreBtn, Side.BOTTOM, 0, 0);
         });
 
-        menuItems.get(checkForUpdatesLbl).setOnAction(e -> MoreUtils.checkUpdates(true));
         menuItems.get(logsLbl).setOnAction(e -> FxUtils.newLogsStage());
+        menuItems.get(checkForUpdatesLbl).setOnAction(e -> MoreUtils.checkUpdates(true));
+        menuItems.get(installExtensionLbl).setOnAction(e -> MoreUtils.downloadExtension());
         menuItems.get(aboutLbl).setOnAction(e -> FxUtils.newAboutStage());
     }
 

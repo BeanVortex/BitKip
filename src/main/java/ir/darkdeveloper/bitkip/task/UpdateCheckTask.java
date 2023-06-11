@@ -18,7 +18,7 @@ public class UpdateCheckTask extends Task<UpdateModel> {
     private ExecutorService executor;
 
     @Override
-    protected UpdateModel call() throws Exception {
+    protected UpdateModel call() throws InterruptedException, IOException {
         var url = "https://github.com/DarkDeveloper-arch/BitKip/releases";
         var doc = getDocument(url);
         var updateVersion = doc.select(".Box-body").get(0)
@@ -60,10 +60,11 @@ public class UpdateCheckTask extends Task<UpdateModel> {
             return new UpdateModel(updateVersion, description, assets);
         }
         executor.shutdown();
+        cancel();
         return null;
     }
 
-    private static Document getDocument(String url) throws InterruptedException {
+    public static Document getDocument(String url) throws InterruptedException, IOException {
         Document doc = null;
         for (int i = 0; i < 3; i++) {
             try {
@@ -72,12 +73,12 @@ public class UpdateCheckTask extends Task<UpdateModel> {
                         .get();
                 break;
             } catch (IOException e) {
-                log.error(e.getLocalizedMessage());
+                log.error("Failed to fetch: " + url);
                 Thread.sleep(2000);
             }
         }
         if (doc == null)
-            throw new RuntimeException("Not Found");
+            throw new IOException("Not Found");
         return doc;
     }
 
