@@ -10,6 +10,7 @@ Features:
 - [x] Track download progress
 - [x] Save chunks parts in application folders to isolate BitKip filesystem usage
 - [x] Add Links in single and batch way
+- [x] Ability to refresh expired or damaged links
 - [x] Create/Delete new queues with ability to create dedicated folder for each to organize better
 - [x] Start and stop queues
 - [x] Limit speed of downloads in a queue
@@ -19,5 +20,19 @@ Features:
 - [x] Import links from a file
 - [x] Export links to a file
 - [x] Viewing logs of applicaiton
-- [x] Settings for customization
+- [x] Settings for customization (includes dark mode)
 - [x] Interaction with user clicks and inputs on a browser through BitKip Extension
+
+
+Some pictures of the application:
+
+![main](https://github.com/DarkDeveloper-arch/BitKip/blob/main/readme-img/main-light.png)
+![main](https://github.com/DarkDeveloper-arch/BitKip/blob/main/readme-img/single-light.png)
+![main](https://github.com/DarkDeveloper-arch/BitKip/blob/main/readme-img/batch-light.png)
+![main](https://github.com/DarkDeveloper-arch/BitKip/blob/main/readme-img/queue-light.png)
+![main](https://github.com/DarkDeveloper-arch/BitKip/blob/main/readme-img/queue-settings-light.png)
+![main](https://github.com/DarkDeveloper-arch/BitKip/blob/main/readme-img/queue-settings-scheduler-light.png)
+![main](https://github.com/DarkDeveloper-arch/BitKip/blob/main/readme-img/settings-light.png)
+![main](https://github.com/DarkDeveloper-arch/BitKip/blob/main/readme-img/logs-light.png)
+
+
