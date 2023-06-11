@@ -16,6 +16,7 @@ import org.controlsfx.control.Notifications;
 import java.awt.*;
 import java.io.File;
 import java.io.IOException;
+import java.net.ConnectException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -36,7 +37,16 @@ public class DownloadOpUtils {
     private static void triggerDownload(DownloadModel dm, String speed, String bytes, boolean resume, boolean blocking,
                                         ExecutorService executor) {
 
-        Validations.validateDownloadModel(dm);
+        try {
+            Validations.validateDownloadModel(dm);
+        } catch (ConnectException e) {
+            log.warn(e.getLocalizedMessage() + " : " + dm.getUrl());
+            Platform.runLater(() -> Notifications.create()
+                    .title(e.getLocalizedMessage())
+                    .text(dm.getUrl())
+                    .showWarning());
+            return;
+        }
 
         DownloadTask downloadTask = new DownloadLimitedTask(dm, Long.MAX_VALUE, false);
         if (dm.getChunks() == 0) {

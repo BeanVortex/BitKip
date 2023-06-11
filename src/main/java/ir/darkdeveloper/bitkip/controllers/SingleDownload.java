@@ -179,6 +179,8 @@ public class SingleDownload implements QueueObserver {
 
     private void autoFillLocationAndSizeAndName() {
         try {
+            downloadBtn.setDisable(true);
+            addBtn.setDisable(true);
             // firing select event
             queueCombo.getSelectionModel().select(queueCombo.getSelectionModel().getSelectedIndex());
             var url = urlField.getText();
