@@ -152,8 +152,7 @@ public class MainTableUtils {
             queues = QueuesRepo.getAllQueues(false, false);
         queues.forEach(qm -> {
             if (staticQueueNames.stream().noneMatch(s -> qm.getName().equals(s))) {
-                var defaultColor = ((Label) addToQueueMenu.getGraphic()).getTextFill();
-                var addToQueueMenuItem = createMenuItem(qm, defaultColor);
+                var addToQueueMenuItem = createMenuItem(qm);
                 addToQueueItems.put(addToQueueMenuItem, qm);
             }
         });

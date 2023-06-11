@@ -134,7 +134,7 @@ public class QueuesRepo {
         } catch (SQLException e) {
             log.error(e.getLocalizedMessage());
         }
-        throw new RuntimeException("Queue does not exist");
+        throw new IllegalArgumentException("Queue does not exist");
     }
 
 

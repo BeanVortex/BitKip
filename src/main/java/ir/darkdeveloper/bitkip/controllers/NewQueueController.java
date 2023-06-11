@@ -12,6 +12,7 @@ import javafx.scene.control.CheckBox;
 import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.stage.Stage;
+import org.controlsfx.control.Notifications;
 
 import java.io.File;
 import java.net.URL;
@@ -57,24 +58,31 @@ public class NewQueueController implements FXMLController {
     }
 
 
-
     @FXML
     private void onSaveQueue() {
         var queueName = queueField.getText();
-        queueModel.setName(queueName);
-        queueModel.setEditable(true);
-        queueModel.setCanAddDownload(true);
-        queueModel.setHasFolder(hasFolderCheck.isSelected());
-        if (hasFolderCheck.isSelected())
-            IOUtils.createFolderInSaveLocation("Queues" + File.separator + queueName);
-        var schedule = new ScheduleModel();
-        ScheduleRepo.insertSchedule(schedule, -1);
-        queueModel.setSchedule(schedule);
-        QueuesRepo.insertQueue(queueModel);
-        schedule.setQueueId(queueModel.getId());
-        ScheduleRepo.updateScheduleQueueId(schedule.getId(), schedule.getQueueId());
-        QueueSubject.addQueue(queueModel);
-        log.info("Created queue : " + queueModel.toStringModel());
-        stage.close();
+        try {
+            QueuesRepo.findByName(queueName, false);
+            Notifications.create()
+                    .title("Queue exists")
+                    .text("Queue with this name already exists")
+                    .showWarning();
+        } catch (IllegalArgumentException e) {
+            queueModel.setName(queueName);
+            queueModel.setEditable(true);
+            queueModel.setCanAddDownload(true);
+            queueModel.setHasFolder(hasFolderCheck.isSelected());
+            if (hasFolderCheck.isSelected())
+                IOUtils.createFolderInSaveLocation("Queues" + File.separator + queueName);
+            var schedule = new ScheduleModel();
+            ScheduleRepo.insertSchedule(schedule, -1);
+            queueModel.setSchedule(schedule);
+            QueuesRepo.insertQueue(queueModel);
+            schedule.setQueueId(queueModel.getId());
+            ScheduleRepo.updateScheduleQueueId(schedule.getId(), schedule.getQueueId());
+            QueueSubject.addQueue(queueModel);
+            log.info("Created queue : " + queueModel.toStringModel());
+            stage.close();
+        }
     }
 }

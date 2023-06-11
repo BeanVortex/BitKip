@@ -12,7 +12,6 @@ import javafx.collections.ObservableList;
 import javafx.geometry.Side;
 import javafx.scene.control.*;
 import javafx.scene.input.KeyCodeCombination;
-import javafx.scene.paint.Paint;
 
 import java.io.File;
 import java.time.LocalDateTime;
@@ -234,13 +233,12 @@ public class MenuUtils {
         if (queues.isEmpty())
             queues = QueuesRepo.getAllQueues(false, false);
         queues.forEach(qm -> {
-            var defaultColor = ((Label) addToQueueMenu.getGraphic()).getTextFill();
             if (staticQueueNames.stream().noneMatch(s -> qm.getName().equals(s))) {
-                var addToQueueMenuItem = createMenuItem(qm, defaultColor);
+                var addToQueueMenuItem = createMenuItem(qm);
                 addToQueueItems.put(addToQueueMenuItem, qm);
             }
-            var startQueueMenuItem = createMenuItem(qm, defaultColor);
-            var stopQueueMenuItem = createMenuItem(qm, defaultColor);
+            var startQueueMenuItem = createMenuItem(qm);
+            var stopQueueMenuItem = createMenuItem(qm);
             stopQueueMenuItem.setDisable(true);
             startQueueItems.put(startQueueMenuItem, qm);
             stopQueueItems.put(stopQueueMenuItem, qm);
@@ -321,12 +319,9 @@ public class MenuUtils {
     }
 
 
-    public static MenuItem createMenuItem(QueueModel qm, Paint defaultColor) {
+    public static MenuItem createMenuItem(QueueModel qm) {
         var queueMenuItem = new MenuItem();
         var lbl = new Label(qm.getName());
-        lbl.setTextFill(defaultColor);
-        lbl.setOnMouseEntered(e -> lbl.setTextFill(Paint.valueOf("#fff")));
-        lbl.setOnMouseExited(e -> lbl.setTextFill(defaultColor));
         lbl.setPrefWidth(150);
         lbl.setStyle("-fx-padding: 2 0 0 2");
         queueMenuItem.setGraphic(lbl);
