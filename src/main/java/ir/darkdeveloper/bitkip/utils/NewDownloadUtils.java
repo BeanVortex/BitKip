@@ -25,6 +25,7 @@ import java.util.concurrent.Executor;
 import static ir.darkdeveloper.bitkip.config.AppConfigs.*;
 import static ir.darkdeveloper.bitkip.utils.Defaults.AGENT;
 import static ir.darkdeveloper.bitkip.utils.Defaults.extensions;
+import static ir.darkdeveloper.bitkip.utils.Validations.maxChunks;
 
 public class NewDownloadUtils {
 
@@ -53,7 +54,7 @@ public class NewDownloadUtils {
     public static long getFileSize(HttpURLConnection connection) {
         var fileSize = connection.getContentLengthLong();
         if (fileSize == -1)
-            log.error("Connection failed");
+            log.warn("Can't fetch file size");
         return fileSize;
     }
 
@@ -74,8 +75,8 @@ public class NewDownloadUtils {
             var resumable = canResume(finalConnection[0]);
             Platform.runLater(() -> {
                 if (resumable) {
-                    chunksField.setText("0");
-                    chunksField.setDisable(true);
+                    chunksField.setText(String.valueOf(maxChunks()));
+                    chunksField.setDisable(false);
                     bytesField.setDisable(true);
                     resumableLabel.setText("Yes");
                     resumableLabel.getStyleClass().add("yes");

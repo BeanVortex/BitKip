@@ -163,11 +163,11 @@ public class SingleDownload implements QueueObserver {
         chunksField.setText(urlModel.resumable() ? String.valueOf(maxChunks()) : "0");
         speedField.setDisable(false);
         var resumable = urlModel.resumable();
-        if (resumable){
+        if (resumable) {
             resumableLabel.setText("Yes");
             resumableLabel.getStyleClass().add("yes");
             resumableLabel.getStyleClass().remove("no");
-        }else {
+        } else {
             resumableLabel.setText("No");
             resumableLabel.getStyleClass().add("no");
             resumableLabel.getStyleClass().remove("yes");
@@ -184,8 +184,9 @@ public class SingleDownload implements QueueObserver {
             var url = urlField.getText();
             var connection = NewDownloadUtils.connect(url, 3000, 3000);
             var executor = Executors.newFixedThreadPool(2);
-            var fileNameLocationFuture = NewDownloadUtils.prepareFileNameAndFieldsAsync(connection, url, nameField, executor)
-                    .thenAccept(this::setLocation);
+            var fileNameLocationFuture =
+                    NewDownloadUtils.prepareFileNameAndFieldsAsync(connection, url, nameField, executor)
+                            .thenAccept(this::setLocation);
             var sizeFuture = NewDownloadUtils.prepareFileSizeAndFieldsAsync(connection, urlField, sizeLabel,
                     resumableLabel, chunksField, bytesField, dm, executor);
             CompletableFuture.allOf(fileNameLocationFuture, sizeFuture)
