@@ -224,7 +224,8 @@ public class IOUtils {
                     .append("port=").append(String.valueOf(serverPort)).append("\n")
                     .append("show_complete_dialog=").append(String.valueOf(showCompleteDialog)).append("\n")
                     .append("retry_count=").append(String.valueOf(downloadRetryCount)).append("\n")
-                    .append("rate_limit_count=").append(String.valueOf(downloadRateLimitCount));
+                    .append("rate_limit_count=").append(String.valueOf(downloadRateLimitCount)).append("\n")
+                    .append("user_agent=").append(userAgent);
             writer.flush();
             writer.close();
 
@@ -250,6 +251,7 @@ public class IOUtils {
                         case "show_complete_dialog" -> showCompleteDialog = value.equals("true");
                         case "retry_count" -> downloadRetryCount = Integer.parseInt(value);
                         case "rate_limit_count" -> downloadRateLimitCount = Integer.parseInt(value);
+                        case "user_agent" -> userAgent = value;
                     }
                 }
             }

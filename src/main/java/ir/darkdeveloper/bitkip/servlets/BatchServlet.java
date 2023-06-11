@@ -32,10 +32,10 @@ public class BatchServlet extends HttpServlet {
             Platform.runLater(() -> FxUtils.newBatchListStage(links));
         } catch (IOException e) {
             try {
-                log.error(e.getLocalizedMessage());
+                log.warn(e.getLocalizedMessage());
                 resp.getWriter().write("failed to read payload");
             } catch (IOException ex) {
-                log.error(ex.getLocalizedMessage());
+                log.warn(ex.getLocalizedMessage());
             }
         }
     }

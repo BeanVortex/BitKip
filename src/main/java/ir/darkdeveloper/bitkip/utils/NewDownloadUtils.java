@@ -23,7 +23,6 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 
 import static ir.darkdeveloper.bitkip.config.AppConfigs.*;
-import static ir.darkdeveloper.bitkip.utils.Defaults.AGENT;
 import static ir.darkdeveloper.bitkip.utils.Defaults.extensions;
 import static ir.darkdeveloper.bitkip.utils.Validations.maxChunks;
 
@@ -38,7 +37,7 @@ public class NewDownloadUtils {
             var conn = (HttpURLConnection) url.openConnection();
             conn.setConnectTimeout(connectTimeout);
             conn.setReadTimeout(readTimeout);
-            conn.setRequestProperty("User-Agent", AGENT);
+            conn.setRequestProperty("User-Agent", userAgent);
             return conn;
         } catch (IOException e) {
             var msg = "Connection or read timeout. Connect to the internet or check the url";

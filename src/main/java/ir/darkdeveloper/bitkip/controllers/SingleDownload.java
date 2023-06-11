@@ -159,10 +159,11 @@ public class SingleDownload implements QueueObserver {
         setLocation(urlModel.filename());
         sizeLabel.setText(IOUtils.formatBytes(urlModel.fileSize()));
         bytesField.setText(String.valueOf(urlModel.fileSize()));
-        chunksField.setDisable(!urlModel.resumable());
-        chunksField.setText(urlModel.resumable() ? String.valueOf(maxChunks()) : "0");
+        var conn = NewDownloadUtils.connect(urlModel.url(), 3000, 3000);
+        var resumable = NewDownloadUtils.canResume(conn);
+        chunksField.setDisable(!resumable);
+        chunksField.setText(resumable ? String.valueOf(maxChunks()) : "0");
         speedField.setDisable(false);
-        var resumable = urlModel.resumable();
         if (resumable) {
             resumableLabel.setText("Yes");
             resumableLabel.getStyleClass().add("yes");
