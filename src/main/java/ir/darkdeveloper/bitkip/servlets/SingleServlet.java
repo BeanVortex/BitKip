@@ -9,6 +9,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import javafx.application.Platform;
 
 import java.io.IOException;
+import java.io.PrintWriter;
 
 import static ir.darkdeveloper.bitkip.config.AppConfigs.*;
 
@@ -17,6 +18,9 @@ public class SingleServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) {
         try {
+            resp.setContentType("application/json");
+            resp.setCharacterEncoding("UTF-8");
+
             var urlModel = mapper.readValue(req.getReader(), SingleURLModel.class);
             var agent = urlModel.agent();
             if (agent != null && !agent.isBlank() && !agent.equals(userAgent)) {
@@ -24,14 +28,12 @@ public class SingleServlet extends HttpServlet {
                 IOUtils.saveConfigs();
             }
             Platform.runLater(() -> FxUtils.newDownloadStage(true, urlModel));
+            resp.setStatus(200);
         } catch (IOException e) {
-            try {
-                log.warn(e.getLocalizedMessage());
-                resp.getWriter().write("failed to read payload");
-            } catch (IOException ex) {
-                log.warn(ex.getLocalizedMessage());
-            }
+            resp.setStatus(400);
+            log.warn(e.getLocalizedMessage());
         }
     }
+
 
 }

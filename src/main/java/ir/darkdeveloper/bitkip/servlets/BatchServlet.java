@@ -25,18 +25,18 @@ public class BatchServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) {
         try {
+            resp.setContentType("application/json");
+            resp.setCharacterEncoding("UTF-8");
+
             var urlModel = mapper.readValue(req.getReader(), BatchURLModel.class);
             var links = convertToLinks(urlModel);
             if (links.isEmpty())
                 throw new IOException("Empty data sent by extension");
             Platform.runLater(() -> FxUtils.newBatchListStage(links));
+            resp.setStatus(200);
         } catch (IOException e) {
-            try {
-                log.warn(e.getLocalizedMessage());
-                resp.getWriter().write("failed to read payload");
-            } catch (IOException ex) {
-                log.warn(ex.getLocalizedMessage());
-            }
+            log.warn(e.getLocalizedMessage());
+            resp.setStatus(400);
         }
     }
 
