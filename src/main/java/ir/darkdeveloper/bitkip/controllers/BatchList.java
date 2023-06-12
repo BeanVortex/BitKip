@@ -1,6 +1,6 @@
 package ir.darkdeveloper.bitkip.controllers;
 
-import ir.darkdeveloper.bitkip.controllers.interfaces.FXMLController;
+import ir.darkdeveloper.bitkip.config.observers.QueueObserver;
 import ir.darkdeveloper.bitkip.models.DownloadModel;
 import ir.darkdeveloper.bitkip.models.DownloadStatus;
 import ir.darkdeveloper.bitkip.models.LinkModel;
@@ -26,7 +26,7 @@ import java.util.concurrent.Executors;
 import static ir.darkdeveloper.bitkip.BitKip.getResource;
 import static ir.darkdeveloper.bitkip.config.AppConfigs.mainTableUtils;
 
-public class BatchList implements FXMLController {
+public class BatchList implements QueueObserver {
     @FXML
     private Button addBtn;
     @FXML
@@ -134,4 +134,8 @@ public class BatchList implements FXMLController {
         return list;
     }
 
+    @Override
+    public void updateQueue() {
+        linkTableUtils.updateQueues();
+    }
 }

@@ -19,6 +19,7 @@ public class LinkModel {
     private Boolean resumable;
     private String name;
     private String path;
+    private String selectedPath;
     private transient String agent;
 
     private final List<QueueModel> queues = new ArrayList<>();
@@ -44,7 +45,12 @@ public class LinkModel {
     }
 
     public String getQueuesString() {
-        var q = queues.toString();
-        return q.substring(q.lastIndexOf(',') + 2, q.lastIndexOf(']'));
+        if (queues.size() == 3)
+            return queues.get(2).getName();
+        return queues.get(0).getName();
+    }
+
+    public String getSelectedPath() {
+        return selectedPath == null ? path : selectedPath;
     }
 }

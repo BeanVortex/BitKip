@@ -291,6 +291,7 @@ public class BatchDownload implements QueueObserver {
                 if (selectedQueue.getId() != allDownloadsQueue.getId())
                     lm.getQueues().add(selectedQueue);
                 lm.setPath(path);
+                lm.setSelectedPath(path);
             });
             FxUtils.newBatchListStage(links);
             getQueueSubject().removeObserver(this);

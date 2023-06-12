@@ -1,9 +1,11 @@
 package ir.darkdeveloper.bitkip.utils;
 
 import ir.darkdeveloper.bitkip.models.LinkModel;
+import ir.darkdeveloper.bitkip.models.QueueModel;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.control.*;
+import javafx.scene.control.cell.ComboBoxTableCell;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.scene.input.KeyCode;
@@ -12,8 +14,14 @@ import javafx.scene.input.MouseButton;
 import javafx.stage.Stage;
 import javafx.util.Callback;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+
+import static ir.darkdeveloper.bitkip.config.AppConfigs.queuesPath;
+import static ir.darkdeveloper.bitkip.config.observers.QueueSubject.getQueues;
+import static ir.darkdeveloper.bitkip.utils.Defaults.ALL_DOWNLOADS_QUEUE;
+import static ir.darkdeveloper.bitkip.utils.Defaults.staticQueueNames;
 
 public class LinkTableUtils {
 
@@ -22,6 +30,7 @@ public class LinkTableUtils {
     private static final KeyCodeCombination DEL = new KeyCodeCombination(KeyCode.DELETE);
 
     private final Stage stage;
+    private TableColumn<LinkModel, QueueModel> queuesCol;
 
     public LinkTableUtils(TableView<LinkModel> table, List<LinkModel> links, Stage stage) {
         this.table = table;
@@ -34,14 +43,14 @@ public class LinkTableUtils {
         var sizeCol = new TableColumn<LinkModel, String>("Size");
         var chunksCol = new TableColumn<LinkModel, Integer>("Chunks");
         var resumeCol = new TableColumn<LinkModel, String>("Resumable");
-        var queuesCol = new TableColumn<LinkModel, String>("Queues");
+        queuesCol = new TableColumn<>("Queue");
         var linkCol = new TableColumn<LinkModel, String>("Link");
 
         nameCol.setPrefWidth(300);
         sizeCol.setPrefWidth(90);
         chunksCol.setPrefWidth(70);
         resumeCol.setPrefWidth(90);
-        queuesCol.setPrefWidth(70);
+        queuesCol.setPrefWidth(120);
         linkCol.setPrefWidth(200);
         nameCol.setSortType(TableColumn.SortType.DESCENDING);
 
@@ -51,8 +60,8 @@ public class LinkTableUtils {
         sizeCol.setCellValueFactory(new PropertyValueFactory<>("sizeString"));
         chunksCol.setCellValueFactory(new PropertyValueFactory<>("chunks"));
         resumeCol.setCellValueFactory(new PropertyValueFactory<>("resumableString"));
-        queuesCol.setCellValueFactory(new PropertyValueFactory<>("queuesString"));
         linkCol.setCellValueFactory(new PropertyValueFactory<>("url"));
+        queuesCol.setCellValueFactory(new PropertyValueFactory<>("queuesString"));
 
         linkCol.setCellFactory(TextFieldTableCell.forTableColumn());
         linkCol.setOnEditCommit(e -> e.getTableView().getItems().get(e.getTablePosition().getRow()).setUrl(e.getNewValue()));
@@ -60,6 +69,30 @@ public class LinkTableUtils {
         nameCol.setOnEditCommit(e -> e.getTableView().getItems().get(e.getTablePosition().getRow()).setName(e.getNewValue()));
         chunksCol.setCellFactory(param -> new ChunksCellFactory());
         chunksCol.setOnEditCommit(e -> e.getTableView().getItems().get(e.getTablePosition().getRow()).setChunks(e.getNewValue()));
+        var queuesToShow = getQueues().stream()
+                .filter(qm -> qm.getName().equals(ALL_DOWNLOADS_QUEUE) || !staticQueueNames.contains(qm.getName()))
+                .toList();
+        queuesCol.setCellFactory(p -> new ComboBoxTableCell<>(FXCollections.observableArrayList(queuesToShow)));
+        queuesCol.setOnEditCommit(e -> {
+            var lm = e.getRowValue();
+            var queues = lm.getQueues()
+                    .stream().filter(qm -> staticQueueNames.contains(qm.getName()))
+                    .toList();
+            lm.getQueues().clear();
+            lm.getQueues().addAll(queues);
+            var newQueue = e.getNewValue();
+            lm.setPath(lm.getSelectedPath());
+            if (!newQueue.getName().equals(ALL_DOWNLOADS_QUEUE)) {
+                if (newQueue.hasFolder()) {
+                    var folder = new File(queuesPath + newQueue.getName());
+                    var path = folder.getAbsolutePath();
+                    if (!path.endsWith(File.separator))
+                        path += File.separator;
+                    lm.setPath(path + lm.getName());
+                }
+                lm.getQueues().add(newQueue);
+            }
+        });
 
         table.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
 
@@ -129,5 +162,12 @@ public class LinkTableUtils {
 
     public ObservableList<LinkModel> getLinks() {
         return table.getItems();
+    }
+
+    public void updateQueues() {
+        var queuesToShow = getQueues().stream()
+                .filter(qm -> qm.getName().equals(ALL_DOWNLOADS_QUEUE) || !staticQueueNames.contains(qm.getName()))
+                .toList();
+        queuesCol.setCellFactory(p -> new ComboBoxTableCell<>(FXCollections.observableArrayList(queuesToShow)));
     }
 }

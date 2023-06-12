@@ -243,9 +243,13 @@ public class FxUtils {
         stage.setTitle("Links");
         BatchList controller = loader.getController();
         getThemeSubject().addObserver(controller, scene);
+        getQueueSubject().addObserver(controller);
         controller.setStage(stage);
         controller.setData(links);
-        stage.setOnCloseRequest(e -> getThemeSubject().removeObserver(controller));
+        stage.setOnCloseRequest(e -> {
+            getThemeSubject().removeObserver(controller);
+            getQueueSubject().removeObserver(controller);
+        });
         stage.show();
         stage.setAlwaysOnTop(true);
         stage.setAlwaysOnTop(false);
