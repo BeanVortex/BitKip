@@ -136,8 +136,11 @@ public class FxUtils {
 
     public static void newOnceStageWindow(String key, String resource, String title) {
         if (openStages.containsKey(key)) {
-            openStages.get(key).toFront();
-            return;
+            var stage = openStages.get(key);
+            stage.toFront();
+            if (stage.isShowing())
+                return;
+            else openStages.remove(key);
         }
         FXMLLoader loader;
         Stage stage = new Stage();
@@ -257,8 +260,11 @@ public class FxUtils {
 
     public static void newQueueSettingStage(QueueModel selectedQueue) {
         if (openStages.containsKey(QUEUE_SETTING_STAGE)) {
-            openStages.get(QUEUE_SETTING_STAGE).toFront();
-            return;
+            var stage = openStages.get(QUEUE_SETTING_STAGE);
+            stage.toFront();
+            if (stage.isShowing())
+                return;
+            else openStages.remove(QUEUE_SETTING_STAGE);
         }
         FXMLLoader loader;
         var stage = new Stage();
@@ -347,7 +353,6 @@ public class FxUtils {
     }
 
 
-
     public static boolean askWarning(String header, String content) {
         var yes = new ButtonType("Yes", ButtonBar.ButtonData.YES);
         var no = new ButtonType("No", ButtonBar.ButtonData.NO);
@@ -369,6 +374,7 @@ public class FxUtils {
         alert.setHeaderText(header);
         return showAlert(primary, secondary, alert);
     }
+
     private static boolean showAlert(ButtonType yes, ButtonType no, Alert alert) {
         var stage = (Stage) alert.getDialogPane().getScene().getWindow();
         ThemeObserver.updateThemeNotObserved(stage.getScene());

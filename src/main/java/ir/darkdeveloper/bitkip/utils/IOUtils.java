@@ -29,6 +29,7 @@ import static ir.darkdeveloper.bitkip.config.AppConfigs.*;
 import static ir.darkdeveloper.bitkip.config.observers.QueueSubject.getQueues;
 import static ir.darkdeveloper.bitkip.repo.DownloadsRepo.COL_PATH;
 import static ir.darkdeveloper.bitkip.utils.Defaults.ALL_DOWNLOADS_QUEUE;
+import static ir.darkdeveloper.bitkip.utils.Defaults.staticQueueNames;
 
 
 public class IOUtils {
@@ -197,6 +198,8 @@ public class IOUtils {
     }
 
     public static void createOrDeleteFolderForQueue(boolean create, QueueModel queue) {
+        if (staticQueueNames.contains(queue.getName()))
+            return;
         if (create) {
             var res = createFolderInSaveLocation("Queues" + File.separator + queue.getName());
             if (res) {
