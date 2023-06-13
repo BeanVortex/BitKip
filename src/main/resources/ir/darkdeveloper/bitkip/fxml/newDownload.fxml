@@ -16,7 +16,9 @@
         <Button styleClass="tab_btn" minWidth="300" text="Single" fx:id="singleButton" onAction="#showSingle"/>
         <Button styleClass="tab_btn" minWidth="300" text="Batch" fx:id="batchButton" onAction="#showBatch"/>
     </HBox>
-    <ScrollPane fx:id="scroll" minHeight="560" prefWidth="600">
-        <VBox fx:id="container" prefWidth="580" alignment="CENTER" styleClass="padding_10"/>
+    <ScrollPane fx:id="scroll" prefWidth="600">
+        <VBox>
+            <VBox fx:id="container" prefWidth="580" alignment="CENTER" styleClass="padding_10"/>
+        </VBox>
     </ScrollPane>
 </VBox>

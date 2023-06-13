@@ -11,10 +11,10 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextField;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
-import javafx.scene.layout.VBox;
 import javafx.scene.paint.Paint;
 import javafx.scene.shape.Line;
 import javafx.stage.DirectoryChooser;
@@ -32,9 +32,8 @@ import static ir.darkdeveloper.bitkip.config.observers.ThemeSubject.setTheme;
 
 public class SettingsController implements FXMLController {
 
-
     @FXML
-    private VBox parent;
+    private ScrollPane parent;
     @FXML
     private CheckBox completeDialogCheck;
     @FXML
@@ -64,7 +63,8 @@ public class SettingsController implements FXMLController {
     public void initAfterStage() {
         updateTheme(stage.getScene());
         parent.prefWidthProperty().bind(stage.widthProperty());
-        parent.widthProperty().addListener((ob, o, n) -> {
+        parent.prefHeightProperty().bind(stage.heightProperty());
+        parent.prefWidthProperty().addListener((ob, o, n) -> {
             var endX = n.doubleValue() - 20;
             line1.setEndX(endX);
             line2.setEndX(endX);
