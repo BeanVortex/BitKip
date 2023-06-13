@@ -65,7 +65,7 @@ public class SettingsController implements FXMLController {
         parent.prefWidthProperty().bind(stage.widthProperty());
         parent.prefHeightProperty().bind(stage.heightProperty());
         parent.prefWidthProperty().addListener((ob, o, n) -> {
-            var endX = n.doubleValue() - 40;
+            var endX = parent.getViewportBounds().getWidth() - 20;
             line1.setEndX(endX);
             line2.setEndX(endX);
             line3.setEndX(endX);
