@@ -9,6 +9,7 @@
 <ScrollPane xmlns="http://javafx.com/javafx"
             xmlns:fx="http://javafx.com/fxml"
             fx:id="parent"
+            styleClass="padding_10"
             fx:controller="ir.darkdeveloper.bitkip.controllers.SettingsController"
             prefHeight="600.0" prefWidth="500.0" minHeight="600" minWidth="500">
 
@@ -19,7 +20,7 @@
         <URL value="@../css/light_mode.css"/>
     </stylesheets>
 
-        <VBox spacing="10" alignment="TOP_CENTER" styleClass="padding_10" >
+        <VBox spacing="10" alignment="TOP_CENTER">
             <VBox alignment="BASELINE_LEFT">
                 <Label styleClass="settingTile" text="Save Location"/>
                 <HBox alignment="CENTER_LEFT">
