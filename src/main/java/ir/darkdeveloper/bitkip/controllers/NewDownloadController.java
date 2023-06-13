@@ -76,7 +76,7 @@ public class NewDownloadController implements FXMLController {
             container.setPrefWidth(n.doubleValue() - diff);
         });
 
-        stage.heightProperty().addListener((ob, o, n) -> scroll.setPrefHeight(n.doubleValue() - singleButton.getHeight()));
+        scroll.prefHeightProperty().bind(stage.heightProperty());
 
         var logoPath = getResource("icons/logo.png");
         if (logoPath != null) {
