@@ -48,7 +48,7 @@ public class BitKip extends Application {
         IOUtils.createFoldersForQueue();
         hostServices = getHostServices();
         FxUtils.startMainStage(stage);
-        ScheduleTask.startSchedules();
+        ScheduleTask.scheduleQueues();
         MoreUtils.checkUpdates(false);
         IOUtils.moveChunkFilesToTemp(downloadPath);
         initTray(stage);

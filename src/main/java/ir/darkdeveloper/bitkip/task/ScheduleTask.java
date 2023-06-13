@@ -22,7 +22,7 @@ import static ir.darkdeveloper.bitkip.config.observers.QueueSubject.getQueues;
 
 public class ScheduleTask {
 
-    public static void startSchedules() {
+    public static void scheduleQueues() {
         getQueues().forEach(ScheduleTask::schedule);
     }
 
@@ -53,11 +53,12 @@ public class ScheduleTask {
 
     private static void startSchedule(boolean isThereSchedule, QueueModel queue,
                                       MenuItem startItem, MenuItem stopItem) {
+        var schedule = queue.getSchedule();
         Runnable run = () -> {
             log.info("Start scheduler triggered for " + queue.toStringModel());
+            if (isSchedulerNotTriggeredOnTime("Start", schedule)) return;
             QueueUtils.startQueue(queue, startItem, stopItem);
         };
-        var schedule = queue.getSchedule();
         createSchedule(run, queue, false);
         var sm = currentSchedules.get(schedule.getId());
         if (isThereSchedule)
@@ -66,15 +67,34 @@ public class ScheduleTask {
 
     private static void stopSchedule(boolean isThereSchedule, QueueModel queue,
                                      MenuItem startItem, MenuItem stopItem) {
+        var schedule = queue.getSchedule();
         Runnable run = () -> {
             log.info("Stop scheduler triggered for " + queue.toStringModel());
+            if (isSchedulerNotTriggeredOnTime("Stop", schedule)) return;
             QueueUtils.stopQueue(queue, startItem, stopItem);
         };
-        var schedule = queue.getSchedule();
         createSchedule(run, queue, true);
         var sm = currentSchedules.get(schedule.getId());
         if (isThereSchedule && sm.getStopScheduler() != null)
             sm.getStopScheduler().shutdown();
+    }
+
+    private static boolean isSchedulerNotTriggeredOnTime(String mode, ScheduleModel schedule) {
+        var startDate = schedule.getStartDate();
+        var desiredTime = TimeUnit.NANOSECONDS.toMinutes(schedule.getStartTime().toNanoOfDay());
+        if (mode.equals("Stop"))
+            desiredTime = schedule.getStopTime().toSecondOfDay();
+        var nowTime = LocalTime.now().toSecondOfDay();
+        var isDesiredTimeNotOK = desiredTime != nowTime;
+        var isOnceDownloadNotOK = schedule.isOnceDownload() && (!LocalDate.now().equals(startDate) || isDesiredTimeNotOK);
+        var isDayOfWeekNotOk = !schedule.isOnceDownload() && (!schedule.getDays().contains(LocalDate.now().getDayOfWeek())
+                || isDesiredTimeNotOK);
+        if (isOnceDownloadNotOK || isDayOfWeekNotOk) {
+            log.info(mode + " scheduler triggered on a wrong date or time. Rescheduling all schedules... ");
+            scheduleQueues();
+            return true;
+        }
+        return false;
     }
 
     private static void createSchedule(Runnable run, QueueModel queue, boolean isStop) {
@@ -150,11 +170,6 @@ public class ScheduleTask {
     }
 
     private static boolean validateScheduleModel(ScheduleModel schedule, boolean isThereSchedule) {
-        if (isThereSchedule) {
-            var areAllScheduleFieldSame = currentSchedules.values().stream().anyMatch(s -> s.equals(schedule));
-            if (areAllScheduleFieldSame)
-                return true;
-        }
 
         var sm = currentSchedules.get(schedule.getId());
         if (!schedule.isEnabled()) {
