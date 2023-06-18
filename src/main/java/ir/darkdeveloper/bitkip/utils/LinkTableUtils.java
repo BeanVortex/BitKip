@@ -88,7 +88,7 @@ public class LinkTableUtils {
                     var path = folder.getAbsolutePath();
                     if (!path.endsWith(File.separator))
                         path += File.separator;
-                    lm.setPath(path + lm.getName());
+                    lm.setPath(path);
                 }
                 lm.getQueues().add(newQueue);
             }
