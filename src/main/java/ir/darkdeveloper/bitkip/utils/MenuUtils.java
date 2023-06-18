@@ -291,31 +291,33 @@ public class MenuUtils {
     }
 
     public static void initAddToQueueMenu(Menu addToQueueMenu, LinkedHashMap<MenuItem, QueueModel> addToQueueItems) {
-        addToQueueMenu.getItems().forEach(menuItem ->
-                menuItem.setOnAction(e -> {
-                    var qm = addToQueueItems.get(menuItem);
-                    var notObserved = new ArrayList<>(mainTableUtils.getSelected());
-                    var moveFiles = FxUtils.askToMoveFilesForQueues(notObserved, qm);
-                    for (int i = 0; i < notObserved.size(); i++) {
-                        var dm = notObserved.get(i);
-                        if (dm.getQueues().contains(qm))
-                            return;
-                        if (staticQueueNames.stream().noneMatch(s -> dm.getQueues().get(0).getName().equals(s)))
-                            mainTableUtils.remove(dm);
-                        if (startedQueues.contains(qm))
-                            startedQueues.get(startedQueues.indexOf(qm)).getDownloads().add(dm);
-                        if (moveFiles) {
-                            var newFilePath = FileType.determineFileType(dm.getName()).getPath() + dm.getName();
-                            if (qm.hasFolder())
-                                newFilePath = queuesPath + qm.getName() + File.separator + dm.getName();
-                            IOUtils.moveDownloadFilesFiles(dm, newFilePath);
-                        }
-                        var addToQueueDate = LocalDateTime.now();
-                        if (i != 0)
-                            addToQueueDate = notObserved.get(i - 1).getAddToQueueDate().plusSeconds(1);
-                        DownloadsRepo.updateDownloadQueue(dm.getId(), qm.getId(), addToQueueDate.toString());
-                    }
-                }));
+        addToQueueMenu.getItems().forEach(menuItem -> menuItem.setOnAction(e -> {
+            var qm = addToQueueItems.get(menuItem);
+            var notObserved = new ArrayList<>(mainTableUtils.getSelected());
+            var moveFiles = FxUtils.askToMoveFilesForQueues(notObserved, qm);
+            for (int i = 0; i < notObserved.size(); i++) {
+                var dm = notObserved.get(i);
+                if (dm.getQueues().contains(qm))
+                    return;
+                if (staticQueueNames.stream().noneMatch(s -> dm.getQueues().get(0).getName().equals(s)))
+                    mainTableUtils.remove(dm);
+                if (startedQueues.contains(qm))
+                    startedQueues.get(startedQueues.indexOf(qm)).getDownloads().add(dm);
+                if (moveFiles) {
+                    var newFilePath = FileType.determineFileType(dm.getName()).getPath() + dm.getName();
+                    if (qm.hasFolder())
+                        newFilePath = queuesPath + qm.getName() + File.separator + dm.getName();
+                    IOUtils.moveDownloadFilesFiles(dm, newFilePath);
+                    dm.setFilePath(newFilePath);
+                    mainTableUtils.refreshTable();
+                }
+                var addToQueueDate = LocalDateTime.now();
+                if (i != 0)
+                    addToQueueDate = notObserved.get(i - 1).getAddToQueueDate().plusSeconds(1);
+                DownloadsRepo.updateDownloadQueue(dm.getId(), qm.getId(), addToQueueDate.toString());
+            }
+        })
+        );
     }
 
 
