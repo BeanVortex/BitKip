@@ -44,6 +44,7 @@ public class QueueUtils {
             stopItem.setDisable(false);
             if (qm.isDownloadFromTop())
                 Collections.reverse(downloadsByQueue);
+            downloadsByQueue = new ArrayList<>(downloadsByQueue.stream().map(mainTableUtils::getObservedDownload).toList());
             qm.setDownloads(new CopyOnWriteArrayList<>(downloadsByQueue));
             startedQueues.add(qm);
             start(qm, startItem, stopItem);
@@ -61,10 +62,13 @@ public class QueueUtils {
             var simulDownloads = new AtomicInteger(0);
             var sDownloads = qm.getSimultaneouslyDownload();
             for (int i = 0; i < qm.getDownloads().size(); i++) {
-                var pauseCount = qm.getDownloads().stream().filter(dm -> dm.getDownloadStatus() == DownloadStatus.Paused).count();
+                var pauseCount = qm.getDownloads().stream()
+                        .filter(dm -> dm.getDownloadStatus() == DownloadStatus.Paused)
+                        .count();
+                if (i - 1 != -1 && qm.getDownloads().get(i - 1).getDownloadStatus() == DownloadStatus.Paused)
+                    i--;
                 var dm = qm.getDownloads().get(i);
                 if (dm.getDownloadStatus() == DownloadStatus.Paused) {
-                    dm = mainTableUtils.getObservedDownload(dm);
                     dm.setOpenAfterComplete(false);
                     dm.setShowCompleteDialog(false);
                     if (!dm.getQueues().contains(qm))

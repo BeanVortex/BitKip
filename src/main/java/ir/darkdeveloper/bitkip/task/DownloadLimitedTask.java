@@ -104,48 +104,48 @@ public class DownloadLimitedTask extends DownloadTask {
 
 
     private void performDownload() throws IOException, InterruptedException {
-        if (continueOnLostConnectionLost || retries != downloadRetryCount) {
-            try {
-                var url = new URL(downloadModel.getUrl());
-                var con = (HttpURLConnection) url.openConnection();
-                con.setReadTimeout(3000);
-                con.setConnectTimeout(3000);
-                if (!downloadModel.isResumable())
-                    con.setRequestProperty("User-Agent", downloadModel.getAgent());
-                configureResume(con, file, downloadModel.getSize());
-                var in = con.getInputStream();
-                var fileSize = downloadModel.getSize();
 
-                var out = new FileOutputStream(file, file.exists());
-                fileChannel = out.getChannel();
+        try {
+            var url = new URL(downloadModel.getUrl());
+            var con = (HttpURLConnection) url.openConnection();
+            con.setReadTimeout(3000);
+            con.setConnectTimeout(3000);
+            if (!downloadModel.isResumable())
+                con.setRequestProperty("User-Agent", downloadModel.getAgent());
+            configureResume(con, file, downloadModel.getSize());
+            var in = con.getInputStream();
+            var fileSize = downloadModel.getSize();
 
-                var existingFileSize = 0L;
-                if (file.exists())
-                    existingFileSize = IOUtils.getFileSize(file);
+            var out = new FileOutputStream(file, file.exists());
+            fileChannel = out.getChannel();
 
-                if (isSpeedLimited)
-                    downloadSpeedLimited(fileChannel, in, file, limit, fileSize, existingFileSize);
-                else {
-                    calculateSpeedAndProgress(file, fileSize);
-                    downloadSizeLimited(fileChannel, in, limit, existingFileSize);
-                }
-                out.close();
-            } catch (SocketTimeoutException | UnknownHostException | SocketException s) {
-                if (!paused) {
-                    retries++;
+            var existingFileSize = 0L;
+            if (file.exists())
+                existingFileSize = IOUtils.getFileSize(file);
+
+            if (isSpeedLimited)
+                downloadSpeedLimited(fileChannel, in, file, limit, fileSize, existingFileSize);
+            else {
+                calculateSpeedAndProgress(file, fileSize);
+                downloadSizeLimited(fileChannel, in, limit, existingFileSize);
+            }
+            out.close();
+        } catch (SocketTimeoutException | UnknownHostException | SocketException s) {
+            retries++;
+            if (!paused && (continueOnLostConnectionLost || retries != downloadRetryCount)) {
                     log.warn("Downloading " + downloadModel.getName() + " failed. retry count : " + retries);
                     Thread.sleep(2000);
                     performDownload();
-                }
-            } catch (ClosedChannelException ignore) {
             }
-            var currFileSize = IOUtils.getFileSize(file);
-            if (!paused && currFileSize != downloadModel.getSize()
-                    && (continueOnLostConnectionLost || downloadRateLimitCount < rateLimitCount)) {
-                rateLimitCount++;
-                performDownload();
-            }
+        } catch (ClosedChannelException ignore) {
         }
+        var currFileSize = IOUtils.getFileSize(file);
+        if (!paused && currFileSize != downloadModel.getSize()
+                && (continueOnLostConnectionLost || downloadRateLimitCount < rateLimitCount)) {
+            rateLimitCount++;
+            performDownload();
+        }
+
         if (blocking && paused) {
             succeeded();
             mainTableUtils.updateDownloadProgress(downloadModel.getProgress(), downloadModel);

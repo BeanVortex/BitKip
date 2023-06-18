@@ -155,42 +155,41 @@ public class DownloadInChunksTask extends DownloadTask {
     private void performDownload(URL url, long fromContinue, long from, long to, File partFile,
                                  long existingFileSize, int rateLimitCount, int retries)
             throws InterruptedException, IOException {
-        if (continueOnLostConnectionLost || retries != downloadRetryCount) {
-            try {
-                var con = (HttpURLConnection) url.openConnection();
-                con.setReadTimeout(3000);
-                con.setConnectTimeout(3000);
-                con.addRequestProperty("Range", "bytes=" + fromContinue + "-" + to);
-                if (!downloadModel.isResumable())
-                    con.setRequestProperty("User-Agent", downloadModel.getAgent());
-                var out = new FileOutputStream(partFile, partFile.exists());
-                var fileChannel = out.getChannel();
-                fileChannels.add(fileChannel);
-                var byteChannel = Channels.newChannel(con.getInputStream());
-                fileChannel.transferFrom(byteChannel, existingFileSize, to - fromContinue + 1);
-                fileChannels.remove(fileChannel);
-                fileChannel.close();
-                con.disconnect();
-            } catch (SocketTimeoutException | UnknownHostException | SocketException s) {
-                if (!paused) {
-                    retries++;
-                    log.warn("Downloading part " + partFile.getName() + " failed. retry count : " + retries);
-                    Thread.sleep(2000);
-                    var currFileSize = IOUtils.getFileSize(partFile);
-                    performDownload(url, from + currFileSize, from, to, partFile, currFileSize, rateLimitCount, retries);
-                }
-            } catch (ClosedChannelException ignore) {
-            }
-
-            // when connection has been closed by the server
-            var currFileSize = IOUtils.getFileSize(partFile);
-            if (!paused && currFileSize != (to - from + 1)
-                    && (continueOnLostConnectionLost || downloadRateLimitCount < rateLimitCount)) {
-                rateLimitCount++;
-                log.warn("Downloading part " + partFile.getName() + " limited. retry rate limit count : " + rateLimitCount);
+        try {
+            var con = (HttpURLConnection) url.openConnection();
+            con.setReadTimeout(3000);
+            con.setConnectTimeout(3000);
+            con.addRequestProperty("Range", "bytes=" + fromContinue + "-" + to);
+            if (!downloadModel.isResumable())
+                con.setRequestProperty("User-Agent", downloadModel.getAgent());
+            var out = new FileOutputStream(partFile, partFile.exists());
+            var fileChannel = out.getChannel();
+            fileChannels.add(fileChannel);
+            var byteChannel = Channels.newChannel(con.getInputStream());
+            fileChannel.transferFrom(byteChannel, existingFileSize, to - fromContinue + 1);
+            fileChannels.remove(fileChannel);
+            fileChannel.close();
+            con.disconnect();
+        } catch (SocketTimeoutException | UnknownHostException | SocketException s) {
+            retries++;
+            if (!paused && (continueOnLostConnectionLost || retries != downloadRetryCount)) {
+                log.warn("Downloading part " + partFile.getName() + " failed. retry count : " + retries);
+                Thread.sleep(2000);
+                var currFileSize = IOUtils.getFileSize(partFile);
                 performDownload(url, from + currFileSize, from, to, partFile, currFileSize, rateLimitCount, retries);
             }
+        } catch (ClosedChannelException ignore) {
         }
+
+        // when connection has been closed by the server
+        var currFileSize = IOUtils.getFileSize(partFile);
+        if (!paused && currFileSize != (to - from + 1)
+                && (continueOnLostConnectionLost || downloadRateLimitCount < rateLimitCount)) {
+            rateLimitCount++;
+            log.warn("Downloading part " + partFile.getName() + " limited. retry rate limit count : " + rateLimitCount);
+            performDownload(url, from + currFileSize, from, to, partFile, currFileSize, rateLimitCount, retries);
+        }
+
     }
 
 
