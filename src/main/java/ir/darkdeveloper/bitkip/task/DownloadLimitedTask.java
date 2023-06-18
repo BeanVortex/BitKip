@@ -16,6 +16,7 @@ import java.nio.ByteBuffer;
 import java.nio.channels.Channels;
 import java.nio.channels.ClosedChannelException;
 import java.nio.channels.FileChannel;
+import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.util.concurrent.ExecutorService;
 
@@ -48,10 +49,13 @@ public class DownloadLimitedTask extends DownloadTask {
 
     @Override
     protected Long call() throws IOException {
-        file = new File(downloadModel.getFilePath());
-        if (file.exists() && isCompleted(downloadModel, file, mainTableUtils))
-            return 0L;
         try {
+            file = new File(downloadModel.getFilePath());
+            if (file.exists() && isCompleted(downloadModel, file, mainTableUtils))
+                return 0L;
+            var parentFolder = Path.of(file.getPath()).getParent().toFile();
+            if (!parentFolder.exists())
+                parentFolder.mkdir();
             if (downloadModel.getSize() == -1)
                 performDownloadInStream();
             else
@@ -288,5 +292,17 @@ public class DownloadLimitedTask extends DownloadTask {
     @Override
     public void setBlocking(boolean blocking) {
         this.blocking = blocking;
+    }
+
+    @Override
+    public void runBlocking() {
+        try {
+            call();
+        } catch (Exception e) {
+            log.error(e.getMessage());
+            failed();
+            return;
+        }
+        succeeded();
     }
 }

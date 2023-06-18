@@ -74,10 +74,9 @@ public class QueueUtils {
                         speedLimit = qm.getSpeed();
                     if (sDownloads > 1 && pauseCount >= sDownloads)
                         i = performSimultaneousDownloadWaitForPrev(qm, simulDownloads, i, dm, speedLimit, sDownloads);
-                    else if (sDownloads > 1 && pauseCount < sDownloads) {
+                    else if (sDownloads > 1 && pauseCount < sDownloads)
                         performSimultaneousDownloadDontWaitForPrev(pauseCount, simulDownloads, dm, speedLimit);
-                    } else DownloadOpUtils.startDownload(dm, speedLimit,
-                            null, true, true, null);
+                    else DownloadOpUtils.startDownload(dm, speedLimit, null, true, true, null);
                 }
                 if (!startedQueues.contains(qm))
                     break;

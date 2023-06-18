@@ -99,9 +99,7 @@ public class IOUtils {
                 if (nextFile.exists())
                     nextFile.delete();
             }
-            var pathToMove = filePaths.get(0).getParent() + File.separator + dm.getName();
-            if (filePaths.get(0).toString().contains("BitKip"))
-                pathToMove = filePaths.get(0).getParent().getParent() + File.separator + dm.getName();
+            var pathToMove = filePaths.get(0).getParent().getParent() + File.separator + dm.getName();
             return firstFile.renameTo(new File(pathToMove));
         }
         return false;

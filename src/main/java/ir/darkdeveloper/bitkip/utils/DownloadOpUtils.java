@@ -20,6 +20,7 @@ import java.net.ConnectException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -35,7 +36,7 @@ public class DownloadOpUtils {
      *                 mostly using for queue downloading
      */
     private static void triggerDownload(DownloadModel dm, String speed, String bytes, boolean resume, boolean blocking,
-                                        ExecutorService executor) {
+                                        ExecutorService executor) throws ExecutionException, InterruptedException {
 
         try {
             Validations.validateDownloadModel(dm);
@@ -95,9 +96,9 @@ public class DownloadOpUtils {
         if (executor == null)
             executor = Executors.newCachedThreadPool();
         downloadTask.setExecutor(executor);
-        log.info(("Starting %s download in " + (blocking ? "blocking" : "non-blocking")).formatted(dm.getName()));
+        log.info(("Starting download in " + (blocking ? "blocking" : "non-blocking") + ": %s").formatted(dm.getName()));
         if (blocking)
-            downloadTask.run();
+            downloadTask.runBlocking();
         else
             executor.submit(downloadTask);
 
@@ -111,7 +112,11 @@ public class DownloadOpUtils {
             dm.setDownloadStatus(DownloadStatus.Trying);
             DownloadsRepo.updateDownloadLastTryDate(dm);
             mainTableUtils.refreshTable();
-            triggerDownload(dm, speedLimit, byteLimit, resume, blocking, executor);
+            try {
+                triggerDownload(dm, speedLimit, byteLimit, resume, blocking, executor);
+            } catch (ExecutionException | InterruptedException e) {
+               e.printStackTrace();
+            }
             openDownloadings.stream().filter(dc -> dc.getDownloadModel().equals(dm))
                     .forEach(DownloadingController::initDownloadListeners);
         }
@@ -164,7 +169,11 @@ public class DownloadOpUtils {
         String[] values = {"0", "0", "NULL", lastTryDate.toString()};
         DatabaseHelper.updateRow(cols, values, DatabaseHelper.DOWNLOADS_TABLE_NAME, dmId);
         mainTableUtils.refreshTable();
-        triggerDownload(dm, null, null, true, false, null);
+        try {
+            triggerDownload(dm, null, null, true, false, null);
+        } catch (ExecutionException | InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 
     public static void pauseDownloads(List<DownloadModel> dms) {

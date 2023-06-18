@@ -53,4 +53,5 @@ public abstract class DownloadTask extends Task<Long> {
 
     public abstract void setBlocking(boolean blocking);
 
+    public abstract void runBlocking();
 }

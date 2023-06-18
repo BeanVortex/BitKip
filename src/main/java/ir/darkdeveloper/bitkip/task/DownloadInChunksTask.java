@@ -50,13 +50,16 @@ public class DownloadInChunksTask extends DownloadTask {
 
 
     @Override
-    protected Long call() throws Exception {
-        var url = new URL(downloadModel.getUrl());
-        var file = new File(downloadModel.getFilePath());
-        var fileSize = downloadModel.getSize();
-        if (file.exists() && isCompleted(downloadModel, file, mainTableUtils))
-            return 0L;
+    protected Long call() {
         try {
+            var url = new URL(downloadModel.getUrl());
+            var file = new File(downloadModel.getFilePath());
+            var fileSize = downloadModel.getSize();
+            if (file.exists() && isCompleted(downloadModel, file, mainTableUtils))
+                return 0L;
+            var parentFolder = Path.of(file.getPath()).getParent().toFile();
+            if (!parentFolder.exists())
+                parentFolder.mkdir();
             downloadInChunks(url, fileSize);
         } catch (Exception e) {
             log.error(e.getMessage());
@@ -84,9 +87,7 @@ public class DownloadInChunksTask extends DownloadTask {
         var to = bytesForEach;
         var from = 0L;
         var fromContinue = 0L;
-        var tempFolderPath = Paths.get(downloadModel.getFilePath()).getParent().toString() + File.separator;
-        if (tempFolderPath.contains("BitKip"))
-            tempFolderPath = Paths.get(downloadModel.getFilePath()).getParent() + File.separator + ".temp" + File.separator;
+        var tempFolderPath = Paths.get(downloadModel.getFilePath()).getParent() + File.separator + ".temp" + File.separator;
         if (!Files.exists(Path.of(tempFolderPath)))
             new File(tempFolderPath).mkdir();
         var lastPartSize = fileSize - ((chunks - 1) * bytesForEach);
@@ -185,6 +186,7 @@ public class DownloadInChunksTask extends DownloadTask {
             var currFileSize = IOUtils.getFileSize(partFile);
             if (!paused && currFileSize != (to - from + 1) && downloadRateLimitCount < rateLimitCount) {
                 rateLimitCount++;
+                log.warn("Downloading part " + partFile.getName() + " limited. retry rate limit count : " + rateLimitCount);
                 performDownload(url, from + currFileSize, from, to, partFile, currFileSize, rateLimitCount, retries);
             }
         }
@@ -334,5 +336,17 @@ public class DownloadInChunksTask extends DownloadTask {
     @Override
     public void setBlocking(boolean blocking) {
         this.blocking = blocking;
+    }
+
+    @Override
+    public void runBlocking() {
+        try {
+            call();
+        } catch (Exception e) {
+            log.error(e.getMessage());
+            failed();
+            return;
+        }
+        succeeded();
     }
 }

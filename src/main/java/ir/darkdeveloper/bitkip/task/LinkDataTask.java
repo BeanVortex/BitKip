@@ -10,6 +10,7 @@ import java.util.List;
 public class LinkDataTask extends Task<Flux<LinkModel>> {
 
     private final List<LinkModel> links;
+    private boolean cancel;
 
     public LinkDataTask(List<LinkModel> links) {
         this.links = links;
@@ -18,7 +19,9 @@ public class LinkDataTask extends Task<Flux<LinkModel>> {
     @Override
     protected Flux<LinkModel> call() {
         return Flux.create(fluxSink -> {
-            links.forEach(lm -> {
+            for (var lm : links) {
+                if (cancel)
+                    break;
                 var connection = NewDownloadUtils.connect(lm.getUrl(), 3000, 3000);
                 var fileSize = NewDownloadUtils.getFileSize(connection);
                 var fileName = NewDownloadUtils.extractFileName(lm.getUrl(), connection);
@@ -26,8 +29,12 @@ public class LinkDataTask extends Task<Flux<LinkModel>> {
                 lm.setSize(fileSize);
                 lm.setResumable(NewDownloadUtils.canResume(connection));
                 fluxSink.next(lm);
-            });
+            }
             fluxSink.complete();
         });
+    }
+
+    public void setCancel(boolean cancel) {
+        this.cancel = cancel;
     }
 }

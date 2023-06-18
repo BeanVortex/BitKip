@@ -24,6 +24,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.Executors;
 
 import static ir.darkdeveloper.bitkip.BitKip.getResource;
+import static ir.darkdeveloper.bitkip.config.AppConfigs.log;
 import static ir.darkdeveloper.bitkip.config.AppConfigs.mainTableUtils;
 
 public class BatchList implements QueueObserver {
@@ -61,15 +62,24 @@ public class BatchList implements QueueObserver {
         linkTask.valueProperty().addListener((o, ol, linkFlux) ->
                 executor.submit(() -> {
                     linkFlux.subscribe(
-                            lm -> linkTableUtils.updateLink(lm),
-                            Throwable::printStackTrace,
+                            lm -> {
+                                linkTableUtils.updateLink(lm);
+                                if (!stage.isShowing())
+                                    linkTask.setCancel(true);
+
+                            },
+                            this::errorLog,
                             () -> {
                                 addBtn.setDisable(false);
                                 executor.shutdown();
                             }
                     );
                 }));
-        new Thread(linkTask).start();
+        executor.submit(linkTask);
+    }
+
+    private void errorLog(Throwable err) {
+        log.error(err.getMessage());
     }
 
     @Override
@@ -124,7 +134,7 @@ public class BatchList implements QueueObserver {
             if (i == 0)
                 dm.setAddToQueueDate(LocalDateTime.now());
             else
-                dm.setAddToQueueDate(list.get(i-1).getAddToQueueDate().plusSeconds(1));
+                dm.setAddToQueueDate(list.get(i - 1).getAddToQueueDate().plusSeconds(1));
             dm.setResumable(lm.getResumable());
             dm.setQueues(new CopyOnWriteArrayList<>(lm.getQueues()));
             dm.setDownloadStatus(DownloadStatus.Paused);
