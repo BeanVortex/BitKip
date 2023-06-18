@@ -76,11 +76,16 @@ public class QueueUtils {
                     String speedLimit = null;
                     if (qm.getSpeed() != null)
                         speedLimit = qm.getSpeed();
-                    if (sDownloads > 1 && pauseCount >= sDownloads)
-                        i = performSimultaneousDownloadWaitForPrev(qm, simulDownloads, i, dm, speedLimit, sDownloads);
-                    else if (sDownloads > 1 && pauseCount < sDownloads)
-                        performSimultaneousDownloadDontWaitForPrev(pauseCount, simulDownloads, dm, speedLimit);
-                    else DownloadOpUtils.startDownload(dm, speedLimit, null, true, true, null);
+                    if (sDownloads > 1) {
+                        if (pauseCount >= sDownloads || (pauseCount > 0 && sDownloads == simulDownloads.get()))
+                            i = performSimultaneousDownloadWaitForPrev(qm, simulDownloads, i, dm, speedLimit, sDownloads);
+                        else if (pauseCount < sDownloads)
+                            performSimultaneousDownloadDontWaitForPrev(
+                                    sDownloads - simulDownloads.get(),
+                                    simulDownloads,
+                                    dm, speedLimit);
+                    } else DownloadOpUtils.startDownload(dm, speedLimit, null, true, true, null);
+
                 }
                 if (!startedQueues.contains(qm))
                     break;
@@ -99,7 +104,7 @@ public class QueueUtils {
 
 
     /**
-     * consider 7 files are going to download in parallel. 3 of them will get in if clause and the 4th one will be hold
+     * consider 7 files are going to download in parallel. 3 of them will get inside "if clause" and the 4th one will be hold
      * in else clause until one of those 3 stops or finishes
      */
     private static int performSimultaneousDownloadWaitForPrev(QueueModel qm, AtomicInteger simulDownloads,
@@ -131,9 +136,9 @@ public class QueueUtils {
      *
      * @see QueueUtils#waitToFinishForLessPausedDownloads(QueueModel, MenuItem, MenuItem, ExecutorService)
      */
-    private static void performSimultaneousDownloadDontWaitForPrev(long pauseCount, AtomicInteger simulDownloads,
+    private static void performSimultaneousDownloadDontWaitForPrev(int remainingSimul, AtomicInteger simulDownloads,
                                                                    DownloadModel dm, String speedLimit) {
-        if (simulDownloads.get() < pauseCount) {
+        if (remainingSimul != 0) {
             DownloadOpUtils.startDownload(dm, speedLimit, null, true, false, null);
             simulDownloads.getAndIncrement();
         }
@@ -143,7 +148,7 @@ public class QueueUtils {
     /**
      * waits for non-blocking downloads to finish
      *
-     * @see QueueUtils#performSimultaneousDownloadDontWaitForPrev(long, AtomicInteger, DownloadModel, String)
+     * @see QueueUtils#performSimultaneousDownloadDontWaitForPrev( int, AtomicInteger, DownloadModel, String)
      */
     private static void waitToFinishForLessPausedDownloads(QueueModel qm, MenuItem startItem, MenuItem stopItem,
                                                            ExecutorService executor) {

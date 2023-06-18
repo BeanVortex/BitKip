@@ -21,7 +21,6 @@ import org.kordamp.ikonli.javafx.FontIcon;
 
 import java.io.File;
 import java.net.URL;
-import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.util.ResourceBundle;
 import java.util.concurrent.CompletableFuture;
@@ -249,7 +248,6 @@ public class SingleDownload implements QueueObserver {
     private void onDownload() {
         var prepared = prepareDownload();
         if (prepared) {
-
             DownloadOpUtils.startDownload(dm, speedField.getText(), bytesField.getText(),
                     false, false, null);
             DownloadOpUtils.openDownloadingStage(dm);
@@ -283,7 +281,8 @@ public class SingleDownload implements QueueObserver {
         if (!byURL.isEmpty()) {
             var found = byURL.stream()
                     .filter(dm -> {
-                        var p = Paths.get(dm.getFilePath()).getParent().toString() + File.separator;
+                        var filePath = dm.getFilePath();
+                        var p = filePath.substring(0, filePath.lastIndexOf(File.separator) + 1);
                         var n = dm.getName();
                         return p.equals(path) && n.equals(fileName);
                     })
