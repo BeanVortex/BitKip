@@ -104,7 +104,7 @@ public class DownloadLimitedTask extends DownloadTask {
 
 
     private void performDownload() throws IOException, InterruptedException {
-        if (retries != downloadRetryCount) {
+        if (continueOnLostConnectionLost || retries != downloadRetryCount) {
             try {
                 var url = new URL(downloadModel.getUrl());
                 var con = (HttpURLConnection) url.openConnection();
@@ -140,7 +140,8 @@ public class DownloadLimitedTask extends DownloadTask {
             } catch (ClosedChannelException ignore) {
             }
             var currFileSize = IOUtils.getFileSize(file);
-            if (!paused && currFileSize != downloadModel.getSize() && downloadRateLimitCount < rateLimitCount) {
+            if (!paused && currFileSize != downloadModel.getSize()
+                    && (continueOnLostConnectionLost || downloadRateLimitCount < rateLimitCount)) {
                 rateLimitCount++;
                 performDownload();
             }

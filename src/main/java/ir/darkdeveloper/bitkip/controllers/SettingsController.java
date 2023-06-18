@@ -33,6 +33,8 @@ import static ir.darkdeveloper.bitkip.config.observers.ThemeSubject.setTheme;
 public class SettingsController implements FXMLController {
 
     @FXML
+    private CheckBox continueCheck;
+    @FXML
     private ScrollPane parent;
     @FXML
     private CheckBox completeDialogCheck;
@@ -65,7 +67,7 @@ public class SettingsController implements FXMLController {
         parent.prefWidthProperty().bind(stage.widthProperty());
         parent.prefHeightProperty().bind(stage.heightProperty());
         parent.prefWidthProperty().addListener((ob, o, n) -> {
-            var endX = parent.getViewportBounds().getWidth() - 20;
+            var endX = parent.getViewportBounds().getWidth();
             line1.setEndX(endX);
             line2.setEndX(endX);
             line3.setEndX(endX);
@@ -83,6 +85,9 @@ public class SettingsController implements FXMLController {
         retryField.setText(String.valueOf(downloadRetryCount));
         rateLimitField.setText(String.valueOf(downloadRateLimitCount));
         completeDialogCheck.setSelected(showCompleteDialog);
+        continueCheck.setSelected(continueOnLostConnectionLost);
+        retryField.setDisable(continueOnLostConnectionLost);
+        rateLimitField.setDisable(continueOnLostConnectionLost);
     }
 
 
@@ -177,4 +182,11 @@ public class SettingsController implements FXMLController {
         });
     }
 
+    @FXML
+    private void onContinueCheck() {
+        continueOnLostConnectionLost = continueCheck.isSelected();
+        IOUtils.saveConfigs();
+        retryField.setDisable(continueOnLostConnectionLost);
+        rateLimitField.setDisable(continueOnLostConnectionLost);
+    }
 }

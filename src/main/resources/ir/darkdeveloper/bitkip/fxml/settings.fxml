@@ -11,7 +11,7 @@
             fx:id="parent"
             styleClass="padding_10"
             fx:controller="ir.darkdeveloper.bitkip.controllers.SettingsController"
-            prefHeight="600.0" prefWidth="500.0" minHeight="600" minWidth="500">
+            prefHeight="600.0" prefWidth="550.0" minHeight="600" minWidth="550">
 
     <stylesheets>
         <URL value="@../css/settings.css"/>
@@ -64,6 +64,10 @@
                 <Label styleClass="settingTile" text="Download"/>
                 <CheckBox text="Show complete dialog" fx:id="completeDialogCheck" onAction="#onCompleteDialogCheck"
                           styleClass="settingDescription"/>
+                <CheckBox text="Continue on failure" fx:id="continueCheck" onAction="#onContinueCheck"
+                          styleClass="settingDescription"/>
+                <Label styleClass="settingDescription, opacity_7"
+                       text="If the connection drops or there is a rate limit, continue trying to download the file"/>
                 <HBox alignment="CENTER_LEFT" spacing="5">
                     <Label text="Fail retry count:" styleClass="settingDescription"/>
                     <TextField fx:id="retryField"/>

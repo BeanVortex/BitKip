@@ -33,6 +33,7 @@ public class AppConfigs {
     public static boolean serverEnabled = true;
     public static int serverPort = 9563;
     public static boolean showCompleteDialog = true;
+    public static boolean continueOnLostConnectionLost = true;
     public static int downloadRetryCount = 10;
     public static int downloadRateLimitCount = 20;
     public static String userAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.0.0 Safari/537.36";

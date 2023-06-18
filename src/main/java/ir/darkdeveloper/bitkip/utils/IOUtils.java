@@ -224,6 +224,7 @@ public class IOUtils {
                     .append("server_enabled=").append(String.valueOf(serverEnabled)).append("\n")
                     .append("port=").append(String.valueOf(serverPort)).append("\n")
                     .append("show_complete_dialog=").append(String.valueOf(showCompleteDialog)).append("\n")
+                    .append("continue_on_connection_lost=").append(String.valueOf(continueOnLostConnectionLost)).append("\n")
                     .append("retry_count=").append(String.valueOf(downloadRetryCount)).append("\n")
                     .append("rate_limit_count=").append(String.valueOf(downloadRateLimitCount)).append("\n")
                     .append("user_agent=").append(userAgent);
@@ -250,6 +251,7 @@ public class IOUtils {
                         case "server_enabled" -> serverEnabled = value.equals("true");
                         case "port" -> serverPort = Integer.parseInt(value);
                         case "show_complete_dialog" -> showCompleteDialog = value.equals("true");
+                        case "continue_on_connection_lost" -> continueOnLostConnectionLost = value.equals("true");
                         case "retry_count" -> downloadRetryCount = Integer.parseInt(value);
                         case "rate_limit_count" -> downloadRateLimitCount = Integer.parseInt(value);
                         case "user_agent" -> userAgent = value;

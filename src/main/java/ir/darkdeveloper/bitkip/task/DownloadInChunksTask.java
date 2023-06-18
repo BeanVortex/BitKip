@@ -155,7 +155,7 @@ public class DownloadInChunksTask extends DownloadTask {
     private void performDownload(URL url, long fromContinue, long from, long to, File partFile,
                                  long existingFileSize, int rateLimitCount, int retries)
             throws InterruptedException, IOException {
-        if (retries != downloadRetryCount) {
+        if (continueOnLostConnectionLost || retries != downloadRetryCount) {
             try {
                 var con = (HttpURLConnection) url.openConnection();
                 con.setReadTimeout(3000);
@@ -184,7 +184,8 @@ public class DownloadInChunksTask extends DownloadTask {
 
             // when connection has been closed by the server
             var currFileSize = IOUtils.getFileSize(partFile);
-            if (!paused && currFileSize != (to - from + 1) && downloadRateLimitCount < rateLimitCount) {
+            if (!paused && currFileSize != (to - from + 1)
+                    && (continueOnLostConnectionLost || downloadRateLimitCount < rateLimitCount)) {
                 rateLimitCount++;
                 log.warn("Downloading part " + partFile.getName() + " limited. retry rate limit count : " + rateLimitCount);
                 performDownload(url, from + currFileSize, from, to, partFile, currFileSize, rateLimitCount, retries);
