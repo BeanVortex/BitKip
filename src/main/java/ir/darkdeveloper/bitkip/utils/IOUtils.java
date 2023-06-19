@@ -195,10 +195,10 @@ public class IOUtils {
         }
     }
 
-    public static void createOrDeleteFolderForQueue(boolean create, QueueModel queue) {
+    public static void createOrDeleteFolderForQueue(QueueModel queue) {
         if (staticQueueNames.contains(queue.getName()))
             return;
-        if (create) {
+        if (queue.hasFolder()) {
             var res = createFolderInSaveLocation("Queues" + File.separator + queue.getName());
             if (res) {
                 var downloadsByQueueName = DownloadsRepo.getDownloadsByQueueName(queue.getName());

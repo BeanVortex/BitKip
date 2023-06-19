@@ -412,6 +412,10 @@ public class QueueSetting implements FXMLController, QueueObserver {
 
             queue.setSpeed(speedField.getText());
             queue.setSimultaneouslyDownload(simulDownloadSpinner.getValue());
+            if (queue.hasFolder() != hasFolderCheck.isSelected() && startedQueues.contains(queue)){
+                onReset();
+                throw new IllegalArgumentException("This Queue is currently running, stop it and try again");
+            }
             queue.setHasFolder(hasFolderCheck.isSelected());
             queue.setDownloadFromTop(downloadOrderCheck.isSelected());
             queue.setSchedule(schedule);
@@ -419,7 +423,7 @@ public class QueueSetting implements FXMLController, QueueObserver {
             String[] qValues = {queue.getSpeed(), String.valueOf(queue.getSimultaneouslyDownload()),
                     String.valueOf(queue.hasFolder() ? 1 : 0), String.valueOf(queue.isDownloadFromTop() ? 1 : 0)};
             DatabaseHelper.updateRow(qCols, qValues, QUEUES_TABLE_NAME, queue.getId());
-            IOUtils.createOrDeleteFolderForQueue(queue.hasFolder(), queue);
+            IOUtils.createOrDeleteFolderForQueue(queue);
             ScheduleRepo.updateSchedule(schedule);
             var updatedQueues = QueuesRepo.getAllQueues(false, true);
             QueueSubject.addAllQueues(updatedQueues);
