@@ -30,11 +30,13 @@ public class LinkTableUtils {
     private static final KeyCodeCombination DEL = new KeyCodeCombination(KeyCode.DELETE);
 
     private final Stage stage;
+    private final ComboBox<QueueModel> comboQueue;
     private TableColumn<LinkModel, QueueModel> queuesCol;
 
-    public LinkTableUtils(TableView<LinkModel> table, List<LinkModel> links, Stage stage) {
+    public LinkTableUtils(TableView<LinkModel> table, List<LinkModel> links, ComboBox<QueueModel> comboQueue, Stage stage) {
         this.table = table;
         this.stage = stage;
+        this.comboQueue = comboQueue;
         data.addAll(links);
     }
 
@@ -73,26 +75,7 @@ public class LinkTableUtils {
                 .filter(qm -> qm.getName().equals(ALL_DOWNLOADS_QUEUE) || !staticQueueNames.contains(qm.getName()))
                 .toList();
         queuesCol.setCellFactory(p -> new ComboBoxTableCell<>(FXCollections.observableArrayList(queuesToShow)));
-        queuesCol.setOnEditCommit(e -> {
-            var lm = e.getRowValue();
-            var queues = lm.getQueues()
-                    .stream().filter(qm -> staticQueueNames.contains(qm.getName()))
-                    .toList();
-            lm.getQueues().clear();
-            lm.getQueues().addAll(queues);
-            var newQueue = e.getNewValue();
-            lm.setPath(lm.getSelectedPath());
-            if (!newQueue.getName().equals(ALL_DOWNLOADS_QUEUE)) {
-                if (newQueue.hasFolder()) {
-                    var folder = new File(queuesPath + newQueue.getName());
-                    var path = folder.getAbsolutePath();
-                    if (!path.endsWith(File.separator))
-                        path += File.separator;
-                    lm.setPath(path);
-                }
-                lm.getQueues().add(newQueue);
-            }
-        });
+        queuesCol.setOnEditCommit(e -> changeLinkQueues(e.getRowValue(), e.getNewValue(), true));
 
         table.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
 
@@ -169,5 +152,32 @@ public class LinkTableUtils {
                 .filter(qm -> qm.getName().equals(ALL_DOWNLOADS_QUEUE) || !staticQueueNames.contains(qm.getName()))
                 .toList();
         queuesCol.setCellFactory(p -> new ComboBoxTableCell<>(FXCollections.observableArrayList(queuesToShow)));
+    }
+
+    public void changeQueues(QueueModel queue) {
+        table.getItems().forEach(lm -> changeLinkQueues(lm, queue, false));
+        refreshTable();
+    }
+
+    public void changeLinkQueues(LinkModel lm, QueueModel newQueue, boolean fromTable) {
+        var queues = lm.getQueues()
+                .stream().filter(qm -> staticQueueNames.contains(qm.getName()))
+                .toList();
+        lm.getQueues().clear();
+        lm.getQueues().addAll(queues);
+        lm.setPath(lm.getSelectedPath());
+        if (fromTable)
+            comboQueue.getSelectionModel().select(comboQueue.getItems().size() - 1);
+        if (!newQueue.getName().equals(ALL_DOWNLOADS_QUEUE)) {
+            if (newQueue.hasFolder()) {
+                var folder = new File(queuesPath + newQueue.getName());
+                var path = folder.getAbsolutePath();
+                if (!path.endsWith(File.separator))
+                    path += File.separator;
+                lm.setPath(path);
+            }
+            lm.getQueues().add(newQueue);
+        }
+
     }
 }

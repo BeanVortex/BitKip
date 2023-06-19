@@ -7,6 +7,7 @@
 
 <VBox minHeight="400" prefHeight="400" minWidth="800" prefWidth="800"
       xmlns="http://javafx.com/javafx/16"
+      spacing="10"
       xmlns:fx="http://javafx.com/fxml/1" fx:controller="ir.darkdeveloper.bitkip.controllers.BatchList">
 
     <stylesheets>
@@ -18,6 +19,11 @@
     <HBox>
         <TableView  prefWidth="Infinity" fx:id="linkTable"/>
         <HBox maxWidth="2" minWidth="2" styleClass="csm_toolbar"/>
+    </HBox>
+
+    <HBox spacing="5" alignment="CENTER_LEFT">
+        <Label text="Change queue for all"/>
+        <ComboBox fx:id="comboQueue"/>
     </HBox>
 
     <HBox alignment="BOTTOM_CENTER" style="-fx-padding: 15 0 15 0">

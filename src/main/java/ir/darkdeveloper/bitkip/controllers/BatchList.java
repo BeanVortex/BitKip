@@ -4,11 +4,14 @@ import ir.darkdeveloper.bitkip.config.observers.QueueObserver;
 import ir.darkdeveloper.bitkip.models.DownloadModel;
 import ir.darkdeveloper.bitkip.models.DownloadStatus;
 import ir.darkdeveloper.bitkip.models.LinkModel;
+import ir.darkdeveloper.bitkip.models.QueueModel;
 import ir.darkdeveloper.bitkip.repo.DownloadsRepo;
 import ir.darkdeveloper.bitkip.task.LinkDataTask;
 import ir.darkdeveloper.bitkip.utils.LinkTableUtils;
+import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
+import javafx.scene.control.ComboBox;
 import javafx.scene.control.TableView;
 import javafx.scene.image.Image;
 import javafx.stage.Stage;
@@ -26,8 +29,13 @@ import java.util.concurrent.Executors;
 import static ir.darkdeveloper.bitkip.BitKip.getResource;
 import static ir.darkdeveloper.bitkip.config.AppConfigs.log;
 import static ir.darkdeveloper.bitkip.config.AppConfigs.mainTableUtils;
+import static ir.darkdeveloper.bitkip.config.observers.QueueSubject.getQueues;
+import static ir.darkdeveloper.bitkip.utils.Defaults.ALL_DOWNLOADS_QUEUE;
+import static ir.darkdeveloper.bitkip.utils.Defaults.staticQueueNames;
 
 public class BatchList implements QueueObserver {
+    @FXML
+    public ComboBox<QueueModel> comboQueue;
     @FXML
     private Button addBtn;
     @FXML
@@ -41,6 +49,7 @@ public class BatchList implements QueueObserver {
     public void initialize(URL location, ResourceBundle resources) {
         addBtn.requestFocus();
         addBtn.setDisable(true);
+        comboQueue.setDisable(true);
     }
 
 
@@ -51,10 +60,15 @@ public class BatchList implements QueueObserver {
     }
 
     public void setData(List<LinkModel> links) {
-        linkTableUtils = new LinkTableUtils(linkTable, links, stage);
+        linkTableUtils = new LinkTableUtils(linkTable, links, comboQueue, stage);
         linkTableUtils.tableInits();
         fetchLinksData(links);
+        var queues = links.get(0).getQueues();
+        // get selected queue if not selected any queue in batch download, get All downloads queue
+        var selectedQueue = queues.size() == 3 ? queues.get(2) : queues.get(0);
+        initQueueCombo(selectedQueue);
     }
+
 
     private void fetchLinksData(List<LinkModel> links) {
         var executor = Executors.newCachedThreadPool();
@@ -71,11 +85,28 @@ public class BatchList implements QueueObserver {
                             this::errorLog,
                             () -> {
                                 addBtn.setDisable(false);
+                                comboQueue.setDisable(false);
                                 executor.shutdown();
                             }
                     );
                 }));
         executor.submit(linkTask);
+    }
+
+    private void initQueueCombo(QueueModel selectedQueue) {
+        var queuesToShow = new ArrayList<>(getQueues().stream()
+                .filter(qm -> qm.getName().equals(ALL_DOWNLOADS_QUEUE) || !staticQueueNames.contains(qm.getName()))
+                .toList());
+        var custom = new QueueModel("CUSTOM", false);
+        queuesToShow.add(custom);
+        comboQueue.setItems(FXCollections.observableArrayList(queuesToShow));
+        comboQueue.getSelectionModel().select(selectedQueue);
+        comboQueue.setOnAction(e -> {
+            var selectedItem = comboQueue.getSelectionModel().getSelectedItem();
+            if (selectedItem.getName().equals(custom.getName()))
+                return;
+            linkTableUtils.changeQueues(selectedItem);
+        });
     }
 
     private void errorLog(Throwable err) {
