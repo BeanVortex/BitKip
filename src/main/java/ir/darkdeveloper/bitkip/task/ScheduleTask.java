@@ -81,11 +81,12 @@ public class ScheduleTask {
 
     private static boolean isSchedulerNotTriggeredOnTime(String mode, ScheduleModel schedule) {
         var startDate = schedule.getStartDate();
-        var desiredTime = TimeUnit.NANOSECONDS.toMinutes(schedule.getStartTime().toNanoOfDay());
+        var desiredTime = TimeUnit.SECONDS.toMinutes(schedule.getStartTime().toSecondOfDay());
         if (mode.equals("Stop"))
             desiredTime = schedule.getStopTime().toSecondOfDay();
         var nowTime = LocalTime.now().toSecondOfDay();
-        var isDesiredTimeNotOK = desiredTime != nowTime;
+        // maximum 10 seconds, desiredTime or nowTime can be different from each other
+        var isDesiredTimeNotOK = Math.abs(desiredTime - nowTime) <= 10;
         var isOnceDownloadNotOK = schedule.isOnceDownload() && (!LocalDate.now().equals(startDate) || isDesiredTimeNotOK);
         var isDayOfWeekNotOk = !schedule.isOnceDownload() && (!schedule.getDays().contains(LocalDate.now().getDayOfWeek())
                 || isDesiredTimeNotOK);

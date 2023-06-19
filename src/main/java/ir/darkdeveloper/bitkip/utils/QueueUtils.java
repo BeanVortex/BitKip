@@ -104,7 +104,7 @@ public class QueueUtils {
 
 
     /**
-     * consider 7 files are going to download in parallel. 3 of them will get inside "if clause" and the 4th one will be hold
+     * consider 7 files are going to download in parallel. 3 of them will get inside if-clause and the 4th one will be hold
      * in else clause until one of those 3 stops or finishes
      */
     private static int performSimultaneousDownloadWaitForPrev(QueueModel qm, AtomicInteger simulDownloads,
@@ -170,9 +170,9 @@ public class QueueUtils {
         stopItem.setDisable(true);
         queueDoneNotification(qm);
         startedQueues.remove(qm);
-        shutdownSchedulersOnOnceDownload(qm);
         var schedule = qm.getSchedule();
         if (schedule.isEnabled() && schedule.isTurnOffEnabled()) {
+            shutdownSchedulersOnOnceDownload(qm);
             var turnOffMode = schedule.getTurnOffMode();
             Platform.runLater(() -> {
                 log.info("Turn off triggered");
@@ -180,6 +180,7 @@ public class QueueUtils {
                     PowerUtils.turnOff(turnOffMode);
             });
         }
+        shutdownSchedulersOnOnceDownload(qm);
         if (executor != null)
             executor.shutdown();
         log.info("Queue stopped automatically: " + qm.toStringModel());
