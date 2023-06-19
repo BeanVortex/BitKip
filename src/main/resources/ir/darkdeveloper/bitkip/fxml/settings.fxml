@@ -8,10 +8,9 @@
 <?import java.net.URL?>
 <ScrollPane xmlns="http://javafx.com/javafx"
             xmlns:fx="http://javafx.com/fxml"
-            fx:id="parent"
             styleClass="padding_10"
             fx:controller="ir.darkdeveloper.bitkip.controllers.SettingsController"
-            prefHeight="600.0" prefWidth="550.0" minHeight="600" minWidth="550">
+            prefHeight="600.0" prefWidth="700.0" minHeight="600" minWidth="700">
 
     <stylesheets>
         <URL value="@../css/settings.css"/>
@@ -20,72 +19,84 @@
         <URL value="@../css/light_mode.css"/>
     </stylesheets>
 
-        <VBox spacing="10" alignment="TOP_CENTER">
-            <VBox alignment="BASELINE_LEFT">
-                <Label styleClass="settingTile" text="Save Location"/>
-                <HBox alignment="CENTER_LEFT">
-                    <Label styleClass="settingDescription" text="Current Location: " fx:id="lblLocation"/>
-                    <Region HBox.hgrow="ALWAYS"/>
-                    <Button text="change" styleClass="download_now_btn" onAction="#changeSaveDir"/>
-                </HBox>
-            </VBox>
-
-            <Line stroke="lightgray" fx:id="line1"/>
-
-            <VBox spacing="10" alignment="BASELINE_LEFT">
-                <HBox alignment="CENTER_LEFT">
-                    <Label styleClass="settingTile" text="Theme:"/>
-                    <Region HBox.hgrow="ALWAYS"/>
-                    <Circle radius="10.0" fill="#fff" stroke="#333" styleClass="circleTheme"
-                            onMouseClicked="#onThemeChange"/>
-                </HBox>
-            </VBox>
-
-            <Line stroke="lightgray" fx:id="line2"/>
-
-            <VBox spacing="10">
-                <Label styleClass="settingTile" text="Server"/>
-                <CheckBox text="Listen to links from Browser" styleClass="settingDescription" fx:id="serverCheck"
-                          onAction="#onServerCheck"/>
-                <VBox spacing="5">
-                    <HBox alignment="CENTER_LEFT" spacing="5">
-                        <Label text="Listening port:" styleClass="settingDescription"/>
-                        <TextField fx:id="portField"/>
-                    </HBox>
-                    <Label styleClass="settingDescription, opacity_7"
-                           text="If you changed the port, don't forget to change it on extension"/>
-                    <Label styleClass="settingDescription, opacity_7" text="Server settings will apply on restart"/>
-                </VBox>
-            </VBox>
-
-            <Line stroke="lightgray" fx:id="line3"/>
-
-            <VBox alignment="BASELINE_LEFT" spacing="10">
-                <Label styleClass="settingTile" text="Download"/>
-                <CheckBox text="Show complete dialog" fx:id="completeDialogCheck" onAction="#onCompleteDialogCheck"
-                          styleClass="settingDescription"/>
-                <CheckBox text="Continue on failure" fx:id="continueCheck" onAction="#onContinueCheck"
-                          styleClass="settingDescription"/>
-                <Label styleClass="settingDescription, opacity_7"
-                       text="If the connection drops or there is a rate limit, continue trying to download the file"/>
-                <HBox alignment="CENTER_LEFT" spacing="5">
-                    <Label text="Fail retry count:" styleClass="settingDescription"/>
-                    <TextField fx:id="retryField"/>
-                </HBox>
-                <HBox alignment="CENTER_LEFT" spacing="5">
-                    <Label text="Rate limit retry count:" styleClass="settingDescription"/>
-                    <TextField fx:id="rateLimitField"/>
-                </HBox>
-                <Label styleClass="settingDescription, opacity_7"
-                       text="Hint: Some links has rate limit so you can't download more than certain bytes"/>
-            </VBox>
-            <HBox alignment="CENTER_LEFT" >
-                <Label styleClass="bold" fx:id="savedLabel" visible="false"/>
+    <VBox spacing="10" alignment="TOP_CENTER">
+        <VBox alignment="BASELINE_LEFT">
+            <Label styleClass="settingTile" text="Save Location"/>
+            <HBox alignment="CENTER_LEFT">
+                <Label styleClass="settingDescription" text="Current Location: " fx:id="lblLocation"/>
+                <Region HBox.hgrow="ALWAYS"/>
+                <Button text="change" styleClass="download_now_btn" onAction="#changeSaveDir"/>
             </HBox>
-            <Region VBox.vgrow="ALWAYS"/>
-            <HBox alignment="BASELINE_RIGHT">
-                <Button text="Save" styleClass="download_now_btn" onAction="#onFieldSave"/>
-            </HBox>
-
         </VBox>
+
+        <Line stroke="lightgray" fx:id="line1"/>
+
+        <VBox spacing="10" alignment="BASELINE_LEFT">
+            <HBox alignment="CENTER_LEFT">
+                <Label styleClass="settingTile" text="Theme:"/>
+                <Region HBox.hgrow="ALWAYS"/>
+                <Circle radius="10.0" fill="#fff" stroke="#333" styleClass="circleTheme"
+                        onMouseClicked="#onThemeChange"/>
+            </HBox>
+        </VBox>
+
+        <Line stroke="lightgray" fx:id="line2"/>
+
+        <VBox spacing="10">
+            <Label styleClass="settingTile" text="Server"/>
+            <CheckBox text="Listen to links from Browser" styleClass="settingDescription" fx:id="serverCheck"
+                      onAction="#onServerCheck"/>
+            <VBox spacing="5">
+                <HBox alignment="CENTER_LEFT" spacing="5">
+                    <Label text="Listening port:" styleClass="settingDescription"/>
+                    <TextField fx:id="portField"/>
+                </HBox>
+                <Label styleClass="settingDescription, opacity_7"
+                       text="If you changed the port, don't forget to change it on extension"/>
+                <Label styleClass="settingDescription, opacity_7" text="Server settings will apply on restart"/>
+            </VBox>
+        </VBox>
+
+        <Line stroke="lightgray" fx:id="line3"/>
+
+        <VBox alignment="BASELINE_LEFT" spacing="10">
+            <Label styleClass="settingTile" text="Download"/>
+            <CheckBox text="Show complete dialog" fx:id="completeDialogCheck" onAction="#onCompleteDialogCheck"
+                      styleClass="settingDescription"/>
+            <CheckBox text="Continue on failure" fx:id="continueCheck" onAction="#onContinueCheck"
+                      styleClass="settingDescription"/>
+            <Label styleClass="settingDescription, opacity_7"
+                   text="If the connection drops or there is a rate limit, continue trying to download the file"/>
+            <HBox alignment="CENTER_LEFT" spacing="5">
+                <Label text="Fail retry count:" styleClass="settingDescription"/>
+                <TextField fx:id="retryField"/>
+            </HBox>
+            <HBox alignment="CENTER_LEFT" spacing="5">
+                <Label text="Rate limit retry count:" styleClass="settingDescription"/>
+                <TextField fx:id="rateLimitField"/>
+            </HBox>
+            <Label styleClass="settingDescription, opacity_7"
+                   text="Hint: Some links has rate limit so you can't download more than certain bytes"/>
+            <CheckBox text="Use user agent" fx:id="agentCheck" onAction="#onAgentCheck"
+                      styleClass="settingDescription"/>
+            <HBox alignment="CENTER_LEFT" spacing="5">
+                <Label text="User agent:" styleClass="settingDescription"/>
+                <TextField fx:id="agentField" prefWidth="300"/>
+            </HBox>
+            <Label wrapText="true" styleClass="settingDescription, opacity_7" fx:id="agentDesc"/>
+        </VBox>
+        <HBox alignment="CENTER_LEFT">
+            <Label styleClass="bold" fx:id="savedLabel" visible="false"/>
+        </HBox>
+        <Region VBox.vgrow="ALWAYS"/>
+        <HBox styleClass="padding_10">
+            <HBox alignment="BASELINE_LEFT">
+                <Button text="Default" styleClass="add_btn" onAction="#onDefaults"/>
+            </HBox>
+            <Region HBox.hgrow="ALWAYS"/>
+            <HBox alignment="BASELINE_RIGHT">
+                <Button text="Save" styleClass="download_now_btn" onAction="#onSave"/>
+            </HBox>
+        </HBox>
+    </VBox>
 </ScrollPane>

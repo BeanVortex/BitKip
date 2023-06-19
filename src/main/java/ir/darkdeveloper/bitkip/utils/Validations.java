@@ -6,6 +6,7 @@ import javafx.scene.control.Spinner;
 import javafx.scene.control.TextField;
 import javafx.scene.input.Clipboard;
 
+import java.io.IOException;
 import java.net.ConnectException;
 
 import static ir.darkdeveloper.bitkip.config.AppConfigs.mainTableUtils;
@@ -167,11 +168,11 @@ public class Validations {
         return url.startsWith("http") || url.startsWith("https") || url.startsWith("ftp");
     }
 
-    public static void validateDownloadModel(DownloadModel dm) throws ConnectException {
+    public static void validateDownloadModel(DownloadModel dm) throws IOException {
         if (dm.getSize() != -1 && dm.getSize() != 0)
             return;
 
-        var connection = NewDownloadUtils.connect(dm.getUrl(), 3000, 3000);
+        var connection = NewDownloadUtils.connect(dm.getUrl(), 3000, 3000, true);
         var canResume = NewDownloadUtils.canResume(connection);
         var fileSize = NewDownloadUtils.getFileSize(connection);
         if (fileSize == 0)

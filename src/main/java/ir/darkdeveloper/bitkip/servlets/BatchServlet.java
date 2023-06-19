@@ -40,14 +40,14 @@ public class BatchServlet extends HttpServlet {
         }
     }
 
-    private List<LinkModel> convertToLinks(BatchURLModel urlModel) {
+    private List<LinkModel> convertToLinks(BatchURLModel urlModel) throws IOException {
         var links = urlModel.links();
         if (links == null || links.isEmpty())
             return Collections.emptyList();
         var chunks = Validations.maxChunks();
         var allDownloadsQueue = QueuesRepo.findByName(ALL_DOWNLOADS_QUEUE, false);
         var firstUrl = links.get(0);
-        var connection = NewDownloadUtils.connect(firstUrl, 3000, 3000);
+        var connection = NewDownloadUtils.connect(firstUrl, 3000, 3000, true);
         var firstFileName = NewDownloadUtils.extractFileName(firstUrl, connection);
         var secondaryQueue = BatchDownload.getSecondaryQueueByFileName(firstFileName);
         var path = NewDownloadUtils.determineLocation(firstFileName);

@@ -227,6 +227,7 @@ public class IOUtils {
                     .append("continue_on_connection_lost=").append(String.valueOf(continueOnLostConnectionLost)).append("\n")
                     .append("retry_count=").append(String.valueOf(downloadRetryCount)).append("\n")
                     .append("rate_limit_count=").append(String.valueOf(downloadRateLimitCount)).append("\n")
+                    .append("user_agent_enabled=").append(String.valueOf(userAgentEnabled)).append("\n")
                     .append("user_agent=").append(userAgent);
             writer.flush();
             writer.close();
@@ -255,6 +256,7 @@ public class IOUtils {
                         case "retry_count" -> downloadRetryCount = Integer.parseInt(value);
                         case "rate_limit_count" -> downloadRateLimitCount = Integer.parseInt(value);
                         case "user_agent" -> userAgent = value;
+                        case "user_agent_enabled" -> userAgentEnabled = value.equals("true");
                     }
                 }
             }
@@ -345,7 +347,7 @@ public class IOUtils {
             var chunks = Validations.maxChunks();
             var allDownloadsQueue = QueuesRepo.findByName(ALL_DOWNLOADS_QUEUE, false);
             var firstUrl = lines.get(0);
-            var connection = NewDownloadUtils.connect(firstUrl, 3000, 3000);
+            var connection = NewDownloadUtils.connect(firstUrl, 3000, 3000, true);
             var firstFileName = NewDownloadUtils.extractFileName(firstUrl, connection);
             var secondaryQueue = BatchDownload.getSecondaryQueueByFileName(firstFileName);
             var path = NewDownloadUtils.determineLocation(firstFileName);
@@ -361,7 +363,7 @@ public class IOUtils {
                     })
                     .filter(Objects::nonNull)
                     .toList();
-        } catch (FileNotFoundException e) {
+        } catch (IOException e) {
             log.error(e.getLocalizedMessage());
         }
         return null;
@@ -382,4 +384,5 @@ public class IOUtils {
         writer.flush();
         writer.close();
     }
+
 }

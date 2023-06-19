@@ -29,14 +29,24 @@ public class AppConfigs {
             + File.separator + "Downloads"
             + File.separator + "BitKip" + File.separator;
 
-    public static String theme = "light";
-    public static boolean serverEnabled = true;
-    public static int serverPort = 9563;
-    public static boolean showCompleteDialog = true;
-    public static boolean continueOnLostConnectionLost = true;
-    public static int downloadRetryCount = 10;
-    public static int downloadRateLimitCount = 20;
-    public static String userAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.0.0 Safari/537.36";
+    public static final String defaultTheme = "light";
+    public static String theme = defaultTheme;
+    public static final boolean defaultServerEnabled = true;
+    public static boolean serverEnabled = defaultServerEnabled;
+    public static final int defaultServerPort = 9563;
+    public static int serverPort = defaultServerPort;
+    public static final boolean defaultShowCompleteDialog = true;
+    public static boolean showCompleteDialog = defaultShowCompleteDialog;
+    public static final boolean defaultContinueOnLostConnectionLost = true;
+    public static boolean continueOnLostConnectionLost = defaultContinueOnLostConnectionLost;
+    public static final int defaultDownloadRetryCount = 10;
+    public static int downloadRetryCount = defaultDownloadRetryCount;
+    public static final int defaultDownloadRateLimitCount = 20;
+    public static int downloadRateLimitCount = defaultDownloadRateLimitCount;
+    public static final String defaultUserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.0.0 Safari/537.36";
+    public static String userAgent = defaultUserAgent;
+    public static final boolean defaultUserAgentEnabled = false;
+    public static boolean userAgentEnabled = defaultUserAgentEnabled;
 
 
     public static final ObjectMapper mapper = new ObjectMapper();

@@ -47,6 +47,8 @@ public class DownloadOpUtils {
                     .text(dm.getUrl())
                     .showWarning());
             return;
+        } catch (IOException e){
+            log.error(e.getMessage());
         }
 
         DownloadTask downloadTask = new DownloadLimitedTask(dm, Long.MAX_VALUE, false);

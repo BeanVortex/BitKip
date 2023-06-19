@@ -5,7 +5,11 @@ import ir.darkdeveloper.bitkip.utils.NewDownloadUtils;
 import javafx.concurrent.Task;
 import reactor.core.publisher.Flux;
 
+import java.io.IOException;
+import java.net.HttpURLConnection;
 import java.util.List;
+
+import static ir.darkdeveloper.bitkip.config.AppConfigs.log;
 
 public class LinkDataTask extends Task<Flux<LinkModel>> {
 
@@ -22,7 +26,13 @@ public class LinkDataTask extends Task<Flux<LinkModel>> {
             for (var lm : links) {
                 if (cancel)
                     break;
-                var connection = NewDownloadUtils.connect(lm.getUrl(), 3000, 3000);
+                HttpURLConnection connection;
+                try {
+                    connection = NewDownloadUtils.connect(lm.getUrl(), 3000, 3000, true);
+                } catch (IOException e) {
+                    log.error(e.getMessage());
+                    break;
+                }
                 var fileSize = NewDownloadUtils.getFileSize(connection);
                 var fileName = NewDownloadUtils.extractFileName(lm.getUrl(), connection);
                 lm.setName(fileName);

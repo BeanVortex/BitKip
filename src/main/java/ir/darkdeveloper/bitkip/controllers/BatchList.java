@@ -169,7 +169,6 @@ public class BatchList implements QueueObserver {
             dm.setResumable(lm.getResumable());
             dm.setQueues(new CopyOnWriteArrayList<>(lm.getQueues()));
             dm.setDownloadStatus(DownloadStatus.Paused);
-            dm.setAgent(lm.getAgent());
             list.add(dm);
         }
         return list;

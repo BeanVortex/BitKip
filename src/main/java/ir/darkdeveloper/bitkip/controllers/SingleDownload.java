@@ -20,6 +20,8 @@ import javafx.stage.Stage;
 import org.kordamp.ikonli.javafx.FontIcon;
 
 import java.io.File;
+import java.io.IOException;
+import java.net.HttpURLConnection;
 import java.net.URL;
 import java.time.LocalDateTime;
 import java.util.ResourceBundle;
@@ -158,7 +160,13 @@ public class SingleDownload implements QueueObserver {
         setLocation(urlModel.filename());
         sizeLabel.setText(IOUtils.formatBytes(urlModel.fileSize()));
         bytesField.setText(String.valueOf(urlModel.fileSize()));
-        var conn = NewDownloadUtils.connect(urlModel.url(), 3000, 3000);
+        HttpURLConnection conn;
+        try {
+            conn = NewDownloadUtils.connect(urlModel.url(), 3000, 3000, true);
+        } catch (IOException e) {
+            log.error(e.getMessage());
+            return;
+        }
         var resumable = NewDownloadUtils.canResume(conn);
         chunksField.setDisable(!resumable);
         chunksField.setText(resumable ? String.valueOf(maxChunks()) : "0");
@@ -174,7 +182,6 @@ public class SingleDownload implements QueueObserver {
         }
         dm.setResumable(resumable);
         dm.setSize(urlModel.fileSize());
-        dm.setAgent(urlModel.agent());
     }
 
     private void autoFillLocationAndSizeAndName() {
@@ -184,7 +191,7 @@ public class SingleDownload implements QueueObserver {
             // firing select event
             queueCombo.getSelectionModel().select(queueCombo.getSelectionModel().getSelectedIndex());
             var url = urlField.getText();
-            var connection = NewDownloadUtils.connect(url, 3000, 3000);
+            var connection = NewDownloadUtils.connect(url, 3000, 3000, true);
             var executor = Executors.newFixedThreadPool(2);
             var fileNameLocationFuture =
                     NewDownloadUtils.prepareFileNameAndFieldsAsync(connection, url, nameField, executor)

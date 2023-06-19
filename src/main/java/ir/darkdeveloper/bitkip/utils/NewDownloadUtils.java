@@ -29,7 +29,7 @@ import static ir.darkdeveloper.bitkip.utils.Validations.maxChunks;
 public class NewDownloadUtils {
 
 
-    public static HttpURLConnection connect(String uri, int connectTimeout, int readTimeout) {
+    public static HttpURLConnection connect(String uri, int connectTimeout, int readTimeout, boolean showErrors) throws IOException {
         try {
             if (uri.isBlank())
                 throw new IllegalArgumentException("URL is blank");
@@ -37,16 +37,20 @@ public class NewDownloadUtils {
             var conn = (HttpURLConnection) url.openConnection();
             conn.setConnectTimeout(connectTimeout);
             conn.setReadTimeout(readTimeout);
-            conn.setRequestProperty("User-Agent", userAgent);
+            if (userAgentEnabled)
+                conn.setRequestProperty("User-Agent", userAgent);
             return conn;
         } catch (IOException e) {
-            var msg = "Connection or read timeout. Connect to the internet or check the url";
-            log.error(msg);
-            Notifications.create()
-                    .title("Bad Connection")
-                    .text(msg)
-                    .showError();
-            throw new RuntimeException(msg);
+            if (showErrors) {
+                var msg = "Connection or read timeout. Connect to the internet or check the url";
+                log.error(msg);
+                Notifications.create()
+                        .title("Bad Connection")
+                        .text(msg)
+                        .showError();
+                throw new RuntimeException(msg);
+            } else
+                throw new IOException(e);
         }
     }
 
@@ -68,8 +72,13 @@ public class NewDownloadUtils {
                                                                         Executor executor) {
         final HttpURLConnection[] finalConnection = {connection};
         return CompletableFuture.supplyAsync(() -> {
-            if (finalConnection[0] == null)
-                finalConnection[0] = connect(urlField.getText(), 3000, 3000);
+            if (finalConnection[0] == null) {
+                try {
+                    finalConnection[0] = connect(urlField.getText(), 3000, 3000, true);
+                } catch (IOException e) {
+                    log.error(e.getMessage());
+                }
+            }
             var fileSize = getFileSize(finalConnection[0]);
             var resumable = canResume(finalConnection[0]);
             Platform.runLater(() -> {
@@ -117,8 +126,13 @@ public class NewDownloadUtils {
                                                                           TextField nameField, Executor executor) {
         final HttpURLConnection[] finalConnection = {connection};
         return CompletableFuture.supplyAsync(() -> {
-            if (finalConnection[0] == null)
-                finalConnection[0] = connect(link, 3000, 3000);
+            if (finalConnection[0] == null) {
+                try {
+                    finalConnection[0] = connect(link, 3000, 3000, true);
+                } catch (IOException e) {
+                    log.error(e.getMessage());
+                }
+            }
             var fileName = extractFileName(link, finalConnection[0]);
             if (nameField != null)
                 Platform.runLater(() -> nameField.setText(fileName));
@@ -203,7 +217,7 @@ public class NewDownloadUtils {
             if (downloadBtn != null)
                 downloadBtn.setDisable(true);
             addBtn.setDisable(true);
-            if (refreshBtn != null){
+            if (refreshBtn != null) {
                 refreshBtn.setDisable(false);
                 refreshBtn.setVisible(true);
             }
@@ -212,7 +226,7 @@ public class NewDownloadUtils {
             errorLabel.setVisible(false);
             if (downloadBtn != null)
                 downloadBtn.setDisable(false);
-            if (refreshBtn != null){
+            if (refreshBtn != null) {
                 refreshBtn.setDisable(true);
                 refreshBtn.setVisible(false);
             }

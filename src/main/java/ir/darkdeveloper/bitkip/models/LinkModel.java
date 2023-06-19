@@ -20,7 +20,6 @@ public class LinkModel {
     private String name;
     private String path;
     private String selectedPath;
-    private transient String agent;
 
     private final List<QueueModel> queues = new ArrayList<>();
 

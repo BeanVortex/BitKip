@@ -6,6 +6,7 @@ import ir.darkdeveloper.bitkip.models.DownloadStatus;
 import ir.darkdeveloper.bitkip.repo.DownloadsRepo;
 import ir.darkdeveloper.bitkip.utils.DownloadOpUtils;
 import ir.darkdeveloper.bitkip.utils.IOUtils;
+import ir.darkdeveloper.bitkip.utils.NewDownloadUtils;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -35,6 +36,7 @@ public class DownloadLimitedTask extends DownloadTask {
     private int retries = 0;
     private int rateLimitCount = 0;
     private boolean blocking;
+    private String url;
 
 
     /**
@@ -50,6 +52,7 @@ public class DownloadLimitedTask extends DownloadTask {
     @Override
     protected Long call() throws IOException {
         try {
+            url = downloadModel.getUrl();
             file = new File(downloadModel.getFilePath());
             if (file.exists() && isCompleted(downloadModel, file, mainTableUtils))
                 return 0L;
@@ -70,7 +73,7 @@ public class DownloadLimitedTask extends DownloadTask {
 
     private void performDownloadInStream() {
         try {
-            var downloadUrl = new URL(downloadModel.getUrl());
+            var downloadUrl = new URL(url);
             var inputStream = downloadUrl.openStream();
             var readableByteChannel = Channels.newChannel(inputStream);
 
@@ -106,12 +109,9 @@ public class DownloadLimitedTask extends DownloadTask {
     private void performDownload() throws IOException, InterruptedException {
 
         try {
-            var url = new URL(downloadModel.getUrl());
-            var con = (HttpURLConnection) url.openConnection();
-            con.setReadTimeout(3000);
-            con.setConnectTimeout(3000);
+            var con = NewDownloadUtils.connect(url, 3000, 3000, false);
             if (!downloadModel.isResumable())
-                con.setRequestProperty("User-Agent", downloadModel.getAgent());
+                con.setRequestProperty("User-Agent", userAgent);
             configureResume(con, file, downloadModel.getSize());
             var in = con.getInputStream();
             var fileSize = downloadModel.getSize();
@@ -133,9 +133,9 @@ public class DownloadLimitedTask extends DownloadTask {
         } catch (SocketTimeoutException | UnknownHostException | SocketException s) {
             retries++;
             if (!paused && (continueOnLostConnectionLost || retries != downloadRetryCount)) {
-                    log.warn("Downloading " + downloadModel.getName() + " failed. retry count : " + retries);
-                    Thread.sleep(2000);
-                    performDownload();
+                log.warn("Downloading " + downloadModel.getName() + " failed. retry count : " + retries);
+                Thread.sleep(2000);
+                performDownload();
             }
         } catch (ClosedChannelException ignore) {
         }

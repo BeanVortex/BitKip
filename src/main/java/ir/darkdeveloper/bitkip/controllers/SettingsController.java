@@ -9,10 +9,7 @@ import ir.darkdeveloper.bitkip.utils.Validations;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.scene.control.CheckBox;
-import javafx.scene.control.Label;
-import javafx.scene.control.ScrollPane;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.paint.Paint;
@@ -33,9 +30,13 @@ import static ir.darkdeveloper.bitkip.config.observers.ThemeSubject.setTheme;
 public class SettingsController implements FXMLController {
 
     @FXML
-    private CheckBox continueCheck;
+    private CheckBox agentCheck;
     @FXML
-    private ScrollPane parent;
+    private Label agentDesc;
+    @FXML
+    private TextField agentField;
+    @FXML
+    private CheckBox continueCheck;
     @FXML
     private CheckBox completeDialogCheck;
     @FXML
@@ -64,10 +65,8 @@ public class SettingsController implements FXMLController {
     @Override
     public void initAfterStage() {
         updateTheme(stage.getScene());
-        parent.prefWidthProperty().bind(stage.widthProperty());
-        parent.prefHeightProperty().bind(stage.heightProperty());
-        parent.prefWidthProperty().addListener((ob, o, n) -> {
-            var endX = parent.getViewportBounds().getWidth();
+        stage.widthProperty().addListener((ob, o, n) -> {
+            var endX = n.doubleValue() - 60;
             line1.setEndX(endX);
             line2.setEndX(endX);
             line3.setEndX(endX);
@@ -79,6 +78,11 @@ public class SettingsController implements FXMLController {
         Validations.validateIntInputCheck(portField, (long) serverPort);
         Validations.validateIntInputCheck(retryField, (long) downloadRetryCount);
         Validations.validateIntInputCheck(rateLimitField, (long) downloadRateLimitCount);
+        agentDesc.setText("Note: If you enter wrong agent, your downloads may not start. Your agent will update when you use extension");
+        initElements();
+    }
+
+    private void initElements() {
         lblLocation.setText(downloadPath);
         serverCheck.setSelected(serverEnabled);
         portField.setText(String.valueOf(serverPort));
@@ -88,6 +92,9 @@ public class SettingsController implements FXMLController {
         continueCheck.setSelected(continueOnLostConnectionLost);
         retryField.setDisable(continueOnLostConnectionLost);
         rateLimitField.setDisable(continueOnLostConnectionLost);
+        agentField.setText(userAgent);
+        agentCheck.setSelected(userAgentEnabled);
+        agentField.setDisable(!userAgentEnabled);
     }
 
 
@@ -159,10 +166,11 @@ public class SettingsController implements FXMLController {
     }
 
     @FXML
-    public void onFieldSave() {
+    public void onSave() {
         serverPort = Integer.parseInt(portField.getText());
         downloadRetryCount = Integer.parseInt(retryField.getText());
         downloadRateLimitCount = Integer.parseInt(rateLimitField.getText());
+        userAgent = agentField.getText();
         IOUtils.saveConfigs();
         showSavedMessage();
     }
@@ -188,5 +196,29 @@ public class SettingsController implements FXMLController {
         IOUtils.saveConfigs();
         retryField.setDisable(continueOnLostConnectionLost);
         rateLimitField.setDisable(continueOnLostConnectionLost);
+    }
+
+    @FXML
+    private void onDefaults() {
+        theme = defaultTheme;
+        setTheme(theme);
+        serverEnabled = defaultServerEnabled;
+        serverPort = defaultServerPort;
+        showCompleteDialog = defaultShowCompleteDialog;
+        continueOnLostConnectionLost = defaultContinueOnLostConnectionLost;
+        downloadRetryCount = defaultDownloadRetryCount;
+        downloadRateLimitCount = defaultDownloadRateLimitCount;
+        userAgent = defaultUserAgent;
+        userAgentEnabled = defaultUserAgentEnabled;
+        IOUtils.saveConfigs();
+        initElements();
+        showSavedMessage();
+    }
+
+    @FXML
+    private void onAgentCheck() {
+        userAgentEnabled = agentCheck.isSelected();
+        IOUtils.saveConfigs();
+        agentField.setDisable(!userAgentEnabled);
     }
 }
