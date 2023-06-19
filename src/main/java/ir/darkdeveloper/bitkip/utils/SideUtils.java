@@ -52,7 +52,7 @@ public class SideUtils {
         queuesItem.setGraphic(createFolderIcon());
         var treeQueueItems = queues.stream()
                 .filter(q -> !staticQueueNames.contains(q.getName()))
-                .map(SideUtils::createQueueItem).toList();
+                .map(SideUtils::changeScheduledQueueIcon).toList();
         queuesItem.getChildren().addAll(treeQueueItems);
 
         allItem.getChildren().addAll(List.of(categoryItem, finishedItem, unfinishedItem, queuesItem));
@@ -226,7 +226,7 @@ public class SideUtils {
         return createIcon("fas-folder", "#FFC107");
     }
 
-    private static TreeItem<String> createQueueItem(QueueModel q) {
+    public static TreeItem<String> changeScheduledQueueIcon(QueueModel q) {
         var tree = new TreeItem<>(q.getName());
         if (q.getSchedule().isEnabled())
             tree.setGraphic(createIcon("fas-clock", "#FF6D00"));

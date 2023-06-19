@@ -6,6 +6,7 @@ import ir.darkdeveloper.bitkip.repo.ScheduleRepo;
 import ir.darkdeveloper.bitkip.utils.FxUtils;
 import ir.darkdeveloper.bitkip.utils.MenuUtils;
 import ir.darkdeveloper.bitkip.utils.QueueUtils;
+import ir.darkdeveloper.bitkip.utils.SideUtils;
 import javafx.scene.control.Label;
 import javafx.scene.control.MenuItem;
 
@@ -53,12 +54,12 @@ public class ScheduleTask {
 
     private static void startSchedule(boolean isThereSchedule, QueueModel queue,
                                       MenuItem startItem, MenuItem stopItem) {
-        var schedule = queue.getSchedule();
         Runnable run = () -> {
             log.info("Start scheduler triggered for " + queue.toStringModel());
-            if (isSchedulerNotTriggeredOnTime("Start", schedule)) return;
+            if (isSchedulerNotTriggeredOnTime("Start", queue)) return;
             QueueUtils.startQueue(queue, startItem, stopItem);
         };
+        var schedule = queue.getSchedule();
         createSchedule(run, queue, false);
         var sm = currentSchedules.get(schedule.getId());
         if (isThereSchedule)
@@ -67,31 +68,37 @@ public class ScheduleTask {
 
     private static void stopSchedule(boolean isThereSchedule, QueueModel queue,
                                      MenuItem startItem, MenuItem stopItem) {
-        var schedule = queue.getSchedule();
         Runnable run = () -> {
             log.info("Stop scheduler triggered for " + queue.toStringModel());
-            if (isSchedulerNotTriggeredOnTime("Stop", schedule)) return;
+            if (isSchedulerNotTriggeredOnTime("Stop", queue)) return;
             QueueUtils.stopQueue(queue, startItem, stopItem);
         };
+        var schedule = queue.getSchedule();
         createSchedule(run, queue, true);
         var sm = currentSchedules.get(schedule.getId());
         if (isThereSchedule && sm.getStopScheduler() != null)
             sm.getStopScheduler().shutdown();
     }
 
-    private static boolean isSchedulerNotTriggeredOnTime(String mode, ScheduleModel schedule) {
+    private static boolean isSchedulerNotTriggeredOnTime(String mode, QueueModel queue) {
+        var schedule = queue.getSchedule();
         var startDate = schedule.getStartDate();
-        var desiredTime = TimeUnit.SECONDS.toMinutes(schedule.getStartTime().toSecondOfDay());
+        var desiredTime = schedule.getStartTime().toSecondOfDay();
         if (mode.equals("Stop"))
             desiredTime = schedule.getStopTime().toSecondOfDay();
         var nowTime = LocalTime.now().toSecondOfDay();
         // maximum 10 seconds, desiredTime or nowTime can be different from each other
-        var isDesiredTimeNotOK = Math.abs(desiredTime - nowTime) <= 10;
+        var isDesiredTimeNotOK = Math.abs(desiredTime - nowTime) > 10;
         var isOnceDownloadNotOK = schedule.isOnceDownload() && (!LocalDate.now().equals(startDate) || isDesiredTimeNotOK);
         var isDayOfWeekNotOk = !schedule.isOnceDownload() && (!schedule.getDays().contains(LocalDate.now().getDayOfWeek())
                 || isDesiredTimeNotOK);
         if (isOnceDownloadNotOK || isDayOfWeekNotOk) {
-            log.info(mode + " scheduler triggered on a wrong date or time. Rescheduling all schedules... ");
+            if (isOnceDownloadNotOK){
+                queue.getSchedule().setEnabled(false);
+                SideUtils.changeScheduledQueueIcon(queue);
+            }
+            log.info(mode + " scheduler triggered on a wrong date or time for %s. Rescheduling all schedules... "
+                    .formatted(queue.getName()));
             scheduleQueues();
             return true;
         }
@@ -128,11 +135,7 @@ public class ScheduleTask {
             firstTriggerMsg += TimeUnit.MILLISECONDS.toMinutes(initialDelay) + " minutes :" + queue.toStringModel();
             log.info(firstTriggerMsg);
 
-            scheduler.scheduleAtFixedRate(() -> {
-                if (!schedule.getDays().contains(LocalDate.now().getDayOfWeek()))
-                    return;
-                run.run();
-            }, initialDelay, TimeUnit.DAYS.toMillis(1), TimeUnit.MILLISECONDS);
+            scheduler.scheduleAtFixedRate(run, initialDelay, TimeUnit.DAYS.toMillis(1), TimeUnit.MILLISECONDS);
         }
     }
 
