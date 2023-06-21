@@ -1,6 +1,7 @@
 package ir.darkdeveloper.bitkip.controllers;
 
 import ir.darkdeveloper.bitkip.config.AppConfigs;
+import ir.darkdeveloper.bitkip.config.observers.QueueObserver;
 import ir.darkdeveloper.bitkip.controllers.interfaces.FXMLController;
 import ir.darkdeveloper.bitkip.task.FileMoveTask;
 import ir.darkdeveloper.bitkip.utils.FxUtils;
@@ -9,9 +10,11 @@ import ir.darkdeveloper.bitkip.utils.Validations;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.scene.control.*;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.VBox;
 import javafx.scene.paint.Paint;
 import javafx.scene.shape.Line;
 import javafx.stage.DirectoryChooser;
@@ -24,11 +27,15 @@ import java.net.URL;
 import java.util.ResourceBundle;
 import java.util.concurrent.Executors;
 
+import static ir.darkdeveloper.bitkip.BitKip.getResource;
 import static ir.darkdeveloper.bitkip.config.AppConfigs.*;
+import static ir.darkdeveloper.bitkip.config.observers.QueueSubject.getQueueSubject;
 import static ir.darkdeveloper.bitkip.config.observers.ThemeSubject.setTheme;
 
 public class SettingsController implements FXMLController {
 
+    @FXML
+    private VBox queueContainer;
     @FXML
     private CheckBox agentCheck;
     @FXML
@@ -41,12 +48,6 @@ public class SettingsController implements FXMLController {
     private CheckBox completeDialogCheck;
     @FXML
     private Label lblLocation;
-    @FXML
-    private Line line1;
-    @FXML
-    private Line line2;
-    @FXML
-    private Line line3;
     @FXML
     private CheckBox serverCheck;
     @FXML
@@ -65,12 +66,6 @@ public class SettingsController implements FXMLController {
     @Override
     public void initAfterStage() {
         updateTheme(stage.getScene());
-        stage.widthProperty().addListener((ob, o, n) -> {
-            var endX = n.doubleValue() - 60;
-            line1.setEndX(endX);
-            line2.setEndX(endX);
-            line3.setEndX(endX);
-        });
     }
 
     @Override
@@ -79,6 +74,7 @@ public class SettingsController implements FXMLController {
         Validations.validateIntInputCheck(retryField, (long) downloadRetryCount);
         Validations.validateIntInputCheck(rateLimitField, (long) downloadRateLimitCount);
         agentDesc.setText("Note: If you enter wrong agent, your downloads may not start. Your agent will update when you use extension");
+        initQueues();
         initElements();
     }
 
@@ -95,6 +91,36 @@ public class SettingsController implements FXMLController {
         agentField.setText(userAgent);
         agentCheck.setSelected(userAgentEnabled);
         agentField.setDisable(!userAgentEnabled);
+    }
+
+    private void initQueues() {
+        try {
+            var loader = new FXMLLoader(getResource("fxml/queueSetting.fxml"));
+            VBox details = loader.load();
+            queueContainer.getChildren().removeIf(node -> {
+                if (node.getId() == null)
+                    return false;
+                return node.getId().equals("download_details");
+            });
+
+            QueueObserver controller = loader.getController();
+            if (fxmlName.equals("singleDownload"))
+                ((SingleDownload)controller).setUrlModel(urlModel);
+
+            if (prevController != null)
+                getQueueSubject().removeObserver(prevController);
+
+
+
+            details.setId("download_details");
+            controller.setStage(stage);
+            container.getChildren().add(details);
+            getQueueSubject().addObserver(controller);
+            prevController = controller;
+        } catch (IOException e) {
+            log.error(e.getLocalizedMessage());
+            throw new RuntimeException(e);
+        }
     }
 
 

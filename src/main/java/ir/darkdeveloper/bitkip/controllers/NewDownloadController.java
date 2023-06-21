@@ -108,15 +108,15 @@ public class NewDownloadController implements FXMLController {
 
     private void switchToSingleDownload() {
         isSingle = true;
-        singleButton.getStyleClass().add("tab_btn_selected");
-        batchButton.getStyleClass().remove("tab_btn_selected");
+        singleButton.getStyleClass().add("selected_tab");
+        batchButton.getStyleClass().remove("selected_tab");
         switchDownloadDetails("singleDownload");
     }
 
     private void switchToMultipleDownload() {
         isSingle = false;
-        batchButton.getStyleClass().add("tab_btn_selected");
-        singleButton.getStyleClass().remove("tab_btn_selected");
+        batchButton.getStyleClass().add("selected_tab");
+        singleButton.getStyleClass().remove("selected_tab");
         switchDownloadDetails("batchDownload");
     }
 

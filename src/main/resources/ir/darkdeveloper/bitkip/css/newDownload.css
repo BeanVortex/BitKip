@@ -1,4 +1,4 @@
-.tab_btn {
+.new_download_tab_btn {
     /*-fx-padding: 3;*/
     -fx-min-height: 40;
     -fx-border-radius: 0;
@@ -6,12 +6,12 @@
     -fx-border-color: transparent;
     -fx-border-style: none;
     -fx-font-weight: bold;
-    -fx-text-fill: #FAFAFA;
-    -fx-background-color: #4a677c;
+    -fx-text-fill: #DDE6ED;
+    -fx-background-color: #33435b;
     -fx-border-insets: 0;
 }
 
-.tab_btn_selected {
+.selected_tab {
     -fx-background-color: #009688;
 }
 

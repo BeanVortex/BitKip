@@ -1,10 +1,10 @@
 * {
-    -fx-white-color: #fff;
-    -fx-text-color: #fff !important;
-    -fx-primary-color: #293944 !important;
-    -fx-arrow-color: #fff !important;
-    -fx-primary-color2: #192b3a !important;
-    -fx-secondary-color: #506e83 !important;
+    -fx-white-color: #DDE6ED;
+    -fx-text-color: #DDE6ED !important;
+    -fx-primary-color: #27374D !important;
+    -fx-arrow-color: #DDE6ED !important;
+    -fx-primary-color2: #33435b !important;
+    -fx-secondary-color: #526D82 !important;
     -fx-red-color: #EF5350 !important;
     -fx-green-color: #51b055 !important;
 }

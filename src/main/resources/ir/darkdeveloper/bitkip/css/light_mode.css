@@ -1,11 +1,11 @@
 * {
     -fx-white-color: #fff;
     -fx-text-color: #111;
-    -fx-primary-color: #f3f3f3;
-    -fx-primary-color2: #e8e8e8;
+    -fx-primary-color: #F8F6F4;
+    -fx-primary-color2: #eee;
     -fx-arrow-color: #111;
-    -fx-secondary-color: lightgray;
-    -fx-secondary-color2: darkgray;
+    -fx-secondary-color: #C4DFDF;
+    -fx-secondary-color2: #D2E9E9;
     -fx-dark-primary-color: #293944;
     -fx-red-color: #EF5350 !important;
     -fx-green-color: #51b055 !important;
@@ -134,13 +134,16 @@
 }
 
 
-.tab-pane .tab-header-area .tab-header-background,
 .date-picker .arrow-button,
 .table-view .corner,
 .menu-item:hover:disabled,
 .accordion .titled-pane .title,
 .table-view .column-header {
     -fx-background-color: transparent;
+}
+
+.tab-pane .tab-header-area .tab-header-background {
+    -fx-background-color: -fx-primary-color2;
 }
 
 

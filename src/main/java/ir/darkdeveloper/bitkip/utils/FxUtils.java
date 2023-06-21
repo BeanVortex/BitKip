@@ -174,7 +174,7 @@ public class FxUtils {
     public static void newSettingsStage() {
         FXMLLoader loader;
         Stage stage = new Stage();
-        ScrollPane root;
+        VBox root;
         try {
             loader = new FXMLLoader(getResource("fxml/settings.fxml"));
             root = loader.load();

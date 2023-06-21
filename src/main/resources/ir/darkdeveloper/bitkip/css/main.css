@@ -1,11 +1,11 @@
 
 .csm_toolbar {
-    -fx-background-color: #223b4d;
+    -fx-background-color: #27374D;
     -fx-padding: 0px 5px 2px 0px;
 }
 
 .toolbar_menu, .csm_toolbar .label {
-    -fx-text-fill: #FAFAFA;
+    -fx-text-fill: #DDE6ED;
 }
 
 .toolbar_menu {
@@ -15,7 +15,7 @@
 }
 
 .toolbar_menu:hover {
-    -fx-background-color: #4a677c;
+    -fx-background-color: #526D82;
 }
 
 .padding_10{
