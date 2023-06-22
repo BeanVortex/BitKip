@@ -3,7 +3,9 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.layout.HBox?>
+<?import javafx.scene.text.Text?>
 <VBox minHeight="400.0" minWidth="500.0" spacing="20"
+      maxWidth="500"
       style="-fx-padding: 10"
       stylesheets="@../css/light_mode.css"
       xmlns="http://javafx.com/javafx/16" xmlns:fx="http://javafx.com/fxml/1"
@@ -13,5 +15,7 @@
         <Label text="Logs on date : "/>
         <ComboBox fx:id="comboSelectFile" onAction="#fileSelected"/>
     </HBox>
-    <TextArea fx:id="logArea" editable="false" />
+    <ScrollPane fx:id="scrollPane">
+        <Text text="No Logs" fx:id="text" styleClass="text-logs"/>
+    </ScrollPane>
 </VBox>

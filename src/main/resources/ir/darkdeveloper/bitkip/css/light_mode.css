@@ -102,6 +102,10 @@
     -fx-text-fill: -fx-text-color !important;
 }
 
+.text-logs{
+    -fx-fill: -fx-text-color;
+    -fx-font-size: 10pt;
+}
 
 .circleTheme {
     -fx-fill: -fx-dark-primary-color;
@@ -136,10 +140,9 @@
     -fx-text-fill: -fx-text-color;
 }
 
-.tab-pane .tab{
+.tab-pane .tab {
     -fx-background-color: -fx-primary-color2;
 }
-
 
 
 .date-picker .arrow-button,

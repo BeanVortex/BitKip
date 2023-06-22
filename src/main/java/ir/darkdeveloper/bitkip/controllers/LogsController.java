@@ -5,7 +5,8 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.ComboBox;
-import javafx.scene.control.TextArea;
+import javafx.scene.control.ScrollPane;
+import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import org.controlsfx.control.Notifications;
 
@@ -24,8 +25,9 @@ public class LogsController implements FXMLController {
     @FXML
     private ComboBox<FileWrapper> comboSelectFile;
     @FXML
-    private TextArea logArea;
-
+    private ScrollPane scrollPane;
+    @FXML
+    private Text text;
     private Stage stage;
 
     @Override
@@ -37,9 +39,9 @@ public class LogsController implements FXMLController {
     @Override
     public void initAfterStage() {
         updateTheme(stage.getScene());
-        logArea.setPrefHeight(stage.getHeight());
-        stage.widthProperty().addListener((o, ol, n) -> logArea.setPrefWidth(n.doubleValue()));
-        stage.heightProperty().addListener((o, ol, n) -> logArea.setPrefHeight(n.doubleValue()));
+//        text.wrappingWidthProperty().bind(stage.widthProperty());
+        stage.widthProperty().addListener((o, ol, n) -> scrollPane.setPrefWidth(n.doubleValue() - 50));
+        stage.heightProperty().addListener((o, ol, n) -> scrollPane.setPrefHeight(n.doubleValue() - 50));
     }
 
     record FileWrapper(File file) {
@@ -51,6 +53,8 @@ public class LogsController implements FXMLController {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
+        scrollPane.setFitToHeight(true);
+        scrollPane.setFitToWidth(true);
         var logsDir = Path.of(dataPath + "logs").toFile();
         if (logsDir.exists() && logsDir.isDirectory()) {
             var files = logsDir.listFiles();
@@ -62,7 +66,7 @@ public class LogsController implements FXMLController {
                 comboSelectFile.setItems(listFiles);
                 comboSelectFile.getSelectionModel().select(listFiles.size() - 1);
                 fileSelected();
-            } else logArea.setText("No logs");
+            }
         }
 
     }
@@ -77,7 +81,7 @@ public class LogsController implements FXMLController {
         try {
             var logs = Files.readAllLines(Path.of(comboSelectFile.getSelectionModel().getSelectedItem().file().getPath()))
                     .stream().reduce((s1, s2) -> String.join("\n", s1, s2));
-            logArea.setText(logs.orElse("No logs"));
+            text.setText(logs.orElse("No Logs"));
         } catch (IOException e) {
             log.error(e.getLocalizedMessage());
             Notifications.create()
