@@ -5,9 +5,9 @@
 <?import javafx.scene.layout.*?>
 <?import org.controlsfx.control.*?>
 
-<ScrollPane fx:id="scrollPane" minHeight="430.0" minWidth="600" prefHeight="430.0" prefWidth="600"
+<ScrollPane fx:id="scrollPane" minHeight="450.0" minWidth="600" prefHeight="450.0" prefWidth="600"
             xmlns="http://javafx.com/javafx/17.0.2-ea" xmlns:fx="http://javafx.com/fxml/1"
-            fx:controller="ir.darkdeveloper.bitkip.controllers.DownloadingController">
+            fx:controller="ir.darkdeveloper.bitkip.controllers.DetailsController">
     <stylesheets>
         <URL value="@../css/main.css"/>
         <URL value="@../css/newDownload.css"/>
@@ -27,8 +27,9 @@
             </HBox>
             <ProgressBar fx:id="downloadProgress" minHeight="20" prefWidth="Infinity"/>
         </VBox>
-        <Label fx:id="progressLbl" styleClass="bold" text="progress"/>
-        <Label fx:id="remainingLbl" styleClass="bold" text="remaining time"/>
+        <Label fx:id="progressLbl" styleClass="bold"/>
+        <Label fx:id="remainingLbl" styleClass="bold"/>
+        <Label fx:id="chunksLbl" styleClass="bold"/>
         <HBox spacing="5">
             <Label styleClass="bold" text="Resumable:"/>
             <Label fx:id="resumableLbl" styleClass="bold, title-opacity"/>

@@ -130,7 +130,7 @@ public class MainTableUtils {
                     menuItems.get(refreshLbl).setOnAction(e -> DownloadOpUtils.refreshDownload(getSelected()));
                     menuItems.get(copyLbl).setOnAction(e -> FxUtils.setClipboard(getSelected().get(0).getUrl()));
                     menuItems.get(restartLbl).setOnAction(e -> DownloadOpUtils.restartDownloads(getSelected()));
-                    menuItems.get(downloadingLbl).setOnAction(e -> getSelected().forEach(FxUtils::newDownloadingStage));
+                    menuItems.get(downloadingLbl).setOnAction(e -> getSelected().forEach(FxUtils::newDetailsStage));
                     menuItems.get(exportLinkLbl).setOnAction(e -> DownloadOpUtils.exportLinks(getSelectedUrls()));
                     menuItems.get(deleteFromQueueLbl).setOnAction(e -> MenuUtils.deleteFromQueue());
                     menuItems.get(deleteLbl).setOnAction(e -> DownloadOpUtils.deleteDownloads(getSelected(), false));
@@ -167,7 +167,7 @@ public class MainTableUtils {
                 var selected = getSelected();
                 if (selected.size() > 0) {
                     var dm = getSelected().get(0);
-                    DownloadOpUtils.openDownloadingStage(dm);
+                    DownloadOpUtils.openDetailsStage(dm);
                 }
             }
         };

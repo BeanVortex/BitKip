@@ -197,12 +197,12 @@ public class FxUtils {
         stage.show();
     }
 
-    public static void newDownloadingStage(DownloadModel dm) {
+    public static void newDetailsStage(DownloadModel dm) {
         FXMLLoader loader;
         var stage = new Stage();
         ScrollPane root;
         try {
-            loader = new FXMLLoader(getResource("fxml/downloading.fxml"));
+            loader = new FXMLLoader(getResource("fxml/details.fxml"));
             root = loader.load();
         } catch (IOException e) {
             log.error(e.getMessage());
@@ -216,7 +216,7 @@ public class FxUtils {
         if (end > 60)
             end = 60;
         stage.setTitle(dm.getName().substring(0, end));
-        DownloadingController controller = loader.getController();
+        DetailsController controller = loader.getController();
         controller.setStage(stage);
         openDownloadings.add(controller);
         getThemeSubject().addObserver(controller, scene);
@@ -226,6 +226,8 @@ public class FxUtils {
             getThemeSubject().removeObserver(controller);
         });
         stage.show();
+        stage.setAlwaysOnTop(true);
+        stage.setAlwaysOnTop(false);
     }
 
     public static void newBatchListStage(List<LinkModel> links) {

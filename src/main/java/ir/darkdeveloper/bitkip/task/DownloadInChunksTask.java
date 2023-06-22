@@ -1,6 +1,6 @@
 package ir.darkdeveloper.bitkip.task;
 
-import ir.darkdeveloper.bitkip.controllers.DownloadingController;
+import ir.darkdeveloper.bitkip.controllers.DetailsController;
 import ir.darkdeveloper.bitkip.models.DownloadModel;
 import ir.darkdeveloper.bitkip.models.DownloadStatus;
 import ir.darkdeveloper.bitkip.repo.DownloadsRepo;
@@ -301,13 +301,13 @@ public class DownloadInChunksTask extends DownloadTask {
                             .findFirst().ifPresentOrElse(dc -> dc.onComplete(download),
                                     () -> {
                                         if (download.isShowCompleteDialog())
-                                            DownloadOpUtils.openDownloadingStage(download);
+                                            DownloadOpUtils.openDetailsStage(download);
                                     });
                     if (download.isOpenAfterComplete())
                         openFile(download);
                 } else
                     openDownloadings.stream().filter(dc -> dc.getDownloadModel().equals(download))
-                            .forEach(DownloadingController::onPause);
+                            .forEach(DetailsController::onPause);
 
                 DownloadsRepo.updateDownloadProgress(download);
                 DownloadsRepo.updateDownloadLastTryDate(download);

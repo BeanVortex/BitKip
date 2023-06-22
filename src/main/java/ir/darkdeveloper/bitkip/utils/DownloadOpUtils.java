@@ -1,6 +1,6 @@
 package ir.darkdeveloper.bitkip.utils;
 
-import ir.darkdeveloper.bitkip.controllers.DownloadingController;
+import ir.darkdeveloper.bitkip.controllers.DetailsController;
 import ir.darkdeveloper.bitkip.models.DownloadModel;
 import ir.darkdeveloper.bitkip.models.DownloadStatus;
 import ir.darkdeveloper.bitkip.repo.DatabaseHelper;
@@ -120,7 +120,7 @@ public class DownloadOpUtils {
                e.printStackTrace();
             }
             openDownloadings.stream().filter(dc -> dc.getDownloadModel().equals(dm))
-                    .forEach(DownloadingController::initDownloadListeners);
+                    .forEach(DetailsController::initDownloadListeners);
         }
     }
 
@@ -145,7 +145,7 @@ public class DownloadOpUtils {
                         restartDownload(dm);
                     }
                     openDownloadings.stream().filter(dc -> dc.getDownloadModel().equals(dm))
-                            .forEach(DownloadingController::initDownloadListeners);
+                            .forEach(DetailsController::initDownloadListeners);
                 });
     }
 
@@ -212,7 +212,7 @@ public class DownloadOpUtils {
                 log.info(logMsg + dm);
                 var openDownloadingsCopy = new ArrayList<>(openDownloadings);
                 openDownloadingsCopy.stream().filter(dc -> dc.getDownloadModel().equals(dm))
-                        .forEach(DownloadingController::closeStage);
+                        .forEach(DetailsController::closeStage);
             });
 
             mainTableUtils.remove(dms);
@@ -224,8 +224,8 @@ public class DownloadOpUtils {
         FxUtils.newDownloadStage(isSingle, null);
     }
 
-    public static void openDownloadingStage(DownloadModel dm) {
-        FxUtils.newDownloadingStage(dm);
+    public static void openDetailsStage(DownloadModel dm) {
+        FxUtils.newDetailsStage(dm);
     }
 
     public static void openFiles(ObservableList<DownloadModel> dms) {

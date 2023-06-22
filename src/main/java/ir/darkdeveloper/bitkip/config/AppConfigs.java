@@ -1,7 +1,7 @@
 package ir.darkdeveloper.bitkip.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import ir.darkdeveloper.bitkip.controllers.DownloadingController;
+import ir.darkdeveloper.bitkip.controllers.DetailsController;
 import ir.darkdeveloper.bitkip.models.DownloadModel;
 import ir.darkdeveloper.bitkip.models.QueueModel;
 import ir.darkdeveloper.bitkip.models.ScheduleModel;
@@ -86,7 +86,7 @@ public class AppConfigs {
 
     public static final List<DownloadModel> currentDownloadings = new ArrayList<>();
     public static final List<QueueModel> startedQueues = new ArrayList<>();
-    public static final List<DownloadingController> openDownloadings = new ArrayList<>();
+    public static final List<DetailsController> openDownloadings = new ArrayList<>();
     // integer represents scheduleModelId
     public static final Map<Integer, ScheduleModel> currentSchedules = new HashMap<>();
 

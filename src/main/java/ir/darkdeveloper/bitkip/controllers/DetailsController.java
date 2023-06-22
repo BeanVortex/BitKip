@@ -32,7 +32,7 @@ import static ir.darkdeveloper.bitkip.config.AppConfigs.currentDownloadings;
 import static ir.darkdeveloper.bitkip.config.AppConfigs.openDownloadings;
 import static ir.darkdeveloper.bitkip.utils.DownloadOpUtils.openFile;
 
-public class DownloadingController implements FXMLController {
+public class DetailsController implements FXMLController {
 
     @FXML
     private VBox container;
@@ -56,6 +56,8 @@ public class DownloadingController implements FXMLController {
     private Label progressLbl;
     @FXML
     private Label resumableLbl;
+    @FXML
+    private Label chunksLbl;
     @FXML
     private ProgressBar downloadProgress;
     @FXML
@@ -132,6 +134,7 @@ public class DownloadingController implements FXMLController {
         downloadedOfLbl.setText(downloadOf);
         progressLbl.setText("Progress: %.2f%%".formatted(downloadModel.getProgress()));
         downloadProgress.setProgress(downloadModel.getProgress() / 100);
+        chunksLbl.setText("Chunks: " + downloadModel.getChunks());
         var resumable = downloadModel.isResumable();
         if (resumable) {
             resumableLbl.getStyleClass().add("yes");
@@ -295,7 +298,11 @@ public class DownloadingController implements FXMLController {
 
     public void onComplete(DownloadModel download) {
         if (download.getDownloadStatus() == DownloadStatus.Completed) {
+            stage.show();
             stage.toFront();
+            stage.setIconified(false);
+            stage.setAlwaysOnTop(true);
+            stage.setAlwaysOnTop(false);
             isComplete = true;
             remainingLbl.setText("Remaining: Done");
             controlBtn.setText("Open");
