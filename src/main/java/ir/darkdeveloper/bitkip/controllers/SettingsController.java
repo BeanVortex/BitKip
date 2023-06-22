@@ -14,9 +14,9 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.control.*;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Paint;
-import javafx.scene.shape.Line;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.Stage;
 import org.controlsfx.control.Notifications;
@@ -30,10 +30,17 @@ import java.util.concurrent.Executors;
 import static ir.darkdeveloper.bitkip.BitKip.getResource;
 import static ir.darkdeveloper.bitkip.config.AppConfigs.*;
 import static ir.darkdeveloper.bitkip.config.observers.QueueSubject.getQueueSubject;
+import static ir.darkdeveloper.bitkip.config.observers.ThemeSubject.getThemeSubject;
 import static ir.darkdeveloper.bitkip.config.observers.ThemeSubject.setTheme;
 
 public class SettingsController implements FXMLController {
 
+    @FXML
+    private VBox root;
+    @FXML
+    private HBox actionArea;
+    @FXML
+    private TabPane tabPane;
     @FXML
     private VBox queueContainer;
     @FXML
@@ -61,11 +68,40 @@ public class SettingsController implements FXMLController {
 
 
     private Stage stage;
-
+    private QueueObserver queueController;
+    private VBox queueRoot;
 
     @Override
     public void initAfterStage() {
         updateTheme(stage.getScene());
+        initQueues();
+        stage.setTitle("Settings");
+        stage.setResizable(true);
+        stage.setOnCloseRequest(e -> {
+            getThemeSubject().removeObserver(this);
+            getQueueSubject().removeObserver(queueController);
+        });
+        var defaultStageWidth = stage.getMinWidth();
+        var defaultStageHeight = stage.getMinHeight();
+        tabPane.getSelectionModel().selectedIndexProperty().addListener((ob, o, n) -> {
+            // if queue tab is selected
+            if (n.intValue() == 2) {
+                root.getChildren().remove(actionArea);
+                var width = queueRoot.getPrefWidth() + 100;
+                var height = queueRoot.getPrefHeight() + 100;
+                stage.setWidth(width);
+                stage.setHeight(height);
+                stage.setMinWidth(width);
+                stage.setMinHeight(height);
+            } else if (!root.getChildren().contains(actionArea)){
+                root.getChildren().add(actionArea);
+                stage.setWidth(defaultStageWidth);
+                stage.setHeight(defaultStageHeight);
+                stage.setMinWidth(defaultStageWidth);
+                stage.setMinHeight(defaultStageHeight);
+                stage.setTitle("Settings");
+            }
+        });
     }
 
     @Override
@@ -74,7 +110,6 @@ public class SettingsController implements FXMLController {
         Validations.validateIntInputCheck(retryField, (long) downloadRetryCount);
         Validations.validateIntInputCheck(rateLimitField, (long) downloadRateLimitCount);
         agentDesc.setText("Note: If you enter wrong agent, your downloads may not start. Your agent will update when you use extension");
-        initQueues();
         initElements();
     }
 
@@ -96,29 +131,13 @@ public class SettingsController implements FXMLController {
     private void initQueues() {
         try {
             var loader = new FXMLLoader(getResource("fxml/queueSetting.fxml"));
-            VBox details = loader.load();
-            queueContainer.getChildren().removeIf(node -> {
-                if (node.getId() == null)
-                    return false;
-                return node.getId().equals("download_details");
-            });
-
-            QueueObserver controller = loader.getController();
-            if (fxmlName.equals("singleDownload"))
-                ((SingleDownload)controller).setUrlModel(urlModel);
-
-            if (prevController != null)
-                getQueueSubject().removeObserver(prevController);
-
-
-
-            details.setId("download_details");
-            controller.setStage(stage);
-            container.getChildren().add(details);
-            getQueueSubject().addObserver(controller);
-            prevController = controller;
-        } catch (IOException e) {
-            log.error(e.getLocalizedMessage());
+            queueRoot = loader.load();
+            queueController = loader.getController();
+            queueController.setStage(stage);
+            queueContainer.getChildren().add(queueRoot);
+            getQueueSubject().addObserver(queueController);
+        } catch (Exception e) {
+            log.error(e.getMessage());
             throw new RuntimeException(e);
         }
     }

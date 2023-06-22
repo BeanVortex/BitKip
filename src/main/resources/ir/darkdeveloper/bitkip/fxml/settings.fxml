@@ -6,6 +6,7 @@
 <?import java.net.URL?>
 <VBox xmlns="http://javafx.com/javafx"
       xmlns:fx="http://javafx.com/fxml"
+      fx:id="root"
       fx:controller="ir.darkdeveloper.bitkip.controllers.SettingsController"
       prefHeight="600.0" prefWidth="500.0" minHeight="600" minWidth="500">
 
@@ -16,7 +17,7 @@
         <URL value="@../css/light_mode.css"/>
     </stylesheets>
 
-    <TabPane>
+    <TabPane fx:id="tabPane">
 
         <Tab text="General" closable="false">
             <VBox alignment="TOP_CENTER" spacing="10" styleClass="padding_10">
@@ -94,8 +95,8 @@
     <HBox styleClass="padding_10" alignment="CENTER_LEFT">
         <Label styleClass="bold" fx:id="savedLabel" visible="false"/>
     </HBox>
-    <Region VBox.vgrow="ALWAYS"/>
-    <HBox styleClass="padding_10">
+    <Region VBox.vgrow="SOMETIMES"/>
+    <HBox styleClass="padding_10" fx:id="actionArea">
         <HBox alignment="BASELINE_LEFT">
             <Button text="Default" styleClass="add_btn" onAction="#onDefaults"/>
         </HBox>

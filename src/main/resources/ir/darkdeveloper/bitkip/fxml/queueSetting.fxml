@@ -16,7 +16,12 @@
 
     <HBox>
         <ListView prefHeight="628" prefWidth="150" minWidth="150" maxWidth="150" fx:id="queueList"/>
-        <VBox prefWidth="465" minWidth="465" prefHeight="628" fx:id="rightContainer">
+        <VBox spacing="5" prefWidth="465" minWidth="465" prefHeight="628" fx:id="rightContainer">
+
+            <HBox styleClass="padding_5">
+                <Label fx:id="selectedQueueLbl" styleClass="title_size2, bold"/>
+            </HBox>
+
             <TabPane>
                 <Tab text="General" closable="false">
                     <VBox spacing="5" styleClass="padding_10">
@@ -36,9 +41,9 @@
                         <HBox alignment="CENTER_LEFT" styleClass="padding_10">
                             <CheckBox text="Download from top" styleClass="bold" fx:id="downloadOrderCheck"/>
                         </HBox>
-                         <HBox alignment="CENTER_LEFT" styleClass="padding_x_10">
-                                <Label text="Based on added to queue column" styleClass="descText"/>
-                         </HBox>
+                        <HBox alignment="CENTER_LEFT" styleClass="padding_x_10">
+                            <Label text="Based on added to queue column" styleClass="descText"/>
+                        </HBox>
                     </VBox>
                 </Tab>
 

@@ -21,6 +21,9 @@
 .padding_10{
     -fx-padding: 10;
 }
+.padding_5{
+    -fx-padding: 5;
+}
 .padding_x_10{
     -fx-padding: 0 10;
 }
@@ -36,6 +39,9 @@
     -fx-font-size: 20;
 }
 
+.title_size2 {
+    -fx-font-size: 17;
+}
 
 #newDownloadBtn {
     -fx-min-width: 50;

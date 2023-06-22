@@ -50,6 +50,8 @@ import static java.time.DayOfWeek.*;
 public class QueueSetting implements FXMLController, QueueObserver {
 
     @FXML
+    private Label selectedQueueLbl;
+    @FXML
     private Label windowsPowerLbl;
     @FXML
     private CheckBox hasFolderCheck;
@@ -246,6 +248,7 @@ public class QueueSetting implements FXMLController, QueueObserver {
         }
         downloadOrderCheck.setSelected(selectedQueue.get().isDownloadFromTop());
         stage.setTitle("Queue Setting: %s".formatted(selectedQueue.get().getName()));
+        selectedQueueLbl.setText("Queue: " + selectedQueue.get().getName());
         queueList.getSelectionModel().select(selectedQueue.get());
         datePicker.setValue(LocalDate.now());
 
@@ -412,7 +415,7 @@ public class QueueSetting implements FXMLController, QueueObserver {
 
             queue.setSpeed(speedField.getText());
             queue.setSimultaneouslyDownload(simulDownloadSpinner.getValue());
-            if (queue.hasFolder() != hasFolderCheck.isSelected() && startedQueues.contains(queue)){
+            if (queue.hasFolder() != hasFolderCheck.isSelected() && startedQueues.contains(queue)) {
                 onReset();
                 throw new IllegalArgumentException("This Queue is currently running, stop it and try again");
             }

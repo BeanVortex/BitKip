@@ -18,7 +18,6 @@
 .date-picker .cell:hover,
 .table-view .column-header-background,
 .table-view .filler,
-.tab-pane .tab,
 .table-view,
 .list-view,
 .tab-pane,
@@ -127,11 +126,20 @@
 }
 
 .table-row-cell:even,
-.list-cell:even,
-.tab-pane .tab:selected {
+.list-cell:even {
     -fx-background-color: -fx-primary-color2;
     -fx-text-fill: -fx-text-color;
 }
+
+.tab-pane .tab:selected {
+    -fx-background-color: -fx-secondary-color;
+    -fx-text-fill: -fx-text-color;
+}
+
+.tab-pane .tab{
+    -fx-background-color: -fx-primary-color2;
+}
+
 
 
 .date-picker .arrow-button,

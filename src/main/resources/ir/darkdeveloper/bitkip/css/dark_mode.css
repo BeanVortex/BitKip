@@ -40,6 +40,10 @@
     -fx-background-color: -fx-secondary-color !important;
 }
 
+.tab-pane .tab:selected {
+    -fx-background-color: -fx-primary-color;
+    -fx-text-fill: -fx-text-color;
+}
 
 #newQueue,
 #openLocation {
