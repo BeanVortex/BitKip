@@ -27,13 +27,14 @@
 
 ## BitKip Demo
 
-![main](https://github.com/DarkDeveloper-arch/BitKip/blob/main/readme-img/main-light.png)
-![main](https://github.com/DarkDeveloper-arch/BitKip/blob/main/readme-img/single-light.png)
-![main](https://github.com/DarkDeveloper-arch/BitKip/blob/main/readme-img/batch-light.png)
-![main](https://github.com/DarkDeveloper-arch/BitKip/blob/main/readme-img/queue-light.png)
-![main](https://github.com/DarkDeveloper-arch/BitKip/blob/main/readme-img/queue-settings-light.png)
-![main](https://github.com/DarkDeveloper-arch/BitKip/blob/main/readme-img/queue-settings-scheduler-light.png)
-![main](https://github.com/DarkDeveloper-arch/BitKip/blob/main/readme-img/settings-light.png)
-![main](https://github.com/DarkDeveloper-arch/BitKip/blob/main/readme-img/logs-light.png)
+![main](https://github.com/DarkDeveloper-arch/BitKip/blob/main/readme-img/main.png)
+![main](https://github.com/DarkDeveloper-arch/BitKip/blob/main/readme-img/single.png)
+![main](https://github.com/DarkDeveloper-arch/BitKip/blob/main/readme-img/batch.png)
+![main](https://github.com/DarkDeveloper-arch/BitKip/blob/main/readme-img/batch-list.png)
+![main](https://github.com/DarkDeveloper-arch/BitKip/blob/main/readme-img/queue-setting.png)
+![main](https://github.com/DarkDeveloper-arch/BitKip/blob/main/readme-img/queue-scheduler.png)
+![main](https://github.com/DarkDeveloper-arch/BitKip/blob/main/readme-img/settings-1.png)
+![main](https://github.com/DarkDeveloper-arch/BitKip/blob/main/readme-img/settings-2.png)
+![main](https://github.com/DarkDeveloper-arch/BitKip/blob/main/readme-img/logs.png)
 
 
