@@ -162,7 +162,7 @@ public class SingleDownload implements QueueObserver {
         bytesField.setText(String.valueOf(urlModel.fileSize()));
         HttpURLConnection conn;
         try {
-            conn = NewDownloadUtils.connect(urlModel.url(), 3000, 3000, true);
+            conn = NewDownloadUtils.connect(urlModel.url(), true);
         } catch (IOException e) {
             log.error(e.getMessage());
             return;
@@ -191,7 +191,7 @@ public class SingleDownload implements QueueObserver {
             // firing select event
             queueCombo.getSelectionModel().select(queueCombo.getSelectionModel().getSelectedIndex());
             var url = urlField.getText();
-            var connection = NewDownloadUtils.connect(url, 3000, 3000, true);
+            var connection = NewDownloadUtils.connect(url, true);
             var executor = Executors.newFixedThreadPool(2);
             var fileNameLocationFuture =
                     NewDownloadUtils.prepareFileNameAndFieldsAsync(connection, url, nameField, executor)

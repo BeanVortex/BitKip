@@ -227,6 +227,8 @@ public class IOUtils {
                     .append("continue_on_connection_lost=").append(String.valueOf(continueOnLostConnectionLost)).append("\n")
                     .append("retry_count=").append(String.valueOf(downloadRetryCount)).append("\n")
                     .append("rate_limit_count=").append(String.valueOf(downloadRateLimitCount)).append("\n")
+                    .append("connection_timeout=").append(String.valueOf(connectionTimeout)).append("\n")
+                    .append("read_timeout=").append(String.valueOf(readTimeout)).append("\n")
                     .append("user_agent_enabled=").append(String.valueOf(userAgentEnabled)).append("\n")
                     .append("user_agent=").append(userAgent);
             writer.flush();
@@ -255,6 +257,8 @@ public class IOUtils {
                         case "continue_on_connection_lost" -> continueOnLostConnectionLost = value.equals("true");
                         case "retry_count" -> downloadRetryCount = Integer.parseInt(value);
                         case "rate_limit_count" -> downloadRateLimitCount = Integer.parseInt(value);
+                        case "connection_timeout" -> connectionTimeout = Integer.parseInt(value);
+                        case "read_timeout" -> readTimeout = Integer.parseInt(value);
                         case "user_agent" -> userAgent = value;
                         case "user_agent_enabled" -> userAgentEnabled = value.equals("true");
                     }
@@ -347,7 +351,7 @@ public class IOUtils {
             var chunks = Validations.maxChunks();
             var allDownloadsQueue = QueuesRepo.findByName(ALL_DOWNLOADS_QUEUE, false);
             var firstUrl = lines.get(0);
-            var connection = NewDownloadUtils.connect(firstUrl, 3000, 3000, true);
+            var connection = NewDownloadUtils.connect(firstUrl, true);
             var firstFileName = NewDownloadUtils.extractFileName(firstUrl, connection);
             var secondaryQueue = BatchDownload.getSecondaryQueueByFileName(firstFileName);
             var path = NewDownloadUtils.determineLocation(firstFileName);

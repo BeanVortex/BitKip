@@ -78,10 +78,18 @@
                 <CheckBox text="Use user agent" fx:id="agentCheck" onAction="#onAgentCheck"
                           styleClass="settingDescription"/>
                 <HBox alignment="CENTER_LEFT" spacing="5">
-                    <Label text="User agent:" styleClass="settingDescription"/>
+                    <Label text="User Agent:" styleClass="settingDescription"/>
                     <TextField fx:id="agentField" prefWidth="300"/>
                 </HBox>
                 <Label wrapText="true" styleClass="settingDescription, opacity_7" fx:id="agentDesc"/>
+                <HBox alignment="CENTER_LEFT" spacing="5">
+                    <Label text="Connection Timeout:" styleClass="settingDescription"/>
+                    <TextField fx:id="connectionField"/>
+                </HBox>
+                <HBox alignment="CENTER_LEFT" spacing="5">
+                    <Label text="Read Timeout:" styleClass="settingDescription"/>
+                    <TextField fx:id="readField"/>
+                </HBox>
             </VBox>
         </Tab>
 

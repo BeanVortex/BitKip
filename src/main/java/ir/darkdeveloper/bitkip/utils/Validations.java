@@ -169,10 +169,11 @@ public class Validations {
     }
 
     public static void validateDownloadModel(DownloadModel dm) throws IOException {
-        if (dm.getSize() != -1 && dm.getSize() != 0)
+        var size = dm.getSize();
+        if (size == -1 || size == 0)
             return;
 
-        var connection = NewDownloadUtils.connect(dm.getUrl(), 3000, 3000, true);
+        var connection = NewDownloadUtils.connect(dm.getUrl(), true);
         var canResume = NewDownloadUtils.canResume(connection);
         var fileSize = NewDownloadUtils.getFileSize(connection);
         if (fileSize == 0)

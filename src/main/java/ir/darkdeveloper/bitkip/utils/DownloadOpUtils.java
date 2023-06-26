@@ -139,11 +139,8 @@ public class DownloadOpUtils {
                     if (dm.isResumable()) {
                         log.info("Resuming download : " + dm);
                         startDownload(dm, speedLimit, byteLimit, true, false, null);
-                    } else {
-                        dm.setDownloadStatus(DownloadStatus.Restarting);
-                        mainTableUtils.refreshTable();
+                    } else
                         restartDownload(dm);
-                    }
                     openDownloadings.stream().filter(dc -> dc.getDownloadModel().equals(dm))
                             .forEach(DetailsController::initDownloadListeners);
                 });
@@ -167,14 +164,15 @@ public class DownloadOpUtils {
         dm.setProgress(0);
         dm.setCompleteDate(null);
         dm.setLastTryDate(lastTryDate);
+        dm.setDownloadStatus(DownloadStatus.Restarting);
+        mainTableUtils.refreshTable();
         String[] cols = {COL_DOWNLOADED, COL_PROGRESS, COL_COMPLETE_DATE, COL_LAST_TRY_DATE};
         String[] values = {"0", "0", "NULL", lastTryDate.toString()};
         DatabaseHelper.updateRow(cols, values, DatabaseHelper.DOWNLOADS_TABLE_NAME, dmId);
-        mainTableUtils.refreshTable();
         try {
             triggerDownload(dm, null, null, true, false, null);
         } catch (ExecutionException | InterruptedException e) {
-            e.printStackTrace();
+            log.error(e.getMessage());
         }
     }
 

@@ -47,6 +47,11 @@ public class AppConfigs {
     public static String userAgent = defaultUserAgent;
     public static final boolean defaultUserAgentEnabled = false;
     public static boolean userAgentEnabled = defaultUserAgentEnabled;
+    public static final int defaultConnectionTimeout = 3000;
+    public static int connectionTimeout = defaultConnectionTimeout;
+    public static final int defaultReadTimeout = 3000;
+    public static int readTimeout = defaultReadTimeout;
+
 
 
     public static final ObjectMapper mapper = new ObjectMapper();

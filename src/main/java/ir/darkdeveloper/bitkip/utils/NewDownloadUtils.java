@@ -29,25 +29,25 @@ import static ir.darkdeveloper.bitkip.utils.Validations.maxChunks;
 public class NewDownloadUtils {
 
 
-    public static HttpURLConnection connect(String uri, int connectTimeout, int readTimeout, boolean showErrors) throws IOException {
+    public static HttpURLConnection connect(String uri, boolean showErrors) throws IOException {
         try {
             if (uri.isBlank())
                 throw new IllegalArgumentException("URL is blank");
             var url = new URL(uri);
             var conn = (HttpURLConnection) url.openConnection();
-            conn.setConnectTimeout(connectTimeout);
+            conn.setConnectTimeout(connectionTimeout);
             conn.setReadTimeout(readTimeout);
             if (userAgentEnabled)
                 conn.setRequestProperty("User-Agent", userAgent);
             return conn;
         } catch (IOException e) {
             if (showErrors) {
-                var msg = "Connection or read timeout. Connect to the internet or check the url";
+                var msg = "Connection or read timeout. Connect to the internet or check the url: " + e.getMessage();
                 log.error(msg);
-                Notifications.create()
+                Platform.runLater(() -> Notifications.create()
                         .title("Bad Connection")
                         .text(msg)
-                        .showError();
+                        .showError());
                 throw new RuntimeException(msg);
             } else
                 throw new IOException(e);
@@ -74,7 +74,7 @@ public class NewDownloadUtils {
         return CompletableFuture.supplyAsync(() -> {
             if (finalConnection[0] == null) {
                 try {
-                    finalConnection[0] = connect(urlField.getText(), 3000, 3000, true);
+                    finalConnection[0] = connect(urlField.getText(), true);
                 } catch (IOException e) {
                     log.error(e.getMessage());
                 }
@@ -128,7 +128,7 @@ public class NewDownloadUtils {
         return CompletableFuture.supplyAsync(() -> {
             if (finalConnection[0] == null) {
                 try {
-                    finalConnection[0] = connect(link, 3000, 3000, true);
+                    finalConnection[0] = connect(link, true);
                 } catch (IOException e) {
                     log.error(e.getMessage());
                 }
