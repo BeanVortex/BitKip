@@ -17,7 +17,7 @@ import java.util.*;
 
 public class AppConfigs {
 
-    public static final String VERSION = "1.1.0";
+    public static final String VERSION = "1.1.1";
 
     public static final String dataPath = System.getProperty("user.home")
             + File.separator + "Documents"

@@ -40,7 +40,11 @@ public class FxUtils {
     private static final String QUEUE_SETTING_STAGE = "QueueSetting";
     private static final String ABOUT_STAGE = "About";
     private static final String LOGS_STAGE = "Log";
-    private static final Map<String, Stage> openStages = new LinkedHashMap<>();
+    private static final Map<String, StageAndController> openStages = new LinkedHashMap<>();
+
+    record StageAndController(Stage stage, FXMLController controller) {
+
+    }
 
 
     public static void startMainStage(Stage stage) {
@@ -136,7 +140,8 @@ public class FxUtils {
 
     public static void newOnceStageWindow(String key, String resource, String title) {
         if (openStages.containsKey(key)) {
-            var stage = openStages.get(key);
+            var val = openStages.get(key);
+            var stage = val.stage();
             stage.toFront();
             if (stage.isShowing())
                 return;
@@ -168,7 +173,8 @@ public class FxUtils {
             getThemeSubject().removeObserver(controller);
         });
         stage.show();
-        openStages.put(key, stage);
+        var stageAndController = new StageAndController(stage, controller);
+        openStages.put(key, stageAndController);
     }
 
     public static void newSettingsStage() {
@@ -262,7 +268,10 @@ public class FxUtils {
 
     public static void newQueueSettingStage(QueueModel selectedQueue) {
         if (openStages.containsKey(QUEUE_SETTING_STAGE)) {
-            var stage = openStages.get(QUEUE_SETTING_STAGE);
+            var val = openStages.get(QUEUE_SETTING_STAGE);
+            var stage = val.stage();
+            var controller = val.controller();
+            ((QueueSetting) controller).setSelectedQueue(selectedQueue);
             stage.toFront();
             if (stage.isShowing())
                 return;
@@ -300,7 +309,8 @@ public class FxUtils {
         stage.show();
         stage.setAlwaysOnTop(true);
         stage.setAlwaysOnTop(false);
-        openStages.put(QUEUE_SETTING_STAGE, stage);
+        var stageAndController = new StageAndController(stage, controller);
+        openStages.put(QUEUE_SETTING_STAGE, stageAndController);
     }
 
     public static void newRefreshStage(DownloadModel dm) {

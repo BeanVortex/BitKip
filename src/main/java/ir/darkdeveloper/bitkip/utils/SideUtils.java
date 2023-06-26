@@ -121,6 +121,13 @@ public class SideUtils {
                 sideTree.setContextMenu(cMenu);
                 cMenu.show(selectedItem.getGraphic(), Side.BOTTOM, 0, 0);
             }
+            if (event.getButton().equals(MouseButton.PRIMARY) && event.getClickCount() == 2) {
+                if (itemName.equals("Finished") || itemName.equals("Unfinished")
+                        || itemName.equals("Categories") || itemName.equals("Queues"))
+                    return;
+                var qm = QueuesRepo.findByName(selectedItem.getValue(), false);
+                FxUtils.newQueueSettingStage(qm);
+            }
         };
     }
 
