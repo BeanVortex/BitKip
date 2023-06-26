@@ -58,11 +58,7 @@ public class SettingsController implements FXMLController {
     @FXML
     private CheckBox serverCheck;
     @FXML
-    private TextField portField;
-    @FXML
-    private TextField retryField;
-    @FXML
-    private TextField rateLimitField;
+    private TextField connectionField, readField, rateLimitField, retryField, portField;
     @FXML
     private Label savedLabel;
 
@@ -93,7 +89,7 @@ public class SettingsController implements FXMLController {
                 stage.setHeight(height);
                 stage.setMinWidth(width);
                 stage.setMinHeight(height);
-            } else if (!root.getChildren().contains(actionArea)){
+            } else if (!root.getChildren().contains(actionArea)) {
                 root.getChildren().add(actionArea);
                 stage.setWidth(defaultStageWidth);
                 stage.setHeight(defaultStageHeight);
@@ -109,6 +105,8 @@ public class SettingsController implements FXMLController {
         Validations.validateIntInputCheck(portField, (long) serverPort);
         Validations.validateIntInputCheck(retryField, (long) downloadRetryCount);
         Validations.validateIntInputCheck(rateLimitField, (long) downloadRateLimitCount);
+        Validations.validateIntInputCheck(connectionField, (long) connectionTimeout);
+        Validations.validateIntInputCheck(readField, (long) readTimeout);
         agentDesc.setText("Note: If you enter wrong agent, your downloads may not start. Your agent will update when you use extension");
         initElements();
     }
@@ -126,6 +124,8 @@ public class SettingsController implements FXMLController {
         agentField.setText(userAgent);
         agentCheck.setSelected(userAgentEnabled);
         agentField.setDisable(!userAgentEnabled);
+        connectionField.setText(String.valueOf(connectionTimeout));
+        readField.setText(String.valueOf(readTimeout));
     }
 
     private void initQueues() {
@@ -215,6 +215,8 @@ public class SettingsController implements FXMLController {
         serverPort = Integer.parseInt(portField.getText());
         downloadRetryCount = Integer.parseInt(retryField.getText());
         downloadRateLimitCount = Integer.parseInt(rateLimitField.getText());
+        readTimeout = Integer.parseInt(readField.getText());
+        connectionTimeout = Integer.parseInt(connectionField.getText());
         userAgent = agentField.getText();
         IOUtils.saveConfigs();
         showSavedMessage();
@@ -255,6 +257,8 @@ public class SettingsController implements FXMLController {
         downloadRateLimitCount = defaultDownloadRateLimitCount;
         userAgent = defaultUserAgent;
         userAgentEnabled = defaultUserAgentEnabled;
+        connectionTimeout = defaultConnectionTimeout;
+        readTimeout = defaultReadTimeout;
         IOUtils.saveConfigs();
         initElements();
         showSavedMessage();

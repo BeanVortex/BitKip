@@ -7,6 +7,8 @@ import ir.darkdeveloper.bitkip.repo.DownloadsRepo;
 import ir.darkdeveloper.bitkip.utils.DownloadOpUtils;
 import ir.darkdeveloper.bitkip.utils.IOUtils;
 import ir.darkdeveloper.bitkip.utils.NewDownloadUtils;
+import javafx.application.Platform;
+import org.controlsfx.control.Notifications;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -17,6 +19,7 @@ import java.nio.ByteBuffer;
 import java.nio.channels.Channels;
 import java.nio.channels.ClosedChannelException;
 import java.nio.channels.FileChannel;
+import java.nio.channels.ReadableByteChannel;
 import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.util.concurrent.ExecutorService;
@@ -59,49 +62,63 @@ public class DownloadLimitedTask extends DownloadTask {
             var parentFolder = Path.of(file.getPath()).getParent().toFile();
             if (!parentFolder.exists())
                 parentFolder.mkdir();
-            if (downloadModel.getSize() == -1)
+            var size = downloadModel.getSize();
+            if (size == -1 || size == 0)
                 performDownloadInStream();
             else
                 performDownload();
         } catch (IOException | InterruptedException e) {
             if (e instanceof IOException)
-                log.error(e.getLocalizedMessage());
+                log.error(e.getMessage());
             this.pause();
         }
         return IOUtils.getFileSize(file);
     }
 
-    private void performDownloadInStream() {
+    private void performDownloadInStream() throws IOException {
+        InputStream i = null;
+        ReadableByteChannel rbc = null;
+        FileOutputStream fos = null;
         try {
-            var downloadUrl = new URL(url);
-            var inputStream = downloadUrl.openStream();
-            var readableByteChannel = Channels.newChannel(inputStream);
+            var con = NewDownloadUtils.connect(url, true);
+            con.setRequestProperty("User-Agent", userAgent);
+            i = con.getInputStream();
+            rbc = Channels.newChannel(i);
 
-            var out = new FileOutputStream(file, file.exists());
-            fileChannel = out.getChannel();
+            fos = new FileOutputStream(file, file.exists());
+            fileChannel = fos.getChannel();
 
             updateProgress(0, 1);
 
             var buffer = ByteBuffer.allocate(1024);
-            while (readableByteChannel.read(buffer) != -1) {
+            while (rbc.read(buffer) != -1) {
                 buffer.flip();
                 fileChannel.write(buffer);
                 updateValue(fileChannel.position());
                 buffer.clear();
             }
 
-
             var size = fileChannel.size();
             downloadModel.setSize(size);
-            fileChannel.close();
-            out.close();
-            readableByteChannel.close();
-            inputStream.close();
+
             DownloadsRepo.updateDownloadProperty(DownloadsRepo.COL_SIZE, String.valueOf(size), downloadModel.getId());
 
 
         } catch (IOException e) {
             log.error(e.getMessage());
+            Platform.runLater(() -> Notifications.create()
+                    .title("Couldn't download file")
+                    .text(e.getMessage())
+                    .showError());
+        } finally {
+            if (fileChannel != null)
+                fileChannel.close();
+            if (fos != null)
+                fos.close();
+            if (rbc != null)
+                rbc.close();
+            if (i != null)
+                i.close();
         }
     }
 
@@ -109,7 +126,7 @@ public class DownloadLimitedTask extends DownloadTask {
     private void performDownload() throws IOException, InterruptedException {
 
         try {
-            var con = NewDownloadUtils.connect(url, 3000, 3000, false);
+            var con = NewDownloadUtils.connect(url, false);
             if (!downloadModel.isResumable())
                 con.setRequestProperty("User-Agent", userAgent);
             configureResume(con, file, downloadModel.getSize());
@@ -220,17 +237,19 @@ public class DownloadLimitedTask extends DownloadTask {
                 } else openDownloadings.stream().filter(dc -> dc.getDownloadModel().equals(download))
                         .forEach(DetailsController::onPause);
 
+
                 download.setDownloaded(IOUtils.getFileSize(file));
                 DownloadsRepo.updateDownloadProgress(download);
                 DownloadsRepo.updateDownloadLastTryDate(download);
-                currentDownloadings.remove(download);
-                mainTableUtils.refreshTable();
             }
+        } catch (IOException e) {
+            log.error(e.getMessage());
+        } finally {
+            currentDownloadings.remove(downloadModel);
+            mainTableUtils.refreshTable();
             if (executor != null && !blocking)
                 executor.shutdownNow();
             System.gc();
-        } catch (IOException e) {
-            log.error(e.getLocalizedMessage());
         }
 
     }
@@ -238,7 +257,10 @@ public class DownloadLimitedTask extends DownloadTask {
     @Override
     protected void failed() {
         log.info("Failed download: " + downloadModel);
-        pause();
+        paused = true;
+        retries = 0;
+        rateLimitCount = 0;
+        succeeded();
     }
 
     private void calculateSpeedAndProgress(File file, long fileSize) {

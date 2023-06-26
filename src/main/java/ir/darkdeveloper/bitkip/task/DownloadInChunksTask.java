@@ -158,7 +158,7 @@ public class DownloadInChunksTask extends DownloadTask {
                                  long existingFileSize, int rateLimitCount, int retries)
             throws InterruptedException, IOException {
         try {
-            var con = NewDownloadUtils.connect(url, 3000, 3000, false);
+            var con = NewDownloadUtils.connect(url, false);
             con.addRequestProperty("Range", "bytes=" + fromContinue + "-" + to);
             if (!downloadModel.isResumable())
                 con.setRequestProperty("User-Agent", userAgent);
@@ -199,7 +199,7 @@ public class DownloadInChunksTask extends DownloadTask {
         if (retries != downloadRetryCount) {
             try {
                 var bytesToDownloadEachInCycle = limit / chunks;
-                var con = NewDownloadUtils.connect(url, 3000, 3000, false);
+                var con = NewDownloadUtils.connect(url, false);
                 if (!downloadModel.isResumable())
                     con.setRequestProperty("User-Agent", userAgent);
                 con.addRequestProperty("Range", "bytes=" + fromContinue + "-" + to);
@@ -312,14 +312,15 @@ public class DownloadInChunksTask extends DownloadTask {
                 DownloadsRepo.updateDownloadProgress(download);
                 DownloadsRepo.updateDownloadLastTryDate(download);
 
-                currentDownloadings.remove(download);
-                mainTableUtils.refreshTable();
             }
+        } catch (IOException e) {
+            log.error(e.getLocalizedMessage());
+        } finally {
+            currentDownloadings.remove(downloadModel);
+            mainTableUtils.refreshTable();
             if (executor != null && !blocking)
                 executor.shutdownNow();
             System.gc();
-        } catch (IOException e) {
-            log.error(e.getLocalizedMessage());
         }
     }
 

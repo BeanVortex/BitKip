@@ -28,7 +28,7 @@ public class LinkDataTask extends Task<Flux<LinkModel>> {
                     break;
                 HttpURLConnection connection;
                 try {
-                    connection = NewDownloadUtils.connect(lm.getUrl(), 3000, 3000, true);
+                    connection = NewDownloadUtils.connect(lm.getUrl(), true);
                 } catch (IOException e) {
                     log.error(e.getMessage());
                     break;
