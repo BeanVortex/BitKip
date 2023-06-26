@@ -63,7 +63,7 @@ public class DownloadLimitedTask extends DownloadTask {
             if (!parentFolder.exists())
                 parentFolder.mkdir();
             var size = downloadModel.getSize();
-            if (size == -1 || size == 0)
+            if (size == -1 || size == 0 || !downloadModel.isResumable())
                 performDownloadInStream();
             else
                 performDownload();
@@ -89,12 +89,16 @@ public class DownloadLimitedTask extends DownloadTask {
             fileChannel = fos.getChannel();
 
             updateProgress(0, 1);
+            var fileSize = downloadModel.getSize();
+            if (fileSize > 0)
+                calculateSpeedAndProgress(file, fileSize);
 
-            var buffer = ByteBuffer.allocate(1024);
+            var buffer = ByteBuffer.allocate(8192);
             while (rbc.read(buffer) != -1) {
                 buffer.flip();
                 fileChannel.write(buffer);
-                updateValue(fileChannel.position());
+                if (fileSize<0)
+                    updateValue(fileChannel.position());
                 buffer.clear();
             }
 

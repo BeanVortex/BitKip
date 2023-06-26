@@ -183,13 +183,15 @@ public class Validations {
         if (!canResume)
             dm.setChunks(0);
         var observedDownload = mainTableUtils.getObservedDownload(dm);
-        observedDownload.setSize(fileSize);
-        observedDownload.setResumable(canResume);
-        openDownloadings.stream()
-                .filter(dc -> dc.getDownloadModel().equals(dm))
-                .forEach(dc -> dc.setDownloadModel(dm));
-        DownloadsRepo.updateDownloadProperty(DownloadsRepo.COL_SIZE, String.valueOf(fileSize), dm.getId());
-        DownloadsRepo.updateDownloadProperty(DownloadsRepo.COL_RESUMABLE, String.valueOf(canResume), dm.getId());
+        if (observedDownload != null){
+            observedDownload.setSize(fileSize);
+            observedDownload.setResumable(canResume);
+            openDownloadings.stream()
+                    .filter(dc -> dc.getDownloadModel().equals(dm))
+                    .forEach(dc -> dc.setDownloadModel(dm));
+            DownloadsRepo.updateDownloadProperty(DownloadsRepo.COL_SIZE, String.valueOf(fileSize), dm.getId());
+            DownloadsRepo.updateDownloadProperty(DownloadsRepo.COL_RESUMABLE, String.valueOf(canResume), dm.getId());
+        }
 
     }
 }
