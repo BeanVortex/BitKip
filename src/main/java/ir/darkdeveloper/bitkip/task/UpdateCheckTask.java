@@ -56,10 +56,10 @@ public class UpdateCheckTask extends Task<UpdateModel> {
                     fileSize = "";
                 assets.add(new UpdateModel.Asset(fileTitle, fileLink, fileSize));
             }
-            executor.shutdown();
+            executor.shutdownNow();
             return new UpdateModel(updateVersion, description, assets);
         }
-        executor.shutdown();
+        executor.shutdownNow();
         cancel();
         return null;
     }

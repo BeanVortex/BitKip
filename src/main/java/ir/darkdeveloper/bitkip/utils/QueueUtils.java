@@ -36,8 +36,14 @@ public class QueueUtils {
                             .sorted(Comparator.comparing(DownloadModel::getAddToQueueDate))
                             .toList()
             );
+            var executor = Executors.newCachedThreadPool();
             if (downloadsByQueue.isEmpty()) {
-                queueDoneNotification(qm);
+                if (triggerTurnOffOnEmptyQueue)
+                    whenQueueDone(qm, startItem, stopItem, executor);
+                else{
+                    queueDoneNotification(qm);
+                    executor.shutdownNow();
+                }
                 return;
             }
             startItem.setDisable(true);
@@ -47,17 +53,18 @@ public class QueueUtils {
             downloadsByQueue = new ArrayList<>(downloadsByQueue.stream().map(mainTableUtils::getObservedDownload).toList());
             qm.setDownloads(new CopyOnWriteArrayList<>(downloadsByQueue));
             startedQueues.add(qm);
-            start(qm, startItem, stopItem);
+            start(qm, startItem, stopItem, executor);
             log.info("Queue has been started: " + qm);
         } else if (schedule.isEnabled() && schedule.isOnceDownload()) {
-            currentSchedules.get(schedule.getId()).getStartScheduler().shutdown();
+            // in case when user starts the queue manually which adds the queue to startedQueues and
+            // when start scheduler runs, it shutdowns the start scheduler
+            currentSchedules.get(schedule.getId()).getStartScheduler().shutdownNow();
             log.info("Start scheduler has been disabled for: " + qm.getName());
         }
 
     }
 
-    private static void start(QueueModel qm, MenuItem startItem, MenuItem stopItem) {
-        var executor = Executors.newCachedThreadPool();
+    private static void start(QueueModel qm, MenuItem startItem, MenuItem stopItem, ExecutorService executor) {
         executor.submit(() -> {
             var simulDownloads = new AtomicInteger(0);
             var sDownloads = qm.getSimultaneouslyDownload();
@@ -148,7 +155,7 @@ public class QueueUtils {
     /**
      * waits for non-blocking downloads to finish
      *
-     * @see QueueUtils#performSimultaneousDownloadDontWaitForPrev( int, AtomicInteger, DownloadModel, String)
+     * @see QueueUtils#performSimultaneousDownloadDontWaitForPrev(int, AtomicInteger, DownloadModel, String)
      */
     private static void waitToFinishForLessPausedDownloads(QueueModel qm, MenuItem startItem, MenuItem stopItem,
                                                            ExecutorService executor) {
@@ -182,7 +189,7 @@ public class QueueUtils {
         }
         shutdownSchedulersOnOnceDownload(qm);
         if (executor != null)
-            executor.shutdown();
+            executor.shutdownNow();
         log.info("Queue stopped automatically: " + qm.toStringModel());
     }
 
@@ -204,7 +211,7 @@ public class QueueUtils {
     private static void shutdownSchedulersOnOnceDownload(QueueModel qm) {
         var schedule = qm.getSchedule();
         if (schedule.isEnabled() && schedule.isOnceDownload()) {
-            currentSchedules.get(schedule.getId()).getStartScheduler().shutdown();
+            currentSchedules.get(schedule.getId()).getStartScheduler().shutdownNow();
             var stopScheduler = currentSchedules.get(schedule.getId()).getStopScheduler();
             if (stopScheduler != null) stopScheduler.shutdownNow();
             schedule.setEnabled(false);

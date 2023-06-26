@@ -54,6 +54,13 @@
                         <Label styleClass="settingDescription, opacity_7" text="Server settings will apply on restart"/>
                     </VBox>
                 </VBox>
+
+                <VBox styleClass="padding_10" spacing="10">
+                    <Label styleClass="settingTile" text="Queue"/>
+                    <CheckBox text="Trigger turn off on an empty queue with a scheduler" fx:id="triggerOffCheck"
+                              styleClass="settingDescription"
+                              onAction="#onTurnOffCheck"/>
+                </VBox>
             </VBox>
         </Tab>
 

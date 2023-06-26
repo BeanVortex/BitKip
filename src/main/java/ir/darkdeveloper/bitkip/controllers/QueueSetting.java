@@ -34,7 +34,6 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.HashSet;
 import java.util.ResourceBundle;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import static com.sun.jna.Platform.*;
@@ -363,7 +362,6 @@ public class QueueSetting implements FXMLController, QueueObserver {
 
     @FXML
     private void onSave() {
-        var executor = Executors.newCachedThreadPool();
         try {
             var schedule = new ScheduleModel();
             var queue = selectedQueue.get();
@@ -435,16 +433,17 @@ public class QueueSetting implements FXMLController, QueueObserver {
             queueList.getSelectionModel().select(queue);
 
             ScheduleTask.schedule(queue);
-            showResultMessage("Successfully Saved", SaveStatus.SUCCESS, executor);
+            showResultMessage("Successfully Saved", SaveStatus.SUCCESS);
             log.info("Updated queue : " + queue.toStringModel());
         } catch (IllegalArgumentException e) {
-            showResultMessage(e.getMessage(), SaveStatus.ERROR, executor);
+            showResultMessage(e.getMessage(), SaveStatus.ERROR);
             log.error(e.getMessage());
         }
 
     }
 
-    private void showResultMessage(String message, SaveStatus saveStatus, ExecutorService executor) {
+    private void showResultMessage(String message, SaveStatus saveStatus) {
+        var executor = Executors.newCachedThreadPool();
         executor.submit(() -> {
             try {
                 Platform.runLater(() -> savedLabel.setText(message));

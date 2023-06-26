@@ -223,6 +223,7 @@ public class IOUtils {
                     .append("theme=").append(theme).append("\n")
                     .append("server_enabled=").append(String.valueOf(serverEnabled)).append("\n")
                     .append("port=").append(String.valueOf(serverPort)).append("\n")
+                    .append("trigger_turn_off_on_empty_queue=").append(String.valueOf(triggerTurnOffOnEmptyQueue)).append("\n")
                     .append("show_complete_dialog=").append(String.valueOf(showCompleteDialog)).append("\n")
                     .append("continue_on_connection_lost=").append(String.valueOf(continueOnLostConnectionLost)).append("\n")
                     .append("retry_count=").append(String.valueOf(downloadRetryCount)).append("\n")
@@ -253,6 +254,7 @@ public class IOUtils {
                         case "theme" -> theme = value;
                         case "server_enabled" -> serverEnabled = value.equals("true");
                         case "port" -> serverPort = Integer.parseInt(value);
+                        case "trigger_turn_off_on_empty_queue" -> triggerTurnOffOnEmptyQueue = value.equals("true");
                         case "show_complete_dialog" -> showCompleteDialog = value.equals("true");
                         case "continue_on_connection_lost" -> continueOnLostConnectionLost = value.equals("true");
                         case "retry_count" -> downloadRetryCount = Integer.parseInt(value);

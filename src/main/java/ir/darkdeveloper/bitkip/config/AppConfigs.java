@@ -51,7 +51,8 @@ public class AppConfigs {
     public static int connectionTimeout = defaultConnectionTimeout;
     public static final int defaultReadTimeout = 3000;
     public static int readTimeout = defaultReadTimeout;
-
+    public static final boolean defaultTriggerTurnOffOnEmptyQueue = true;
+    public static boolean triggerTurnOffOnEmptyQueue = defaultTriggerTurnOffOnEmptyQueue;
 
 
     public static final ObjectMapper mapper = new ObjectMapper();

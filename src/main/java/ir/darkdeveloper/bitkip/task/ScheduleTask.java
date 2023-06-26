@@ -41,9 +41,9 @@ public class ScheduleTask {
                 .findFirst().orElse(null);
 
 
-        startSchedule(isThereSchedule, queue, startItem, stopItem);
+        startSchedule(queue, startItem, stopItem);
         if (schedule.isStopTimeEnabled())
-            stopSchedule(isThereSchedule, queue, startItem, stopItem);
+            stopSchedule(queue, startItem, stopItem);
         currentSchedules.put(schedule.getId(), schedule);
         if (schedule.isTurnOffEnabled() && (isLinux() || isMac()) && userPassword == null) {
             var header = "You have at least one queue that has been scheduled to turn off or suspend.";
@@ -52,32 +52,22 @@ public class ScheduleTask {
         }
     }
 
-    private static void startSchedule(boolean isThereSchedule, QueueModel queue,
-                                      MenuItem startItem, MenuItem stopItem) {
+    private static void startSchedule(QueueModel queue, MenuItem startItem, MenuItem stopItem) {
         Runnable run = () -> {
             log.info("Start scheduler triggered for " + queue.toStringModel());
             if (isSchedulerNotTriggeredOnTime("Start", queue)) return;
             QueueUtils.startQueue(queue, startItem, stopItem);
         };
-        var schedule = queue.getSchedule();
         createSchedule(run, queue, false);
-        var sm = currentSchedules.get(schedule.getId());
-        if (isThereSchedule)
-            sm.getStartScheduler().shutdown();
     }
 
-    private static void stopSchedule(boolean isThereSchedule, QueueModel queue,
-                                     MenuItem startItem, MenuItem stopItem) {
+    private static void stopSchedule(QueueModel queue, MenuItem startItem, MenuItem stopItem) {
         Runnable run = () -> {
             log.info("Stop scheduler triggered for " + queue.toStringModel());
             if (isSchedulerNotTriggeredOnTime("Stop", queue)) return;
             QueueUtils.stopQueue(queue, startItem, stopItem);
         };
-        var schedule = queue.getSchedule();
         createSchedule(run, queue, true);
-        var sm = currentSchedules.get(schedule.getId());
-        if (isThereSchedule && sm.getStopScheduler() != null)
-            sm.getStopScheduler().shutdown();
     }
 
     private static boolean isSchedulerNotTriggeredOnTime(String mode, QueueModel queue) {
@@ -193,8 +183,8 @@ public class ScheduleTask {
                     return true;
                 }
             }
-            if (sm != null && sm.getStartScheduler() != null) sm.getStartScheduler().shutdown();
-            if (sm != null && sm.getStopScheduler() != null) sm.getStopScheduler().shutdown();
+            if (sm != null && sm.getStartScheduler() != null) sm.getStartScheduler().shutdownNow();
+            if (sm != null && sm.getStopScheduler() != null) sm.getStopScheduler().shutdownNow();
         }
         return false;
     }

@@ -36,6 +36,8 @@ import static ir.darkdeveloper.bitkip.config.observers.ThemeSubject.setTheme;
 public class SettingsController implements FXMLController {
 
     @FXML
+    private CheckBox triggerOffCheck;
+    @FXML
     private VBox root;
     @FXML
     private HBox actionArea;
@@ -114,6 +116,7 @@ public class SettingsController implements FXMLController {
     private void initElements() {
         lblLocation.setText(downloadPath);
         serverCheck.setSelected(serverEnabled);
+        triggerOffCheck.setSelected(triggerTurnOffOnEmptyQueue);
         portField.setText(String.valueOf(serverPort));
         retryField.setText(String.valueOf(downloadRetryCount));
         rateLimitField.setText(String.valueOf(downloadRateLimitCount));
@@ -252,6 +255,7 @@ public class SettingsController implements FXMLController {
         serverEnabled = defaultServerEnabled;
         serverPort = defaultServerPort;
         showCompleteDialog = defaultShowCompleteDialog;
+        triggerTurnOffOnEmptyQueue = defaultTriggerTurnOffOnEmptyQueue;
         continueOnLostConnectionLost = defaultContinueOnLostConnectionLost;
         downloadRetryCount = defaultDownloadRetryCount;
         downloadRateLimitCount = defaultDownloadRateLimitCount;
@@ -269,5 +273,10 @@ public class SettingsController implements FXMLController {
         userAgentEnabled = agentCheck.isSelected();
         IOUtils.saveConfigs();
         agentField.setDisable(!userAgentEnabled);
+    }
+
+    public void onTurnOffCheck() {
+        triggerTurnOffOnEmptyQueue = triggerOffCheck.isSelected();
+        IOUtils.saveConfigs();
     }
 }

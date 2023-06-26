@@ -31,7 +31,7 @@ public class ExtensionInstallTask extends Task<Integer> {
             FxUtils.setClipboard(fileLink);
             FxUtils.newDownloadStage(true, null);
         });
-        executor.shutdown();
+        executor.shutdownNow();
         return 0;
     }
 
