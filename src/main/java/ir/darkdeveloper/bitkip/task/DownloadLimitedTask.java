@@ -154,7 +154,6 @@ public class DownloadLimitedTask extends DownloadTask {
         } catch (SocketTimeoutException | UnknownHostException | SocketException s) {
             retries++;
             if (!paused && (continueOnLostConnectionLost || retries != downloadRetryCount)) {
-                log.warn("Downloading " + downloadModel.getName() + " failed. retry count : " + retries);
                 Thread.sleep(2000);
                 performDownload();
             }
@@ -284,7 +283,7 @@ public class DownloadLimitedTask extends DownloadTask {
 
             } catch (InterruptedException ignore) {
             } catch (IOException e) {
-                e.printStackTrace();
+                log.error(e.getMessage());
             }
         });
     }
