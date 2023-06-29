@@ -173,7 +173,6 @@ public class DownloadInChunksTask extends DownloadTask {
         } catch (SocketTimeoutException | UnknownHostException | SocketException s) {
             retries++;
             if (!paused && (continueOnLostConnectionLost || retries != downloadRetryCount)) {
-//                log.warn("Downloading part " + partFile.getName() + " failed. retry count : " + retries);
                 Thread.sleep(2000);
                 var currFileSize = IOUtils.getFileSize(partFile);
                 performDownload(from + currFileSize, from, to, partFile, currFileSize, rateLimitCount, retries);
@@ -186,7 +185,6 @@ public class DownloadInChunksTask extends DownloadTask {
         if (!paused && currFileSize != (to - from + 1)
                 && (continueOnLostConnectionLost || downloadRateLimitCount < rateLimitCount)) {
             rateLimitCount++;
-            log.warn("Downloading part " + partFile.getName() + " limited. retry rate limit count : " + rateLimitCount);
             performDownload(from + currFileSize, from, to, partFile, currFileSize, rateLimitCount, retries);
         }
 
@@ -220,7 +218,6 @@ public class DownloadInChunksTask extends DownloadTask {
             } catch (SocketTimeoutException | UnknownHostException s) {
                 if (!paused) {
                     retries++;
-//                    log.warn("Downloading part " + partFile.getName() + " failed. retry count : " + retries);
                     Thread.sleep(2000);
                     var currFileSize = IOUtils.getFileSize(partFile);
                     performLimitedDownload(from + currFileSize, from, to, partFile, currFileSize, rateLimitCount, retries);
