@@ -98,7 +98,7 @@ public class DownloadOpUtils {
         if (executor == null)
             executor = Executors.newCachedThreadPool();
         downloadTask.setExecutor(executor);
-        log.info(("Starting download in " + (blocking ? "blocking" : "non-blocking") + ": %s").formatted(dm.getName()));
+        log.info(("Starting download in " + (blocking ? "blocking" : "non-blocking") + ": %s").formatted(dm));
         if (blocking)
             downloadTask.runBlocking();
         else
@@ -109,7 +109,6 @@ public class DownloadOpUtils {
     public static void startDownload(DownloadModel dm, String speedLimit, String byteLimit, boolean resume,
                                      boolean blocking, ExecutorService executor) {
         if (!currentDownloadings.contains(dm)) {
-            log.info("Starting download : " + dm);
             dm.setLastTryDate(LocalDateTime.now());
             dm.setDownloadStatus(DownloadStatus.Trying);
             DownloadsRepo.updateDownloadLastTryDate(dm);
@@ -181,7 +180,6 @@ public class DownloadOpUtils {
     }
 
     public static void pauseDownload(DownloadModel dm) {
-        log.info("Pausing download : " + dm);
         currentDownloadings.stream()
                 .filter(c -> c.equals(dm))
                 .findFirst().ifPresent(dm2 -> dm2.getDownloadTask().pause());

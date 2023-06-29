@@ -336,4 +336,9 @@ public class DetailsController implements FXMLController {
         DownloadOpUtils.openContainingFolder(downloadModel);
         stage.close();
     }
+
+    public ProgressBar getProgressBar() {
+        return downloadProgress;
+    }
+
 }

@@ -2,13 +2,11 @@ package ir.darkdeveloper.bitkip.utils;
 
 import ir.darkdeveloper.bitkip.config.AppConfigs;
 import ir.darkdeveloper.bitkip.controllers.BatchDownload;
-import ir.darkdeveloper.bitkip.models.DownloadModel;
-import ir.darkdeveloper.bitkip.models.FileType;
-import ir.darkdeveloper.bitkip.models.LinkModel;
-import ir.darkdeveloper.bitkip.models.QueueModel;
+import ir.darkdeveloper.bitkip.models.*;
 import ir.darkdeveloper.bitkip.repo.DownloadsRepo;
 import ir.darkdeveloper.bitkip.repo.QueuesRepo;
 import javafx.event.ActionEvent;
+import javafx.scene.control.ProgressBar;
 import javafx.stage.FileChooser;
 import org.controlsfx.control.Notifications;
 
@@ -80,6 +78,8 @@ public class IOUtils {
             dm.setDownloaded(currentFileSize);
         if (filePaths.stream().allMatch(path -> path.toFile().exists())
                 && currentFileSize == dm.getSize()) {
+            dm.setDownloadStatus(DownloadStatus.Merging);
+            mainTableUtils.refreshTable();
             var firstFile = filePaths.get(0).toFile();
             for (int i = 1; i < chunks; i++) {
                 var nextFile = filePaths.get(i).toFile();
@@ -90,10 +90,20 @@ public class IOUtils {
                         var outputChannel = out.getChannel()
                 ) {
                     var buffer = ByteBuffer.allocateDirect(1048576);
+                    var details = openDownloadings.stream()
+                            .filter(dc -> dc.getDownloadModel().equals(dm))
+                            .findFirst();
+                    ProgressBar progressBar = null;
+                    if (details.isPresent())
+                        progressBar = details.get().getProgressBar();
+
                     while (inputChannel.read(buffer) != -1) {
                         buffer.flip();
                         outputChannel.write(buffer);
                         buffer.clear();
+                        if (progressBar != null)
+                            progressBar.setProgress((double) outputChannel.position() /currentFileSize);
+
                     }
                 }
                 if (nextFile.exists())
