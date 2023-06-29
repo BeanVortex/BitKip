@@ -47,7 +47,7 @@ public class DownloadOpUtils {
                     .text(dm.getUrl())
                     .showWarning());
             return;
-        } catch (IOException e){
+        } catch (IOException e) {
             log.error(e.getMessage());
         }
 
@@ -117,7 +117,7 @@ public class DownloadOpUtils {
             try {
                 triggerDownload(dm, speedLimit, byteLimit, resume, blocking, executor);
             } catch (ExecutionException | InterruptedException e) {
-               e.printStackTrace();
+                e.printStackTrace();
             }
             openDownloadings.stream().filter(dc -> dc.getDownloadModel().equals(dm))
                     .forEach(DetailsController::initDownloadListeners);
@@ -232,7 +232,6 @@ public class DownloadOpUtils {
     }
 
     public static void openFile(DownloadModel dm) {
-        var desktop = Desktop.getDesktop();
         log.info("Opening file : " + dm.getFilePath());
         if (!new File(dm.getFilePath()).exists()) {
             Platform.runLater(() -> Notifications.create()
@@ -243,10 +242,25 @@ public class DownloadOpUtils {
             return;
         }
         try {
-            if (Desktop.isDesktopSupported())
-                desktop.open(new File(dm.getFilePath()));
-            else
-                log.warn("Desktop is not supported to open file");
+            var desktop = Desktop.getDesktop();
+            var filePath = dm.getFilePath();
+            var os = System.getProperty("os.name").toLowerCase();
+            var isLinux = os.contains("nix") || os.contains("nux") || os.contains("bsd");
+            if (Desktop.isDesktopSupported() && !isLinux)
+                desktop.open(new File(filePath));
+            else {
+                ProcessBuilder processBuilder;
+                if (os.contains("win"))
+                    // For Windows
+                    processBuilder = new ProcessBuilder("cmd.exe", "/c", "start", filePath);
+                else if (os.contains("mac"))
+                    processBuilder = new ProcessBuilder("open", filePath);
+                else if (isLinux)
+                    processBuilder = new ProcessBuilder("xdg-open", filePath);
+                else
+                    throw new UnsupportedOperationException("Unsupported operating system: " + os);
+                processBuilder.start();
+            }
         } catch (IOException e) {
             log.error(e.getLocalizedMessage());
         }
