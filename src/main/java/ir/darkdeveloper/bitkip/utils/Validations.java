@@ -7,7 +7,6 @@ import javafx.scene.control.TextField;
 import javafx.scene.input.Clipboard;
 
 import java.io.IOException;
-import java.net.ConnectException;
 
 import static ir.darkdeveloper.bitkip.config.AppConfigs.mainTableUtils;
 import static ir.darkdeveloper.bitkip.config.AppConfigs.openDownloadings;
@@ -169,21 +168,21 @@ public class Validations {
     }
 
     public static void validateDownloadModel(DownloadModel dm) throws IOException {
-        var size = dm.getSize();
-        if (size == -1 || size == 0)
+        if (dm.getSize() > 0)
             return;
 
+        // when added through batch list and size not fetched
         var connection = NewDownloadUtils.connect(dm.getUrl(), true);
         var canResume = NewDownloadUtils.canResume(connection);
         var fileSize = NewDownloadUtils.getFileSize(connection);
-        if (fileSize == 0)
-            throw new ConnectException("Could not connect");
         dm.setSize(fileSize);
         dm.setResumable(canResume);
         if (!canResume)
             dm.setChunks(0);
+        if (fileSize == -1 || fileSize == 0)
+            return;
         var observedDownload = mainTableUtils.getObservedDownload(dm);
-        if (observedDownload != null){
+        if (observedDownload != null) {
             observedDownload.setSize(fileSize);
             observedDownload.setResumable(canResume);
             openDownloadings.stream()

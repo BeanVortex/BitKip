@@ -24,6 +24,7 @@
     <HBox spacing="5" alignment="CENTER_LEFT">
         <Label text="Change queue for all"/>
         <ComboBox fx:id="comboQueue"/>
+        <Button fx:id="newQueue" onAction="#onNewQueue"/>
     </HBox>
 
     <HBox alignment="BOTTOM_CENTER" style="-fx-padding: 15 0 15 0">

@@ -7,6 +7,7 @@ import ir.darkdeveloper.bitkip.models.LinkModel;
 import ir.darkdeveloper.bitkip.models.QueueModel;
 import ir.darkdeveloper.bitkip.repo.DownloadsRepo;
 import ir.darkdeveloper.bitkip.task.LinkDataTask;
+import ir.darkdeveloper.bitkip.utils.FxUtils;
 import ir.darkdeveloper.bitkip.utils.LinkTableUtils;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
@@ -15,6 +16,7 @@ import javafx.scene.control.ComboBox;
 import javafx.scene.control.TableView;
 import javafx.scene.image.Image;
 import javafx.stage.Stage;
+import org.kordamp.ikonli.javafx.FontIcon;
 
 import java.io.File;
 import java.net.URL;
@@ -35,7 +37,9 @@ import static ir.darkdeveloper.bitkip.utils.Defaults.staticQueueNames;
 
 public class BatchList implements QueueObserver {
     @FXML
-    public ComboBox<QueueModel> comboQueue;
+    private ComboBox<QueueModel> comboQueue;
+    @FXML
+    private Button newQueue;
     @FXML
     private Button addBtn;
     @FXML
@@ -43,6 +47,8 @@ public class BatchList implements QueueObserver {
 
     private Stage stage;
     private LinkTableUtils linkTableUtils;
+    private List<LinkModel> links;
+    private static final QueueModel customQueue = new QueueModel("CUSTOM", false);
 
 
     @Override
@@ -50,6 +56,7 @@ public class BatchList implements QueueObserver {
         addBtn.requestFocus();
         addBtn.setDisable(true);
         comboQueue.setDisable(true);
+        newQueue.setGraphic(new FontIcon());
     }
 
 
@@ -60,13 +67,11 @@ public class BatchList implements QueueObserver {
     }
 
     public void setData(List<LinkModel> links) {
+        this.links = links;
         linkTableUtils = new LinkTableUtils(linkTable, links, comboQueue, stage);
         linkTableUtils.tableInits();
         fetchLinksData(links);
-        var queues = links.get(0).getQueues();
-        // get selected queue if not selected any queue in batch download, get All downloads queue
-        var selectedQueue = queues.size() == 3 ? queues.get(2) : queues.get(0);
-        initQueueCombo(selectedQueue);
+        initQueueCombo();
     }
 
 
@@ -93,21 +98,25 @@ public class BatchList implements QueueObserver {
         executor.submit(linkTask);
     }
 
-    private void initQueueCombo(QueueModel selectedQueue) {
+    private void initQueueCombo() {
+        var queues = links.get(0).getQueues();
+        // get selected queue if not selected any queue in batch download, get All downloads queue
+        var selectedQueue = queues.size() == 3 ? queues.get(2) : queues.get(0);
         var queuesToShow = new ArrayList<>(getQueues().stream()
                 .filter(qm -> qm.getName().equals(ALL_DOWNLOADS_QUEUE) || !staticQueueNames.contains(qm.getName()))
                 .toList());
-        var custom = new QueueModel("CUSTOM", false);
-        queuesToShow.add(custom);
+        queuesToShow.add(customQueue);
+        comboQueue.setOnAction(null);
         comboQueue.setItems(FXCollections.observableArrayList(queuesToShow));
         comboQueue.getSelectionModel().select(selectedQueue);
         comboQueue.setOnAction(e -> {
             var selectedItem = comboQueue.getSelectionModel().getSelectedItem();
-            if (selectedItem.getName().equals(custom.getName()))
+            if (selectedItem.getName().equals(customQueue.getName()))
                 return;
             linkTableUtils.changeQueues(selectedItem);
         });
     }
+
 
     private void errorLog(Throwable err) {
         log.error(err.getMessage());
@@ -177,5 +186,11 @@ public class BatchList implements QueueObserver {
     @Override
     public void updateQueue() {
         linkTableUtils.updateQueues();
+        initQueueCombo();
+    }
+
+    public void onNewQueue() {
+        FxUtils.newQueueStage();
+
     }
 }
