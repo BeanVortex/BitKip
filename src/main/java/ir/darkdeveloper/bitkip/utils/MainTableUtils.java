@@ -203,8 +203,12 @@ public class MainTableUtils {
                 i.setDownloaded(bytesDownloaded);
                 if (speed != 0) {
                     long delta = dm.getSize() - bytesDownloaded;
-                    var remaining = DurationFormatUtils.formatDuration((delta / speed) * 1000, "dd:HH:mm:ss");
-                    i.setRemainingTime(remaining);
+                    try {
+                        var remaining = DurationFormatUtils.formatDuration((delta / speed) * 1000, "dd:HH:mm:ss");
+                        i.setRemainingTime(remaining);
+                    }catch (IllegalArgumentException e){
+                        e.printStackTrace();
+                    }
                 }
                 refreshTable();
             }

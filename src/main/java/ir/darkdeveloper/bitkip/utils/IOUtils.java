@@ -5,7 +5,9 @@ import ir.darkdeveloper.bitkip.controllers.BatchDownload;
 import ir.darkdeveloper.bitkip.models.*;
 import ir.darkdeveloper.bitkip.repo.DownloadsRepo;
 import ir.darkdeveloper.bitkip.repo.QueuesRepo;
+import javafx.application.Platform;
 import javafx.event.ActionEvent;
+import javafx.scene.control.Label;
 import javafx.scene.control.ProgressBar;
 import javafx.stage.FileChooser;
 import org.controlsfx.control.Notifications;
@@ -78,8 +80,29 @@ public class IOUtils {
             dm.setDownloaded(currentFileSize);
         if (filePaths.stream().allMatch(path -> path.toFile().exists())
                 && currentFileSize == dm.getSize()) {
+
+            var details = openDownloadings.stream()
+                    .filter(dc -> dc.getDownloadModel().equals(dm))
+                    .findFirst();
+            ProgressBar progressBar;
+            Label speedLbl, downloadedLbl;
+            if (details.isPresent()) {
+                progressBar = details.get().getProgressBar();
+                Platform.runLater(() -> {
+                    details.get().setPauseButtonDisable(true);
+                    details.get().updateLabels("Status: " + DownloadStatus.Merging.name(), "Remaining: Merging");
+                });
+                speedLbl = details.get().getSpeedLbl();
+                downloadedLbl = details.get().getDownloadedOfLbl();
+            } else {
+                downloadedLbl = null;
+                speedLbl = null;
+                progressBar = null;
+            }
+
             dm.setDownloadStatus(DownloadStatus.Merging);
             mainTableUtils.refreshTable();
+
             var firstFile = filePaths.get(0).toFile();
             for (int i = 1; i < chunks; i++) {
                 var nextFile = filePaths.get(i).toFile();
@@ -90,20 +113,21 @@ public class IOUtils {
                         var outputChannel = out.getChannel()
                 ) {
                     var buffer = ByteBuffer.allocateDirect(1048576);
-                    var details = openDownloadings.stream()
-                            .filter(dc -> dc.getDownloadModel().equals(dm))
-                            .findFirst();
-                    ProgressBar progressBar = null;
-                    if (details.isPresent())
-                        progressBar = details.get().getProgressBar();
-
                     while (inputChannel.read(buffer) != -1) {
                         buffer.flip();
-                        outputChannel.write(buffer);
+                        var bytes = outputChannel.write(buffer);
+                        if (details.isPresent()) {
+                            var finalCurrentFileSize = currentFileSize;
+                            var position = outputChannel.position();
+                            Platform.runLater(() -> {
+                                progressBar.setProgress((double) position / finalCurrentFileSize);
+                                speedLbl.setText(formatBytes(bytes));
+                                var downloadOf = "%s / %s"
+                                        .formatted(formatBytes(position), formatBytes(finalCurrentFileSize));
+                                downloadedLbl.setText(downloadOf);
+                            });
+                        }
                         buffer.clear();
-                        if (progressBar != null)
-                            progressBar.setProgress((double) outputChannel.position() /currentFileSize);
-
                     }
                 }
                 if (nextFile.exists())

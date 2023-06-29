@@ -81,7 +81,7 @@ public class DownloadOpUtils {
                 if (o == null)
                     o = n;
                 var currentSpeed = (n - o);
-                if (n == 0)
+                if (n <= 0)
                     currentSpeed = 0;
                 mainTableUtils.updateDownloadSpeedAndRemaining(currentSpeed, dm, n);
             });

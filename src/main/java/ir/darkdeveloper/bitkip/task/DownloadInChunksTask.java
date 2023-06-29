@@ -312,7 +312,7 @@ public class DownloadInChunksTask extends DownloadTask {
 
             }
         } catch (IOException e) {
-            log.error(e.getLocalizedMessage());
+            log.error(e.getMessage());
         } finally {
             currentDownloadings.remove(downloadModel);
             mainTableUtils.refreshTable();

@@ -39,8 +39,6 @@ public class DetailsController implements FXMLController {
     @FXML
     private ScrollPane scrollPane;
     @FXML
-    private Label locationLbl;
-    @FXML
     private Button openFolderBtn;
     @FXML
     private Hyperlink link;
@@ -53,25 +51,10 @@ public class DetailsController implements FXMLController {
     @FXML
     private ToggleSwitch showSwitch;
     @FXML
-    private Label progressLbl;
-    @FXML
-    private Label resumableLbl;
-    @FXML
-    private Label chunksLbl;
-    @FXML
     private ProgressBar downloadProgress;
     @FXML
-    private Label nameLbl;
-    @FXML
-    private Label queueLbl;
-    @FXML
-    private Label statusLbl;
-    @FXML
-    private Label speedLbl;
-    @FXML
-    private Label downloadedOfLbl;
-    @FXML
-    private Label remainingLbl;
+    private Label nameLbl, queueLbl, remainingLbl, locationLbl, progressLbl, resumableLbl, chunksLbl,
+            statusLbl, speedLbl, downloadedOfLbl;
     @FXML
     private Button controlBtn;
 
@@ -297,27 +280,29 @@ public class DetailsController implements FXMLController {
     }
 
     public void onComplete(DownloadModel download) {
-        if (download.getDownloadStatus() == DownloadStatus.Completed) {
-            stage.show();
-            stage.toFront();
-            stage.setIconified(false);
-            stage.setAlwaysOnTop(true);
-            stage.setAlwaysOnTop(false);
-            isComplete = true;
-            remainingLbl.setText("Remaining: Done");
-            controlBtn.setText("Open");
-            openFolderBtn.setText("Open folder");
-            downloadProgress.setProgress(100);
-            statusLbl.setText("Status: Complete");
-            progressLbl.setText("Progress: 100%");
-            var downloadOf = "%s / %s"
-                    .formatted(IOUtils.formatBytes(downloadModel.getSize()),
-                            IOUtils.formatBytes(downloadModel.getSize()));
-            downloadedOfLbl.setText(downloadOf);
-            bytesField.setDisable(true);
-            speedField.setDisable(true);
-            openFolderBtn.setVisible(true);
-        }
+        if (download.getDownloadStatus() == DownloadStatus.Completed)
+            Platform.runLater(() -> {
+                stage.show();
+                stage.toFront();
+                stage.setIconified(false);
+                stage.setAlwaysOnTop(true);
+                stage.setAlwaysOnTop(false);
+                isComplete = true;
+                remainingLbl.setText("Remaining: Done");
+                controlBtn.setText("Open");
+                openFolderBtn.setText("Open folder");
+                downloadProgress.setProgress(100);
+                statusLbl.setText("Status: Complete");
+                progressLbl.setText("Progress: 100%");
+                var downloadOf = "%s / %s"
+                        .formatted(IOUtils.formatBytes(downloadModel.getSize()),
+                                IOUtils.formatBytes(downloadModel.getSize()));
+                downloadedOfLbl.setText(downloadOf);
+                bytesField.setDisable(true);
+                speedField.setDisable(true);
+                openFolderBtn.setVisible(true);
+                controlBtn.setDisable(false);
+            });
     }
 
     public void closeStage() {
@@ -341,4 +326,20 @@ public class DetailsController implements FXMLController {
         return downloadProgress;
     }
 
+    public void updateLabels(String status, String remaining) {
+        statusLbl.setText(status);
+        remainingLbl.setText(remaining);
+    }
+
+    public void setPauseButtonDisable(boolean disable) {
+        controlBtn.setDisable(disable);
+    }
+
+    public Label getSpeedLbl() {
+        return speedLbl;
+    }
+
+    public Label getDownloadedOfLbl() {
+        return downloadedOfLbl;
+    }
 }
