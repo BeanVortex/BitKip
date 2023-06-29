@@ -17,8 +17,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ResourceBundle;
 
-import static ir.darkdeveloper.bitkip.config.AppConfigs.dataPath;
-import static ir.darkdeveloper.bitkip.config.AppConfigs.log;
+import static ir.darkdeveloper.bitkip.config.AppConfigs.*;
 
 public class LogsController implements FXMLController {
 
@@ -44,10 +43,10 @@ public class LogsController implements FXMLController {
         stage.heightProperty().addListener((o, ol, n) -> scrollPane.setPrefHeight(n.doubleValue() - 50));
     }
 
-    record FileWrapper(File file) {
+    record FileWrapper(String path) {
         @Override
         public String toString() {
-            return file.getName().substring(0, file.getName().lastIndexOf('.'));
+            return path.substring(path.lastIndexOf(File.separator) + 1, path.lastIndexOf('.'));
         }
     }
 
@@ -62,9 +61,13 @@ public class LogsController implements FXMLController {
                 ObservableList<FileWrapper> listFiles = FXCollections.observableArrayList();
                 for (var f : files)
                     if (!f.getName().contains("lck"))
-                        listFiles.add(new FileWrapper(f));
+                        listFiles.add(new FileWrapper(f.getPath()));
                 comboSelectFile.setItems(listFiles);
-                comboSelectFile.getSelectionModel().select(listFiles.size() - 1);
+                var curFile = listFiles.stream().filter(fw -> fw.path.equals(pathToLogFile)).findFirst();
+                if (curFile.isEmpty())
+                    comboSelectFile.getSelectionModel().select(listFiles.size() - 1);
+                else
+                    comboSelectFile.getSelectionModel().select(curFile.get());
                 fileSelected();
             }
         }
@@ -79,14 +82,16 @@ public class LogsController implements FXMLController {
     @FXML
     private void fileSelected() {
         try {
-            var logs = Files.readAllLines(Path.of(comboSelectFile.getSelectionModel().getSelectedItem().file().getPath()))
-                    .stream().reduce((s1, s2) -> String.join("\n", s1, s2));
+            var path = comboSelectFile.getSelectionModel().getSelectedItem().path();
+            var logs = Files.readAllLines(Path.of(path))
+                    .stream()
+                    .reduce((s1, s2) -> String.join("\n", s1, s2));
             text.setText(logs.orElse("No Logs"));
         } catch (IOException e) {
-            log.error(e.getLocalizedMessage());
+            log.error(e.getMessage());
             Notifications.create()
                     .title("Failed to read log file")
-                    .text(e.getLocalizedMessage())
+                    .text(e.getMessage())
                     .showError();
         }
     }

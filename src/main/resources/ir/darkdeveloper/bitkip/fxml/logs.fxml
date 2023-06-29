@@ -6,6 +6,7 @@
 <?import javafx.scene.text.Text?>
 <VBox minHeight="400.0" minWidth="500.0" spacing="20"
       maxWidth="500"
+      maxHeight="600"
       style="-fx-padding: 10"
       stylesheets="@../css/light_mode.css"
       xmlns="http://javafx.com/javafx/16" xmlns:fx="http://javafx.com/fxml/1"

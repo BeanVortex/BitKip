@@ -58,13 +58,14 @@ public class AppConfigs {
     public static final ObjectMapper mapper = new ObjectMapper();
 
     public static Logger log;
+    public static String pathToLogFile;
 
     public static void initLogger() {
         new File(dataPath).mkdir();
         new File(dataPath + "logs").mkdir();
         var dateFormat = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss");
         var timestamp = dateFormat.format(new Date());
-        var pathToLogFile = dataPath + "logs" + File.separator + timestamp + ".log";
+        pathToLogFile = dataPath + "logs" + File.separator + timestamp + ".log";
         System.setProperty("log.file.path", pathToLogFile);
         log = LoggerFactory.getLogger("BitKip");
     }
