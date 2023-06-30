@@ -104,6 +104,12 @@ public class IOUtils {
             mainTableUtils.refreshTable();
 
             var firstFile = filePaths.get(0).toFile();
+            var bufferSize = currentFileSize > 524_288_000 ?
+                    (
+                            currentFileSize > 1_048_576_000 ? 2097152 : 1048576
+                    )
+                    : 8192;
+            var buffer = ByteBuffer.allocateDirect(bufferSize);
             for (int i = 1; i < chunks; i++) {
                 var nextFile = filePaths.get(i).toFile();
                 try (
@@ -112,7 +118,6 @@ public class IOUtils {
                         var inputChannel = in.getChannel();
                         var outputChannel = out.getChannel()
                 ) {
-                    var buffer = ByteBuffer.allocateDirect(1048576);
                     while (inputChannel.read(buffer) != -1) {
                         buffer.flip();
                         var bytes = outputChannel.write(buffer);

@@ -7,6 +7,7 @@ import ir.darkdeveloper.bitkip.repo.DownloadsRepo;
 import ir.darkdeveloper.bitkip.utils.DownloadOpUtils;
 import ir.darkdeveloper.bitkip.utils.IOUtils;
 import ir.darkdeveloper.bitkip.utils.NewDownloadUtils;
+import javafx.application.Platform;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -277,9 +278,16 @@ public class DownloadInChunksTask extends DownloadTask {
 
     @Override
     protected void succeeded() {
+        if (!Platform.isFxApplicationThread())
+            runFinalization();
+        else executor.submit(this::runFinalization);
+    }
+
+    private void runFinalization() {
         try {
-            for (var channel : fileChannels)
-                channel.close();
+                for (var channel : fileChannels)
+                    if (channel != null)
+                        channel.close();
             var dmOpt = currentDownloadings.stream()
                     .filter(c -> c.equals(downloadModel))
                     .findFirst();

@@ -15,7 +15,6 @@ import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
-import javafx.scene.image.Image;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import org.apache.commons.lang3.time.DurationFormatUtils;
@@ -27,7 +26,6 @@ import java.net.URL;
 import java.util.List;
 import java.util.ResourceBundle;
 
-import static ir.darkdeveloper.bitkip.BitKip.getResource;
 import static ir.darkdeveloper.bitkip.config.AppConfigs.currentDownloadings;
 import static ir.darkdeveloper.bitkip.config.AppConfigs.openDownloadings;
 import static ir.darkdeveloper.bitkip.utils.DownloadOpUtils.openFile;
@@ -68,12 +66,6 @@ public class DetailsController implements FXMLController {
     @Override
     public void initAfterStage() {
         updateTheme(stage.getScene());
-        var logoPath = getResource("icons/logo.png");
-        if (logoPath != null) {
-            var img = new Image(logoPath.toExternalForm());
-            stage.getIcons().add(img);
-        }
-
         stage.heightProperty().addListener((o, ol, n) -> scrollPane.setPrefHeight(n.doubleValue()));
         stage.widthProperty().addListener((o, ol, n) -> {
             scrollPane.setPrefWidth(n.doubleValue());
@@ -206,7 +198,6 @@ public class DetailsController implements FXMLController {
             if (!Platform.isFxApplicationThread())
                 Platform.runLater(() -> updatePause(newValue));
             else updatePause(newValue);
-            controlBtn.setDisable(false);
         });
 
         openSwitch.selectedProperty().addListener((o, old, newVal) -> {
@@ -225,19 +216,26 @@ public class DetailsController implements FXMLController {
     private void updatePause(Boolean paused) {
         if (downloadModel.getDownloadStatus() == DownloadStatus.Completed)
             return;
+        controlBtn.setDisable(false);
         if (downloadModel.getChunks() == 0)
             bytesField.setDisable(!paused);
         speedField.setDisable(!paused);
         if (!speedField.getText().equals("0"))
             bytesField.setDisable(true);
         controlBtn.setText(paused ? (downloadModel.isResumable() ? "Resume" : "Restart") : "Pause");
-        statusLbl.setText("Status: " + (paused ? DownloadStatus.Paused : DownloadStatus.Downloading));
+        if (paused)
+            remainingLbl.setText("Remaining: Paused");
+        if (downloadModel.getDownloadStatus() == DownloadStatus.Merging) {
+            setPauseButtonDisable(true);
+            updateLabels("Status: " + DownloadStatus.Merging.name(), "Remaining: Merging");
+            downloadProgress.setProgress(ProgressBar.INDETERMINATE_PROGRESS);
+        } else
+            statusLbl.setText("Status: " + (paused ? DownloadStatus.Paused : DownloadStatus.Downloading));
         var downloadOf = "%s / %s"
                 .formatted(IOUtils.formatBytes(downloadModel.getDownloaded()),
                         IOUtils.formatBytes(downloadModel.getSize()));
         downloadedOfLbl.setText(downloadOf);
-        if (paused)
-            remainingLbl.setText("Remaining: Paused");
+
     }
 
     @FXML
@@ -301,7 +299,7 @@ public class DetailsController implements FXMLController {
                 bytesField.setDisable(true);
                 speedField.setDisable(true);
                 openFolderBtn.setVisible(true);
-                controlBtn.setDisable(false);
+                setPauseButtonDisable(false);
             });
     }
 

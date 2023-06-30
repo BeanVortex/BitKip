@@ -222,6 +222,12 @@ public class FxUtils {
         if (end > 60)
             end = 60;
         stage.setTitle(dm.getName().substring(0, end));
+        var logoPath = getResource("icons/logo.png");
+        if (logoPath != null) {
+            var img = new Image(logoPath.toExternalForm());
+            stage.getIcons().add(img);
+        }
+
         DetailsController controller = loader.getController();
         controller.setStage(stage);
         openDownloadings.add(controller);

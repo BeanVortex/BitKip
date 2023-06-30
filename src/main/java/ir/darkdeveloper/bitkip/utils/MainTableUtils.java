@@ -20,6 +20,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 
 import static ir.darkdeveloper.bitkip.config.AppConfigs.currentDownloadings;
+import static ir.darkdeveloper.bitkip.config.AppConfigs.log;
 import static ir.darkdeveloper.bitkip.utils.Defaults.staticQueueNames;
 import static ir.darkdeveloper.bitkip.utils.MenuUtils.createMenuItem;
 import static ir.darkdeveloper.bitkip.utils.ShortcutUtils.*;
@@ -201,13 +202,13 @@ public class MainTableUtils {
                 i.setDownloadStatus(DownloadStatus.Downloading);
                 i.setSpeedString(IOUtils.formatBytes(speed));
                 i.setDownloaded(bytesDownloaded);
-                if (speed != 0) {
-                    long delta = dm.getSize() - bytesDownloaded;
+                long delta = dm.getSize() - bytesDownloaded;
+                if (speed != 0 && delta >= 0) {
                     try {
                         var remaining = DurationFormatUtils.formatDuration((delta / speed) * 1000, "dd:HH:mm:ss");
                         i.setRemainingTime(remaining);
-                    }catch (IllegalArgumentException e){
-                        e.printStackTrace();
+                    } catch (IllegalArgumentException e) {
+                        log.warn(e.getMessage());
                     }
                 }
                 refreshTable();
