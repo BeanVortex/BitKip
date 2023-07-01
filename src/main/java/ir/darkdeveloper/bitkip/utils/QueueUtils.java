@@ -72,8 +72,6 @@ public class QueueUtils {
                 var pauseCount = qm.getDownloads().stream()
                         .filter(dm -> dm.getDownloadStatus() == DownloadStatus.Paused)
                         .count();
-                if (i - 1 != -1 && qm.getDownloads().get(i - 1).getDownloadStatus() == DownloadStatus.Paused)
-                    i--;
                 var dm = qm.getDownloads().get(i);
                 if (dm.getDownloadStatus() == DownloadStatus.Paused) {
                     dm.setOpenAfterComplete(false);
