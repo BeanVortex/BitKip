@@ -27,7 +27,7 @@ import static ir.darkdeveloper.bitkip.utils.Defaults.OTHERS_QUEUE;
 import static ir.darkdeveloper.bitkip.utils.Defaults.extensions;
 import static ir.darkdeveloper.bitkip.utils.Validations.maxChunks;
 
-public class NewDownloadUtils {
+public class DownloadUtils {
 
 
     public static HttpURLConnection connect(String uri, boolean showErrors) throws IOException {

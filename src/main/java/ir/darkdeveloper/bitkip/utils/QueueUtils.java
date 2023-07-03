@@ -4,10 +4,10 @@ import ir.darkdeveloper.bitkip.config.observers.QueueSubject;
 import ir.darkdeveloper.bitkip.models.DownloadModel;
 import ir.darkdeveloper.bitkip.models.DownloadStatus;
 import ir.darkdeveloper.bitkip.models.QueueModel;
+import ir.darkdeveloper.bitkip.models.StartedQueue;
 import ir.darkdeveloper.bitkip.repo.QueuesRepo;
 import ir.darkdeveloper.bitkip.repo.ScheduleRepo;
 import javafx.application.Platform;
-import javafx.scene.control.MenuItem;
 import org.controlsfx.control.Notifications;
 
 import java.util.ArrayList;
@@ -18,7 +18,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static ir.darkdeveloper.bitkip.config.AppConfigs.log;
 import static ir.darkdeveloper.bitkip.config.AppConfigs.*;
 import static ir.darkdeveloper.bitkip.config.observers.QueueSubject.addAllQueues;
 import static ir.darkdeveloper.bitkip.config.observers.QueueSubject.getQueues;
@@ -26,9 +25,12 @@ import static ir.darkdeveloper.bitkip.config.observers.QueueSubject.getQueues;
 public class QueueUtils {
 
 
-    public static void startQueue(QueueModel qm, MenuItem startItem, MenuItem stopItem) {
+    public static void startQueue(StartedQueue startedQueue, boolean canTurnOff) {
+        var qm = startedQueue.queue();
         var schedule = qm.getSchedule();
-        if (!startedQueues.contains(qm)) {
+        var startItem = startedQueue.startItem();
+        var stopItem = startedQueue.stopItem();
+        if (!startedQueues.contains(startedQueue)) {
             var downloadsByQueue = new ArrayList<>(
                     QueuesRepo.findByName(qm.getName(), true)
                             .getDownloads()
@@ -39,8 +41,8 @@ public class QueueUtils {
             var executor = Executors.newCachedThreadPool();
             if (downloadsByQueue.isEmpty()) {
                 if (triggerTurnOffOnEmptyQueue)
-                    whenQueueDone(qm, startItem, stopItem, executor);
-                else{
+                    whenQueueDone(startedQueue, canTurnOff, executor);
+                else {
                     queueDoneNotification(qm);
                     executor.shutdownNow();
                 }
@@ -52,8 +54,8 @@ public class QueueUtils {
                 Collections.reverse(downloadsByQueue);
             downloadsByQueue = new ArrayList<>(downloadsByQueue.stream().map(mainTableUtils::getObservedDownload).toList());
             qm.setDownloads(new CopyOnWriteArrayList<>(downloadsByQueue));
-            startedQueues.add(qm);
-            start(qm, startItem, stopItem, executor);
+            startedQueues.add(startedQueue);
+            start(startedQueue, canTurnOff, executor);
             log.info("Queue has been started: " + qm);
         } else if (schedule.isEnabled() && schedule.isOnceDownload()) {
             // in case when user starts the queue manually which adds the queue to startedQueues and
@@ -64,8 +66,9 @@ public class QueueUtils {
 
     }
 
-    private static void start(QueueModel qm, MenuItem startItem, MenuItem stopItem, ExecutorService executor) {
+    private static void start(StartedQueue startedQueue, boolean canTurnOff, ExecutorService executor) {
         executor.submit(() -> {
+            var qm = startedQueue.queue();
             var simulDownloads = new AtomicInteger(0);
             var sDownloads = qm.getSimultaneouslyDownload();
             for (int i = 0; i < qm.getDownloads().size(); i++) {
@@ -92,16 +95,16 @@ public class QueueUtils {
                     } else DownloadOpUtils.startDownload(dm, speedLimit, null, true, true, null);
 
                 }
-                if (!startedQueues.contains(qm))
+                if (!startedQueues.contains(startedQueue))
                     break;
             }
 
             var pauseCount = qm.getDownloads().stream().filter(dm -> dm.getDownloadStatus() == DownloadStatus.Paused).count();
             // when queue is done or paused all manually and one simultaneously download
-            if (sDownloads == 1 && startedQueues.contains(qm) && pauseCount != 0)
-                whenQueueDone(qm, startItem, stopItem, executor);
+            if (sDownloads == 1 && startedQueues.contains(startedQueue) && pauseCount != 0)
+                whenQueueDone(startedQueue, canTurnOff, executor);
             else
-                waitToFinishForLessPausedDownloads(qm, startItem, stopItem, executor);
+                waitToFinishForLessPausedDownloads(startedQueue, canTurnOff, executor);
 
         });
 
@@ -139,7 +142,7 @@ public class QueueUtils {
      * it is useful when queue simultaneously downloads are greater than current paused downloads in queue
      * it starts all downloads non-blocking and the waiting to finish is done later in waitToFinishForLessPausedDownloads method
      *
-     * @see QueueUtils#waitToFinishForLessPausedDownloads(QueueModel, MenuItem, MenuItem, ExecutorService)
+     * @see QueueUtils#waitToFinishForLessPausedDownloads(StartedQueue, boolean, ExecutorService)
      */
     private static void performSimultaneousDownloadDontWaitForPrev(int remainingSimul, AtomicInteger simulDownloads,
                                                                    DownloadModel dm, String speedLimit) {
@@ -155,8 +158,8 @@ public class QueueUtils {
      *
      * @see QueueUtils#performSimultaneousDownloadDontWaitForPrev(int, AtomicInteger, DownloadModel, String)
      */
-    private static void waitToFinishForLessPausedDownloads(QueueModel qm, MenuItem startItem, MenuItem stopItem,
-                                                           ExecutorService executor) {
+    private static void waitToFinishForLessPausedDownloads(StartedQueue startedQueue, boolean canTurnOff, ExecutorService executor) {
+        var qm = startedQueue.queue();
         var count = currentDownloadings.stream().filter(d -> d.getQueues().contains(qm)).count();
         while (count != 0) {
             try {
@@ -166,17 +169,21 @@ public class QueueUtils {
                 throw new RuntimeException(e);
             }
         }
-        if (startedQueues.contains(qm))
-            whenQueueDone(qm, startItem, stopItem, executor);
+        if (startedQueues.contains(startedQueue))
+            whenQueueDone(startedQueue, canTurnOff, executor);
     }
 
-    private static void whenQueueDone(QueueModel qm, MenuItem startItem, MenuItem stopItem, ExecutorService executor) {
+    private static void whenQueueDone(StartedQueue startedQueue, boolean canTurnOff, ExecutorService executor) {
+        var startItem = startedQueue.startItem();
+        var stopItem = startedQueue.stopItem();
+        var qm = startedQueue.queue();
+
         startItem.setDisable(false);
         stopItem.setDisable(true);
         queueDoneNotification(qm);
-        startedQueues.remove(qm);
+        startedQueues.remove(startedQueue);
         var schedule = qm.getSchedule();
-        if (schedule.isEnabled() && schedule.isTurnOffEnabled()) {
+        if (schedule.isEnabled() && schedule.isTurnOffEnabled() && canTurnOff) {
             shutdownSchedulersOnOnceDownload(qm);
             var turnOffMode = schedule.getTurnOffMode();
             Platform.runLater(() -> {
@@ -192,17 +199,21 @@ public class QueueUtils {
     }
 
 
-    public static void stopQueue(QueueModel qm, MenuItem startItem, MenuItem stopItem) {
-        if (startedQueues.contains(qm)) {
-            var downloadsByQueue = startedQueues.get(startedQueues.indexOf(qm)).getDownloads();
+    public static void stopQueue(StartedQueue startedQueue) {
+        stopQueue(startedQueue, true);
+    }
+
+    public static void stopQueue(StartedQueue startedQueue, boolean canTurnOff) {
+        if (startedQueues.contains(startedQueue)) {
+            var downloadsByQueue = startedQueues.get(startedQueues.indexOf(startedQueue)).queue().getDownloads();
             downloadsByQueue.forEach(dm -> {
                 dm = mainTableUtils.getObservedDownload(dm);
                 DownloadOpUtils.pauseDownload(dm);
             });
 
-            startedQueues.remove(qm);
-            log.info("Queue has been stopped: " + qm);
-            whenQueueDone(qm, startItem, stopItem, null);
+            startedQueues.remove(startedQueue);
+            log.info("Queue has been stopped: " + startedQueue.queue());
+            whenQueueDone(startedQueue, canTurnOff, null);
         }
     }
 

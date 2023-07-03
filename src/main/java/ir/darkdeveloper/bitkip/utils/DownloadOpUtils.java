@@ -360,8 +360,8 @@ public class DownloadOpUtils {
         dm.setUrl(url);
         dm.setName(fileName);
         try {
-            var conn = NewDownloadUtils.connect(url, true);
-            var canResume = NewDownloadUtils.canResume(conn);
+            var conn = DownloadUtils.connect(url, true);
+            var canResume = DownloadUtils.canResume(conn);
             dm.setResumable(canResume);
             dm.setChunks(canResume ? maxChunks() : 0);
             dm.setProgress(0);
@@ -370,13 +370,13 @@ public class DownloadOpUtils {
             dm.setAddToQueueDate(LocalDateTime.now());
             dm.setShowCompleteDialog(showCompleteDialog);
             dm.setOpenAfterComplete(false);
-            var path = NewDownloadUtils.determineLocation(fileName);
+            var path = DownloadUtils.determineLocation(fileName);
             dm.setFilePath(path);
 
             if (DownloadsRepo.exists(url, fileName, path))
                 throw new IllegalArgumentException("This url and name exists for this location. Change location or name");
 
-            var queue = NewDownloadUtils.determineQueue(fileName);
+            var queue = DownloadUtils.determineQueue(fileName);
             var allDownloadsQueue = QueuesRepo.findByName(ALL_DOWNLOADS_QUEUE, false);
             dm.getQueues().add(allDownloadsQueue);
             dm.getQueues().add(queue);
@@ -395,5 +395,11 @@ public class DownloadOpUtils {
                     .showWarning();
         }
 
+    }
+
+    public static void pauseAllDownloads() {
+        var cpyStartedQueues = new ArrayList<>(startedQueues);
+        cpyStartedQueues.forEach(q -> QueueUtils.stopQueue(q, false));
+        pauseDownloads(currentDownloadings);
     }
 }

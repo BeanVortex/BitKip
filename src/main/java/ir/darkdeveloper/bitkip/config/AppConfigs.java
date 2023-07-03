@@ -5,6 +5,7 @@ import ir.darkdeveloper.bitkip.controllers.DetailsController;
 import ir.darkdeveloper.bitkip.models.DownloadModel;
 import ir.darkdeveloper.bitkip.models.QueueModel;
 import ir.darkdeveloper.bitkip.models.ScheduleModel;
+import ir.darkdeveloper.bitkip.models.StartedQueue;
 import ir.darkdeveloper.bitkip.utils.MainTableUtils;
 import javafx.application.HostServices;
 import org.slf4j.Logger;
@@ -17,7 +18,7 @@ import java.util.*;
 
 public class AppConfigs {
 
-    public static final String VERSION = "1.1.1";
+    public static final String VERSION = "1.2.0";
 
     public static final String dataPath = System.getProperty("user.home")
             + File.separator + "Documents"
@@ -94,7 +95,7 @@ public class AppConfigs {
 
 
     public static final List<DownloadModel> currentDownloadings = new ArrayList<>();
-    public static final List<QueueModel> startedQueues = new ArrayList<>();
+    public static final List<StartedQueue> startedQueues = new ArrayList<>();
     public static final List<DetailsController> openDownloadings = new ArrayList<>();
     // integer represents scheduleModelId
     public static final Map<Integer, ScheduleModel> currentSchedules = new HashMap<>();

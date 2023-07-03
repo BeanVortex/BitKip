@@ -3,6 +3,7 @@ package ir.darkdeveloper.bitkip.utils;
 import ir.darkdeveloper.bitkip.models.DownloadModel;
 import ir.darkdeveloper.bitkip.models.DownloadStatus;
 import ir.darkdeveloper.bitkip.models.QueueModel;
+import ir.darkdeveloper.bitkip.models.StartedQueue;
 import ir.darkdeveloper.bitkip.repo.DownloadsRepo;
 import ir.darkdeveloper.bitkip.repo.QueuesRepo;
 import javafx.event.EventHandler;
@@ -162,13 +163,12 @@ public class SideUtils {
         var menuItems = MenuUtils.createMapMenuItems(lbls, keys);
         cMenu.getItems().addAll(menuItems.values());
         var qm = QueuesRepo.findByName(itemName, false);
-        menuItems.get(startQueueLbl).setDisable(startedQueues.contains(qm));
-        menuItems.get(stopQueueLbl).setDisable(!startedQueues.contains(qm));
+        var startedQueue = new StartedQueue(qm, menuItems.get(startQueueLbl), menuItems.get(stopQueueLbl));
 
-        menuItems.get(startQueueLbl).setOnAction(e ->
-                QueueUtils.startQueue(qm, menuItems.get(startQueueLbl), menuItems.get(stopQueueLbl)));
-        menuItems.get(stopQueueLbl).setOnAction(e ->
-                QueueUtils.stopQueue(qm, menuItems.get(startQueueLbl), menuItems.get(stopQueueLbl)));
+        menuItems.get(startQueueLbl).setDisable(startedQueues.contains(startedQueue));
+        menuItems.get(stopQueueLbl).setDisable(!startedQueues.contains(startedQueue));
+        menuItems.get(startQueueLbl).setOnAction(e -> QueueUtils.startQueue(startedQueue, true));
+        menuItems.get(stopQueueLbl).setOnAction(e -> QueueUtils.stopQueue(startedQueue));
         menuItems.get(queueSettingLbl).setOnAction(e -> FxUtils.newQueueSettingStage(qm));
         menuItems.get(exportLbl).setOnAction(e -> DownloadOpUtils.exportLinks(qm.getName()));
         if (menuItems.containsKey(deleteLbl))

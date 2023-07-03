@@ -5,6 +5,7 @@ import ir.darkdeveloper.bitkip.config.observers.QueueSubject;
 import ir.darkdeveloper.bitkip.controllers.interfaces.FXMLController;
 import ir.darkdeveloper.bitkip.models.QueueModel;
 import ir.darkdeveloper.bitkip.models.ScheduleModel;
+import ir.darkdeveloper.bitkip.models.StartedQueue;
 import ir.darkdeveloper.bitkip.models.TurnOffMode;
 import ir.darkdeveloper.bitkip.repo.DatabaseHelper;
 import ir.darkdeveloper.bitkip.repo.QueuesRepo;
@@ -370,7 +371,7 @@ public class QueueSetting implements FXMLController, QueueObserver {
 
             queue.setSpeed(speedField.getText());
             queue.setSimultaneouslyDownload(simulDownloadSpinner.getValue());
-            if (queue.hasFolder() != hasFolderCheck.isSelected() && startedQueues.contains(queue)) {
+            if (queue.hasFolder() != hasFolderCheck.isSelected() && startedQueues.contains(new StartedQueue(queue))) {
                 onReset();
                 throw new IllegalArgumentException("This Queue is currently running, stop it and try again");
             }

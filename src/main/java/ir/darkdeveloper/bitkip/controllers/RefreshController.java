@@ -5,7 +5,7 @@ import ir.darkdeveloper.bitkip.models.DownloadModel;
 import ir.darkdeveloper.bitkip.repo.DownloadsRepo;
 import ir.darkdeveloper.bitkip.utils.DownloadOpUtils;
 import ir.darkdeveloper.bitkip.utils.Validations;
-import ir.darkdeveloper.bitkip.utils.NewDownloadUtils;
+import ir.darkdeveloper.bitkip.utils.DownloadUtils;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -44,9 +44,9 @@ public class RefreshController implements FXMLController {
             saveBtn.setDisable(false);
             resumeBtn.setDisable(false);
             if (n.equals(dm.getUrl()))
-                NewDownloadUtils.disableControlsAndShowError("Same URL", errorLabel, saveBtn, resumeBtn, null);
+                DownloadUtils.disableControlsAndShowError("Same URL", errorLabel, saveBtn, resumeBtn, null);
             if (n.isBlank())
-                NewDownloadUtils.disableControlsAndShowError("URL is blank", errorLabel, saveBtn, resumeBtn, null);
+                DownloadUtils.disableControlsAndShowError("URL is blank", errorLabel, saveBtn, resumeBtn, null);
         });
     }
 

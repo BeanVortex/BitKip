@@ -1,10 +1,7 @@
 package ir.darkdeveloper.bitkip.utils;
 
 import ir.darkdeveloper.bitkip.config.observers.QueueSubject;
-import ir.darkdeveloper.bitkip.models.DownloadModel;
-import ir.darkdeveloper.bitkip.models.DownloadStatus;
-import ir.darkdeveloper.bitkip.models.FileType;
-import ir.darkdeveloper.bitkip.models.QueueModel;
+import ir.darkdeveloper.bitkip.models.*;
 import ir.darkdeveloper.bitkip.repo.DownloadsRepo;
 import ir.darkdeveloper.bitkip.repo.QueuesRepo;
 import javafx.application.Platform;
@@ -58,6 +55,7 @@ public class MenuUtils {
         var openFolderLbl = new Label("Open folder");
         var resumeLbl = new Label("Resume");
         var pauseLbl = new Label("Pause");
+        var pauseAllLbl = new Label("Pause All");
         var refreshLbl = new Label("Refresh URL");
         var copyLbl = new Label("Copy URL");
         var restartLbl = new Label("Restart");
@@ -71,10 +69,10 @@ public class MenuUtils {
         var stopQueueLbl = new Label("Stop queue");
         var queueSettingLbl = new Label("Queue settings");
 
-        var lbls = List.of(openLbl, openFolderLbl, resumeLbl, pauseLbl, refreshLbl, copyLbl,
+        var lbls = List.of(openLbl, openFolderLbl, resumeLbl, pauseLbl, pauseAllLbl, refreshLbl, copyLbl,
                 restartLbl, exportLinkLbl, deleteLbl, deleteWithFileLbl);
-        var keyCodes = Arrays.asList(OPEN_KEY, OPEN_FOLDER_KEY, RESUME_KEY, PAUSE_KEY,
-                REFRESH_KEY, COPY_KEY, RESTART_KEY, null, DELETE_KEY, DELETE_FILE_KEY);
+        var keyCodes = Arrays.asList(OPEN_KEY, OPEN_FOLDER_KEY, RESUME_KEY,
+                PAUSE_KEY, PAUSE_ALL_KEY, REFRESH_KEY, COPY_KEY, RESTART_KEY, null, DELETE_KEY, DELETE_FILE_KEY);
         var menuItems = createMapMenuItems(lbls, keyCodes);
 
         var split = new SeparatorMenuItem();
@@ -110,7 +108,7 @@ public class MenuUtils {
 
         operationMenu.setOnMouseClicked(event -> {
             var selectedItems = mainTableUtils.getSelected();
-            disableMenuItems(resumeLbl, pauseLbl, openLbl, openFolderLbl, deleteFromQueueLbl, refreshLbl, copyLbl, restartLbl,
+            disableMenuItems(resumeLbl, pauseLbl, pauseAllLbl, openLbl, openFolderLbl, deleteFromQueueLbl, refreshLbl, copyLbl, restartLbl,
                     addToQueueLbl, deleteLbl, deleteWithFileLbl, menuItems, selectedItems);
             disableEnableStartStopQueue(startQueueMenu, stopQueueMenu);
             deleteLbl.setText("Delete selected (" + selectedItems.size() + ")");
@@ -122,6 +120,7 @@ public class MenuUtils {
         menuItems.get(resumeLbl).setOnAction(e -> DownloadOpUtils.resumeDownloads(
                 mainTableUtils.getSelected(), null, null));
         menuItems.get(pauseLbl).setOnAction(e -> DownloadOpUtils.pauseDownloads(mainTableUtils.getSelected()));
+        menuItems.get(pauseAllLbl).setOnAction(e -> DownloadOpUtils.pauseAllDownloads());
         menuItems.get(restartLbl).setOnAction(e -> DownloadOpUtils.restartDownloads(mainTableUtils.getSelected()));
         menuItems.get(exportLinkLbl).setOnAction(e -> DownloadOpUtils.exportLinks(mainTableUtils.getSelectedUrls()));
         menuItems.get(refreshLbl).setOnAction(e -> DownloadOpUtils.refreshDownload(mainTableUtils.getSelected()));
@@ -134,18 +133,26 @@ public class MenuUtils {
     }
 
     private static void disableEnableStartStopQueue(Menu startQueueMenu, Menu stopQueueMenu) {
-        var startedQueueNames = startedQueues.stream().map(QueueModel::getName)
+        var startedQueueNames = startedQueues.stream()
+                .map(StartedQueue::queue)
+                .map(QueueModel::getName)
                 .toList();
-        startQueueMenu.getItems().stream()
-                .filter(i -> startedQueueNames.contains(((Label) i.getGraphic()).getText()))
-                .forEach(item -> item.setDisable(true));
-        stopQueueMenu.getItems().stream()
-                .filter(i -> startedQueueNames.contains(((Label) i.getGraphic()).getText()))
-                .forEach(item -> item.setDisable(false));
+        if (startedQueueNames.isEmpty()) {
+            startQueueMenu.getItems().forEach(i -> i.setDisable(false));
+            stopQueueMenu.getItems().forEach(i -> i.setDisable(true));
+        } else {
+            startQueueMenu.getItems().stream()
+                    .filter(i -> startedQueueNames.contains(((Label) i.getGraphic()).getText()))
+                    .forEach(item -> item.setDisable(true));
+            stopQueueMenu.getItems().stream()
+                    .filter(i -> startedQueueNames.contains(((Label) i.getGraphic()).getText()))
+                    .forEach(item -> item.setDisable(false));
+        }
     }
 
-    public static void disableMenuItems(Label resumeLbl, Label pauseLbl, Label openLbl, Label openFolderLbl, Label deleteFromQueueLbl,
-                                        Label refreshLbl, Label copyLbl, Label restartLbl, Label addToQueueLbl,
+    public static void disableMenuItems(Label resumeLbl, Label pauseLbl, Label pauseAllLbl, Label openLbl,
+                                        Label openFolderLbl, Label deleteFromQueueLbl, Label refreshLbl,
+                                        Label copyLbl, Label restartLbl, Label addToQueueLbl,
                                         Label deleteLbl, Label deleteWithFileLbl,
                                         LinkedHashMap<Label, MenuItem> menuItems,
                                         ObservableList<DownloadModel> selectedItems) {
@@ -153,6 +160,7 @@ public class MenuUtils {
         menuItems.get(openFolderLbl).setDisable(selectedItems.size() != 1);
         menuItems.get(resumeLbl).setDisable(selectedItems.isEmpty() || selectedItems.stream().anyMatch(dm -> !dm.isResumable()));
         menuItems.get(pauseLbl).setDisable(selectedItems.isEmpty());
+        menuItems.get(pauseAllLbl).setDisable(currentDownloadings.isEmpty());
         menuItems.get(restartLbl).setDisable(selectedItems.isEmpty());
         menuItems.get(refreshLbl).setDisable(selectedItems.size() != 1);
         menuItems.get(copyLbl).setDisable(selectedItems.size() != 1);
@@ -255,8 +263,10 @@ public class MenuUtils {
                         .filter(stopItem -> ((Label) stopItem.getGraphic()).getText()
                                 .equals(((Label) startItem.getGraphic()).getText()))
                         .findFirst()
-                        .ifPresent(stopItem -> QueueUtils.startQueue(startQueueItems.get(startItem), startItem,
-                                stopItem))
+                        .ifPresent(stopItem -> {
+                            var startedQueue = new StartedQueue(startQueueItems.get(startItem), startItem, stopItem);
+                            QueueUtils.startQueue(startedQueue, true);
+                        })
         ));
 
         stopQueueMenu.getItems().forEach(stopItem -> stopItem.setOnAction(e ->
@@ -265,7 +275,10 @@ public class MenuUtils {
                         .filter(startItem -> ((Label) startItem.getGraphic()).getText()
                                 .equals(((Label) stopItem.getGraphic()).getText()))
                         .findFirst()
-                        .ifPresent(startItem -> QueueUtils.stopQueue(stopQueueItems.get(stopItem), startItem, stopItem))
+                        .ifPresent(startItem -> {
+                            var startedQueue = new StartedQueue(stopQueueItems.get(stopItem), startItem, stopItem);
+                            QueueUtils.stopQueue(startedQueue);
+                        })
         ));
     }
 
@@ -279,8 +292,9 @@ public class MenuUtils {
                     .filter(qm -> !staticQueueNames.contains(qm.getName()))
                     .findFirst()
                     .ifPresent(qm -> {
-                        if (startedQueues.contains(qm))
-                            startedQueues.get(startedQueues.indexOf(qm)).getDownloads().remove(dm);
+                        var startedQueue = new StartedQueue(qm);
+                        if (startedQueues.contains(startedQueue))
+                            startedQueues.get(startedQueues.indexOf(startedQueue)).queue().getDownloads().remove(dm);
                         DownloadsRepo.deleteDownloadQueue(dm.getId(), qm.getId());
                     });
             if (moveFiles) {
@@ -292,31 +306,32 @@ public class MenuUtils {
 
     public static void initAddToQueueMenu(Menu addToQueueMenu, LinkedHashMap<MenuItem, QueueModel> addToQueueItems) {
         addToQueueMenu.getItems().forEach(menuItem -> menuItem.setOnAction(e -> {
-            var qm = addToQueueItems.get(menuItem);
-            var notObserved = new ArrayList<>(mainTableUtils.getSelected());
-            var moveFiles = FxUtils.askToMoveFilesForQueues(notObserved, qm);
-            for (int i = 0; i < notObserved.size(); i++) {
-                var dm = notObserved.get(i);
-                if (dm.getQueues().contains(qm))
-                    return;
-                if (staticQueueNames.stream().noneMatch(s -> dm.getQueues().get(0).getName().equals(s)))
-                    mainTableUtils.remove(dm);
-                if (startedQueues.contains(qm))
-                    startedQueues.get(startedQueues.indexOf(qm)).getDownloads().add(dm);
-                if (moveFiles) {
-                    var newFilePath = FileType.determineFileType(dm.getName()).getPath() + dm.getName();
-                    if (qm.hasFolder())
-                        newFilePath = queuesPath + qm.getName() + File.separator + dm.getName();
-                    IOUtils.moveDownloadFilesFiles(dm, newFilePath);
-                    dm.setFilePath(newFilePath);
-                    mainTableUtils.refreshTable();
-                }
-                var addToQueueDate = LocalDateTime.now();
-                if (i != 0)
-                    addToQueueDate = notObserved.get(i - 1).getAddToQueueDate().plusSeconds(1);
-                DownloadsRepo.updateDownloadQueue(dm.getId(), qm.getId(), addToQueueDate.toString());
-            }
-        })
+                    var qm = addToQueueItems.get(menuItem);
+                    var notObserved = new ArrayList<>(mainTableUtils.getSelected());
+                    var moveFiles = FxUtils.askToMoveFilesForQueues(notObserved, qm);
+                    for (int i = 0; i < notObserved.size(); i++) {
+                        var dm = notObserved.get(i);
+                        if (dm.getQueues().contains(qm))
+                            return;
+                        if (staticQueueNames.stream().noneMatch(s -> dm.getQueues().get(0).getName().equals(s)))
+                            mainTableUtils.remove(dm);
+                        var startedQueue = new StartedQueue(qm);
+                        if (startedQueues.contains(startedQueue))
+                            startedQueues.get(startedQueues.indexOf(startedQueue)).queue().getDownloads().add(dm);
+                        if (moveFiles) {
+                            var newFilePath = FileType.determineFileType(dm.getName()).getPath() + dm.getName();
+                            if (qm.hasFolder())
+                                newFilePath = queuesPath + qm.getName() + File.separator + dm.getName();
+                            IOUtils.moveDownloadFilesFiles(dm, newFilePath);
+                            dm.setFilePath(newFilePath);
+                            mainTableUtils.refreshTable();
+                        }
+                        var addToQueueDate = LocalDateTime.now();
+                        if (i != 0)
+                            addToQueueDate = notObserved.get(i - 1).getAddToQueueDate().plusSeconds(1);
+                        DownloadsRepo.updateDownloadQueue(dm.getId(), qm.getId(), addToQueueDate.toString());
+                    }
+                })
         );
     }
 

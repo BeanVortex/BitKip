@@ -8,7 +8,7 @@ import ir.darkdeveloper.bitkip.repo.DownloadsRepo;
 import ir.darkdeveloper.bitkip.repo.QueuesRepo;
 import ir.darkdeveloper.bitkip.utils.FxUtils;
 import ir.darkdeveloper.bitkip.utils.Validations;
-import ir.darkdeveloper.bitkip.utils.NewDownloadUtils;
+import ir.darkdeveloper.bitkip.utils.DownloadUtils;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -87,26 +87,26 @@ public class BatchDownload implements QueueObserver {
                         " (for example 'https://www.url.com/file00.zip', change 00 to $$)",
                 "Every single file is seperated into parts and will be downloaded concurrently"
         };
-        NewDownloadUtils.initPopOvers(questionBtns, contents);
+        DownloadUtils.initPopOvers(questionBtns, contents);
         autoFillLocation();
         queueCombo.getSelectionModel().selectedIndexProperty().addListener(observable -> onQueueChanged());
         startField.textProperty().addListener(o -> autoFillLocation());
         endField.textProperty().addListener(o -> autoFillLocation());
         urlField.textProperty().addListener((o, ol, n) -> {
             if (n.isBlank())
-                NewDownloadUtils.disableControlsAndShowError("URL is blank", errorLabel, checkBtn, null, null);
+                DownloadUtils.disableControlsAndShowError("URL is blank", errorLabel, checkBtn, null, null);
             else autoFillLocation();
         });
         locationField.textProperty().addListener((o, ol, n) -> {
             if (n.isBlank())
-                NewDownloadUtils.disableControlsAndShowError("Location is blank", errorLabel, checkBtn, null, null);
+                DownloadUtils.disableControlsAndShowError("Location is blank", errorLabel, checkBtn, null, null);
             else onOfflineFieldsChanged();
         });
     }
 
     private void onOfflineFieldsChanged() {
         if (tempLink != null)
-            NewDownloadUtils.onOfflineFieldsChanged(locationField, tempLink.getName(), null, queueCombo,
+            DownloadUtils.onOfflineFieldsChanged(locationField, tempLink.getName(), null, queueCombo,
                     errorLabel, null, checkBtn, openLocation, null);
     }
 
@@ -119,17 +119,17 @@ public class BatchDownload implements QueueObserver {
             var links = generateLinks(url, start, end, Integer.parseInt(chunksField.getText()), true);
             var link = links.get(0);
             tempLink = link;
-            var connection = NewDownloadUtils.connect(link.getUrl(), true);
-            var fileNameLocationFuture = CompletableFuture.supplyAsync(() -> NewDownloadUtils.extractFileName(link.getUrl(), connection))
+            var connection = DownloadUtils.connect(link.getUrl(), true);
+            var fileNameLocationFuture = CompletableFuture.supplyAsync(() -> DownloadUtils.extractFileName(link.getUrl(), connection))
                     .thenAccept(this::setLocation);
             fileNameLocationFuture
                     .whenComplete((unused, throwable) ->
-                            NewDownloadUtils.checkIfFileIsOKToSave(locationField.getText(),
+                            DownloadUtils.checkIfFileIsOKToSave(locationField.getText(),
                                     tempLink.getName(), errorLabel, null, checkBtn, null))
                     .exceptionally(throwable -> {
                         var errorMsg = throwable.getCause().getLocalizedMessage();
                         Platform.runLater(() ->
-                                NewDownloadUtils.disableControlsAndShowError(errorMsg, errorLabel,
+                                DownloadUtils.disableControlsAndShowError(errorMsg, errorLabel,
                                         checkBtn, null, null));
                         return null;
                     });
@@ -138,12 +138,12 @@ public class BatchDownload implements QueueObserver {
             var errorMsg = e.getLocalizedMessage();
             if (e instanceof IndexOutOfBoundsException)
                 errorMsg = "No URLs found";
-            NewDownloadUtils.disableControlsAndShowError(errorMsg, errorLabel, checkBtn, null, null);
+            DownloadUtils.disableControlsAndShowError(errorMsg, errorLabel, checkBtn, null, null);
         }
     }
 
     private void setLocation(String fileName) {
-        NewDownloadUtils.setLocationAndQueue(locationField, fileName, null);
+        DownloadUtils.setLocationAndQueue(locationField, fileName, null);
         tempLink.setName(fileName);
     }
 
@@ -223,9 +223,9 @@ public class BatchDownload implements QueueObserver {
 
     @FXML
     private void onSelectLocation(ActionEvent e) {
-        NewDownloadUtils.selectLocation(e, locationField);
+        DownloadUtils.selectLocation(e, locationField);
         if (tempLink != null)
-            NewDownloadUtils.checkIfFileIsOKToSave(locationField.getText(), tempLink.getName(),
+            DownloadUtils.checkIfFileIsOKToSave(locationField.getText(), tempLink.getName(),
                     errorLabel, null, checkBtn, null);
     }
 
@@ -236,12 +236,12 @@ public class BatchDownload implements QueueObserver {
             var path = locationField.getText();
             if (url.isBlank()) {
                 log.warn("URL is blank");
-                NewDownloadUtils.disableControlsAndShowError("URL is blank", errorLabel, checkBtn, null, null);
+                DownloadUtils.disableControlsAndShowError("URL is blank", errorLabel, checkBtn, null, null);
                 return;
             }
             if (path.isBlank()) {
                 log.warn("Location is blank");
-                NewDownloadUtils.disableControlsAndShowError("Location is blank", errorLabel, checkBtn, null, null);
+                DownloadUtils.disableControlsAndShowError("Location is blank", errorLabel, checkBtn, null, null);
                 return;
             }
             var start = Integer.parseInt(startField.getText());
@@ -261,7 +261,7 @@ public class BatchDownload implements QueueObserver {
                         var msg = "At least one URL exists for this location. Change location or change start, end.\n"
                                 + found.get().getUrl();
                         log.warn(msg);
-                        NewDownloadUtils.disableControlsAndShowError(msg, errorLabel, checkBtn, null, null);
+                        DownloadUtils.disableControlsAndShowError(msg, errorLabel, checkBtn, null, null);
                         return;
                     }
                 }
@@ -285,7 +285,7 @@ public class BatchDownload implements QueueObserver {
             if (e instanceof NumberFormatException)
                 return;
             log.error(e.getLocalizedMessage());
-            NewDownloadUtils.disableControlsAndShowError(e.getLocalizedMessage(), errorLabel, checkBtn, null, null);
+            DownloadUtils.disableControlsAndShowError(e.getLocalizedMessage(), errorLabel, checkBtn, null, null);
         }
     }
 

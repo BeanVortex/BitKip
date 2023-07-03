@@ -6,7 +6,7 @@ import ir.darkdeveloper.bitkip.models.LinkModel;
 import ir.darkdeveloper.bitkip.repo.QueuesRepo;
 import ir.darkdeveloper.bitkip.utils.FxUtils;
 import ir.darkdeveloper.bitkip.utils.Validations;
-import ir.darkdeveloper.bitkip.utils.NewDownloadUtils;
+import ir.darkdeveloper.bitkip.utils.DownloadUtils;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -47,10 +47,10 @@ public class BatchServlet extends HttpServlet {
         var chunks = Validations.maxChunks();
         var allDownloadsQueue = QueuesRepo.findByName(ALL_DOWNLOADS_QUEUE, false);
         var firstUrl = links.get(0);
-        var connection = NewDownloadUtils.connect(firstUrl, true);
-        var firstFileName = NewDownloadUtils.extractFileName(firstUrl, connection);
+        var connection = DownloadUtils.connect(firstUrl, true);
+        var firstFileName = DownloadUtils.extractFileName(firstUrl, connection);
         var secondaryQueue = BatchDownload.getSecondaryQueueByFileName(firstFileName);
-        var path = NewDownloadUtils.determineLocation(firstFileName);
+        var path = DownloadUtils.determineLocation(firstFileName);
         return urlModel.links().stream().map(s -> {
             var lm = new LinkModel(s, chunks);
             lm.getQueues().add(allDownloadsQueue);

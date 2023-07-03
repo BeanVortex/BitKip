@@ -96,7 +96,7 @@ public class SingleDownload implements QueueObserver {
                 "File is seperated into parts and will be downloaded concurrently"
         };
 
-        NewDownloadUtils.initPopOvers(questionBtns, contents);
+        DownloadUtils.initPopOvers(questionBtns, contents);
         Validations.validateInputChecks(chunksField, bytesField, speedField, dm);
 
     }
@@ -110,17 +110,17 @@ public class SingleDownload implements QueueObserver {
         queueCombo.getSelectionModel().selectedIndexProperty().addListener(observable -> onQueueChanged());
         urlField.textProperty().addListener((o, ol, n) -> {
             if (n.isBlank())
-                NewDownloadUtils.disableControlsAndShowError("URL is blank", errorLabel, downloadBtn, addBtn, refreshBtn);
+                DownloadUtils.disableControlsAndShowError("URL is blank", errorLabel, downloadBtn, addBtn, refreshBtn);
             else autoFillLocationAndSizeAndName();
         });
         nameField.textProperty().addListener((o, ol, n) -> {
             if (n.isBlank())
-                NewDownloadUtils.disableControlsAndShowError("Name is blank", errorLabel, downloadBtn, addBtn, refreshBtn);
+                DownloadUtils.disableControlsAndShowError("Name is blank", errorLabel, downloadBtn, addBtn, refreshBtn);
             else onOfflineFieldsChanged();
         });
         locationField.textProperty().addListener((o, ol, n) -> {
             if (n.isBlank())
-                NewDownloadUtils.disableControlsAndShowError("Location is blank", errorLabel, downloadBtn, addBtn, refreshBtn);
+                DownloadUtils.disableControlsAndShowError("Location is blank", errorLabel, downloadBtn, addBtn, refreshBtn);
             else onOfflineFieldsChanged();
         });
         if (urlModel == null)
@@ -135,12 +135,12 @@ public class SingleDownload implements QueueObserver {
         bytesField.setText(String.valueOf(urlModel.fileSize()));
         HttpURLConnection conn;
         try {
-            conn = NewDownloadUtils.connect(urlModel.url(), true);
+            conn = DownloadUtils.connect(urlModel.url(), true);
         } catch (IOException e) {
             log.error(e.getMessage());
             return;
         }
-        var resumable = NewDownloadUtils.canResume(conn);
+        var resumable = DownloadUtils.canResume(conn);
         chunksField.setDisable(!resumable);
         chunksField.setText(resumable ? String.valueOf(maxChunks()) : "0");
         speedField.setDisable(false);
@@ -164,16 +164,16 @@ public class SingleDownload implements QueueObserver {
             // firing select event
             queueCombo.getSelectionModel().select(queueCombo.getSelectionModel().getSelectedIndex());
             var url = urlField.getText();
-            var connection = NewDownloadUtils.connect(url, true);
+            var connection = DownloadUtils.connect(url, true);
             var executor = Executors.newFixedThreadPool(2);
             var fileNameLocationFuture =
-                    NewDownloadUtils.prepareFileNameAndFieldsAsync(connection, url, nameField, executor)
+                    DownloadUtils.prepareFileNameAndFieldsAsync(connection, url, nameField, executor)
                             .thenAccept(this::setLocation);
-            var sizeFuture = NewDownloadUtils.prepareFileSizeAndFieldsAsync(connection, urlField, sizeLabel,
+            var sizeFuture = DownloadUtils.prepareFileSizeAndFieldsAsync(connection, urlField, sizeLabel,
                     resumableLabel, chunksField, bytesField, dm, executor);
             CompletableFuture.allOf(fileNameLocationFuture, sizeFuture)
                     .whenComplete((unused, throwable) -> {
-                        NewDownloadUtils.checkIfFileIsOKToSave(locationField.getText(),
+                        DownloadUtils.checkIfFileIsOKToSave(locationField.getText(),
                                 nameField.getText(), errorLabel, downloadBtn, addBtn, refreshBtn);
                         executor.shutdown();
                     })
@@ -182,22 +182,22 @@ public class SingleDownload implements QueueObserver {
                             executor.shutdown();
                         var errMsg = throwable.getCause().getLocalizedMessage();
                         Platform.runLater(() ->
-                                NewDownloadUtils.disableControlsAndShowError(errMsg, errorLabel, downloadBtn, addBtn, refreshBtn));
+                                DownloadUtils.disableControlsAndShowError(errMsg, errorLabel, downloadBtn, addBtn, refreshBtn));
                         return null;
                     });
         } catch (Exception e) {
-            NewDownloadUtils.disableControlsAndShowError(e.getLocalizedMessage(), errorLabel, downloadBtn, addBtn, refreshBtn);
+            DownloadUtils.disableControlsAndShowError(e.getLocalizedMessage(), errorLabel, downloadBtn, addBtn, refreshBtn);
         }
     }
 
     private void setLocation(String fileName) {
-        NewDownloadUtils.setLocationAndQueue(locationField, fileName, dm);
+        DownloadUtils.setLocationAndQueue(locationField, fileName, dm);
     }
 
     @FXML
     private void onSelectLocation(ActionEvent e) {
-        NewDownloadUtils.selectLocation(e, locationField);
-        NewDownloadUtils.checkIfFileIsOKToSave(locationField.getText(), nameField.getText(),
+        DownloadUtils.selectLocation(e, locationField);
+        DownloadUtils.checkIfFileIsOKToSave(locationField.getText(), nameField.getText(),
                 errorLabel, downloadBtn, addBtn, refreshBtn);
     }
 
@@ -243,24 +243,24 @@ public class SingleDownload implements QueueObserver {
         var path = locationField.getText();
         if (url.isBlank()) {
             log.warn("URL is blank");
-            NewDownloadUtils.disableControlsAndShowError("URL is blank", errorLabel, downloadBtn, addBtn, refreshBtn);
+            DownloadUtils.disableControlsAndShowError("URL is blank", errorLabel, downloadBtn, addBtn, refreshBtn);
             return false;
         }
         if (fileName.isBlank()) {
             log.warn("Name is blank");
-            NewDownloadUtils.disableControlsAndShowError("Name is blank", errorLabel, downloadBtn, addBtn, refreshBtn);
+            DownloadUtils.disableControlsAndShowError("Name is blank", errorLabel, downloadBtn, addBtn, refreshBtn);
             return false;
         }
         if (path.isBlank()) {
             log.warn("Location is blank");
-            NewDownloadUtils.disableControlsAndShowError("Location is blank", errorLabel, downloadBtn, addBtn, refreshBtn);
+            DownloadUtils.disableControlsAndShowError("Location is blank", errorLabel, downloadBtn, addBtn, refreshBtn);
             return false;
         }
 
         if (DownloadsRepo.exists(url, fileName, path)) {
             var msg = "This url and name exists for this location. Change location or name";
             log.error(msg);
-            NewDownloadUtils.disableControlsAndShowError(msg, errorLabel, downloadBtn, addBtn, refreshBtn);
+            DownloadUtils.disableControlsAndShowError(msg, errorLabel, downloadBtn, addBtn, refreshBtn);
             return false;
         }
 
@@ -304,7 +304,7 @@ public class SingleDownload implements QueueObserver {
     }
 
     private void onOfflineFieldsChanged() {
-        NewDownloadUtils.onOfflineFieldsChanged(locationField, nameField.getText(), dm, queueCombo,
+        DownloadUtils.onOfflineFieldsChanged(locationField, nameField.getText(), dm, queueCombo,
                 errorLabel, downloadBtn, addBtn, openLocation, refreshBtn);
     }
 

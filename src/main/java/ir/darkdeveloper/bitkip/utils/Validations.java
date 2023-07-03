@@ -172,9 +172,9 @@ public class Validations {
             return;
 
         // when added through batch list and size not fetched
-        var connection = NewDownloadUtils.connect(dm.getUrl(), true);
-        var canResume = NewDownloadUtils.canResume(connection);
-        var fileSize = NewDownloadUtils.getFileSize(connection);
+        var connection = DownloadUtils.connect(dm.getUrl(), true);
+        var canResume = DownloadUtils.canResume(connection);
+        var fileSize = DownloadUtils.getFileSize(connection);
         dm.setSize(fileSize);
         dm.setResumable(canResume);
         if (!canResume)

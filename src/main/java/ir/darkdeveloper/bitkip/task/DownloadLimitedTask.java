@@ -6,7 +6,7 @@ import ir.darkdeveloper.bitkip.models.DownloadStatus;
 import ir.darkdeveloper.bitkip.repo.DownloadsRepo;
 import ir.darkdeveloper.bitkip.utils.DownloadOpUtils;
 import ir.darkdeveloper.bitkip.utils.IOUtils;
-import ir.darkdeveloper.bitkip.utils.NewDownloadUtils;
+import ir.darkdeveloper.bitkip.utils.DownloadUtils;
 import javafx.application.Platform;
 import org.controlsfx.control.Notifications;
 
@@ -80,7 +80,7 @@ public class DownloadLimitedTask extends DownloadTask {
         ReadableByteChannel rbc = null;
         FileOutputStream fos = null;
         try {
-            var con = NewDownloadUtils.connect(url, true);
+            var con = DownloadUtils.connect(url, true);
             con.setRequestProperty("User-Agent", userAgent);
             i = con.getInputStream();
             rbc = Channels.newChannel(i);
@@ -130,7 +130,7 @@ public class DownloadLimitedTask extends DownloadTask {
     private void performDownload() throws IOException, InterruptedException {
 
         try {
-            var con = NewDownloadUtils.connect(url, false);
+            var con = DownloadUtils.connect(url, false);
             if (!downloadModel.isResumable())
                 con.setRequestProperty("User-Agent", userAgent);
             configureResume(con, file, downloadModel.getSize());

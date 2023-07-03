@@ -6,7 +6,7 @@ import ir.darkdeveloper.bitkip.models.DownloadStatus;
 import ir.darkdeveloper.bitkip.repo.DownloadsRepo;
 import ir.darkdeveloper.bitkip.utils.DownloadOpUtils;
 import ir.darkdeveloper.bitkip.utils.IOUtils;
-import ir.darkdeveloper.bitkip.utils.NewDownloadUtils;
+import ir.darkdeveloper.bitkip.utils.DownloadUtils;
 import javafx.application.Platform;
 
 import java.io.File;
@@ -159,7 +159,7 @@ public class DownloadInChunksTask extends DownloadTask {
                                  long existingFileSize, int rateLimitCount, int retries)
             throws InterruptedException, IOException {
         try {
-            var con = NewDownloadUtils.connect(url, false);
+            var con = DownloadUtils.connect(url, false);
             con.addRequestProperty("Range", "bytes=" + fromContinue + "-" + to);
             var out = new FileOutputStream(partFile, partFile.exists());
             var fileChannel = out.getChannel();
@@ -196,7 +196,7 @@ public class DownloadInChunksTask extends DownloadTask {
         if (retries != downloadRetryCount) {
             try {
                 var bytesToDownloadEachInCycle = limit / chunks;
-                var con = NewDownloadUtils.connect(url, false);
+                var con = DownloadUtils.connect(url, false);
                 if (!downloadModel.isResumable())
                     con.setRequestProperty("User-Agent", userAgent);
                 con.addRequestProperty("Range", "bytes=" + fromContinue + "-" + to);

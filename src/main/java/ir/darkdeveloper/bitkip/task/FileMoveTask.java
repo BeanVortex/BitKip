@@ -2,7 +2,7 @@ package ir.darkdeveloper.bitkip.task;
 
 import ir.darkdeveloper.bitkip.repo.DownloadsRepo;
 import ir.darkdeveloper.bitkip.utils.IOUtils;
-import ir.darkdeveloper.bitkip.utils.NewDownloadUtils;
+import ir.darkdeveloper.bitkip.utils.DownloadUtils;
 import javafx.concurrent.Task;
 
 import java.io.IOException;
@@ -32,7 +32,7 @@ public class FileMoveTask extends Task<Long> {
         IOUtils.moveAndDeletePreviousData(prevPath, nextPath);
         DownloadsRepo.getDownloadsByQueueName(ALL_DOWNLOADS_QUEUE).forEach(dm -> {
             if (dm.getFilePath().contains("BitKip")) {
-                var downloadPath = NewDownloadUtils.determineLocation(dm.getName());
+                var downloadPath = DownloadUtils.determineLocation(dm.getName());
                 var id = dm.getId();
                 DownloadsRepo.updateDownloadLocation(downloadPath, id);
             }

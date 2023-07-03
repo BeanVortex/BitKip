@@ -2,13 +2,13 @@ package ir.darkdeveloper.bitkip.task;
 
 import ir.darkdeveloper.bitkip.models.QueueModel;
 import ir.darkdeveloper.bitkip.models.ScheduleModel;
+import ir.darkdeveloper.bitkip.models.StartedQueue;
 import ir.darkdeveloper.bitkip.repo.ScheduleRepo;
 import ir.darkdeveloper.bitkip.utils.FxUtils;
 import ir.darkdeveloper.bitkip.utils.MenuUtils;
 import ir.darkdeveloper.bitkip.utils.QueueUtils;
 import ir.darkdeveloper.bitkip.utils.SideUtils;
 import javafx.scene.control.Label;
-import javafx.scene.control.MenuItem;
 
 import java.time.*;
 import java.util.concurrent.Executors;
@@ -16,7 +16,6 @@ import java.util.concurrent.TimeUnit;
 
 import static com.sun.jna.Platform.isLinux;
 import static com.sun.jna.Platform.isMac;
-import static ir.darkdeveloper.bitkip.config.AppConfigs.log;
 import static ir.darkdeveloper.bitkip.config.AppConfigs.*;
 import static ir.darkdeveloper.bitkip.config.observers.QueueSubject.getQueues;
 
@@ -41,9 +40,10 @@ public class ScheduleTask {
                 .findFirst().orElse(null);
 
 
-        startSchedule(queue, startItem, stopItem);
+        var startedQueue = new StartedQueue(queue, startItem, stopItem);
+        startSchedule(startedQueue);
         if (schedule.isStopTimeEnabled())
-            stopSchedule(queue, startItem, stopItem);
+            stopSchedule(startedQueue);
         currentSchedules.put(schedule.getId(), schedule);
         if (schedule.isTurnOffEnabled() && (isLinux() || isMac()) && userPassword == null) {
             var header = "You have at least one queue that has been scheduled to turn off or suspend.";
@@ -52,20 +52,22 @@ public class ScheduleTask {
         }
     }
 
-    private static void startSchedule(QueueModel queue, MenuItem startItem, MenuItem stopItem) {
+    private static void startSchedule(StartedQueue startedQueue) {
+        var queue = startedQueue.queue();
         Runnable run = () -> {
             log.info("Start scheduler triggered for " + queue.toStringModel());
             if (isSchedulerNotTriggeredOnTime("Start", queue)) return;
-            QueueUtils.startQueue(queue, startItem, stopItem);
+            QueueUtils.startQueue(startedQueue, true);
         };
         createSchedule(run, queue, false);
     }
 
-    private static void stopSchedule(QueueModel queue, MenuItem startItem, MenuItem stopItem) {
+    private static void stopSchedule(StartedQueue startedQueue) {
+        var queue = startedQueue.queue();
         Runnable run = () -> {
             log.info("Stop scheduler triggered for " + queue.toStringModel());
             if (isSchedulerNotTriggeredOnTime("Stop", queue)) return;
-            QueueUtils.stopQueue(queue, startItem, stopItem);
+            QueueUtils.stopQueue(startedQueue);
         };
         createSchedule(run, queue, true);
     }

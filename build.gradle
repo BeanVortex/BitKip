@@ -8,7 +8,7 @@ plugins {
 }
 
 group 'ir.darkdeveloper'
-version '1.1.1'
+version '1.2.0'
 sourceCompatibility = '19'
 targetCompatibility = '19'
 mainClassName = 'ir.darkdeveloper.bitkip.BitKip'
@@ -40,7 +40,7 @@ javafx {
 dependencies {
     implementation 'org.controlsfx:controlsfx:11.1.0'
     implementation 'org.kordamp.ikonli:ikonli-javafx:12.3.1'
-    implementation 'org.xerial:sqlite-jdbc:3.40.0.0'
+    implementation 'org.xerial:sqlite-jdbc:3.42.0.0'
     implementation 'org.jsoup:jsoup:1.15.3'
     implementation 'org.eclipse.jetty:jetty-servlet:11.0.15'
     implementation 'org.eclipse.jetty:jetty-server:11.0.15'
