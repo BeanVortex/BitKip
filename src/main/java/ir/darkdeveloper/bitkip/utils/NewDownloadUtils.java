@@ -23,6 +23,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 
 import static ir.darkdeveloper.bitkip.config.AppConfigs.*;
+import static ir.darkdeveloper.bitkip.utils.Defaults.OTHERS_QUEUE;
 import static ir.darkdeveloper.bitkip.utils.Defaults.extensions;
 import static ir.darkdeveloper.bitkip.utils.Validations.maxChunks;
 
@@ -141,37 +142,34 @@ public class NewDownloadUtils {
     }
 
 
-    public static void determineLocationAndQueue(TextField locationField, String fileName, DownloadModel dm) {
+    public static void setLocationAndQueue(TextField locationField, String fileName, DownloadModel dm) {
         Platform.runLater(() -> {
             if (fileName == null || fileName.isBlank())
                 return;
-            for (var entry : extensions.entrySet()) {
-                var matched = entry.getValue().stream().anyMatch(fileName::endsWith);
-                if (matched) {
-                    var path = defaultDownloadPaths.stream().filter(p -> p.contains(entry.getKey()))
-                            .findFirst().orElse(othersPath);
-                    if (!locationField.getText().equals(path))
-                        locationField.setText(path);
-                    determineQueue(dm, entry.getKey());
-                    return;
-                }
-                // empty is set for others
-                if (entry.getValue().isEmpty()) {
-                    if (!locationField.getText().equals(othersPath))
-                        locationField.setText(othersPath);
-                    determineQueue(dm, entry.getKey());
-                    return;
-                }
+            var qm = determineQueue(fileName);
+            if (qm.getName().equals(OTHERS_QUEUE)) {
+                if (!locationField.getText().equals(othersPath))
+                    locationField.setText(othersPath);
+            } else {
+                var path = defaultDownloadPaths.stream().filter(p -> p.contains(qm.getName()))
+                        .findFirst().orElse(othersPath);
+                if (!locationField.getText().equals(path))
+                    locationField.setText(path);
             }
+            if (dm != null && !dm.getQueues().contains(qm))
+                    dm.getQueues().add(qm);
         });
     }
 
-    private static void determineQueue(DownloadModel dm, String queueName) {
-        if (dm != null) {
-            var qm = QueuesRepo.findByName(queueName, false);
-            if (!dm.getQueues().contains(qm))
-                dm.getQueues().add(qm);
+    public static QueueModel determineQueue(String fileName) {
+        if (fileName == null || fileName.isBlank())
+            return null;
+        for (var entry : extensions.entrySet()) {
+            var matched = entry.getValue().stream().anyMatch(fileName::endsWith);
+            if (matched)
+                return QueuesRepo.findByName(entry.getKey(), false);
         }
+        return QueuesRepo.findByName(OTHERS_QUEUE, false);
     }
 
     public static void initPopOvers(Button[] questionButtons, String[] contents) {
@@ -257,7 +255,7 @@ public class NewDownloadUtils {
                 locationField.setText(path);
             openLocation.setDisable(true);
         } else {
-            determineLocationAndQueue(locationField, filename, dm);
+            setLocationAndQueue(locationField, filename, dm);
             openLocation.setDisable(false);
         }
         checkIfFileIsOKToSave(locationField.getText(), filename, errorLabel, downloadBtn, addBtn, refreshBtn);

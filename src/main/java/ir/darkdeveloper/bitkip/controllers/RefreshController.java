@@ -22,13 +22,9 @@ import static ir.darkdeveloper.bitkip.repo.DownloadsRepo.COL_URL;
 public class RefreshController implements FXMLController {
 
     @FXML
-    private Label errorLabel;
+    private Label errorLabel,nameLbl;
     @FXML
-    private Button saveBtn;
-    @FXML
-    private Button resumeBtn;
-    @FXML
-    private Label nameLbl;
+    private Button saveBtn,resumeBtn;
     @FXML
     private TextField urlField;
 

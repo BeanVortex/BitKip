@@ -3,6 +3,7 @@ package ir.darkdeveloper.bitkip.repo;
 import ir.darkdeveloper.bitkip.models.DownloadModel;
 import ir.darkdeveloper.bitkip.models.DownloadStatus;
 
+import java.io.File;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDateTime;
@@ -397,5 +398,21 @@ public class DownloadsRepo {
                         COL_PATH, downloadPath, COL_NAME,
                         COL_ID, id);
         DatabaseHelper.executeUpdateSql(sql, false);
+    }
+
+    public static boolean exists(String url, String fileName, String path) {
+        var byURL = DownloadsRepo.findByURL(url);
+        if (!byURL.isEmpty()) {
+            var found = byURL.stream()
+                    .filter(dm -> {
+                        var filePath = dm.getFilePath();
+                        var p = filePath.substring(0, filePath.lastIndexOf(File.separator) + 1);
+                        var n = dm.getName();
+                        return p.equals(path) && n.equals(fileName);
+                    })
+                    .findFirst();
+            return found.isPresent();
+        }
+        return false;
     }
 }

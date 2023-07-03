@@ -14,7 +14,6 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.control.*;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
-import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Paint;
 import javafx.stage.DirectoryChooser;
@@ -36,33 +35,16 @@ import static ir.darkdeveloper.bitkip.config.observers.ThemeSubject.setTheme;
 public class SettingsController implements FXMLController {
 
     @FXML
-    private CheckBox triggerOffCheck;
+    private CheckBox immediateCheck, triggerOffCheck, agentCheck,
+            continueCheck, completeDialogCheck, serverCheck;
     @FXML
-    private VBox root;
-    @FXML
-    private HBox actionArea;
+    private VBox root, actionArea, queueContainer;
     @FXML
     private TabPane tabPane;
     @FXML
-    private VBox queueContainer;
+    private Label agentDesc, lblLocation, savedLabel;
     @FXML
-    private CheckBox agentCheck;
-    @FXML
-    private Label agentDesc;
-    @FXML
-    private TextField agentField;
-    @FXML
-    private CheckBox continueCheck;
-    @FXML
-    private CheckBox completeDialogCheck;
-    @FXML
-    private Label lblLocation;
-    @FXML
-    private CheckBox serverCheck;
-    @FXML
-    private TextField connectionField, readField, rateLimitField, retryField, portField;
-    @FXML
-    private Label savedLabel;
+    private TextField agentField, connectionField, readField, rateLimitField, retryField, portField;
 
 
     private Stage stage;
@@ -79,8 +61,8 @@ public class SettingsController implements FXMLController {
             getThemeSubject().removeObserver(this);
             getQueueSubject().removeObserver(queueController);
         });
-        var defaultStageWidth = stage.getMinWidth();
-        var defaultStageHeight = stage.getMinHeight();
+        var defaultWidth = stage.getMinWidth() + 50;
+        var defaultHeight = stage.getMinHeight() + 50;
         tabPane.getSelectionModel().selectedIndexProperty().addListener((ob, o, n) -> {
             // if queue tab is selected
             if (n.intValue() == 2) {
@@ -93,10 +75,10 @@ public class SettingsController implements FXMLController {
                 stage.setMinHeight(height);
             } else if (!root.getChildren().contains(actionArea)) {
                 root.getChildren().add(actionArea);
-                stage.setWidth(defaultStageWidth);
-                stage.setHeight(defaultStageHeight);
-                stage.setMinWidth(defaultStageWidth);
-                stage.setMinHeight(defaultStageHeight);
+                stage.setWidth(defaultWidth);
+                stage.setHeight(defaultHeight);
+                stage.setMinWidth(defaultWidth);
+                stage.setMinHeight(defaultHeight);
                 stage.setTitle("Settings");
             }
         });
@@ -117,6 +99,7 @@ public class SettingsController implements FXMLController {
         lblLocation.setText(downloadPath);
         serverCheck.setSelected(serverEnabled);
         triggerOffCheck.setSelected(triggerTurnOffOnEmptyQueue);
+        immediateCheck.setSelected(downloadImmediately);
         portField.setText(String.valueOf(serverPort));
         retryField.setText(String.valueOf(downloadRetryCount));
         rateLimitField.setText(String.valueOf(downloadRateLimitCount));
@@ -259,6 +242,7 @@ public class SettingsController implements FXMLController {
         continueOnLostConnectionLost = defaultContinueOnLostConnectionLost;
         downloadRetryCount = defaultDownloadRetryCount;
         downloadRateLimitCount = defaultDownloadRateLimitCount;
+        downloadImmediately = defaultDownloadImmediately;
         userAgent = defaultUserAgent;
         userAgentEnabled = defaultUserAgentEnabled;
         connectionTimeout = defaultConnectionTimeout;
@@ -277,6 +261,11 @@ public class SettingsController implements FXMLController {
 
     public void onTurnOffCheck() {
         triggerTurnOffOnEmptyQueue = triggerOffCheck.isSelected();
+        IOUtils.saveConfigs();
+    }
+
+    public void onImmediateCheck() {
+        downloadImmediately = immediateCheck.isSelected();
         IOUtils.saveConfigs();
     }
 }

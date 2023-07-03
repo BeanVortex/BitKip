@@ -3,8 +3,10 @@ package ir.darkdeveloper.bitkip.utils;
 import ir.darkdeveloper.bitkip.controllers.DetailsController;
 import ir.darkdeveloper.bitkip.models.DownloadModel;
 import ir.darkdeveloper.bitkip.models.DownloadStatus;
+import ir.darkdeveloper.bitkip.models.SingleURLModel;
 import ir.darkdeveloper.bitkip.repo.DatabaseHelper;
 import ir.darkdeveloper.bitkip.repo.DownloadsRepo;
+import ir.darkdeveloper.bitkip.repo.QueuesRepo;
 import ir.darkdeveloper.bitkip.task.DownloadInChunksTask;
 import ir.darkdeveloper.bitkip.task.DownloadLimitedTask;
 import ir.darkdeveloper.bitkip.task.DownloadTask;
@@ -27,7 +29,9 @@ import java.util.concurrent.Executors;
 import static com.sun.jna.Platform.*;
 import static ir.darkdeveloper.bitkip.config.AppConfigs.*;
 import static ir.darkdeveloper.bitkip.repo.DownloadsRepo.*;
+import static ir.darkdeveloper.bitkip.utils.Defaults.ALL_DOWNLOADS_QUEUE;
 import static ir.darkdeveloper.bitkip.utils.IOUtils.getBytesFromString;
+import static ir.darkdeveloper.bitkip.utils.Validations.maxChunks;
 
 public class DownloadOpUtils {
 
@@ -116,7 +120,7 @@ public class DownloadOpUtils {
             try {
                 triggerDownload(dm, speedLimit, byteLimit, resume, blocking, executor);
             } catch (ExecutionException | InterruptedException e) {
-                e.printStackTrace();
+                log.error(e.getMessage());
             }
             openDownloadings.stream().filter(dc -> dc.getDownloadModel().equals(dm))
                     .forEach(DetailsController::initDownloadListeners);
@@ -347,5 +351,49 @@ public class DownloadOpUtils {
                 .title("Export successful")
                 .text("File exported successfully to " + exportedLinksPath)
                 .showInformation();
+    }
+
+    public static void downloadImmediately(SingleURLModel urlModel) {
+        var dm = new DownloadModel();
+        var url = urlModel.url();
+        var fileName = urlModel.filename();
+        dm.setUrl(url);
+        dm.setName(fileName);
+        try {
+            var conn = NewDownloadUtils.connect(url, true);
+            var canResume = NewDownloadUtils.canResume(conn);
+            dm.setResumable(canResume);
+            dm.setChunks(canResume ? maxChunks() : 0);
+            dm.setProgress(0);
+            dm.setSize(urlModel.fileSize());
+            dm.setAddDate(LocalDateTime.now());
+            dm.setAddToQueueDate(LocalDateTime.now());
+            dm.setShowCompleteDialog(showCompleteDialog);
+            dm.setOpenAfterComplete(false);
+            var path = NewDownloadUtils.determineLocation(fileName);
+            dm.setFilePath(path);
+
+            if (DownloadsRepo.exists(url, fileName, path))
+                throw new IllegalArgumentException("This url and name exists for this location. Change location or name");
+
+            var queue = NewDownloadUtils.determineQueue(fileName);
+            var allDownloadsQueue = QueuesRepo.findByName(ALL_DOWNLOADS_QUEUE, false);
+            dm.getQueues().add(allDownloadsQueue);
+            dm.getQueues().add(queue);
+            dm.setDownloadStatus(DownloadStatus.Trying);
+            DownloadOpUtils.startDownload(dm, "0", String.valueOf(dm.getSize()),
+                    false, false, null);
+            Notifications.create()
+                    .title("Downloading now ...")
+                    .text(dm.getName())
+                    .showInformation();
+        } catch (IOException | IllegalArgumentException e) {
+            log.error(e.getMessage());
+            Notifications.create()
+                    .title("Failed to download : " + dm.getName())
+                    .text(e.getMessage())
+                    .showWarning();
+        }
+
     }
 }

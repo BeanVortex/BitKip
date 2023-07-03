@@ -269,10 +269,13 @@ public class IOUtils {
                     .append("rate_limit_count=").append(String.valueOf(downloadRateLimitCount)).append("\n")
                     .append("connection_timeout=").append(String.valueOf(connectionTimeout)).append("\n")
                     .append("read_timeout=").append(String.valueOf(readTimeout)).append("\n")
+                    .append("immediate_download=").append(String.valueOf(downloadImmediately)).append("\n")
                     .append("user_agent_enabled=").append(String.valueOf(userAgentEnabled)).append("\n")
                     .append("user_agent=").append(userAgent);
             writer.flush();
             writer.close();
+
+            log.info("Saved config");
 
         } catch (IOException e) {
             log.error(e.getLocalizedMessage());
@@ -300,10 +303,12 @@ public class IOUtils {
                         case "rate_limit_count" -> downloadRateLimitCount = Integer.parseInt(value);
                         case "connection_timeout" -> connectionTimeout = Integer.parseInt(value);
                         case "read_timeout" -> readTimeout = Integer.parseInt(value);
+                        case "immediate_download" -> downloadImmediately = value.equals("true");
                         case "user_agent" -> userAgent = value;
                         case "user_agent_enabled" -> userAgentEnabled = value.equals("true");
                     }
                 }
+                log.info("Read config");
             }
         } catch (IOException e) {
             log.error(e.getLocalizedMessage());

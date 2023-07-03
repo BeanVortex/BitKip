@@ -37,24 +37,18 @@ public class DetailsController implements FXMLController {
     @FXML
     private ScrollPane scrollPane;
     @FXML
-    private Button openFolderBtn;
-    @FXML
     private Hyperlink link;
     @FXML
-    private TextField speedField;
+    private TextField bytesField,speedField;
     @FXML
-    private TextField bytesField;
-    @FXML
-    private ToggleSwitch openSwitch;
-    @FXML
-    private ToggleSwitch showSwitch;
+    private ToggleSwitch openSwitch,showSwitch;
     @FXML
     private ProgressBar downloadProgress;
     @FXML
     private Label nameLbl, queueLbl, remainingLbl, locationLbl, progressLbl, resumableLbl, chunksLbl,
             statusLbl, speedLbl, downloadedOfLbl;
     @FXML
-    private Button controlBtn;
+    private Button controlBtn, openFolderBtn;
 
     private Stage stage;
     private DownloadModel downloadModel;
@@ -163,7 +157,7 @@ public class DetailsController implements FXMLController {
                             .formatted(IOUtils.formatBytes(bytes),
                                     IOUtils.formatBytes(downloadModel.getSize()));
                     downloadedOfLbl.setText(downloadOf);
-                    if (speed != 0) {
+                    if (speed > 0) {
                         long delta = downloadModel.getSize() - bytes;
                         var remaining = DurationFormatUtils.formatDuration((delta / speed) * 1000, "dd:HH:mm:ss");
                         remainingLbl.setText("Remaining: " + remaining);

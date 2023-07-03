@@ -33,35 +33,20 @@ import static ir.darkdeveloper.bitkip.utils.Defaults.ALL_DOWNLOADS_QUEUE;
 import static ir.darkdeveloper.bitkip.utils.Defaults.extensions;
 
 public class BatchDownload implements QueueObserver {
+
     @FXML
     private Label errorLabel;
     @FXML
-    private Button newQueue;
+    private Button questionBtnUrl, checkBtn, cancelBtn, questionBtnChunks, openLocation, newQueue;
     @FXML
-    private TextField startField;
-    @FXML
-    private TextField endField;
-    @FXML
-    private TextField locationField;
-    @FXML
-    private Button openLocation;
+    private TextField startField, locationField, endField;
     @FXML
     private ComboBox<QueueModel> queueCombo;
     @FXML
-    private TextField chunksField;
-    @FXML
-    private Button questionBtnChunks;
-    @FXML
-    private Button cancelBtn;
-    @FXML
-    private Button checkBtn;
-    @FXML
-    private Button questionBtnUrl;
-    @FXML
-    private TextField urlField;
+    private TextField chunksField, urlField;
+
 
     private LinkModel tempLink;
-
     private Stage stage;
 
 
@@ -158,7 +143,7 @@ public class BatchDownload implements QueueObserver {
     }
 
     private void setLocation(String fileName) {
-        NewDownloadUtils.determineLocationAndQueue(locationField, fileName, null);
+        NewDownloadUtils.setLocationAndQueue(locationField, fileName, null);
         tempLink.setName(fileName);
     }
 

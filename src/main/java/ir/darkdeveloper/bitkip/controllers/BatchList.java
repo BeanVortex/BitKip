@@ -39,9 +39,7 @@ public class BatchList implements QueueObserver {
     @FXML
     private ComboBox<QueueModel> comboQueue;
     @FXML
-    private Button newQueue;
-    @FXML
-    private Button addBtn;
+    private Button addBtn,newQueue;
     @FXML
     private TableView<LinkModel> linkTable;
 

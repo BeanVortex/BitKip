@@ -27,9 +27,7 @@ public class NewDownloadController implements FXMLController {
     @FXML
     private VBox container;
     @FXML
-    private Button singleButton;
-    @FXML
-    private Button batchButton;
+    private Button singleButton, batchButton;
 
     private Stage stage;
     private QueueObserver prevController;

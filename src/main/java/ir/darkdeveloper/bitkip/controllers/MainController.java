@@ -40,13 +40,7 @@ public class MainController implements FXMLController, QueueObserver {
     @FXML
     private TreeView<String> sideTree;
     @FXML
-    private Button operationMenu;
-    @FXML
-    private Button moreBtn;
-    @FXML
-    private Button menuFile;
-    @FXML
-    private Button newDownloadBtn;
+    private Button newDownloadBtn, menuFile, operationMenu, moreBtn;
     @FXML
     private TableView<DownloadModel> contentTable;
     @FXML

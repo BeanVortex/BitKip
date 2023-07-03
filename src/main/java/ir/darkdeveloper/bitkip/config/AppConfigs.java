@@ -53,6 +53,8 @@ public class AppConfigs {
     public static int readTimeout = defaultReadTimeout;
     public static final boolean defaultTriggerTurnOffOnEmptyQueue = true;
     public static boolean triggerTurnOffOnEmptyQueue = defaultTriggerTurnOffOnEmptyQueue;
+    public static final boolean defaultDownloadImmediately = false;
+    public static boolean downloadImmediately = defaultDownloadImmediately;
 
 
     public static final ObjectMapper mapper = new ObjectMapper();

@@ -1,6 +1,7 @@
 package ir.darkdeveloper.bitkip.servlets;
 
 import ir.darkdeveloper.bitkip.models.SingleURLModel;
+import ir.darkdeveloper.bitkip.utils.DownloadOpUtils;
 import ir.darkdeveloper.bitkip.utils.FxUtils;
 import ir.darkdeveloper.bitkip.utils.IOUtils;
 import jakarta.servlet.http.HttpServlet;
@@ -9,7 +10,6 @@ import jakarta.servlet.http.HttpServletResponse;
 import javafx.application.Platform;
 
 import java.io.IOException;
-import java.io.PrintWriter;
 
 import static ir.darkdeveloper.bitkip.config.AppConfigs.*;
 
@@ -27,7 +27,10 @@ public class SingleServlet extends HttpServlet {
                 userAgent = agent;
                 IOUtils.saveConfigs();
             }
-            Platform.runLater(() -> FxUtils.newDownloadStage(true, urlModel));
+            Platform.runLater(() -> {
+                if (downloadImmediately) DownloadOpUtils.downloadImmediately(urlModel);
+                else FxUtils.newDownloadStage(true, urlModel);
+            });
             resp.setStatus(200);
         } catch (IOException e) {
             resp.setStatus(400);

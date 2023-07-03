@@ -49,74 +49,31 @@ import static java.time.DayOfWeek.*;
 public class QueueSetting implements FXMLController, QueueObserver {
 
     @FXML
-    private Label selectedQueueLbl;
-    @FXML
-    private Label windowsPowerLbl;
-    @FXML
-    private CheckBox hasFolderCheck;
-    @FXML
-    private CheckBox downloadOrderCheck;
-    @FXML
-    private VBox rightContainer;
-    @FXML
-    private Label savedLabel;
-    @FXML
-    private Spinner<Integer> simulDownloadSpinner;
+    private Label selectedQueueLbl, windowsPowerLbl, savedLabel;
     @FXML
     private TextField speedField;
     @FXML
     private ComboBox<TurnOffMode> powerCombo;
     @FXML
-    private CheckBox whenDoneCheck;
+    private Spinner<Integer> simulDownloadSpinner, stopHourSpinner, stopMinuteSpinner, stopSecondSpinner,
+            startHourSpinner, startMinuteSpinner, startSecondSpinner;
     @FXML
-    private Spinner<Integer> stopHourSpinner;
+    private CheckBox hasFolderCheck, downloadOrderCheck, whenDoneCheck, stopAtCheck,
+            saturdayCheck, sundayCheck, mondayCheck, tuesdayCheck, wednesdayCheck, thursdayCheck, fridayCheck,
+            enableCheck;
     @FXML
-    private Spinner<Integer> stopMinuteSpinner;
-    @FXML
-    private Spinner<Integer> stopSecondSpinner;
-    @FXML
-    private HBox stopContainer;
-    @FXML
-    private CheckBox stopAtCheck;
-    @FXML
-    private CheckBox saturdayCheck;
-    @FXML
-    private CheckBox sundayCheck;
-    @FXML
-    private CheckBox mondayCheck;
-    @FXML
-    private CheckBox tuesdayCheck;
-    @FXML
-    private CheckBox wednesdayCheck;
-    @FXML
-    private CheckBox thursdayCheck;
-    @FXML
-    private CheckBox fridayCheck;
-    @FXML
-    private RadioButton onceRadio;
-    @FXML
-    private RadioButton dailyRadio;
+    private RadioButton onceRadio, dailyRadio;
     @FXML
     private GridPane weeksContainer;
     @FXML
     private DatePicker datePicker;
     @FXML
-    private HBox horLine1;
+    private HBox stopContainer, horLine1, horLine2;
     @FXML
-    private HBox horLine2;
-    @FXML
-    private CheckBox enableCheck;
-    @FXML
-    private Spinner<Integer> startHourSpinner;
-    @FXML
-    private Spinner<Integer> startMinuteSpinner;
-    @FXML
-    private Spinner<Integer> startSecondSpinner;
-    @FXML
-    private VBox mainBox;
-
+    private VBox mainBox, rightContainer;
     @FXML
     private ListView<QueueModel> queueList;
+
 
     private Stage stage;
     private final ObjectProperty<QueueModel> selectedQueue = new SimpleObjectProperty<>();

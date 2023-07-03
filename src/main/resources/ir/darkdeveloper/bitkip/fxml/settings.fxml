@@ -8,7 +8,7 @@
       xmlns:fx="http://javafx.com/fxml"
       fx:id="root"
       fx:controller="ir.darkdeveloper.bitkip.controllers.SettingsController"
-      prefHeight="600.0" prefWidth="500.0" minHeight="600" minWidth="500">
+      prefHeight="650.0" prefWidth="500.0" minHeight="650" minWidth="500">
 
     <stylesheets>
         <URL value="@../css/settings.css"/>
@@ -65,7 +65,7 @@
         </Tab>
 
         <Tab text="Download" closable="false">
-            <VBox styleClass="padding_10" alignment="BASELINE_LEFT" spacing="10">
+            <VBox styleClass="padding_10" alignment="BASELINE_LEFT" spacing="15">
                 <CheckBox text="Show complete dialog" fx:id="completeDialogCheck" onAction="#onCompleteDialogCheck"
                           styleClass="settingDescription"/>
                 <CheckBox text="Continue on failure" fx:id="continueCheck" onAction="#onContinueCheck"
@@ -97,6 +97,11 @@
                     <Label text="Read Timeout:" styleClass="settingDescription"/>
                     <TextField fx:id="readField"/>
                 </HBox>
+
+                <CheckBox text="ImmediateDownload" fx:id="immediateCheck" onAction="#onImmediateCheck"
+                          styleClass="settingDescription"/>
+                <Label wrapText="true" styleClass="settingDescription, opacity_7"
+                       text="When you clicked on a link in browser, add and download it automatically"/>
             </VBox>
         </Tab>
 
@@ -106,18 +111,22 @@
 
     </TabPane>
 
+    <VBox fx:id="actionArea">
 
-    <HBox styleClass="padding_10" alignment="CENTER_LEFT">
-        <Label styleClass="bold" fx:id="savedLabel" visible="false"/>
-    </HBox>
-    <Region VBox.vgrow="SOMETIMES"/>
-    <HBox styleClass="padding_10" fx:id="actionArea">
-        <HBox alignment="BASELINE_LEFT">
-            <Button text="Default" styleClass="add_btn" onAction="#onDefaults"/>
+
+        <HBox styleClass="padding_10" alignment="CENTER_LEFT">
+            <Label styleClass="bold" fx:id="savedLabel" visible="false"/>
         </HBox>
-        <Region HBox.hgrow="ALWAYS"/>
-        <HBox alignment="BASELINE_RIGHT">
-            <Button text="Save" styleClass="download_now_btn" onAction="#onSave"/>
+        <Region VBox.vgrow="SOMETIMES"/>
+        <HBox styleClass="padding_10">
+            <HBox alignment="BASELINE_LEFT">
+                <Button text="Default" styleClass="add_btn" onAction="#onDefaults"/>
+            </HBox>
+            <Region HBox.hgrow="ALWAYS"/>
+            <HBox alignment="BASELINE_RIGHT">
+                <Button text="Save" styleClass="download_now_btn" onAction="#onSave"/>
+            </HBox>
         </HBox>
-    </HBox>
+    </VBox>
+
 </VBox>

@@ -36,41 +36,14 @@ import static ir.darkdeveloper.bitkip.utils.Validations.maxChunks;
 public class SingleDownload implements QueueObserver {
 
     @FXML
-    private Label errorLabel;
+    private Label sizeLabel, resumableLabel, errorLabel;
     @FXML
-    private Label resumableLabel;
+    private Button questionBtnSpeed, openLocation, questionBtnChunks,
+            questionBtnBytes, downloadBtn, refreshBtn, addBtn, newQueue;
     @FXML
-    private Button newQueue;
-    @FXML
-    private Button addBtn;
-    @FXML
-    private Button refreshBtn;
-    @FXML
-    private Button downloadBtn;
-    @FXML
-    private Label sizeLabel;
-    @FXML
-    private TextField bytesField;
-    @FXML
-    private Button questionBtnBytes;
-    @FXML
-    private TextField chunksField;
-    @FXML
-    private Button questionBtnChunks;
-    @FXML
-    private TextField speedField;
-    @FXML
-    private Button questionBtnSpeed;
+    private TextField urlField, chunksField, nameField, locationField, speedField, bytesField;
     @FXML
     private ComboBox<QueueModel> queueCombo;
-    @FXML
-    private TextField urlField;
-    @FXML
-    private TextField nameField;
-    @FXML
-    private TextField locationField;
-    @FXML
-    private Button openLocation;
 
     private final DownloadModel dm = new DownloadModel();
     private Stage stage;
@@ -218,7 +191,7 @@ public class SingleDownload implements QueueObserver {
     }
 
     private void setLocation(String fileName) {
-        NewDownloadUtils.determineLocationAndQueue(locationField, fileName, dm);
+        NewDownloadUtils.setLocationAndQueue(locationField, fileName, dm);
     }
 
     @FXML
@@ -284,22 +257,11 @@ public class SingleDownload implements QueueObserver {
             return false;
         }
 
-        var byURL = DownloadsRepo.findByURL(url);
-        if (!byURL.isEmpty()) {
-            var found = byURL.stream()
-                    .filter(dm -> {
-                        var filePath = dm.getFilePath();
-                        var p = filePath.substring(0, filePath.lastIndexOf(File.separator) + 1);
-                        var n = dm.getName();
-                        return p.equals(path) && n.equals(fileName);
-                    })
-                    .findFirst();
-            if (found.isPresent()) {
-                var msg = "This url and name exists for this location. Change location or name";
-                log.error(msg);
-                NewDownloadUtils.disableControlsAndShowError(msg, errorLabel, downloadBtn, addBtn, refreshBtn);
-                return false;
-            }
+        if (DownloadsRepo.exists(url, fileName, path)) {
+            var msg = "This url and name exists for this location. Change location or name";
+            log.error(msg);
+            NewDownloadUtils.disableControlsAndShowError(msg, errorLabel, downloadBtn, addBtn, refreshBtn);
+            return false;
         }
 
 

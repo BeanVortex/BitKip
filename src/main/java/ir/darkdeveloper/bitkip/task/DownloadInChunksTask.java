@@ -161,8 +161,6 @@ public class DownloadInChunksTask extends DownloadTask {
         try {
             var con = NewDownloadUtils.connect(url, false);
             con.addRequestProperty("Range", "bytes=" + fromContinue + "-" + to);
-            if (!downloadModel.isResumable())
-                con.setRequestProperty("User-Agent", userAgent);
             var out = new FileOutputStream(partFile, partFile.exists());
             var fileChannel = out.getChannel();
             fileChannels.add(fileChannel);
