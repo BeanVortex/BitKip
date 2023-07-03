@@ -31,15 +31,14 @@ import static ir.darkdeveloper.bitkip.BitKip.getResource;
 import static ir.darkdeveloper.bitkip.config.AppConfigs.*;
 import static ir.darkdeveloper.bitkip.config.observers.QueueSubject.getQueueSubject;
 import static ir.darkdeveloper.bitkip.config.observers.ThemeSubject.getThemeSubject;
-import static ir.darkdeveloper.bitkip.utils.Defaults.ALL_DOWNLOADS_QUEUE;
 import static ir.darkdeveloper.bitkip.utils.Defaults.staticQueueNames;
 
 public class FxUtils {
 
     // these constants are used to prevent these stages to show more than 1
-    private static final String QUEUE_SETTING_STAGE = "QueueSetting";
     private static final String ABOUT_STAGE = "About";
     private static final String LOGS_STAGE = "Log";
+    private static final String SETTINGS_STAGE = "Settings";
     private static final Map<String, StageAndController> openStages = new LinkedHashMap<>();
 
     record StageAndController(Stage stage, FXMLController controller) {
@@ -139,14 +138,7 @@ public class FxUtils {
     }
 
     public static void newOnceStageWindow(String key, String resource, String title) {
-        if (openStages.containsKey(key)) {
-            var val = openStages.get(key);
-            var stage = val.stage();
-            stage.toFront();
-            if (stage.isShowing())
-                return;
-            else openStages.remove(key);
-        }
+        if (checkOpened(key)) return;
         FXMLLoader loader;
         Stage stage = new Stage();
         VBox root;
@@ -177,7 +169,12 @@ public class FxUtils {
         openStages.put(key, stageAndController);
     }
 
-    public static void newSettingsStage() {
+    public static void newSettingsStage(boolean isQueueSetting, QueueModel selectedQueue) {
+        if (checkOpened(SETTINGS_STAGE)) {
+            var val = openStages.get(SETTINGS_STAGE);
+            ((SettingsController) val.controller()).setQueue(selectedQueue);
+            return;
+        }
         FXMLLoader loader;
         Stage stage = new Stage();
         VBox root;
@@ -199,8 +196,26 @@ public class FxUtils {
         FXMLController controller = loader.getController();
         getThemeSubject().addObserver(controller, scene);
         controller.setStage(stage);
+        if (isQueueSetting)
+            ((SettingsController) controller).setQueue(selectedQueue);
+
         // stage onclose is in controller class
         stage.show();
+        var stageAndController = new StageAndController(stage, controller);
+        openStages.put(SETTINGS_STAGE, stageAndController);
+    }
+
+
+    private static boolean checkOpened(String key) {
+        if (openStages.containsKey(key)) {
+            var val = openStages.get(key);
+            var stage = val.stage();
+            stage.toFront();
+            if (stage.isShowing())
+                return true;
+            else openStages.remove(key);
+        }
+        return false;
     }
 
     public static void newDetailsStage(DownloadModel dm) {
@@ -272,52 +287,6 @@ public class FxUtils {
         stage.setAlwaysOnTop(false);
     }
 
-    public static void newQueueSettingStage(QueueModel selectedQueue) {
-        if (openStages.containsKey(QUEUE_SETTING_STAGE)) {
-            var val = openStages.get(QUEUE_SETTING_STAGE);
-            var stage = val.stage();
-            var controller = val.controller();
-            ((QueueSetting) controller).setSelectedQueue(selectedQueue);
-            stage.toFront();
-            if (stage.isShowing())
-                return;
-            else openStages.remove(QUEUE_SETTING_STAGE);
-        }
-        FXMLLoader loader;
-        var stage = new Stage();
-        VBox root;
-        try {
-            loader = new FXMLLoader(getResource("fxml/queueSetting.fxml"));
-            root = loader.load();
-        } catch (IOException e) {
-            log.error(e.getMessage());
-            throw new RuntimeException(e);
-        }
-        var scene = new Scene(root);
-        stage.setScene(scene);
-
-        stage.setMinWidth(root.getPrefWidth());
-        stage.setMinHeight(root.getPrefHeight());
-        var queueName = ALL_DOWNLOADS_QUEUE;
-        if (selectedQueue != null)
-            queueName = selectedQueue.getName();
-        stage.setTitle("Scheduler: %s".formatted(queueName));
-        QueueSetting controller = loader.getController();
-        controller.setStage(stage);
-        controller.setSelectedQueue(selectedQueue);
-        getQueueSubject().addObserver(controller);
-        getThemeSubject().addObserver(controller, scene);
-        stage.setOnCloseRequest(e -> {
-            openStages.remove(QUEUE_SETTING_STAGE);
-            getQueueSubject().removeObserver(controller);
-            getThemeSubject().removeObserver(controller);
-        });
-        stage.show();
-        stage.setAlwaysOnTop(true);
-        stage.setAlwaysOnTop(false);
-        var stageAndController = new StageAndController(stage, controller);
-        openStages.put(QUEUE_SETTING_STAGE, stageAndController);
-    }
 
     public static void newRefreshStage(DownloadModel dm) {
         FXMLLoader loader;

@@ -127,7 +127,7 @@ public class SideUtils {
                         || itemName.equals("Categories") || itemName.equals("Queues"))
                     return;
                 var qm = QueuesRepo.findByName(selectedItem.getValue(), false);
-                FxUtils.newQueueSettingStage(qm);
+                FxUtils.newSettingsStage(true, qm);
             }
         };
     }
@@ -169,7 +169,7 @@ public class SideUtils {
         menuItems.get(stopQueueLbl).setDisable(!startedQueues.contains(startedQueue));
         menuItems.get(startQueueLbl).setOnAction(e -> QueueUtils.startQueue(startedQueue, true));
         menuItems.get(stopQueueLbl).setOnAction(e -> QueueUtils.stopQueue(startedQueue));
-        menuItems.get(queueSettingLbl).setOnAction(e -> FxUtils.newQueueSettingStage(qm));
+        menuItems.get(queueSettingLbl).setOnAction(e -> FxUtils.newSettingsStage(true, qm));
         menuItems.get(exportLbl).setOnAction(e -> DownloadOpUtils.exportLinks(qm.getName()));
         if (menuItems.containsKey(deleteLbl))
             menuItems.get(deleteLbl).setOnAction(e -> QueueUtils.deleteQueue(itemName));

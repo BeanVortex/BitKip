@@ -42,8 +42,8 @@ public class MenuUtils {
         menuFile.setOnMouseClicked(event -> c.show(menuFile, Side.BOTTOM, 0, 0));
         menuItems.get(addLink).setOnAction(e -> DownloadOpUtils.newDownload(true));
         menuItems.get(batchDownload).setOnAction(e -> DownloadOpUtils.newDownload(false));
-        menuItems.get(settings).setOnAction(e -> FxUtils.newSettingsStage());
-        menuItems.get(queueSettings).setOnAction(e -> FxUtils.newQueueSettingStage(null));
+        menuItems.get(settings).setOnAction(e -> FxUtils.newSettingsStage(false, null));
+        menuItems.get(queueSettings).setOnAction(e -> FxUtils.newSettingsStage(true, null));
         menuItems.get(importLinks).setOnAction(DownloadOpUtils::importLinks);
         menuItems.get(exportLinks).setOnAction(e -> DownloadOpUtils.exportLinks(ALL_DOWNLOADS_QUEUE));
         menuItems.get(exit).setOnAction(e -> Platform.exit());
@@ -129,7 +129,7 @@ public class MenuUtils {
         menuItems.get(deleteWithFileLbl).setOnAction(e -> DownloadOpUtils.deleteDownloads(mainTableUtils.getSelected(), true));
         menuItems.get(newQueueLbl).setOnAction(e -> FxUtils.newQueueStage());
         menuItems.get(deleteFromQueueLbl).setOnAction(e -> deleteFromQueue());
-        menuItems.get(queueSettingLbl).setOnAction(e -> FxUtils.newQueueSettingStage(null));
+        menuItems.get(queueSettingLbl).setOnAction(e -> FxUtils.newSettingsStage(true, null));
     }
 
     private static void disableEnableStartStopQueue(Menu startQueueMenu, Menu stopQueueMenu) {

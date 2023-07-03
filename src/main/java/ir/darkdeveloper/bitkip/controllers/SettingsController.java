@@ -1,8 +1,8 @@
 package ir.darkdeveloper.bitkip.controllers;
 
 import ir.darkdeveloper.bitkip.config.AppConfigs;
-import ir.darkdeveloper.bitkip.config.observers.QueueObserver;
 import ir.darkdeveloper.bitkip.controllers.interfaces.FXMLController;
+import ir.darkdeveloper.bitkip.models.QueueModel;
 import ir.darkdeveloper.bitkip.task.FileMoveTask;
 import ir.darkdeveloper.bitkip.utils.FxUtils;
 import ir.darkdeveloper.bitkip.utils.IOUtils;
@@ -11,7 +11,10 @@ import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
-import javafx.scene.control.*;
+import javafx.scene.control.CheckBox;
+import javafx.scene.control.Label;
+import javafx.scene.control.TabPane;
+import javafx.scene.control.TextField;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.VBox;
@@ -48,7 +51,7 @@ public class SettingsController implements FXMLController {
 
 
     private Stage stage;
-    private QueueObserver queueController;
+    private QueueSetting queueController;
     private VBox queueRoot;
 
     @Override
@@ -267,5 +270,10 @@ public class SettingsController implements FXMLController {
     public void onImmediateCheck() {
         downloadImmediately = immediateCheck.isSelected();
         IOUtils.saveConfigs();
+    }
+
+    public void setQueue(QueueModel selectedQueue) {
+        tabPane.getSelectionModel().select(2);
+        queueController.setSelectedQueue(selectedQueue);
     }
 }
