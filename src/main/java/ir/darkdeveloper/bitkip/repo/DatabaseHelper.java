@@ -51,9 +51,9 @@ public class DatabaseHelper {
         }
     }
 
-    public static void updateRow(String[] column, String[] value, String table, int id) {
-        var length = column.length;
-        if (length != value.length)
+    public static void updateRow(String[] columns, String[] values, String table, int id) {
+        var length = columns.length;
+        if (length != values.length)
             throw new RuntimeException("columns and values do not match by length");
 
         var builder = new StringBuilder("UPDATE ");
@@ -61,14 +61,14 @@ public class DatabaseHelper {
         for (int i = 0; i < length; i++) {
             boolean isInteger = false;
             try {
-                Integer.parseInt(value[i]);
+                Integer.parseInt(values[i]);
                 isInteger = true;
             } catch (Exception ignore) {
             }
-            var val = value[i];
+            var val = values[i];
             if (!isInteger && !val.equals("NULL"))
                 val = "\"" + val + "\"";
-            builder.append(column[i]).append("=").append(val);
+            builder.append(columns[i]).append("=").append(val);
             if (i != length - 1)
                 builder.append(",");
         }
