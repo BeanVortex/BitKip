@@ -31,6 +31,8 @@ import java.util.concurrent.Executors;
 import static ir.darkdeveloper.bitkip.config.AppConfigs.*;
 import static ir.darkdeveloper.bitkip.config.observers.QueueSubject.getQueueSubject;
 import static ir.darkdeveloper.bitkip.utils.Defaults.ALL_DOWNLOADS_QUEUE;
+import static ir.darkdeveloper.bitkip.utils.DownloadUtils.getNewFileNameIfExists;
+import static ir.darkdeveloper.bitkip.utils.DownloadUtils.handleError;
 import static ir.darkdeveloper.bitkip.utils.Validations.maxChunks;
 
 public class SingleDownload implements QueueObserver {
@@ -173,8 +175,8 @@ public class SingleDownload implements QueueObserver {
                     resumableLabel, chunksField, bytesField, dm, executor);
             CompletableFuture.allOf(fileNameLocationFuture, sizeFuture)
                     .whenComplete((unused, throwable) -> {
-                        DownloadUtils.checkIfFileIsOKToSave(locationField.getText(),
-                                nameField.getText(), errorLabel, downloadBtn, addBtn, refreshBtn);
+                        handleError(() -> DownloadUtils.checkIfFileIsOKToSave(locationField.getText(),
+                                nameField.getText(), downloadBtn, addBtn, refreshBtn),errorLabel);
                         executor.shutdown();
                     })
                     .exceptionally(throwable -> {
@@ -197,8 +199,8 @@ public class SingleDownload implements QueueObserver {
     @FXML
     private void onSelectLocation(ActionEvent e) {
         DownloadUtils.selectLocation(e, locationField);
-        DownloadUtils.checkIfFileIsOKToSave(locationField.getText(), nameField.getText(),
-                errorLabel, downloadBtn, addBtn, refreshBtn);
+        handleError(() -> DownloadUtils.checkIfFileIsOKToSave(locationField.getText(),
+                nameField.getText(), downloadBtn, addBtn, refreshBtn), errorLabel);
     }
 
     @FXML
@@ -258,10 +260,15 @@ public class SingleDownload implements QueueObserver {
         }
 
         if (DownloadsRepo.exists(url, fileName, path)) {
-            var msg = "This url and name exists for this location. Change location or name";
-            log.error(msg);
-            DownloadUtils.disableControlsAndShowError(msg, errorLabel, downloadBtn, addBtn, refreshBtn);
-            return false;
+            if (addSameDownload) {
+                fileName = getNewFileNameIfExists(fileName, path);
+                nameField.setText(fileName);
+            } else {
+                var msg = "This url and name exists for this location. Change location or name";
+                log.error(msg);
+                DownloadUtils.disableControlsAndShowError(msg, errorLabel, downloadBtn, addBtn, refreshBtn);
+                return false;
+            }
         }
 
 
@@ -304,8 +311,8 @@ public class SingleDownload implements QueueObserver {
     }
 
     private void onOfflineFieldsChanged() {
-        DownloadUtils.onOfflineFieldsChanged(locationField, nameField.getText(), dm, queueCombo,
-                errorLabel, downloadBtn, addBtn, openLocation, refreshBtn);
+        handleError(() -> DownloadUtils.onOfflineFieldsChanged(locationField, nameField.getText(), dm, queueCombo,
+                downloadBtn, addBtn, openLocation, refreshBtn), errorLabel);
     }
 
 
@@ -313,4 +320,5 @@ public class SingleDownload implements QueueObserver {
         this.urlModel = urlModel;
         initAfterUrlModel();
     }
+
 }

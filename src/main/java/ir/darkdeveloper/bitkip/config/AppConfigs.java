@@ -56,6 +56,8 @@ public class AppConfigs {
     public static boolean triggerTurnOffOnEmptyQueue = defaultTriggerTurnOffOnEmptyQueue;
     public static final boolean defaultDownloadImmediately = false;
     public static boolean downloadImmediately = defaultDownloadImmediately;
+    public static final boolean defaultAddSameDownload = true;
+    public static boolean addSameDownload  = defaultAddSameDownload;
 
 
     public static final ObjectMapper mapper = new ObjectMapper();

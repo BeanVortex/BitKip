@@ -1,6 +1,7 @@
 package ir.darkdeveloper.bitkip.utils;
 
 import ir.darkdeveloper.bitkip.controllers.DetailsController;
+import ir.darkdeveloper.bitkip.exceptions.DeniedException;
 import ir.darkdeveloper.bitkip.models.DownloadModel;
 import ir.darkdeveloper.bitkip.models.DownloadStatus;
 import ir.darkdeveloper.bitkip.models.SingleURLModel;
@@ -30,6 +31,7 @@ import static com.sun.jna.Platform.*;
 import static ir.darkdeveloper.bitkip.config.AppConfigs.*;
 import static ir.darkdeveloper.bitkip.repo.DownloadsRepo.*;
 import static ir.darkdeveloper.bitkip.utils.Defaults.ALL_DOWNLOADS_QUEUE;
+import static ir.darkdeveloper.bitkip.utils.DownloadUtils.getNewFileNameIfExists;
 import static ir.darkdeveloper.bitkip.utils.IOUtils.getBytesFromString;
 import static ir.darkdeveloper.bitkip.utils.Validations.maxChunks;
 
@@ -225,7 +227,10 @@ public class DownloadOpUtils {
     }
 
     public static void openDetailsStage(DownloadModel dm) {
-        FxUtils.newDetailsStage(dm);
+        if (!Platform.isFxApplicationThread())
+            Platform.runLater(() -> FxUtils.newDetailsStage(dm));
+        else
+            FxUtils.newDetailsStage(dm);
     }
 
     public static void openFiles(ObservableList<DownloadModel> dms) {
@@ -358,7 +363,6 @@ public class DownloadOpUtils {
         var url = urlModel.url();
         var fileName = urlModel.filename();
         dm.setUrl(url);
-        dm.setName(fileName);
         try {
             var conn = DownloadUtils.connect(url, true);
             var canResume = DownloadUtils.canResume(conn);
@@ -371,10 +375,13 @@ public class DownloadOpUtils {
             dm.setShowCompleteDialog(showCompleteDialog);
             dm.setOpenAfterComplete(false);
             var path = DownloadUtils.determineLocation(fileName);
-            dm.setFilePath(path);
+            if (addSameDownload)
+                fileName = getNewFileNameIfExists(fileName, path);
+            dm.setName(fileName);
+            dm.setFilePath(path + fileName);
 
-            if (DownloadsRepo.exists(url, fileName, path))
-                throw new IllegalArgumentException("This url and name exists for this location. Change location or name");
+            if (!addSameDownload && DownloadsRepo.exists(url, fileName, path))
+                throw new DeniedException("This url and name exists for this location. Change location or name");
 
             var queue = DownloadUtils.determineQueue(fileName);
             var allDownloadsQueue = QueuesRepo.findByName(ALL_DOWNLOADS_QUEUE, false);
@@ -387,7 +394,7 @@ public class DownloadOpUtils {
                     .title("Downloading now ...")
                     .text(dm.getName())
                     .showInformation();
-        } catch (IOException | IllegalArgumentException e) {
+        } catch (IOException | DeniedException e) {
             log.error(e.getMessage());
             Notifications.create()
                     .title("Failed to download : " + dm.getName())

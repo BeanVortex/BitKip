@@ -283,9 +283,9 @@ public class DownloadInChunksTask extends DownloadTask {
 
     private void runFinalization() {
         try {
-                for (var channel : fileChannels)
-                    if (channel != null)
-                        channel.close();
+            for (var channel : fileChannels)
+                if (channel != null)
+                    channel.close();
             var dmOpt = currentDownloadings.stream()
                     .filter(c -> c.equals(downloadModel))
                     .findFirst();

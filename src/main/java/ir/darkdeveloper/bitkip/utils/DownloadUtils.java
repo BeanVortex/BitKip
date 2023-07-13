@@ -1,8 +1,10 @@
 package ir.darkdeveloper.bitkip.utils;
 
 import ir.darkdeveloper.bitkip.config.AppConfigs;
+import ir.darkdeveloper.bitkip.exceptions.DeniedException;
 import ir.darkdeveloper.bitkip.models.DownloadModel;
 import ir.darkdeveloper.bitkip.models.QueueModel;
+import ir.darkdeveloper.bitkip.repo.DownloadsRepo;
 import ir.darkdeveloper.bitkip.repo.QueuesRepo;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
@@ -60,6 +62,22 @@ public class DownloadUtils {
         if (fileSize == -1)
             log.warn("Can't fetch file size");
         return fileSize;
+    }
+
+    public static String getNewFileNameIfExists(String fileName, String path) {
+        var pathToFind = path + fileName;
+        var nextNum = DownloadsRepo.getNextNumberOfExistedDownload(pathToFind);
+        if (nextNum == 0 || nextNum == 1)
+            pathToFind = pathToFind.substring(0, pathToFind.lastIndexOf('.'));
+        nextNum = DownloadsRepo.getNextNumberOfExistedDownload(pathToFind);
+        if (nextNum == 0)
+            return fileName;
+        var newFileName = new StringBuilder(fileName.substring(0, fileName.lastIndexOf('.')));
+        newFileName.append("(")
+                .append(nextNum)
+                .append(")")
+                .append(fileName.substring(fileName.lastIndexOf('.')));
+        return String.valueOf(newFileName);
     }
 
     public static boolean canResume(HttpURLConnection connection) {
@@ -157,7 +175,7 @@ public class DownloadUtils {
                     locationField.setText(path);
             }
             if (dm != null && !dm.getQueues().contains(qm))
-                    dm.getQueues().add(qm);
+                dm.getQueues().add(qm);
         });
     }
 
@@ -206,22 +224,21 @@ public class DownloadUtils {
                 .showError();
     }
 
-    public static void checkIfFileIsOKToSave(String location, String name,
-                                             Label errorLabel, Button downloadBtn, Button addBtn, Button refreshBtn) {
+    public static void checkIfFileIsOKToSave(String location, String name, Button downloadBtn,
+                                             Button addBtn, Button refreshBtn) throws DeniedException {
         var file = new File(location + name);
         var chunkFile = new File(location + name + "#0");
         if (file.exists() || chunkFile.exists()) {
-            errorLabel.setVisible(true);
             if (downloadBtn != null)
-                downloadBtn.setDisable(true);
-            addBtn.setDisable(true);
-            if (refreshBtn != null) {
+                downloadBtn.setDisable(!addSameDownload);
+            addBtn.setDisable(!addSameDownload);
+            if (refreshBtn != null && !addSameDownload) {
                 refreshBtn.setDisable(false);
                 refreshBtn.setVisible(true);
             }
-            Platform.runLater(() -> errorLabel.setText("At least one file with this name exists in this location"));
+            if (!addSameDownload)
+                throw new DeniedException("At least one file with this name exists in this location");
         } else {
-            errorLabel.setVisible(false);
             if (downloadBtn != null)
                 downloadBtn.setDisable(false);
             if (refreshBtn != null) {
@@ -232,10 +249,28 @@ public class DownloadUtils {
         }
     }
 
+    public static void handleError(ERunnable r, Label errorLabel) {
+        Runnable run = () -> {
+            try {
+                r.run();
+                errorLabel.setVisible(false);
+            } catch (DeniedException e) {
+                errorLabel.setVisible(true);
+                errorLabel.setText(e.getMessage());
+            }
+        };
+        if (Platform.isFxApplicationThread())
+            run.run();
+        else Platform.runLater(run);
+    }
+
+    public interface ERunnable {
+        void run() throws DeniedException;
+    }
+
     public static void onOfflineFieldsChanged(TextField locationField, String filename, DownloadModel dm,
-                                              ComboBox<QueueModel> queueCombo, Label errorLabel,
-                                              Button downloadBtn, Button addBtn, Button openLocation,
-                                              Button refreshBtn) {
+                                              ComboBox<QueueModel> queueCombo, Button downloadBtn, Button addBtn,
+                                              Button openLocation, Button refreshBtn) throws DeniedException {
         // when saving outside BitKip folder
         var selectedQueue = queueCombo.getSelectionModel().getSelectedItem();
         if (!locationField.getText().contains("BitKip")
@@ -258,7 +293,7 @@ public class DownloadUtils {
             setLocationAndQueue(locationField, filename, dm);
             openLocation.setDisable(false);
         }
-        checkIfFileIsOKToSave(locationField.getText(), filename, errorLabel, downloadBtn, addBtn, refreshBtn);
+        checkIfFileIsOKToSave(locationField.getText(), filename, downloadBtn, addBtn, refreshBtn);
     }
 
     public static void disableControlsAndShowError(String error, Label errorLbl,

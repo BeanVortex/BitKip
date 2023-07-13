@@ -27,10 +27,12 @@ import java.util.List;
 import java.util.ResourceBundle;
 import java.util.concurrent.CompletableFuture;
 
+import static ir.darkdeveloper.bitkip.config.AppConfigs.addSameDownload;
 import static ir.darkdeveloper.bitkip.config.AppConfigs.log;
 import static ir.darkdeveloper.bitkip.config.observers.QueueSubject.getQueueSubject;
 import static ir.darkdeveloper.bitkip.utils.Defaults.ALL_DOWNLOADS_QUEUE;
 import static ir.darkdeveloper.bitkip.utils.Defaults.extensions;
+import static ir.darkdeveloper.bitkip.utils.DownloadUtils.handleError;
 
 public class BatchDownload implements QueueObserver {
 
@@ -106,8 +108,9 @@ public class BatchDownload implements QueueObserver {
 
     private void onOfflineFieldsChanged() {
         if (tempLink != null)
-            DownloadUtils.onOfflineFieldsChanged(locationField, tempLink.getName(), null, queueCombo,
-                    errorLabel, null, checkBtn, openLocation, null);
+            handleError(() -> DownloadUtils.onOfflineFieldsChanged(locationField, tempLink.getName(),
+                    null, queueCombo, null, checkBtn, openLocation, null), errorLabel);
+
     }
 
     private void autoFillLocation() {
@@ -124,8 +127,8 @@ public class BatchDownload implements QueueObserver {
                     .thenAccept(this::setLocation);
             fileNameLocationFuture
                     .whenComplete((unused, throwable) ->
-                            DownloadUtils.checkIfFileIsOKToSave(locationField.getText(),
-                                    tempLink.getName(), errorLabel, null, checkBtn, null))
+                            handleError(() -> DownloadUtils.checkIfFileIsOKToSave(locationField.getText(),
+                                    tempLink.getName(), null, checkBtn, null), errorLabel))
                     .exceptionally(throwable -> {
                         var errorMsg = throwable.getCause().getLocalizedMessage();
                         Platform.runLater(() ->
@@ -225,8 +228,8 @@ public class BatchDownload implements QueueObserver {
     private void onSelectLocation(ActionEvent e) {
         DownloadUtils.selectLocation(e, locationField);
         if (tempLink != null)
-            DownloadUtils.checkIfFileIsOKToSave(locationField.getText(), tempLink.getName(),
-                    errorLabel, null, checkBtn, null);
+            handleError(() -> DownloadUtils.checkIfFileIsOKToSave(locationField.getText(),
+                    tempLink.getName(), null, checkBtn, null), errorLabel);
     }
 
     @FXML
@@ -248,25 +251,25 @@ public class BatchDownload implements QueueObserver {
             var end = Integer.parseInt(endField.getText());
             var links = generateLinks(url, start, end, Integer.parseInt(chunksField.getText()), false);
 
-            for (var link : links) {
-                var byURL = DownloadsRepo.findByURL(link.getUrl());
-                if (!byURL.isEmpty()) {
-                    var found = byURL.stream()
-                            .filter(dm -> {
-                                var s = Paths.get(dm.getFilePath()).getParent().toString() + File.separator;
-                                return s.equals(path);
-                            })
-                            .findFirst();
-                    if (found.isPresent()) {
-                        var msg = "At least one URL exists for this location. Change location or change start, end.\n"
-                                + found.get().getUrl();
-                        log.warn(msg);
-                        DownloadUtils.disableControlsAndShowError(msg, errorLabel, checkBtn, null, null);
-                        return;
+            if (!addSameDownload)
+                for (var link : links) {
+                    var byURL = DownloadsRepo.findByURL(link.getUrl());
+                    if (!byURL.isEmpty()) {
+                        var found = byURL.stream()
+                                .filter(dm -> {
+                                    var s = Paths.get(dm.getFilePath()).getParent().toString() + File.separator;
+                                    return s.equals(path);
+                                })
+                                .findFirst();
+                        if (found.isPresent()) {
+                            var msg = "At least one URL exists for this location. Change location or change start, end.\n"
+                                    + found.get().getUrl();
+                            log.warn(msg);
+                            DownloadUtils.disableControlsAndShowError(msg, errorLabel, checkBtn, null, null);
+                            return;
+                        }
                     }
                 }
-            }
-
             var selectedQueue = queueCombo.getSelectionModel().getSelectedItem();
             var allDownloadsQueue = QueuesRepo.findByName(ALL_DOWNLOADS_QUEUE, false);
             var secondaryQueue = getSecondaryQueueByFileName(tempLink.getName());

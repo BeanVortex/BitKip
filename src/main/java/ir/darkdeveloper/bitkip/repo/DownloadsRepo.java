@@ -165,7 +165,7 @@ public class DownloadsRepo {
 
     public static List<DownloadModel> findByURL(String url) {
         var sql = """
-                SELECT * FROM %s WHERE %s="%s";
+                SELECT * FROM %s WHERE %s LIKE "%s%%";
                 """
                 .formatted(DOWNLOADS_TABLE_NAME, COL_URL, url);
         return fetchDownloads(sql, false);
@@ -243,7 +243,7 @@ public class DownloadsRepo {
             else throw new Exception("queue count for the download is not correct");
             stmt.executeUpdate(updateAddToQueueDateSql);
         } catch (Exception e) {
-            log.error(e.getLocalizedMessage());
+            log.error(e.getMessage());
         }
     }
 
@@ -414,5 +414,20 @@ public class DownloadsRepo {
             return found.isPresent();
         }
         return false;
+    }
+
+    public static int getNextNumberOfExistedDownload(String path) {
+        var sql = """
+                SELECT COUNT(*) AS count FROM %s WHERE %s LIKE "%s%%";
+                """
+                .formatted(DOWNLOADS_TABLE_NAME,
+                        COL_PATH, path);
+        try (var con = DatabaseHelper.openConnection();
+             var stmt = con.createStatement()) {
+            var resultSet = stmt.executeQuery(sql);
+            return resultSet.getInt("count");
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

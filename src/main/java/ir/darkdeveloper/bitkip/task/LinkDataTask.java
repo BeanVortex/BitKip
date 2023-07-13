@@ -10,6 +10,7 @@ import java.net.HttpURLConnection;
 import java.util.List;
 
 import static ir.darkdeveloper.bitkip.config.AppConfigs.log;
+import static ir.darkdeveloper.bitkip.utils.DownloadUtils.getNewFileNameIfExists;
 
 public class LinkDataTask extends Task<Flux<LinkModel>> {
 
@@ -33,9 +34,10 @@ public class LinkDataTask extends Task<Flux<LinkModel>> {
                     log.error(e.getMessage());
                     break;
                 }
+                var url = lm.getUrl();
                 var fileSize = DownloadUtils.getFileSize(connection);
-                var fileName = DownloadUtils.extractFileName(lm.getUrl(), connection);
-                lm.setName(fileName);
+                var fileName = DownloadUtils.extractFileName(url, connection);
+                lm.setName(getNewFileNameIfExists(fileName, lm.getPath()));
                 lm.setSize(fileSize);
                 lm.setResumable(DownloadUtils.canResume(connection));
                 fluxSink.next(lm);

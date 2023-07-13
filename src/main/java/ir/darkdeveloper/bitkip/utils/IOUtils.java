@@ -270,6 +270,7 @@ public class IOUtils {
                     .append("connection_timeout=").append(String.valueOf(connectionTimeout)).append("\n")
                     .append("read_timeout=").append(String.valueOf(readTimeout)).append("\n")
                     .append("immediate_download=").append(String.valueOf(downloadImmediately)).append("\n")
+                    .append("add_same_download=").append(String.valueOf(addSameDownload)).append("\n")
                     .append("user_agent_enabled=").append(String.valueOf(userAgentEnabled)).append("\n")
                     .append("user_agent=").append(userAgent);
             writer.flush();
@@ -304,6 +305,7 @@ public class IOUtils {
                         case "connection_timeout" -> connectionTimeout = Integer.parseInt(value);
                         case "read_timeout" -> readTimeout = Integer.parseInt(value);
                         case "immediate_download" -> downloadImmediately = value.equals("true");
+                        case "add_same_download" -> addSameDownload = value.equals("true");
                         case "user_agent" -> userAgent = value;
                         case "user_agent_enabled" -> userAgentEnabled = value.equals("true");
                     }

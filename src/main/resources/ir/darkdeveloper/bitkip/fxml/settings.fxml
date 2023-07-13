@@ -42,7 +42,7 @@
 
                 <VBox styleClass="padding_10" spacing="10">
                     <Label styleClass="settingTile" text="Server"/>
-                    <CheckBox text="Listen to links from Browser" styleClass="settingDescription" fx:id="serverCheck"
+                    <CheckBox text="Listen to links from Browser" fx:id="serverCheck"
                               onAction="#onServerCheck"/>
                     <VBox spacing="5">
                         <HBox alignment="CENTER_LEFT" spacing="5">
@@ -58,51 +58,51 @@
                 <VBox styleClass="padding_10" spacing="10">
                     <Label styleClass="settingTile" text="Queue"/>
                     <CheckBox text="Trigger turn off on an empty queue with a scheduler" fx:id="triggerOffCheck"
-                              styleClass="settingDescription"
                               onAction="#onTurnOffCheck"/>
                 </VBox>
             </VBox>
         </Tab>
 
         <Tab text="Download" closable="false">
-            <VBox styleClass="padding_10" alignment="BASELINE_LEFT" spacing="15">
-                <CheckBox text="Show complete dialog" fx:id="completeDialogCheck" onAction="#onCompleteDialogCheck"
-                          styleClass="settingDescription"/>
-                <CheckBox text="Continue on failure" fx:id="continueCheck" onAction="#onContinueCheck"
-                          styleClass="settingDescription"/>
-                <Label styleClass="settingDescription, opacity_7"
-                       text="If the connection drops or there is a rate limit, continue trying to download the file"/>
-                <HBox alignment="CENTER_LEFT" spacing="5">
-                    <Label text="Fail retry count:" styleClass="settingDescription"/>
-                    <TextField fx:id="retryField"/>
-                </HBox>
-                <HBox alignment="CENTER_LEFT" spacing="5">
-                    <Label text="Rate limit retry count:" styleClass="settingDescription"/>
-                    <TextField fx:id="rateLimitField"/>
-                </HBox>
-                <Label styleClass="settingDescription, opacity_7"
-                       text="Hint: Some links has rate limit so you can't download more than certain bytes"/>
-                <CheckBox text="Use user agent" fx:id="agentCheck" onAction="#onAgentCheck"
-                          styleClass="settingDescription"/>
-                <HBox alignment="CENTER_LEFT" spacing="5">
-                    <Label text="User Agent:" styleClass="settingDescription"/>
-                    <TextField fx:id="agentField" prefWidth="300"/>
-                </HBox>
-                <Label wrapText="true" styleClass="settingDescription, opacity_7" fx:id="agentDesc"/>
-                <HBox alignment="CENTER_LEFT" spacing="5">
-                    <Label text="Connection Timeout:" styleClass="settingDescription"/>
-                    <TextField fx:id="connectionField"/>
-                </HBox>
-                <HBox alignment="CENTER_LEFT" spacing="5">
-                    <Label text="Read Timeout:" styleClass="settingDescription"/>
-                    <TextField fx:id="readField"/>
-                </HBox>
+            <ScrollPane hbarPolicy="NEVER">
+                <VBox styleClass="padding_10" alignment="BASELINE_LEFT" spacing="15">
+                    <CheckBox text="Show complete dialog" fx:id="completeDialogCheck" onAction="#onCompleteDialogCheck"/>
+                    <CheckBox text="Continue on failure" fx:id="continueCheck" onAction="#onContinueCheck"/>
+                    <Label styleClass="settingDescription, opacity_7"
+                           text="If the connection drops or there is a rate limit, continue trying to download the file"/>
+                    <HBox alignment="CENTER_LEFT" spacing="5">
+                        <Label text="Fail retry count:" styleClass="settingDescription"/>
+                        <TextField fx:id="retryField"/>
+                    </HBox>
+                    <HBox alignment="CENTER_LEFT" spacing="5">
+                        <Label text="Rate limit retry count:" styleClass="settingDescription"/>
+                        <TextField fx:id="rateLimitField"/>
+                    </HBox>
+                    <Label styleClass="settingDescription, opacity_7"
+                           text="Hint: Some links has rate limit so you can't download more than certain bytes"/>
+                    <CheckBox text="Use user agent" fx:id="agentCheck" onAction="#onAgentCheck"/>
+                    <HBox alignment="CENTER_LEFT" spacing="5">
+                        <Label text="User Agent:" styleClass="settingDescription"/>
+                        <TextField fx:id="agentField" prefWidth="300"/>
+                    </HBox>
+                    <Label wrapText="true" styleClass="settingDescription, opacity_7" fx:id="agentDesc"/>
+                    <HBox alignment="CENTER_LEFT" spacing="5">
+                        <Label text="Connection Timeout:" styleClass="settingDescription"/>
+                        <TextField fx:id="connectionField"/>
+                    </HBox>
+                    <HBox alignment="CENTER_LEFT" spacing="5">
+                        <Label text="Read Timeout:" styleClass="settingDescription"/>
+                        <TextField fx:id="readField"/>
+                    </HBox>
 
-                <CheckBox text="ImmediateDownload" fx:id="immediateCheck" onAction="#onImmediateCheck"
-                          styleClass="settingDescription"/>
-                <Label wrapText="true" styleClass="settingDescription, opacity_7"
-                       text="When you clicked on a link in browser, add and download it automatically"/>
-            </VBox>
+                    <CheckBox text="Immediate Download" fx:id="immediateCheck" onAction="#onImmediateCheck"/>
+                    <Label wrapText="true" styleClass="settingDescription, opacity_7"
+                           text="When you clicked on a link in browser, add and download it automatically"/>
+                    <CheckBox text="Add downloads even if exist" fx:id="addDownCheck" onAction="#onAddDownCheck"/>
+                    <Label wrapText="true" styleClass="settingDescription, opacity_7"
+                           text="It will add downloads with numbered name"/>
+                </VBox>
+            </ScrollPane>
         </Tab>
 
         <Tab text="Queue" closable="false">
@@ -112,9 +112,7 @@
     </TabPane>
 
     <VBox fx:id="actionArea">
-
-
-        <HBox styleClass="padding_10" alignment="CENTER_LEFT">
+        <HBox styleClass="padding_x_10" alignment="CENTER_LEFT">
             <Label styleClass="bold" fx:id="savedLabel" visible="false"/>
         </HBox>
         <Region VBox.vgrow="SOMETIMES"/>

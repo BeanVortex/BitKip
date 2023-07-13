@@ -38,7 +38,7 @@ import static ir.darkdeveloper.bitkip.config.observers.ThemeSubject.setTheme;
 public class SettingsController implements FXMLController {
 
     @FXML
-    private CheckBox immediateCheck, triggerOffCheck, agentCheck,
+    private CheckBox immediateCheck, triggerOffCheck, agentCheck, addDownCheck,
             continueCheck, completeDialogCheck, serverCheck;
     @FXML
     private VBox root, actionArea, queueContainer;
@@ -103,6 +103,7 @@ public class SettingsController implements FXMLController {
         serverCheck.setSelected(serverEnabled);
         triggerOffCheck.setSelected(triggerTurnOffOnEmptyQueue);
         immediateCheck.setSelected(downloadImmediately);
+        addDownCheck.setSelected(addSameDownload);
         portField.setText(String.valueOf(serverPort));
         retryField.setText(String.valueOf(downloadRetryCount));
         rateLimitField.setText(String.valueOf(downloadRateLimitCount));
@@ -262,13 +263,21 @@ public class SettingsController implements FXMLController {
         agentField.setDisable(!userAgentEnabled);
     }
 
-    public void onTurnOffCheck() {
+    @FXML
+    private void onTurnOffCheck() {
         triggerTurnOffOnEmptyQueue = triggerOffCheck.isSelected();
         IOUtils.saveConfigs();
     }
 
-    public void onImmediateCheck() {
+    @FXML
+    private void onImmediateCheck() {
         downloadImmediately = immediateCheck.isSelected();
+        IOUtils.saveConfigs();
+    }
+
+    @FXML
+    private void onAddDownCheck() {
+        addSameDownload = addDownCheck.isSelected();
         IOUtils.saveConfigs();
     }
 
