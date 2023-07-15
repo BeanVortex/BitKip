@@ -44,7 +44,7 @@ public class BatchServlet extends HttpServlet {
         var links = urlModel.links();
         if (links == null || links.isEmpty())
             return Collections.emptyList();
-        var chunks = Validations.maxChunks();
+        var chunks = Validations.maxChunks(Long.MAX_VALUE);
         var allDownloadsQueue = QueuesRepo.findByName(ALL_DOWNLOADS_QUEUE, false);
         var firstUrl = links.get(0);
         var connection = DownloadUtils.connect(firstUrl, true);

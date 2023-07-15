@@ -362,14 +362,15 @@ public class DownloadOpUtils {
         var dm = new DownloadModel();
         var url = urlModel.url();
         var fileName = urlModel.filename();
+        var fileSize = urlModel.fileSize();
         dm.setUrl(url);
         try {
             var conn = DownloadUtils.connect(url, true);
             var canResume = DownloadUtils.canResume(conn);
             dm.setResumable(canResume);
-            dm.setChunks(canResume ? maxChunks() : 0);
+            dm.setChunks(canResume ? maxChunks(fileSize) : 0);
             dm.setProgress(0);
-            dm.setSize(urlModel.fileSize());
+            dm.setSize(fileSize);
             dm.setAddDate(LocalDateTime.now());
             dm.setAddToQueueDate(LocalDateTime.now());
             dm.setShowCompleteDialog(showCompleteDialog);
@@ -377,11 +378,13 @@ public class DownloadOpUtils {
             var path = DownloadUtils.determineLocation(fileName);
             if (addSameDownload)
                 fileName = getNewFileNameIfExists(fileName, path);
-            dm.setName(fileName);
             dm.setFilePath(path + fileName);
-
-            if (!addSameDownload && DownloadsRepo.exists(url, fileName, path))
+            var newFileName = getNewFileNameIfExists(fileName, path);
+            fileName = addSameDownload ? newFileName : fileName;
+            if (!newFileName.equals(fileName))
                 throw new DeniedException("This url and name exists for this location. Change location or name");
+
+            dm.setName(fileName);
 
             var queue = DownloadUtils.determineQueue(fileName);
             var allDownloadsQueue = QueuesRepo.findByName(ALL_DOWNLOADS_QUEUE, false);

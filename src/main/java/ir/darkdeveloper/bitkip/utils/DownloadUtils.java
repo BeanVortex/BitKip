@@ -64,6 +64,9 @@ public class DownloadUtils {
         return fileSize;
     }
 
+    /**
+    * @return new file name like file(1), file(2). if not existed in db, returns fileName
+    * */
     public static String getNewFileNameIfExists(String fileName, String path) {
         var pathToFind = path + fileName;
         var nextNum = DownloadsRepo.getNextNumberOfExistedDownload(pathToFind);
@@ -102,7 +105,7 @@ public class DownloadUtils {
             var resumable = canResume(finalConnection[0]);
             Platform.runLater(() -> {
                 if (resumable) {
-                    chunksField.setText(String.valueOf(maxChunks()));
+                    chunksField.setText(String.valueOf(maxChunks(fileSize)));
                     chunksField.setDisable(false);
                     bytesField.setDisable(true);
                     resumableLabel.setText("Yes");

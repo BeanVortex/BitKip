@@ -130,6 +130,7 @@ public class SingleDownload implements QueueObserver {
     }
 
     private void setInputValuesFromExtension(SingleURLModel urlModel) {
+        var fileSize = urlModel.fileSize();
         urlField.setText(urlModel.url());
         nameField.setText(urlModel.filename());
         setLocation(urlModel.filename());
@@ -144,7 +145,7 @@ public class SingleDownload implements QueueObserver {
         }
         var resumable = DownloadUtils.canResume(conn);
         chunksField.setDisable(!resumable);
-        chunksField.setText(resumable ? String.valueOf(maxChunks()) : "0");
+        chunksField.setText(resumable ? String.valueOf(maxChunks(fileSize)) : "0");
         speedField.setDisable(false);
         if (resumable) {
             resumableLabel.setText("Yes");
@@ -156,7 +157,7 @@ public class SingleDownload implements QueueObserver {
             resumableLabel.getStyleClass().remove("yes");
         }
         dm.setResumable(resumable);
-        dm.setSize(urlModel.fileSize());
+        dm.setSize(fileSize);
     }
 
     private void autoFillLocationAndSizeAndName() {
@@ -176,7 +177,7 @@ public class SingleDownload implements QueueObserver {
             CompletableFuture.allOf(fileNameLocationFuture, sizeFuture)
                     .whenComplete((unused, throwable) -> {
                         handleError(() -> DownloadUtils.checkIfFileIsOKToSave(locationField.getText(),
-                                nameField.getText(), downloadBtn, addBtn, refreshBtn),errorLabel);
+                                nameField.getText(), downloadBtn, addBtn, refreshBtn), errorLabel);
                         executor.shutdown();
                     })
                     .exceptionally(throwable -> {
@@ -259,16 +260,13 @@ public class SingleDownload implements QueueObserver {
             return false;
         }
 
-        if (DownloadsRepo.exists(url, fileName, path)) {
-            if (addSameDownload) {
-                fileName = getNewFileNameIfExists(fileName, path);
-                nameField.setText(fileName);
-            } else {
-                var msg = "This url and name exists for this location. Change location or name";
-                log.error(msg);
-                DownloadUtils.disableControlsAndShowError(msg, errorLabel, downloadBtn, addBtn, refreshBtn);
-                return false;
-            }
+        var newFileName = getNewFileNameIfExists(fileName, path);
+        fileName = addSameDownload ? newFileName : fileName;
+        if (!newFileName.equals(fileName)) {
+            var msg = "This url and name exists for this location. Change location or name";
+            log.error(msg);
+            DownloadUtils.disableControlsAndShowError(msg, errorLabel, downloadBtn, addBtn, refreshBtn);
+            return false;
         }
 
 

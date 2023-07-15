@@ -123,6 +123,7 @@ public class LinkTableUtils {
         if (l != null) {
             l.setSize(lm.getSize());
             l.setName(lm.getName());
+            l.setChunks(Validations.maxChunks(l.getSize()));
             l.setResumable(l.getResumable());
             refreshTable();
         }
