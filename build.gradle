@@ -8,7 +8,7 @@ plugins {
 }
 
 group 'ir.darkdeveloper'
-version '1.2.0'
+version '1.2.1'
 sourceCompatibility = '19'
 targetCompatibility = '19'
 mainClassName = 'ir.darkdeveloper.bitkip.BitKip'
@@ -72,6 +72,9 @@ jlink {
             installerName = 'BitKip'
             installerOptions = ['--win-menu', '--win-shortcut',
                                 '--icon', 'src/main/resources/ir/darkdeveloper/bitkip/icons/logo.ico',
+                                "--app-version", version as String,
+                                "--win-menu-group", "BitKip",
+                                "--description", "Free download manager for desktop",
                                 '--vendor', 'DarkDeveloper']
             imageOptions = ['--icon', 'src/main/resources/ir/darkdeveloper/bitkip/icons/logo.ico']
         }
@@ -80,6 +83,16 @@ jlink {
         excludeProvides servicePattern: 'reactor.blockhound.*'
     }
 }
+
+task fatJar(type: Jar) {
+    manifest {
+        attributes 'Main-Class': mainClassName
+    }
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    from { configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) } }
+    with jar
+}
+
 
 jlinkZip {
     group = 'distribution'
