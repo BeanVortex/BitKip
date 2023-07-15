@@ -16,7 +16,7 @@ echo creating releases folder
 mkdir build\releases\
 
 echo zipping runtime folder
-powershell -command "Compress-Archive -Path 'build\jpackage\app' -DestinationPath 'build\releases\%FILE_NAME%-win-bin.zip'"
+powershell -command "Compress-Archive -Path 'build\jpackage\%NAME%' -DestinationPath 'build\releases\%FILE_NAME%-win-bin.zip'"
 
 
 echo moving files to releases
