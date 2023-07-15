@@ -96,7 +96,7 @@ jlink {
 
 task fatJar(type: Jar) {
     manifest {
-        attributes 'Main-Class': mainClassName
+        attributes 'Main-Class': "ir.darkdeveloper.bitkip.Launcher"
     }
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
     from { configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) } }
