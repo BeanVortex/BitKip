@@ -130,6 +130,7 @@ public class SingleDownload implements QueueObserver {
     }
 
     private void setInputValuesFromExtension(SingleURLModel urlModel) {
+        var fileSize = urlModel.fileSize();
         urlField.setText(urlModel.url());
         nameField.setText(urlModel.filename());
         setLocation(urlModel.filename());
@@ -144,7 +145,7 @@ public class SingleDownload implements QueueObserver {
         }
         var resumable = DownloadUtils.canResume(conn);
         chunksField.setDisable(!resumable);
-        chunksField.setText(resumable ? String.valueOf(maxChunks()) : "0");
+        chunksField.setText(resumable ? String.valueOf(maxChunks(fileSize)) : "0");
         speedField.setDisable(false);
         if (resumable) {
             resumableLabel.setText("Yes");
@@ -156,7 +157,7 @@ public class SingleDownload implements QueueObserver {
             resumableLabel.getStyleClass().remove("yes");
         }
         dm.setResumable(resumable);
-        dm.setSize(urlModel.fileSize());
+        dm.setSize(fileSize);
     }
 
     private void autoFillLocationAndSizeAndName() {

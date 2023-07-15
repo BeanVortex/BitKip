@@ -362,14 +362,15 @@ public class DownloadOpUtils {
         var dm = new DownloadModel();
         var url = urlModel.url();
         var fileName = urlModel.filename();
+        var fileSize = urlModel.fileSize();
         dm.setUrl(url);
         try {
             var conn = DownloadUtils.connect(url, true);
             var canResume = DownloadUtils.canResume(conn);
             dm.setResumable(canResume);
-            dm.setChunks(canResume ? maxChunks() : 0);
+            dm.setChunks(canResume ? maxChunks(fileSize) : 0);
             dm.setProgress(0);
-            dm.setSize(urlModel.fileSize());
+            dm.setSize(fileSize);
             dm.setAddDate(LocalDateTime.now());
             dm.setAddToQueueDate(LocalDateTime.now());
             dm.setShowCompleteDialog(showCompleteDialog);

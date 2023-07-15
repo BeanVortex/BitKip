@@ -105,7 +105,7 @@ public class DownloadUtils {
             var resumable = canResume(finalConnection[0]);
             Platform.runLater(() -> {
                 if (resumable) {
-                    chunksField.setText(String.valueOf(maxChunks()));
+                    chunksField.setText(String.valueOf(maxChunks(fileSize)));
                     chunksField.setDisable(false);
                     bytesField.setDisable(true);
                     resumableLabel.setText("Yes");

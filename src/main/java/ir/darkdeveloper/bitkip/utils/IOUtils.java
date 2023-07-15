@@ -396,7 +396,7 @@ public class IOUtils {
             if (lines.isEmpty())
                 return null;
 
-            var chunks = Validations.maxChunks();
+            var chunks = Validations.maxChunks(Long.MAX_VALUE);
             var allDownloadsQueue = QueuesRepo.findByName(ALL_DOWNLOADS_QUEUE, false);
             var firstUrl = lines.get(0);
             var connection = DownloadUtils.connect(firstUrl, true);

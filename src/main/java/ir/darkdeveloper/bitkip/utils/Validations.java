@@ -60,7 +60,7 @@ public class Validations {
     public static void validateChunksInputChecks(TextField chunksField) {
         if (chunksField == null)
             return;
-        var threads = maxChunks();
+        var threads = maxChunks(Long.MAX_VALUE);
         chunksField.setText(String.valueOf(threads));
         chunksField.textProperty().addListener((o, old, newValue) -> {
             if (!newValue.matches("\\d*"))
@@ -159,7 +159,9 @@ public class Validations {
     }
 
 
-    public static int maxChunks() {
+    public static int maxChunks(long fileSize) {
+        if (fileSize < 2_000_000)
+            return 0;
         return Runtime.getRuntime().availableProcessors() * 2;
     }
 
