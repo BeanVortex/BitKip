@@ -96,11 +96,13 @@ public class DownloadOpUtils {
                 mainTableUtils.updateDownloadProgress(n.floatValue() * 100, dm));
         downloadTask.setBlocking(blocking);
         dm.setDownloadTask(downloadTask);
+        currentDownloadings.add(dm);
+        openDownloadings.stream().filter(dc -> dc.getDownloadModel().equals(dm))
+                .forEach(DetailsController::initDownloadListeners);
         if (!resume) {
             DownloadsRepo.insertDownload(dm);
             mainTableUtils.addRow(dm);
         }
-        currentDownloadings.add(dm);
         if (executor == null)
             executor = Executors.newCachedThreadPool();
         downloadTask.setExecutor(executor);
@@ -124,8 +126,6 @@ public class DownloadOpUtils {
             } catch (ExecutionException | InterruptedException e) {
                 log.error(e.getMessage());
             }
-            openDownloadings.stream().filter(dc -> dc.getDownloadModel().equals(dm))
-                    .forEach(DetailsController::initDownloadListeners);
         }
     }
 

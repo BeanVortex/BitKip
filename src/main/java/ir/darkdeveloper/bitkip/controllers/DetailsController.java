@@ -132,7 +132,7 @@ public class DetailsController implements FXMLController {
 
     private DownloadTask getDownloadTask() {
         return currentDownloadings.stream()
-                .filter(c -> c.equals(downloadModel))
+                .filter(dm -> dm.equals(downloadModel))
                 .findFirst()
                 .map(DownloadModel::getDownloadTask).orElse(null);
     }
@@ -253,8 +253,9 @@ public class DetailsController implements FXMLController {
             isPaused.set(false);
         } else {
             var dt = getDownloadTask();
-            if (dt != null)
+            if (dt != null){
                 dt.pause();
+            }
             controlBtn.setDisable(true);
             isPaused.set(true);
         }

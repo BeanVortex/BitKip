@@ -264,7 +264,7 @@ public class DownloadInChunksTask extends DownloadTask {
                 if (channel != null)
                     channel.close();
         } catch (IOException e) {
-            log.error(e.getLocalizedMessage());
+            log.error(e.getMessage());
         }
     }
 
