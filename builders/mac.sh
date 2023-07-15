@@ -17,4 +17,4 @@ tar -czf ./build/releases/$FILE_NAME-mac-bin.zip ./build/image/
 echo "moving files to releases"
 mv ./build/jpackage/$FILE_NAME* ./build/releases/
 mv ./build/libs/*.jar ./build/releases/$FILE_NAME-mac.jar
-
+ls ./build/releases
