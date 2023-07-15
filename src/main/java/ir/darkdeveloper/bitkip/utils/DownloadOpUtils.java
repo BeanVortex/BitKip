@@ -377,11 +377,13 @@ public class DownloadOpUtils {
             var path = DownloadUtils.determineLocation(fileName);
             if (addSameDownload)
                 fileName = getNewFileNameIfExists(fileName, path);
-            dm.setName(fileName);
             dm.setFilePath(path + fileName);
-
-            if (!addSameDownload && DownloadsRepo.exists(url, fileName, path))
+            var newFileName = getNewFileNameIfExists(fileName, path);
+            fileName = addSameDownload ? newFileName : fileName;
+            if (!newFileName.equals(fileName))
                 throw new DeniedException("This url and name exists for this location. Change location or name");
+
+            dm.setName(fileName);
 
             var queue = DownloadUtils.determineQueue(fileName);
             var allDownloadsQueue = QueuesRepo.findByName(ALL_DOWNLOADS_QUEUE, false);

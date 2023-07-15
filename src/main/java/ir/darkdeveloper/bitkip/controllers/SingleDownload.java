@@ -176,7 +176,7 @@ public class SingleDownload implements QueueObserver {
             CompletableFuture.allOf(fileNameLocationFuture, sizeFuture)
                     .whenComplete((unused, throwable) -> {
                         handleError(() -> DownloadUtils.checkIfFileIsOKToSave(locationField.getText(),
-                                nameField.getText(), downloadBtn, addBtn, refreshBtn),errorLabel);
+                                nameField.getText(), downloadBtn, addBtn, refreshBtn), errorLabel);
                         executor.shutdown();
                     })
                     .exceptionally(throwable -> {
@@ -259,16 +259,13 @@ public class SingleDownload implements QueueObserver {
             return false;
         }
 
-        if (DownloadsRepo.exists(url, fileName, path)) {
-            if (addSameDownload) {
-                fileName = getNewFileNameIfExists(fileName, path);
-                nameField.setText(fileName);
-            } else {
-                var msg = "This url and name exists for this location. Change location or name";
-                log.error(msg);
-                DownloadUtils.disableControlsAndShowError(msg, errorLabel, downloadBtn, addBtn, refreshBtn);
-                return false;
-            }
+        var newFileName = getNewFileNameIfExists(fileName, path);
+        fileName = addSameDownload ? newFileName : fileName;
+        if (!newFileName.equals(fileName)) {
+            var msg = "This url and name exists for this location. Change location or name";
+            log.error(msg);
+            DownloadUtils.disableControlsAndShowError(msg, errorLabel, downloadBtn, addBtn, refreshBtn);
+            return false;
         }
 
 

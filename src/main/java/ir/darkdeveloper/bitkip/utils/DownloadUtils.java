@@ -64,6 +64,9 @@ public class DownloadUtils {
         return fileSize;
     }
 
+    /**
+    * @return new file name like file(1), file(2). if not existed in db, returns fileName
+    * */
     public static String getNewFileNameIfExists(String fileName, String path) {
         var pathToFind = path + fileName;
         var nextNum = DownloadsRepo.getNextNumberOfExistedDownload(pathToFind);
