@@ -36,9 +36,13 @@ SectionEnd
 Function .onInit
     ; Add the uninstall registry entry during initialization
     WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${appName}" "DisplayName" "${appName}"
-    WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${appName}" "InstallLocation" $INSTDIR
-    WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${appName}" "UninstallString" '"$INSTDIR\${uninstallerName}"'
-    WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${appName}" "DisplayIcon" "$INSTDIR\logo.ico"
     WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${appName}" "Publisher" "${publisher}"
     WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${appName}" "DisplayVersion" "${version}"
+FunctionEnd
+
+Function .onInstSuccess
+    ; Add the uninstall registry entry after installation
+    WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${appName}" "UninstallString" '"$INSTDIR\${uninstallerName}"'
+    WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${appName}" "DisplayIcon" "$INSTDIR\logo.ico"
+    WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${appName}" "InstallLocation" $INSTDIR
 FunctionEnd
