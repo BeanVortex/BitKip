@@ -1,6 +1,6 @@
 ; JavaFX Application Installer Script
-!define version "$%BitKip-version%"
-!define appName "$%BitKip%"
+!define version "$%VERSION%"
+!define appName "$%NAME%"
 !define filename "${appName}-${version}.exe"
 !define publisher "DarkDeveloper"
 !define uninstallerName "uninstall.exe"
