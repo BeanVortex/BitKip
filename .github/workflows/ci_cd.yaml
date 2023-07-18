@@ -18,6 +18,10 @@ jobs:
           distribution: 'oracle'
           gpg-private-key: ${{ secrets.GPG_KEY }}
           gpg-passphrase: PASSPHRASE
+      - name: Set up nsis installer
+        uses: joncloud/makensis-action@publish
+        with:
+          additional-plugin-paths: ${{ github.workspace }}/NSIS_Plugins/Plugins
       - name: Build using script
         run: .\builders\windows.bat
       - name: Upload Artifacts

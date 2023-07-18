@@ -1,4 +1,4 @@
-!define appName "$%BitKip%"
+!define appName "$%NAME%"
 
 Section
     ReadRegStr $INSTDIR HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${appName}" "InstallLocation"

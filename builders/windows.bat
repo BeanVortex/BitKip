@@ -15,12 +15,17 @@ call gradlew.bat fatJar
 echo creating releases folder
 mkdir build\releases\
 
+
 echo zipping runtime folder
 powershell -command "Compress-Archive -Path 'build\jpackage\%NAME%' -DestinationPath 'build\releases\%FILE_NAME%-win-bin.zip'"
 
+echo creating nsis installer
+makensis builders\windows-installer\uninstall.nsi
+move builders\windows-installer\uninstall.exe build\jpackage\%NAME%\
+makensis builders\windows-installer\installer.nsi
 
 echo moving files to releases
-move build\jpackage\%FILE_NAME%* build\releases\
+move builders\windows-installer\*.exe build\releases\
 move .\build\libs\%FILE_NAME%.jar .\build\releases\%FILE_NAME%-win.jar
 dir .\build\releases
 
