@@ -36,9 +36,12 @@ import static ir.darkdeveloper.bitkip.models.TurnOffMode.*;
 import static ir.darkdeveloper.bitkip.repo.DatabaseHelper.DOWNLOADS_TABLE_NAME;
 import static ir.darkdeveloper.bitkip.repo.DownloadsRepo.COL_TURNOFF_MODE;
 import static ir.darkdeveloper.bitkip.utils.DownloadOpUtils.openFile;
+import static ir.darkdeveloper.bitkip.utils.IOUtils.getBytesFromString;
 
 public class DetailsController implements FXMLController {
 
+    @FXML
+    private Button speedApplyBtn;
     @FXML
     private ComboBox<TurnOffMode> turnOffCombo;
     @FXML
@@ -216,7 +219,8 @@ public class DetailsController implements FXMLController {
         linkPopover.setContentNode(new Label("Copied"));
         link.setOnMouseExited(event -> linkPopover.hide());
         turnOffCombo.setItems(FXCollections.observableArrayList(NOTHING, SLEEP, TURN_OFF));
-
+        speedApplyBtn.setVisible(false);
+        speedApplyBtn.setDisable(true);
     }
 
     private void updatePause(Boolean paused) {
@@ -225,7 +229,7 @@ public class DetailsController implements FXMLController {
         controlBtn.setDisable(false);
         if (downloadModel.getChunks() == 0)
             bytesField.setDisable(!paused);
-        speedField.setDisable(!paused);
+        // Todo: check if already downloaded some(first through db and filesystem)
         if (!speedField.getText().equals("0"))
             bytesField.setDisable(true);
         controlBtn.setText(paused ? (downloadModel.isResumable() ? "Resume" : "Restart") : "Pause");
@@ -241,6 +245,8 @@ public class DetailsController implements FXMLController {
                 .formatted(IOUtils.formatBytes(downloadModel.getDownloaded()),
                         IOUtils.formatBytes(downloadModel.getSize()));
         downloadedOfLbl.setText(downloadOf);
+        speedApplyBtn.setVisible(!paused);
+        speedApplyBtn.setDisable(paused);
 
     }
 
@@ -343,6 +349,17 @@ public class DetailsController implements FXMLController {
                     .showInformation();
         }
     }
+
+    @FXML
+    private void onSpeedApplied() {
+        var dmTask = downloadModel.getDownloadTask();
+        if (dmTask != null) {
+            long bytesFromString = getBytesFromString(speedField.getText());
+            downloadModel.setSpeed(bytesFromString);
+            dmTask.updateSpeed(bytesFromString);
+        }
+    }
+
 
     public ProgressBar getProgressBar() {
         return downloadProgress;

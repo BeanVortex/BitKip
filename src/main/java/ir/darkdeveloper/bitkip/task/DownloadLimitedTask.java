@@ -31,7 +31,7 @@ import static ir.darkdeveloper.bitkip.utils.DownloadOpUtils.openFile;
 public class DownloadLimitedTask extends DownloadTask {
     private boolean paused;
     private boolean isCalculating;
-    private final long limit;
+    private long limit;
     private final boolean isSpeedLimited;
     private File file;
     private ExecutorService executor;
@@ -39,7 +39,9 @@ public class DownloadLimitedTask extends DownloadTask {
     private int retries = 0;
     private int rateLimitCount = 0;
     private boolean blocking;
+    private long fileSize;
     private String url;
+    private InputStream in;
 
 
     /**
@@ -62,8 +64,8 @@ public class DownloadLimitedTask extends DownloadTask {
             var parentFolder = Path.of(file.getPath()).getParent().toFile();
             if (!parentFolder.exists())
                 parentFolder.mkdir();
-            var size = downloadModel.getSize();
-            if (size == -1 || size == 0 || !downloadModel.isResumable())
+            fileSize = downloadModel.getSize();
+            if (fileSize == -1 || fileSize == 0 || !downloadModel.isResumable())
                 performDownloadInStream();
             else
                 performDownload();
@@ -89,15 +91,14 @@ public class DownloadLimitedTask extends DownloadTask {
             fileChannel = fos.getChannel();
 
             updateProgress(0, 1);
-            var fileSize = downloadModel.getSize();
             if (fileSize > 0)
-                calculateSpeedAndProgress(file, fileSize);
+                calculateSpeedAndProgress();
 
             var buffer = ByteBuffer.allocate(8192);
             while (rbc.read(buffer) != -1) {
                 buffer.flip();
                 fileChannel.write(buffer);
-                if (fileSize<0)
+                if (fileSize < 0)
                     updateValue(fileChannel.position());
                 buffer.clear();
             }
@@ -134,21 +135,16 @@ public class DownloadLimitedTask extends DownloadTask {
             if (!downloadModel.isResumable())
                 con.setRequestProperty("User-Agent", userAgent);
             configureResume(con, file, downloadModel.getSize());
-            var in = con.getInputStream();
-            var fileSize = downloadModel.getSize();
+            in = con.getInputStream();
 
             var out = new FileOutputStream(file, file.exists());
             fileChannel = out.getChannel();
 
-            var existingFileSize = 0L;
-            if (file.exists())
-                existingFileSize = IOUtils.getFileSize(file);
-
             if (isSpeedLimited)
-                downloadSpeedLimited(fileChannel, in, file, limit, fileSize, existingFileSize);
+                downloadSpeedLimited();
             else {
-                calculateSpeedAndProgress(file, fileSize);
-                downloadSizeLimited(fileChannel, in, limit, existingFileSize);
+                calculateSpeedAndProgress();
+                downloadSizeLimited();
             }
             out.close();
         } catch (SocketTimeoutException | UnknownHostException | SocketException s) {
@@ -173,9 +169,11 @@ public class DownloadLimitedTask extends DownloadTask {
         paused = true;
     }
 
-    private void downloadSpeedLimited(FileChannel fileChannel, InputStream in,
-                                      File file, long limit, long fileSize,
-                                      long existingFileSize) throws IOException, InterruptedException {
+    private void downloadSpeedLimited() throws IOException, InterruptedException {
+        var existingFileSize = 0L;
+        if (file.exists())
+            existingFileSize = IOUtils.getFileSize(file);
+
         var byteChannel = Channels.newChannel(in);
         log.info("Downloading speed limited: " + downloadModel);
         var lock = fileChannel.lock();
@@ -199,8 +197,16 @@ public class DownloadLimitedTask extends DownloadTask {
         lock.release();
     }
 
-    private void downloadSizeLimited(FileChannel fileChannel, InputStream in,
-                                     long limit, long existingFileSize) throws IOException {
+    @Override
+    protected void setSpeedLimit(long limit) {
+        if (isSpeedLimited)
+            this.limit = limit;
+    }
+
+    private void downloadSizeLimited() throws IOException {
+        var existingFileSize = 0L;
+        if (file.exists())
+            existingFileSize = IOUtils.getFileSize(file);
         log.info("Downloading size limited: " + downloadModel);
         var byteChannel = Channels.newChannel(in);
         fileChannel.transferFrom(byteChannel, existingFileSize, limit);
@@ -267,7 +273,7 @@ public class DownloadLimitedTask extends DownloadTask {
         succeeded();
     }
 
-    private void calculateSpeedAndProgress(File file, long fileSize) {
+    private void calculateSpeedAndProgress() {
         if (isCalculating)
             return;
         executor.submit(() -> {

@@ -73,11 +73,11 @@ public class DownloadOpUtils {
         } else {
             if (speed != null) {
                 if (speed.equals("0"))
-                    downloadTask = new DownloadInChunksTask(dm, null);
+                    downloadTask = new DownloadInChunksTask(dm, 0, false);
                 else
-                    downloadTask = new DownloadInChunksTask(dm, getBytesFromString(speed));
+                    downloadTask = new DownloadInChunksTask(dm, getBytesFromString(speed), true);
             } else
-                downloadTask = new DownloadInChunksTask(dm, null);
+                downloadTask = new DownloadInChunksTask(dm, 0, false);
         }
 
         if (dm.getSize() == -1)

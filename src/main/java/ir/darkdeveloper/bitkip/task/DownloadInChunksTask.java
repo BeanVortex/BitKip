@@ -32,7 +32,8 @@ import static ir.darkdeveloper.bitkip.utils.DownloadOpUtils.openFile;
 
 public class DownloadInChunksTask extends DownloadTask {
     private final int chunks;
-    private final Long limit;
+    private long limit;
+    private boolean isSpeedLimited;
     private final List<FileChannel> fileChannels = new ArrayList<>();
     private final List<Path> filePaths = new ArrayList<>();
     private volatile boolean paused;
@@ -41,14 +42,18 @@ public class DownloadInChunksTask extends DownloadTask {
     private ExecutorService executor;
     private boolean blocking;
     private String url;
+    private long bytesToDownloadEachInCycleLimited;
+    private List<CompletableFuture<Void>> downloaders;
+    private boolean newLimitSet;
 
-    public DownloadInChunksTask(DownloadModel downloadModel, Long limit) {
+    public DownloadInChunksTask(DownloadModel downloadModel, long limit, boolean isSpeedLimited) {
         super(downloadModel);
         if (downloadModel.getChunks() == 0)
             throw new IllegalArgumentException("To download file in chunks, chunks must not be 0");
         this.chunks = downloadModel.getChunks();
         this.limit = limit;
-        isLimited = limit != null;
+        isLimited = limit != 0;
+        this.isSpeedLimited = isSpeedLimited;
     }
 
 
@@ -74,12 +79,12 @@ public class DownloadInChunksTask extends DownloadTask {
     private void downloadInChunks(long fileSize)
             throws IOException, InterruptedException, ExecutionException {
         calculateSpeedAndProgressChunks(fileSize);
-        var futures = prepareParts(fileSize);
-        if (!futures.isEmpty()) {
+        downloaders = prepareParts(fileSize);
+        if (!downloaders.isEmpty()) {
             isCalculating = true;
             log.info("Downloading : " + downloadModel);
-            var futureArr = new CompletableFuture[futures.size()];
-            futures.toArray(futureArr);
+            var futureArr = new CompletableFuture[downloaders.size()];
+            downloaders.toArray(futureArr);
             CompletableFuture.allOf(futureArr).get();
         }
     }
@@ -127,19 +132,10 @@ public class DownloadInChunksTask extends DownloadTask {
     private void addFutures(long fileSize, ArrayList<CompletableFuture<Void>> futures,
                             File partFile, long fromContinue, long from, long to) {
         CompletableFuture<Void> c;
-        if (isLimited) {
-            c = CompletableFuture.supplyAsync(() -> {
-                try {
-                    performLimitedDownload(fromContinue, from, to, partFile, fileSize, 0, 0);
-                } catch (IOException | InterruptedException e) {
-                    if (e instanceof IOException)
-                        log.error(e.getMessage());
-                    this.pause();
-                }
-                return null;
-            }, executor);
-        } else {
-            c = CompletableFuture.supplyAsync(() -> {
+        if (isLimited)
+            c = limitedDownload(fromContinue, from, to, partFile, fileSize);
+        else {
+            c = CompletableFuture.runAsync(() -> {
                 try {
                     performDownload(fromContinue, from, to, partFile, fileSize, 0, 0);
                 } catch (IOException | InterruptedException e) {
@@ -147,11 +143,29 @@ public class DownloadInChunksTask extends DownloadTask {
                         log.error(e.getMessage());
                     this.pause();
                 }
-                return null;
             }, executor);
         }
         c.whenComplete((unused, throwable) -> Thread.currentThread().interrupt());
         futures.add(c);
+    }
+
+    private CompletableFuture<Void> limitedDownload(long fromContinue, long from, long to,
+                                                    File partFile, long fileSize) {
+        CompletableFuture<Void> c = null;
+        if (isSpeedLimited) {
+            bytesToDownloadEachInCycleLimited = limit / chunks;
+            c = CompletableFuture.runAsync(() -> {
+                try {
+                    performSpeedLimitedDownload(fromContinue, from, to,
+                            partFile, fileSize, 0, 0);
+                } catch (IOException | InterruptedException e) {
+                    if (e instanceof IOException)
+                        log.error(e.getMessage());
+                    this.pause();
+                }
+            }, executor);
+        }
+        return c;
     }
 
 
@@ -190,12 +204,11 @@ public class DownloadInChunksTask extends DownloadTask {
     }
 
 
-    private void performLimitedDownload(long fromContinue, long from, long to,
-                                        File partFile, long existingFileSize,
-                                        int rateLimitCount, int retries) throws IOException, InterruptedException {
+    private void performSpeedLimitedDownload(long fromContinue, long from, long to,
+                                             File partFile, long existingFileSize,
+                                             int rateLimitCount, int retries) throws IOException, InterruptedException {
         if (retries != downloadRetryCount) {
             try {
-                var bytesToDownloadEachInCycle = limit / chunks;
                 var con = DownloadUtils.connect(url, false);
                 if (!downloadModel.isResumable())
                     con.setRequestProperty("User-Agent", userAgent);
@@ -207,8 +220,8 @@ public class DownloadInChunksTask extends DownloadTask {
                 long finalExistingFileSize = existingFileSize;
                 var lock = fileChannel.lock();
                 while (from + finalExistingFileSize < to) {
-                    fileChannel.transferFrom(byteChannel, finalExistingFileSize, bytesToDownloadEachInCycle);
-                    finalExistingFileSize += bytesToDownloadEachInCycle;
+                    fileChannel.transferFrom(byteChannel, finalExistingFileSize, bytesToDownloadEachInCycleLimited);
+                    finalExistingFileSize += bytesToDownloadEachInCycleLimited;
                     Thread.sleep(ONE_SEC);
                 }
                 lock.release();
@@ -219,14 +232,16 @@ public class DownloadInChunksTask extends DownloadTask {
                     retries++;
                     Thread.sleep(2000);
                     var currFileSize = IOUtils.getFileSize(partFile);
-                    performLimitedDownload(from + currFileSize, from, to, partFile, currFileSize, rateLimitCount, retries);
+                    performSpeedLimitedDownload(from + currFileSize, from, to, partFile,
+                            currFileSize, rateLimitCount, retries);
                 }
             } catch (ClosedChannelException ignore) {
             }
             var currFileSize = IOUtils.getFileSize(partFile);
             if (!paused && currFileSize != (to - from + 1) && downloadRateLimitCount < rateLimitCount) {
                 rateLimitCount++;
-                performLimitedDownload(from + currFileSize, from, to, partFile, currFileSize, rateLimitCount, retries);
+                performSpeedLimitedDownload(from + currFileSize, from, to, partFile, currFileSize
+                        , rateLimitCount, retries);
             }
         }
     }
@@ -276,6 +291,10 @@ public class DownloadInChunksTask extends DownloadTask {
 
     @Override
     protected void succeeded() {
+        if (newLimitSet) {
+            newLimitSet = false;
+            return;
+        }
         if (!Platform.isFxApplicationThread())
             runFinalization();
         else executor.submit(this::runFinalization);
@@ -354,5 +373,16 @@ public class DownloadInChunksTask extends DownloadTask {
             return;
         }
         succeeded();
+    }
+
+    @Override
+    protected void setSpeedLimit(long limit) {
+        this.limit = limit;
+        if (isSpeedLimited)
+            bytesToDownloadEachInCycleLimited = limit / chunks;
+        else {
+
+        }
+        this.isSpeedLimited = true;
     }
 }
