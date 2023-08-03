@@ -2,8 +2,8 @@ package ir.darkdeveloper.bitkip.repo;
 
 import ir.darkdeveloper.bitkip.models.DownloadModel;
 import ir.darkdeveloper.bitkip.models.DownloadStatus;
+import ir.darkdeveloper.bitkip.models.TurnOffMode;
 
-import java.io.File;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDateTime;
@@ -34,6 +34,7 @@ public class DownloadsRepo {
             COL_LAST_TRY_DATE = "last_try_date",
             COL_COMPLETE_DATE = "complete_date",
             COL_RESUMABLE = "resumable",
+            COL_TURNOFF_MODE = "turn_off_mode",
             COL_PATH = "path";
 
     public static void createTable() {
@@ -46,6 +47,7 @@ public class DownloadsRepo {
                 + COL_OPEN_AFTER_COMPLETE + " INTEGER,"
                 + COL_SHOW_COMPLETE_DIALOG + " INTEGER,"
                 + COL_RESUMABLE + " INTEGER,"
+                + COL_TURNOFF_MODE + " VARCHAR,"
                 + COL_URL + " VARCHAR,"
                 + COL_PATH + " VARCHAR,"
                 + COL_CHUNKS + " INTEGER,"
@@ -62,12 +64,15 @@ public class DownloadsRepo {
 
     private static void alters() {
         var addAlters = """
+                ALTER TABLE %s ADD COLUMN %s VARCHAR DEFAULT "NOTHING";
                 ALTER TABLE %s ADD COLUMN %s INTEGER DEFAULT 1;
                 ALTER TABLE %s ADD COLUMN %s INTEGER DEFAULT 0;
                 ALTER TABLE %s ADD COLUMN %s VARCHAR DEFAULT "%s";
                 ALTER TABLE %s ADD COLUMN %s INTEGER DEFAULT 1;
                 """
-                .formatted(DOWNLOADS_TABLE_NAME, COL_SHOW_COMPLETE_DIALOG,
+                .formatted(
+                        DOWNLOADS_TABLE_NAME, COL_TURNOFF_MODE,
+                        DOWNLOADS_TABLE_NAME, COL_SHOW_COMPLETE_DIALOG,
                         DOWNLOADS_TABLE_NAME, COL_OPEN_AFTER_COMPLETE,
                         DOWNLOADS_TABLE_NAME, COL_ADD_TO_QUEUE_DATE, LocalDateTime.now().toString(),
                         DOWNLOADS_TABLE_NAME, COL_RESUMABLE);
@@ -275,6 +280,7 @@ public class DownloadsRepo {
         var showCompleteDialog = rs.getBoolean(COL_SHOW_COMPLETE_DIALOG);
         var openAfterComplete = rs.getBoolean(COL_OPEN_AFTER_COMPLETE);
         var resumable = rs.getBoolean(COL_RESUMABLE);
+        var turnOffMode = TurnOffMode.valueOf(rs.getString(COL_TURN_OFF_MODE));
         var addDate = rs.getString(COL_ADD_DATE);
         var addDateStr = LocalDateTime.parse(addDate);
         var addToQueueDate = rs.getString(COL_ADD_TO_QUEUE_DATE);
@@ -287,7 +293,7 @@ public class DownloadsRepo {
 
         var build = DownloadModel.builder()
                 .id(id).name(name).progress(progress).downloaded(downloaded).size(size).url(url).filePath(filePath)
-                .chunks(chunks).addDate(addDateStr).addToQueueDate(addToQueueDateStr)
+                .chunks(chunks).addDate(addDateStr).addToQueueDate(addToQueueDateStr).turnOffMode(turnOffMode)
                 .lastTryDate(lastTryDateStr).completeDate(completeDateStr).openAfterComplete(openAfterComplete)
                 .showCompleteDialog(showCompleteDialog).downloadStatus(downloadStatus).resumable(resumable)
                 .build();

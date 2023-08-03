@@ -412,8 +412,8 @@ public class FxUtils {
 
     public static boolean askForShutdown(TurnOffMode turnOffMode) {
         var dialog = new Dialog<ButtonType>();
-        dialog.setTitle("Your pc is about to " + turnOffMode);
-        dialog.setHeaderText("Queue is done or finished and scheduled to " + turnOffMode);
+        dialog.setTitle("Your computer is about to " + turnOffMode);
+        dialog.setHeaderText("Queue/Download has finished and scheduled to " + turnOffMode);
         dialog.getDialogPane().getButtonTypes().addAll(ButtonType.APPLY, ButtonType.CANCEL);
 
         var countDownLbl = new Label();

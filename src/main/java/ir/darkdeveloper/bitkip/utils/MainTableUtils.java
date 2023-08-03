@@ -50,7 +50,7 @@ public class MainTableUtils {
     }
 
     public void tableInits() {
-        nameColumn.setPrefWidth(200);
+        nameColumn.setPrefWidth(250);
         speedColumn.setPrefWidth(100);
         downloadedColumn.setPrefWidth(90);
         sizeColumn.setPrefWidth(90);

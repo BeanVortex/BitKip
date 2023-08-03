@@ -3,6 +3,8 @@ package ir.darkdeveloper.bitkip.controllers;
 import ir.darkdeveloper.bitkip.controllers.interfaces.FXMLController;
 import ir.darkdeveloper.bitkip.models.DownloadModel;
 import ir.darkdeveloper.bitkip.models.DownloadStatus;
+import ir.darkdeveloper.bitkip.models.TurnOffMode;
+import ir.darkdeveloper.bitkip.repo.DatabaseHelper;
 import ir.darkdeveloper.bitkip.repo.DownloadsRepo;
 import ir.darkdeveloper.bitkip.repo.QueuesRepo;
 import ir.darkdeveloper.bitkip.task.DownloadTask;
@@ -13,11 +15,13 @@ import ir.darkdeveloper.bitkip.utils.Validations;
 import javafx.application.Platform;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
+import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import org.apache.commons.lang3.time.DurationFormatUtils;
+import org.controlsfx.control.Notifications;
 import org.controlsfx.control.PopOver;
 import org.controlsfx.control.ToggleSwitch;
 
@@ -28,10 +32,15 @@ import java.util.ResourceBundle;
 
 import static ir.darkdeveloper.bitkip.config.AppConfigs.currentDownloadings;
 import static ir.darkdeveloper.bitkip.config.AppConfigs.openDownloadings;
+import static ir.darkdeveloper.bitkip.models.TurnOffMode.*;
+import static ir.darkdeveloper.bitkip.repo.DatabaseHelper.DOWNLOADS_TABLE_NAME;
+import static ir.darkdeveloper.bitkip.repo.DownloadsRepo.COL_TURNOFF_MODE;
 import static ir.darkdeveloper.bitkip.utils.DownloadOpUtils.openFile;
 
 public class DetailsController implements FXMLController {
 
+    @FXML
+    private ComboBox<TurnOffMode> turnOffCombo;
     @FXML
     private VBox container;
     @FXML
@@ -39,9 +48,9 @@ public class DetailsController implements FXMLController {
     @FXML
     private Hyperlink link;
     @FXML
-    private TextField bytesField,speedField;
+    private TextField bytesField, speedField;
     @FXML
-    private ToggleSwitch openSwitch,showSwitch;
+    private ToggleSwitch openSwitch, showSwitch;
     @FXML
     private ProgressBar downloadProgress;
     @FXML
@@ -118,6 +127,7 @@ public class DetailsController implements FXMLController {
         openSwitch.setSelected(downloadModel.isOpenAfterComplete());
         showSwitch.setSelected(downloadModel.isShowCompleteDialog());
         onComplete(downloadModel);
+        turnOffCombo.getSelectionModel().select(downloadModel.getTurnOffMode());
     }
 
     public void initDownloadListeners() {
@@ -205,6 +215,8 @@ public class DetailsController implements FXMLController {
         linkPopover.setAnimated(true);
         linkPopover.setContentNode(new Label("Copied"));
         link.setOnMouseExited(event -> linkPopover.hide());
+        turnOffCombo.setItems(FXCollections.observableArrayList(NOTHING, SLEEP, TURN_OFF));
+
     }
 
     private void updatePause(Boolean paused) {
@@ -253,7 +265,7 @@ public class DetailsController implements FXMLController {
             isPaused.set(false);
         } else {
             var dt = getDownloadTask();
-            if (dt != null){
+            if (dt != null) {
                 dt.pause();
             }
             controlBtn.setDisable(true);
@@ -313,6 +325,23 @@ public class DetailsController implements FXMLController {
     private void onFolderOpen() {
         DownloadOpUtils.openContainingFolder(downloadModel);
         stage.close();
+    }
+
+    @FXML
+    private void onTurnOffChanged() {
+        var value = turnOffCombo.getValue();
+        downloadModel.setTurnOffMode(value);
+        var downloadTask = downloadModel.getDownloadTask();
+        if (downloadTask != null)
+            downloadTask.setDownloadModel(downloadModel);
+        DatabaseHelper.updateCol(COL_TURNOFF_MODE,
+                value.toString(), DOWNLOADS_TABLE_NAME, downloadModel.getId());
+        if (value != NOTHING) {
+            Notifications.create()
+                    .title("Turn off mode changed")
+                    .text("Your computer will %s after download has done".formatted(value.toString().toLowerCase()))
+                    .showInformation();
+        }
     }
 
     public ProgressBar getProgressBar() {

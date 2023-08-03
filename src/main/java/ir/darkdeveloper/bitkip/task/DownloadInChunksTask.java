@@ -58,7 +58,7 @@ public class DownloadInChunksTask extends DownloadTask {
             url = downloadModel.getUrl();
             var file = new File(downloadModel.getFilePath());
             var fileSize = downloadModel.getSize();
-            if (file.exists() && isCompleted(downloadModel, file, mainTableUtils))
+            if (file.exists() && isCompleted(file, mainTableUtils))
                 return 0L;
             var parentFolder = Path.of(file.getPath()).getParent().toFile();
             if (!parentFolder.exists())
@@ -325,6 +325,7 @@ public class DownloadInChunksTask extends DownloadTask {
             if (executor != null && !blocking)
                 executor.shutdownNow();
             System.gc();
+            whenDone();
         }
     }
 

@@ -1,10 +1,7 @@
 package ir.darkdeveloper.bitkip.utils;
 
 import ir.darkdeveloper.bitkip.config.observers.QueueSubject;
-import ir.darkdeveloper.bitkip.models.DownloadModel;
-import ir.darkdeveloper.bitkip.models.DownloadStatus;
-import ir.darkdeveloper.bitkip.models.QueueModel;
-import ir.darkdeveloper.bitkip.models.StartedQueue;
+import ir.darkdeveloper.bitkip.models.*;
 import ir.darkdeveloper.bitkip.repo.QueuesRepo;
 import ir.darkdeveloper.bitkip.repo.ScheduleRepo;
 import javafx.application.Platform;
@@ -79,6 +76,7 @@ public class QueueUtils {
                 if (dm.getDownloadStatus() == DownloadStatus.Paused) {
                     dm.setOpenAfterComplete(false);
                     dm.setShowCompleteDialog(false);
+                    dm.setTurnOffMode(TurnOffMode.NOTHING);
                     if (!dm.getQueues().contains(qm))
                         dm.getQueues().add(qm);
                     String speedLimit = null;

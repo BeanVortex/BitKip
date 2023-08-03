@@ -173,7 +173,7 @@ public class DownloadOpUtils {
         mainTableUtils.refreshTable();
         String[] cols = {COL_DOWNLOADED, COL_PROGRESS, COL_COMPLETE_DATE, COL_LAST_TRY_DATE};
         String[] values = {"0", "0", "NULL", lastTryDate.toString()};
-        DatabaseHelper.updateRow(cols, values, DatabaseHelper.DOWNLOADS_TABLE_NAME, dmId);
+        DatabaseHelper.updateCols(cols, values, DatabaseHelper.DOWNLOADS_TABLE_NAME, dmId);
         try {
             triggerDownload(dm, null, null, true, false, null);
         } catch (ExecutionException | InterruptedException e) {

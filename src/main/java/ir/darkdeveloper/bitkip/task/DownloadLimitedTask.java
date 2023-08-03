@@ -57,7 +57,7 @@ public class DownloadLimitedTask extends DownloadTask {
         try {
             url = downloadModel.getUrl();
             file = new File(downloadModel.getFilePath());
-            if (file.exists() && isCompleted(downloadModel, file, mainTableUtils))
+            if (file.exists() && isCompleted(file, mainTableUtils))
                 return 0L;
             var parentFolder = Path.of(file.getPath()).getParent().toFile();
             if (!parentFolder.exists())
@@ -253,6 +253,7 @@ public class DownloadLimitedTask extends DownloadTask {
             if (executor != null && !blocking)
                 executor.shutdownNow();
             System.gc();
+            whenDone();
         }
 
     }
