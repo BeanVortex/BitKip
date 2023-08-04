@@ -94,8 +94,8 @@ public class SingleDownload implements QueueObserver {
         });
         var questionBtns = new Button[]{questionBtnSpeed, questionBtnBytes, questionBtnChunks};
         var contents = new String[]{
-                "You can limit downloading speed. calculated in MB. (0.8 means 800KB)",
-                "You can specify how many bytes of the file to download (Disabled in chunks downloading mode)",
+                "You can limit downloading speed. calculated in MB. (0.8 means 838KB)",
+                "You can specify how many bytes of the file to download (roughly)",
                 "File is seperated into parts and will be downloaded concurrently"
         };
 
@@ -145,7 +145,6 @@ public class SingleDownload implements QueueObserver {
             return;
         }
         var resumable = DownloadUtils.canResume(conn);
-        chunksField.setDisable(!resumable);
         chunksField.setText(resumable ? String.valueOf(maxChunks(fileSize)) : "0");
         speedField.setDisable(false);
         if (resumable) {
@@ -173,8 +172,8 @@ public class SingleDownload implements QueueObserver {
             var fileNameLocationFuture =
                     DownloadUtils.prepareFileNameAndFieldsAsync(connection, url, nameField, executor)
                             .thenAccept(this::setLocation);
-            var sizeFuture = DownloadUtils.prepareFileSizeAndFieldsAsync(connection, urlField, sizeLabel,
-                    resumableLabel, chunksField, bytesField, dm, executor);
+            var sizeFuture = DownloadUtils.prepareFileSizeAndFieldsAsync(connection,
+                    urlField, sizeLabel, resumableLabel, chunksField, bytesField, dm, executor);
             CompletableFuture.allOf(fileNameLocationFuture, sizeFuture)
                     .whenComplete((unused, throwable) -> {
                         handleError(() -> DownloadUtils.checkIfFileIsOKToSave(locationField.getText(),
@@ -283,6 +282,8 @@ public class SingleDownload implements QueueObserver {
         dm.setAddToQueueDate(LocalDateTime.now());
         dm.setShowCompleteDialog(showCompleteDialog);
         dm.setOpenAfterComplete(false);
+        dm.setSpeedLimit(Long.parseLong(speedField.getText()));
+        dm.setByteLimit(Long.parseLong(bytesField.getText()));
         var selectedQueue = queueCombo.getSelectionModel().getSelectedItem();
         var allDownloadsQueue = QueuesRepo.findByName(ALL_DOWNLOADS_QUEUE, false);
         dm.getQueues().add(allDownloadsQueue);

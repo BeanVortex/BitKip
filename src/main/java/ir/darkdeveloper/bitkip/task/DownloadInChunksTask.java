@@ -1,6 +1,7 @@
 package ir.darkdeveloper.bitkip.task;
 
 import ir.darkdeveloper.bitkip.controllers.DetailsController;
+import ir.darkdeveloper.bitkip.exceptions.DeniedException;
 import ir.darkdeveloper.bitkip.models.DownloadModel;
 import ir.darkdeveloper.bitkip.models.DownloadStatus;
 import ir.darkdeveloper.bitkip.repo.DownloadsRepo;
@@ -46,14 +47,16 @@ public class DownloadInChunksTask extends DownloadTask {
     private long bytesToDownloadEachInCycleLimited;
     private boolean newLimitSet;
 
-    public DownloadInChunksTask(DownloadModel downloadModel, long speedLimit, long byteLimit) {
+    public DownloadInChunksTask(DownloadModel downloadModel, long speedLimit, long byteLimit) throws DeniedException {
         super(downloadModel);
         if (downloadModel.getChunks() == 0)
             throw new IllegalArgumentException("To download file in chunks, chunks must not be 0");
+        if (byteLimit == 0)
+            throw new DeniedException("File did not download due to 0 bytes chosen to download");
         this.chunks = downloadModel.getChunks();
         this.speedLimit = speedLimit;
         this.byteLimit = byteLimit;
-        isByteLimited = byteLimit != 0;
+        isByteLimited = true;
         isSpeedLimited = speedLimit != 0;
     }
 

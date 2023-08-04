@@ -54,22 +54,7 @@ public class Validations {
             return;
         var threads = maxChunks(Long.MAX_VALUE);
         chunksField.setText(String.valueOf(threads));
-        chunksField.textProperty().addListener((o, old, newValue) -> {
-            if (!newValue.matches("\\d*"))
-                chunksField.setText(newValue.replaceAll("\\D", ""));
-            if (!chunksField.getText().isBlank()) {
-                var chunks = Integer.parseInt(chunksField.getText());
-                if (chunks > threads)
-                    chunks = threads;
-                if (chunks == 1)
-                    chunks = 2;
-                chunksField.setText(String.valueOf(chunks));
-            }
-        });
-        chunksField.focusedProperty().addListener((o, old, newValue) -> {
-            if (!newValue && chunksField.getText().isBlank())
-                chunksField.setText(String.valueOf(threads));
-        });
+        chunksField.setDisable(true);
     }
 
     public static void validateIntInputCheck(TextField field, Long defaultVal) {

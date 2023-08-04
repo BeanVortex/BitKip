@@ -5,6 +5,7 @@ import ir.darkdeveloper.bitkip.exceptions.DeniedException;
 import ir.darkdeveloper.bitkip.models.DownloadModel;
 import ir.darkdeveloper.bitkip.models.DownloadStatus;
 import ir.darkdeveloper.bitkip.models.SingleURLModel;
+import ir.darkdeveloper.bitkip.models.TurnOffMode;
 import ir.darkdeveloper.bitkip.repo.DatabaseHelper;
 import ir.darkdeveloper.bitkip.repo.DownloadsRepo;
 import ir.darkdeveloper.bitkip.repo.QueuesRepo;
@@ -60,8 +61,14 @@ public class DownloadOpUtils {
         // todo : remove limited and replace it with special download task
         if (dm.getChunks() == 0)
             downloadTask = new DownloadLimitedTask(dm, Long.MAX_VALUE, false);
-        else
-            downloadTask = new DownloadInChunksTask(dm, speed, bytes);
+        else {
+            try {
+                downloadTask = new DownloadInChunksTask(dm, speed, bytes);
+            } catch (DeniedException e) {
+                log.error(e.getMessage());
+                return;
+            }
+        }
 
 
         if (dm.getSize() == -1)
@@ -103,6 +110,7 @@ public class DownloadOpUtils {
         if (!currentDownloadings.contains(dm)) {
             dm.setLastTryDate(LocalDateTime.now());
             dm.setDownloadStatus(DownloadStatus.Trying);
+            dm.setTurnOffMode(TurnOffMode.NOTHING);
             DownloadsRepo.updateDownloadLastTryDate(dm);
             mainTableUtils.refreshTable();
             try {

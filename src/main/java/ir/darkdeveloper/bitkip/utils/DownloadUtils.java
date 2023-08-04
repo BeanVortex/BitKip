@@ -106,8 +106,7 @@ public class DownloadUtils {
             Platform.runLater(() -> {
                 if (resumable) {
                     chunksField.setText(String.valueOf(maxChunks(fileSize)));
-                    chunksField.setDisable(false);
-                    bytesField.setDisable(true);
+                    bytesField.setDisable(false);
                     resumableLabel.setText("Yes");
                     resumableLabel.getStyleClass().add("yes");
                     resumableLabel.getStyleClass().remove("no");
@@ -116,7 +115,6 @@ public class DownloadUtils {
                     resumableLabel.getStyleClass().add("no");
                     resumableLabel.getStyleClass().remove("yes");
                     chunksField.setText("0");
-                    chunksField.setDisable(true);
                     bytesField.setDisable(true);
                 }
                 sizeLabel.setText(IOUtils.formatBytes(fileSize));

@@ -99,8 +99,13 @@ public class DetailsController implements FXMLController {
 
     private void initDownloadData() {
         Validations.validateInputChecks(null, bytesField, speedField, downloadModel);
-        bytesField.setText(String.valueOf(downloadModel.getSize()));
+        var byteLimit = String.valueOf(downloadModel.getByteLimit());
+        if (byteLimit.equals("0"))
+            byteLimit = String.valueOf(downloadModel.getSize());
+        bytesField.setText(byteLimit);
         bytesField.setDisable(downloadModel.getSize() < 0);
+        var speedLimit = String.valueOf(downloadModel.getSpeedLimit());
+        speedField.setText(speedLimit);
         downloadedBytes.setText(String.valueOf(downloadModel.getDownloaded()));
         link.setText(downloadModel.getUrl());
         locationLbl.setText("Path: " + new File(downloadModel.getFilePath()).getParentFile().getAbsolutePath());
