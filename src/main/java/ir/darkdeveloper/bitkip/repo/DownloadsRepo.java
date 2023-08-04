@@ -34,7 +34,7 @@ public class DownloadsRepo {
             COL_LAST_TRY_DATE = "last_try_date",
             COL_COMPLETE_DATE = "complete_date",
             COL_RESUMABLE = "resumable",
-            COL_TURNOFF_MODE = "turn_off_mode",
+            COL_TURNOFF_MODE = "turnoff_mode",
             COL_PATH = "path";
 
     public static void createTable() {
@@ -280,7 +280,7 @@ public class DownloadsRepo {
         var showCompleteDialog = rs.getBoolean(COL_SHOW_COMPLETE_DIALOG);
         var openAfterComplete = rs.getBoolean(COL_OPEN_AFTER_COMPLETE);
         var resumable = rs.getBoolean(COL_RESUMABLE);
-        var turnOffMode = TurnOffMode.valueOf(rs.getString(COL_TURN_OFF_MODE));
+        var turnOffMode = TurnOffMode.valueOf(rs.getString(COL_TURNOFF_MODE));
         var addDate = rs.getString(COL_ADD_DATE);
         var addDateStr = LocalDateTime.parse(addDate);
         var addToQueueDate = rs.getString(COL_ADD_TO_QUEUE_DATE);
