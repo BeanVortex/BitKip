@@ -32,27 +32,29 @@ import static ir.darkdeveloper.bitkip.utils.DownloadOpUtils.openFile;
 
 public class DownloadInChunksTask extends DownloadTask {
     private final int chunks;
-    private long limit;
+    private long speedLimit;
+    private final long byteLimit;
     private boolean isSpeedLimited;
     private final List<FileChannel> fileChannels = new ArrayList<>();
     private final List<Path> filePaths = new ArrayList<>();
     private volatile boolean paused;
     private volatile boolean isCalculating;
-    private final boolean isLimited;
+    private final boolean isByteLimited;
     private ExecutorService executor;
     private boolean blocking;
     private String url;
     private long bytesToDownloadEachInCycleLimited;
     private boolean newLimitSet;
 
-    public DownloadInChunksTask(DownloadModel downloadModel, long limit, boolean isSpeedLimited) {
+    public DownloadInChunksTask(DownloadModel downloadModel, long speedLimit, long byteLimit) {
         super(downloadModel);
         if (downloadModel.getChunks() == 0)
             throw new IllegalArgumentException("To download file in chunks, chunks must not be 0");
         this.chunks = downloadModel.getChunks();
-        this.limit = limit;
-        isLimited = limit != 0;
-        this.isSpeedLimited = isSpeedLimited;
+        this.speedLimit = speedLimit;
+        this.byteLimit = byteLimit;
+        isByteLimited = byteLimit != 0;
+        isSpeedLimited = speedLimit != 0;
     }
 
 
@@ -77,8 +79,8 @@ public class DownloadInChunksTask extends DownloadTask {
 
     private void downloadInChunks(long fileSize)
             throws IOException, InterruptedException, ExecutionException {
-        calculateSpeedAndProgressChunks(fileSize);
-       var futures = prepareParts(fileSize);
+        calculateSpeedAndProgress(fileSize);
+        var futures = prepareParts(fileSize);
         if (!futures.isEmpty()) {
             isCalculating = true;
             log.info("Downloading : " + downloadModel);
@@ -131,9 +133,19 @@ public class DownloadInChunksTask extends DownloadTask {
     private void addFutures(long fileSize, ArrayList<CompletableFuture<Void>> futures,
                             File partFile, long fromContinue, long from, long to) {
         CompletableFuture<Void> c;
-        if (isLimited)
-            c = limitedDownload(fromContinue, from, to, partFile, fileSize);
-        else {
+        if (isSpeedLimited) {
+            bytesToDownloadEachInCycleLimited = speedLimit / chunks;
+            c = CompletableFuture.runAsync(() -> {
+                try {
+                    performSpeedLimitedDownload(fromContinue, from, to,
+                            partFile, fileSize, 0, 0);
+                } catch (IOException | InterruptedException e) {
+                    if (e instanceof IOException)
+                        log.error(e.getMessage());
+                    this.pause();
+                }
+            }, executor);
+        } else {
             c = CompletableFuture.runAsync(() -> {
                 try {
                     performDownload(fromContinue, from, to, partFile, fileSize, 0, 0);
@@ -146,25 +158,6 @@ public class DownloadInChunksTask extends DownloadTask {
         }
         c.whenComplete((unused, throwable) -> Thread.currentThread().interrupt());
         futures.add(c);
-    }
-
-    private CompletableFuture<Void> limitedDownload(long fromContinue, long from, long to,
-                                                    File partFile, long fileSize) {
-        CompletableFuture<Void> c = null;
-        if (isSpeedLimited) {
-            bytesToDownloadEachInCycleLimited = limit / chunks;
-            c = CompletableFuture.runAsync(() -> {
-                try {
-                    performSpeedLimitedDownload(fromContinue, from, to,
-                            partFile, fileSize, 0, 0);
-                } catch (IOException | InterruptedException e) {
-                    if (e instanceof IOException)
-                        log.error(e.getMessage());
-                    this.pause();
-                }
-            }, executor);
-        }
-        return c;
     }
 
 
@@ -244,7 +237,7 @@ public class DownloadInChunksTask extends DownloadTask {
     }
 
 
-    private void calculateSpeedAndProgressChunks(long fileSize) {
+    private void calculateSpeedAndProgress(long fileSize) {
         executor.submit(() -> {
             Thread.currentThread().setName("calculator: " + Thread.currentThread().getName());
             try {
@@ -256,7 +249,8 @@ public class DownloadInChunksTask extends DownloadTask {
                         currentFileSize += Files.size(filePaths.get(i));
                     updateProgress(currentFileSize, fileSize);
                     updateValue(currentFileSize);
-
+                    if (isByteLimited && currentFileSize >= byteLimit)
+                        pause();
                     Thread.sleep(ONE_SEC);
                 }
             } catch (InterruptedException | NoSuchFileException ignore) {
@@ -371,19 +365,16 @@ public class DownloadInChunksTask extends DownloadTask {
         succeeded();
     }
 
-    // todo: disable apply when download is done
-    // todo: bytes field with speed field problem
-    // todo: 0 speed means no limit
     @Override
-    protected void setSpeedLimit(long limit) {
-        this.limit = limit;
-        if (isSpeedLimited)
-            bytesToDownloadEachInCycleLimited = limit / chunks;
+    protected void setSpeedLimit(long speedLimit) {
+        this.speedLimit = speedLimit;
+        if (isSpeedLimited && speedLimit != 0)
+            bytesToDownloadEachInCycleLimited = speedLimit / chunks;
         else {
             newLimitSet = true;
             pause();
             try {
-                DownloadOpUtils.triggerDownload(downloadModel, limit, downloadModel.getSize(), true, false, null);
+                DownloadOpUtils.triggerDownload(downloadModel, speedLimit, downloadModel.getSize(), true, false, null);
             } catch (ExecutionException | InterruptedException e) {
                 log.error(e.getMessage());
             }

@@ -17,25 +17,17 @@ public class Validations {
                                            TextField speedField, DownloadModel dm) {
         validateChunksInputChecks(chunksField);
         validateSpeedInputChecks(speedField);
-        validateBytesInputChecks(bytesField, chunksField, speedField, dm);
+        validateBytesInputChecks(bytesField, dm);
     }
 
-    private static void validateBytesInputChecks(TextField bytesField, TextField chunksField,
-                                                 TextField speedField, DownloadModel dm) {
-        if (bytesField == null || speedField == null)
+    private static void validateBytesInputChecks(TextField bytesField, DownloadModel dm) {
+        if (bytesField == null)
             return;
-        bytesField.setDisable(true);
-        speedField.textProperty().addListener((o, old, newValue) -> bytesField.setDisable(!newValue.equals("0")));
-        if (chunksField != null)
-            chunksField.textProperty().addListener((o, old, newValue) -> bytesField.setDisable(!newValue.equals("0")));
 
         bytesField.textProperty().addListener((o, old, newValue) -> {
             if (!newValue.matches("\\d*"))
                 bytesField.setText(newValue.replaceAll("\\D", ""));
-            if (chunksField != null && !newValue.equals(String.valueOf(dm.getSize())))
-                chunksField.setDisable(!dm.isResumable());
-            speedField.setDisable(!bytesField.getText().equals(String.valueOf(dm.getSize())));
-            if (newValue.isBlank())
+            if (newValue.isBlank() || Long.parseLong(newValue) > dm.getSize())
                 bytesField.setText(String.valueOf(dm.getSize()));
         });
         bytesField.focusedProperty().addListener((o, old, newValue) -> {

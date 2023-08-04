@@ -41,7 +41,7 @@ public class DownloadOpUtils {
      *                 mostly using for queue downloading
      */
     public static void triggerDownload(DownloadModel dm, Long speed, Long bytes, boolean resume, boolean blocking,
-                                        ExecutorService executor) throws ExecutionException, InterruptedException {
+                                       ExecutorService executor) throws ExecutionException, InterruptedException {
 
         try {
             Validations.validateDownloadModel(dm);
@@ -56,28 +56,13 @@ public class DownloadOpUtils {
             log.error(e.getMessage());
         }
 
-        DownloadTask downloadTask = new DownloadLimitedTask(dm, Long.MAX_VALUE, false);
-        if (dm.getChunks() == 0) {
-            if (speed != null) {
-                if (speed == 0) {
-                    if (bytes != null) {
-                        if (bytes == dm.getSize())
-                            downloadTask = new DownloadLimitedTask(dm, Long.MAX_VALUE, false);
-                        else
-                            downloadTask = new DownloadLimitedTask(dm, bytes, false);
-                    }
-                } else
-                    downloadTask = new DownloadLimitedTask(dm, speed, true);
-            }
-        } else {
-            if (speed != null) {
-                if (speed == 0)
-                    downloadTask = new DownloadInChunksTask(dm, 0, false);
-                else
-                    downloadTask = new DownloadInChunksTask(dm, speed, true);
-            } else
-                downloadTask = new DownloadInChunksTask(dm, 0, false);
-        }
+        DownloadTask downloadTask;
+        // todo : remove limited and replace it with special download task
+        if (dm.getChunks() == 0)
+            downloadTask = new DownloadLimitedTask(dm, Long.MAX_VALUE, false);
+        else
+            downloadTask = new DownloadInChunksTask(dm, speed, bytes);
+
 
         if (dm.getSize() == -1)
             downloadTask.valueProperty().addListener((ob, o, n) -> mainTableUtils.updateDownloadedNoSize(n, dm));
@@ -174,7 +159,7 @@ public class DownloadOpUtils {
         String[] values = {"0", "0", "NULL", lastTryDate.toString()};
         DatabaseHelper.updateCols(cols, values, DatabaseHelper.DOWNLOADS_TABLE_NAME, dmId);
         try {
-            triggerDownload(dm, null, null, true, false, null);
+            triggerDownload(dm, 0L, dm.getSize(), true, false, null);
         } catch (ExecutionException | InterruptedException e) {
             log.error(e.getMessage());
         }
