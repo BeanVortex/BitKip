@@ -31,7 +31,7 @@ import java.util.concurrent.ExecutorService;
 import static ir.darkdeveloper.bitkip.config.AppConfigs.*;
 import static ir.darkdeveloper.bitkip.utils.DownloadOpUtils.openFile;
 
-public class DownloadInChunksTask extends DownloadTask {
+public class ChunksDownloadTask extends DownloadTask {
     private final int chunks;
     private long speedLimit;
     private final long byteLimit;
@@ -47,7 +47,7 @@ public class DownloadInChunksTask extends DownloadTask {
     private long bytesToDownloadEachInCycleLimited;
     private boolean newLimitSet;
 
-    public DownloadInChunksTask(DownloadModel downloadModel, long speedLimit, long byteLimit) throws DeniedException {
+    public ChunksDownloadTask(DownloadModel downloadModel, long speedLimit, long byteLimit) throws DeniedException {
         super(downloadModel);
         if (downloadModel.getChunks() == 0)
             throw new IllegalArgumentException("To download file in chunks, chunks must not be 0");
@@ -368,8 +368,7 @@ public class DownloadInChunksTask extends DownloadTask {
         succeeded();
     }
 
-    @Override
-    protected void setSpeedLimit(long speedLimit) {
+    public void setSpeedLimit(long speedLimit) {
         this.speedLimit = speedLimit;
         if (isSpeedLimited && speedLimit != 0)
             bytesToDownloadEachInCycleLimited = speedLimit / chunks;

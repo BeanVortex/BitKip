@@ -9,8 +9,8 @@ import ir.darkdeveloper.bitkip.models.TurnOffMode;
 import ir.darkdeveloper.bitkip.repo.DatabaseHelper;
 import ir.darkdeveloper.bitkip.repo.DownloadsRepo;
 import ir.darkdeveloper.bitkip.repo.QueuesRepo;
-import ir.darkdeveloper.bitkip.task.DownloadInChunksTask;
-import ir.darkdeveloper.bitkip.task.DownloadLimitedTask;
+import ir.darkdeveloper.bitkip.task.ChunksDownloadTask;
+import ir.darkdeveloper.bitkip.task.SpecialDownloadTask;
 import ir.darkdeveloper.bitkip.task.DownloadTask;
 import javafx.application.Platform;
 import javafx.collections.ObservableList;
@@ -58,12 +58,11 @@ public class DownloadOpUtils {
         }
 
         DownloadTask downloadTask;
-        // todo : remove limited and replace it with special download task
         if (dm.getChunks() == 0)
-            downloadTask = new DownloadLimitedTask(dm, Long.MAX_VALUE, false);
+            downloadTask = new SpecialDownloadTask(dm);
         else {
             try {
-                downloadTask = new DownloadInChunksTask(dm, speed, bytes);
+                downloadTask = new ChunksDownloadTask(dm, speed, bytes);
             } catch (DeniedException e) {
                 log.error(e.getMessage());
                 return;

@@ -89,9 +89,4 @@ public abstract class DownloadTask extends Task<Long> {
         downloadModel = dm;
     }
 
-    protected abstract void setSpeedLimit(long limit);
-
-    public void updateSpeed(long limit) {
-        setSpeedLimit(limit);
-    }
 }

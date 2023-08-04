@@ -7,6 +7,7 @@ import ir.darkdeveloper.bitkip.models.TurnOffMode;
 import ir.darkdeveloper.bitkip.repo.DatabaseHelper;
 import ir.darkdeveloper.bitkip.repo.DownloadsRepo;
 import ir.darkdeveloper.bitkip.repo.QueuesRepo;
+import ir.darkdeveloper.bitkip.task.ChunksDownloadTask;
 import ir.darkdeveloper.bitkip.task.DownloadTask;
 import ir.darkdeveloper.bitkip.utils.DownloadOpUtils;
 import ir.darkdeveloper.bitkip.utils.FxUtils;
@@ -103,7 +104,7 @@ public class DetailsController implements FXMLController {
         if (byteLimit.equals("0"))
             byteLimit = String.valueOf(downloadModel.getSize());
         bytesField.setText(byteLimit);
-        bytesField.setDisable(downloadModel.getSize() < 0);
+        bytesField.setDisable(downloadModel.getSize() < 0 || !downloadModel.isResumable());
         var speedLimit = String.valueOf(downloadModel.getSpeedLimit());
         speedField.setText(speedLimit);
         downloadedBytes.setText(String.valueOf(downloadModel.getDownloaded()));
@@ -369,10 +370,10 @@ public class DetailsController implements FXMLController {
     @FXML
     private void onSpeedApplied() {
         var dmTask = downloadModel.getDownloadTask();
-        if (dmTask != null) {
-            long bytesFromString = getBytesFromString(speedField.getText());
-            downloadModel.setSpeed(bytesFromString);
-            dmTask.updateSpeed(bytesFromString);
+        if (dmTask instanceof ChunksDownloadTask cdt) {
+            var speed = getBytesFromString(speedField.getText());
+            downloadModel.setSpeed(speed);
+            cdt.setSpeedLimit(speed);
         }
     }
 
