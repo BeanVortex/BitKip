@@ -266,7 +266,8 @@ public class DetailsController implements FXMLController {
         if (isPaused.get()) {
             statusLbl.setText("Status: " + DownloadStatus.Trying);
             controlBtn.setDisable(true);
-            DownloadOpUtils.resumeDownloads(List.of(downloadModel), speedField.getText(), bytesField.getText());
+            DownloadOpUtils.resumeDownloads(List.of(downloadModel),
+                    getBytesFromString(speedField.getText()), Long.valueOf(bytesField.getText()));
             controlBtn.setDisable(false);
             isPaused.set(false);
         } else {

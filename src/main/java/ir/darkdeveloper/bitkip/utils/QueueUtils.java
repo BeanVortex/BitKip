@@ -18,6 +18,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import static ir.darkdeveloper.bitkip.config.AppConfigs.*;
 import static ir.darkdeveloper.bitkip.config.observers.QueueSubject.addAllQueues;
 import static ir.darkdeveloper.bitkip.config.observers.QueueSubject.getQueues;
+import static ir.darkdeveloper.bitkip.utils.IOUtils.getBytesFromString;
 
 public class QueueUtils {
 
@@ -90,7 +91,7 @@ public class QueueUtils {
                                     sDownloads - simulDownloads.get(),
                                     simulDownloads,
                                     dm, speedLimit);
-                    } else DownloadOpUtils.startDownload(dm, speedLimit, null, true, true, null);
+                    } else DownloadOpUtils.startDownload(dm, getBytesFromString(speedLimit), null, true, true, null);
 
                 }
                 if (!startedQueues.contains(startedQueue))
@@ -116,7 +117,7 @@ public class QueueUtils {
     private static int performSimultaneousDownloadWaitForPrev(QueueModel qm, AtomicInteger simulDownloads,
                                                               int i, DownloadModel dm, String speedLimit, int sDownloads) {
         if (simulDownloads.get() < sDownloads) {
-            DownloadOpUtils.startDownload(dm, speedLimit,
+            DownloadOpUtils.startDownload(dm, getBytesFromString(speedLimit),
                     null, true, false, null);
             simulDownloads.getAndIncrement();
         } else {
@@ -145,7 +146,7 @@ public class QueueUtils {
     private static void performSimultaneousDownloadDontWaitForPrev(int remainingSimul, AtomicInteger simulDownloads,
                                                                    DownloadModel dm, String speedLimit) {
         if (remainingSimul != 0) {
-            DownloadOpUtils.startDownload(dm, speedLimit, null, true, false, null);
+            DownloadOpUtils.startDownload(dm, getBytesFromString(speedLimit), null, true, false, null);
             simulDownloads.getAndIncrement();
         }
     }

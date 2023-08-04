@@ -32,7 +32,6 @@ import static ir.darkdeveloper.bitkip.config.AppConfigs.*;
 import static ir.darkdeveloper.bitkip.repo.DownloadsRepo.*;
 import static ir.darkdeveloper.bitkip.utils.Defaults.ALL_DOWNLOADS_QUEUE;
 import static ir.darkdeveloper.bitkip.utils.DownloadUtils.getNewFileNameIfExists;
-import static ir.darkdeveloper.bitkip.utils.IOUtils.getBytesFromString;
 import static ir.darkdeveloper.bitkip.utils.Validations.maxChunks;
 
 public class DownloadOpUtils {
@@ -41,7 +40,7 @@ public class DownloadOpUtils {
      * @param blocking of course, it should be done in concurrent environment otherwise it will block the main thread.
      *                 mostly using for queue downloading
      */
-    private static void triggerDownload(DownloadModel dm, String speed, String bytes, boolean resume, boolean blocking,
+    public static void triggerDownload(DownloadModel dm, Long speed, Long bytes, boolean resume, boolean blocking,
                                         ExecutorService executor) throws ExecutionException, InterruptedException {
 
         try {
@@ -60,22 +59,22 @@ public class DownloadOpUtils {
         DownloadTask downloadTask = new DownloadLimitedTask(dm, Long.MAX_VALUE, false);
         if (dm.getChunks() == 0) {
             if (speed != null) {
-                if (speed.equals("0")) {
+                if (speed == 0) {
                     if (bytes != null) {
-                        if (bytes.equals(String.valueOf(dm.getSize())))
+                        if (bytes == dm.getSize())
                             downloadTask = new DownloadLimitedTask(dm, Long.MAX_VALUE, false);
                         else
-                            downloadTask = new DownloadLimitedTask(dm, Long.parseLong(bytes), false);
+                            downloadTask = new DownloadLimitedTask(dm, bytes, false);
                     }
                 } else
-                    downloadTask = new DownloadLimitedTask(dm, getBytesFromString(speed), true);
+                    downloadTask = new DownloadLimitedTask(dm, speed, true);
             }
         } else {
             if (speed != null) {
-                if (speed.equals("0"))
+                if (speed == 0)
                     downloadTask = new DownloadInChunksTask(dm, 0, false);
                 else
-                    downloadTask = new DownloadInChunksTask(dm, getBytesFromString(speed), true);
+                    downloadTask = new DownloadInChunksTask(dm, speed, true);
             } else
                 downloadTask = new DownloadInChunksTask(dm, 0, false);
         }
@@ -114,7 +113,7 @@ public class DownloadOpUtils {
 
     }
 
-    public static void startDownload(DownloadModel dm, String speedLimit, String byteLimit, boolean resume,
+    public static void startDownload(DownloadModel dm, Long speedLimit, Long byteLimit, boolean resume,
                                      boolean blocking, ExecutorService executor) {
         if (!currentDownloadings.contains(dm)) {
             dm.setLastTryDate(LocalDateTime.now());
@@ -132,7 +131,7 @@ public class DownloadOpUtils {
     /**
      * Resumes downloads non-blocking
      */
-    public static void resumeDownloads(List<DownloadModel> dms, String speedLimit, String byteLimit) {
+    public static void resumeDownloads(List<DownloadModel> dms, Long speedLimit, Long byteLimit) {
         dms.stream().filter(dm -> !currentDownloadings.contains(dm))
                 .forEach(dm -> {
                     dm.setLastTryDate(LocalDateTime.now());
@@ -391,8 +390,7 @@ public class DownloadOpUtils {
             dm.getQueues().add(allDownloadsQueue);
             dm.getQueues().add(queue);
             dm.setDownloadStatus(DownloadStatus.Trying);
-            DownloadOpUtils.startDownload(dm, "0", String.valueOf(dm.getSize()),
-                    false, false, null);
+            DownloadOpUtils.startDownload(dm, 0L, dm.getSize(), false, false, null);
             Notifications.create()
                     .title("Downloading now ...")
                     .text(dm.getName())

@@ -43,7 +43,6 @@ public class DownloadInChunksTask extends DownloadTask {
     private boolean blocking;
     private String url;
     private long bytesToDownloadEachInCycleLimited;
-    private List<CompletableFuture<Void>> downloaders;
     private boolean newLimitSet;
 
     public DownloadInChunksTask(DownloadModel downloadModel, long limit, boolean isSpeedLimited) {
@@ -79,12 +78,12 @@ public class DownloadInChunksTask extends DownloadTask {
     private void downloadInChunks(long fileSize)
             throws IOException, InterruptedException, ExecutionException {
         calculateSpeedAndProgressChunks(fileSize);
-        downloaders = prepareParts(fileSize);
-        if (!downloaders.isEmpty()) {
+       var futures = prepareParts(fileSize);
+        if (!futures.isEmpty()) {
             isCalculating = true;
             log.info("Downloading : " + downloadModel);
-            var futureArr = new CompletableFuture[downloaders.size()];
-            downloaders.toArray(futureArr);
+            var futureArr = new CompletableFuture[futures.size()];
+            futures.toArray(futureArr);
             CompletableFuture.allOf(futureArr).get();
         }
     }
@@ -218,13 +217,11 @@ public class DownloadInChunksTask extends DownloadTask {
                 fileChannels.add(fileChannel);
                 var byteChannel = Channels.newChannel(con.getInputStream());
                 long finalExistingFileSize = existingFileSize;
-                var lock = fileChannel.lock();
                 while (from + finalExistingFileSize < to) {
                     fileChannel.transferFrom(byteChannel, finalExistingFileSize, bytesToDownloadEachInCycleLimited);
                     finalExistingFileSize += bytesToDownloadEachInCycleLimited;
                     Thread.sleep(ONE_SEC);
                 }
-                lock.release();
                 fileChannel.close();
                 con.disconnect();
             } catch (SocketTimeoutException | UnknownHostException s) {
@@ -275,7 +272,7 @@ public class DownloadInChunksTask extends DownloadTask {
         log.info("Paused download: " + downloadModel);
         try {
             //this will cause execution get out of transferFrom
-            for (var channel : fileChannels)
+            for (var channel : new ArrayList<>(fileChannels))
                 if (channel != null)
                     channel.close();
         } catch (IOException e) {
@@ -291,10 +288,7 @@ public class DownloadInChunksTask extends DownloadTask {
 
     @Override
     protected void succeeded() {
-        if (newLimitSet) {
-            newLimitSet = false;
-            return;
-        }
+
         if (!Platform.isFxApplicationThread())
             runFinalization();
         else executor.submit(this::runFinalization);
@@ -302,7 +296,7 @@ public class DownloadInChunksTask extends DownloadTask {
 
     private void runFinalization() {
         try {
-            for (var channel : fileChannels)
+            for (var channel : new ArrayList<>(fileChannels))
                 if (channel != null)
                     channel.close();
             var dmOpt = currentDownloadings.stream()
@@ -310,7 +304,8 @@ public class DownloadInChunksTask extends DownloadTask {
                     .findFirst();
             if (dmOpt.isPresent()) {
                 var download = dmOpt.get();
-                download.setDownloadStatus(DownloadStatus.Paused);
+                if (!newLimitSet)
+                    download.setDownloadStatus(DownloadStatus.Paused);
                 if (IOUtils.mergeFiles(download, chunks, filePaths)) {
                     log.info("File successfully downloaded: " + download);
                     download.setCompleteDate(LocalDateTime.now());
@@ -328,7 +323,7 @@ public class DownloadInChunksTask extends DownloadTask {
                                     });
                     if (download.isOpenAfterComplete())
                         openFile(download);
-                } else
+                } else if (!newLimitSet)
                     openDownloadings.stream().filter(dc -> dc.getDownloadModel().equals(download))
                             .forEach(DetailsController::onPause);
 
@@ -344,7 +339,8 @@ public class DownloadInChunksTask extends DownloadTask {
             if (executor != null && !blocking)
                 executor.shutdownNow();
             System.gc();
-            whenDone();
+            if (!newLimitSet)
+                whenDone();
         }
     }
 
@@ -375,13 +371,22 @@ public class DownloadInChunksTask extends DownloadTask {
         succeeded();
     }
 
+    // todo: disable apply when download is done
+    // todo: bytes field with speed field problem
+    // todo: 0 speed means no limit
     @Override
     protected void setSpeedLimit(long limit) {
         this.limit = limit;
         if (isSpeedLimited)
             bytesToDownloadEachInCycleLimited = limit / chunks;
         else {
-
+            newLimitSet = true;
+            pause();
+            try {
+                DownloadOpUtils.triggerDownload(downloadModel, limit, downloadModel.getSize(), true, false, null);
+            } catch (ExecutionException | InterruptedException e) {
+                log.error(e.getMessage());
+            }
         }
         this.isSpeedLimited = true;
     }

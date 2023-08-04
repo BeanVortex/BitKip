@@ -33,6 +33,7 @@ import static ir.darkdeveloper.bitkip.config.observers.QueueSubject.getQueueSubj
 import static ir.darkdeveloper.bitkip.utils.Defaults.ALL_DOWNLOADS_QUEUE;
 import static ir.darkdeveloper.bitkip.utils.DownloadUtils.getNewFileNameIfExists;
 import static ir.darkdeveloper.bitkip.utils.DownloadUtils.handleError;
+import static ir.darkdeveloper.bitkip.utils.IOUtils.getBytesFromString;
 import static ir.darkdeveloper.bitkip.utils.Validations.maxChunks;
 
 public class SingleDownload implements QueueObserver {
@@ -231,7 +232,7 @@ public class SingleDownload implements QueueObserver {
     private void onDownload() {
         var prepared = prepareDownload();
         if (prepared) {
-            DownloadOpUtils.startDownload(dm, speedField.getText(), bytesField.getText(),
+            DownloadOpUtils.startDownload(dm, getBytesFromString(speedField.getText()), Long.parseLong(bytesField.getText()),
                     false, false, null);
             DownloadOpUtils.openDetailsStage(dm);
             getQueueSubject().removeObserver(this);
