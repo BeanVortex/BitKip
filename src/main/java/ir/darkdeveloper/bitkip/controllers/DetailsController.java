@@ -105,6 +105,7 @@ public class DetailsController implements FXMLController {
             byteLimit = String.valueOf(downloadModel.getSize());
         bytesField.setText(byteLimit);
         bytesField.setDisable(downloadModel.getSize() < 0 || !downloadModel.isResumable());
+        speedField.setDisable(!downloadModel.isResumable());
         var speedLimit = String.valueOf(downloadModel.getSpeedLimit());
         speedField.setText(speedLimit);
         downloadedBytes.setText(String.valueOf(downloadModel.getDownloaded()));

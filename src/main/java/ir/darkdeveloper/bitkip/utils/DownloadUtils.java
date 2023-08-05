@@ -65,8 +65,8 @@ public class DownloadUtils {
     }
 
     /**
-    * @return new file name like file(1), file(2). if not existed in db, returns fileName
-    * */
+     * @return new file name like file(1), file(2). if not existed in db, returns fileName
+     */
     public static String getNewFileNameIfExists(String fileName, String path) {
         var pathToFind = path + fileName;
         var nextNum = DownloadsRepo.getNextNumberOfExistedDownload(pathToFind);
@@ -89,7 +89,8 @@ public class DownloadUtils {
     }
 
     public static CompletableFuture<Long> prepareFileSizeAndFieldsAsync(HttpURLConnection connection, TextField urlField,
-                                                                        Label sizeLabel, Label resumableLabel, TextField chunksField,
+                                                                        Label sizeLabel, Label resumableLabel,
+                                                                        TextField speedField, TextField chunksField,
                                                                         TextField bytesField, DownloadModel dm,
                                                                         Executor executor) {
         final HttpURLConnection[] finalConnection = {connection};
@@ -116,6 +117,7 @@ public class DownloadUtils {
                     resumableLabel.getStyleClass().remove("yes");
                     chunksField.setText("0");
                     bytesField.setDisable(true);
+                    speedField.setDisable(true);
                 }
                 sizeLabel.setText(IOUtils.formatBytes(fileSize));
                 bytesField.setText(String.valueOf(fileSize));

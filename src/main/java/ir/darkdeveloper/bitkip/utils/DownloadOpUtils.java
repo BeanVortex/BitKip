@@ -69,7 +69,6 @@ public class DownloadOpUtils {
             }
         }
 
-
         if (dm.getSize() == -1)
             downloadTask.valueProperty().addListener((ob, o, n) -> mainTableUtils.updateDownloadedNoSize(n, dm));
         else

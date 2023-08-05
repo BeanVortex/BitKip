@@ -146,7 +146,8 @@ public class SingleDownload implements QueueObserver {
         }
         var resumable = DownloadUtils.canResume(conn);
         chunksField.setText(resumable ? String.valueOf(maxChunks(fileSize)) : "0");
-        speedField.setDisable(false);
+        speedField.setDisable(!resumable);
+        bytesField.setDisable(!resumable);
         if (resumable) {
             resumableLabel.setText("Yes");
             resumableLabel.getStyleClass().add("yes");
@@ -173,7 +174,7 @@ public class SingleDownload implements QueueObserver {
                     DownloadUtils.prepareFileNameAndFieldsAsync(connection, url, nameField, executor)
                             .thenAccept(this::setLocation);
             var sizeFuture = DownloadUtils.prepareFileSizeAndFieldsAsync(connection,
-                    urlField, sizeLabel, resumableLabel, chunksField, bytesField, dm, executor);
+                    urlField, sizeLabel, resumableLabel, speedField, chunksField, bytesField, dm, executor);
             CompletableFuture.allOf(fileNameLocationFuture, sizeFuture)
                     .whenComplete((unused, throwable) -> {
                         handleError(() -> DownloadUtils.checkIfFileIsOKToSave(locationField.getText(),
@@ -282,7 +283,7 @@ public class SingleDownload implements QueueObserver {
         dm.setAddToQueueDate(LocalDateTime.now());
         dm.setShowCompleteDialog(showCompleteDialog);
         dm.setOpenAfterComplete(false);
-        dm.setSpeedLimit(Long.parseLong(speedField.getText()));
+        dm.setSpeedLimit(getBytesFromString(speedField.getText()));
         dm.setByteLimit(Long.parseLong(bytesField.getText()));
         var selectedQueue = queueCombo.getSelectionModel().getSelectedItem();
         var allDownloadsQueue = QueuesRepo.findByName(ALL_DOWNLOADS_QUEUE, false);
