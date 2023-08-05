@@ -70,16 +70,29 @@ public class DownloadUtils {
     public static String getNewFileNameIfExists(String fileName, String path) {
         var pathToFind = path + fileName;
         var nextNum = DownloadsRepo.getNextNumberOfExistedDownload(pathToFind);
-        if (nextNum == 0 || nextNum == 1)
+        var containsDot = false;
+        if ((nextNum == 0 || nextNum == 1) && fileName.contains(".")) {
+            containsDot = true;
             pathToFind = pathToFind.substring(0, pathToFind.lastIndexOf('.'));
+        }
+
         nextNum = DownloadsRepo.getNextNumberOfExistedDownload(pathToFind);
         if (nextNum == 0)
             return fileName;
-        var newFileName = new StringBuilder(fileName.substring(0, fileName.lastIndexOf('.')));
+
+        var newFileName = new StringBuilder();
+        if (containsDot)
+            newFileName.append(fileName, 0, fileName.lastIndexOf('.'));
+        else
+            newFileName.append(fileName);
+
         newFileName.append("(")
                 .append(nextNum)
-                .append(")")
-                .append(fileName.substring(fileName.lastIndexOf('.')));
+                .append(")");
+
+        if (containsDot)
+            newFileName.append(fileName.substring(fileName.lastIndexOf('.')));
+
         return String.valueOf(newFileName);
     }
 
