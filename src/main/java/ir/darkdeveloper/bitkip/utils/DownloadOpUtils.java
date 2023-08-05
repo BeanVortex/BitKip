@@ -41,7 +41,7 @@ public class DownloadOpUtils {
      * @param blocking of course, it should be done in concurrent environment otherwise it will block the main thread.
      *                 mostly using for queue downloading
      */
-    public static void triggerDownload(DownloadModel dm, Long speed, Long bytes, boolean resume, boolean blocking,
+    public static void triggerDownload(DownloadModel dm, long speed, long bytes, boolean resume, boolean blocking,
                                        ExecutorService executor) throws ExecutionException, InterruptedException {
 
         try {
@@ -62,6 +62,8 @@ public class DownloadOpUtils {
             downloadTask = new SpecialDownloadTask(dm);
         else {
             try {
+                if (dm.getSize() > 0)
+                    bytes = dm.getSize();
                 downloadTask = new ChunksDownloadTask(dm, speed, bytes);
             } catch (DeniedException e) {
                 log.error(e.getMessage());
@@ -103,7 +105,7 @@ public class DownloadOpUtils {
 
     }
 
-    public static void startDownload(DownloadModel dm, Long speedLimit, Long byteLimit, boolean resume,
+    public static void startDownload(DownloadModel dm, long speedLimit, long byteLimit, boolean resume,
                                      boolean blocking, ExecutorService executor) {
         if (!currentDownloadings.contains(dm)) {
             dm.setLastTryDate(LocalDateTime.now());
@@ -122,7 +124,7 @@ public class DownloadOpUtils {
     /**
      * Resumes downloads non-blocking
      */
-    public static void resumeDownloads(List<DownloadModel> dms, Long speedLimit, Long byteLimit) {
+    public static void resumeDownloads(List<DownloadModel> dms, long speedLimit, long byteLimit) {
         dms.stream().filter(dm -> !currentDownloadings.contains(dm))
                 .forEach(dm -> {
                     dm.setLastTryDate(LocalDateTime.now());
@@ -165,7 +167,7 @@ public class DownloadOpUtils {
         String[] values = {"0", "0", "NULL", lastTryDate.toString()};
         DatabaseHelper.updateCols(cols, values, DatabaseHelper.DOWNLOADS_TABLE_NAME, dmId);
         try {
-            triggerDownload(dm, 0L, dm.getSize(), true, false, null);
+            triggerDownload(dm, 0, dm.getSize(), true, false, null);
         } catch (ExecutionException | InterruptedException e) {
             log.error(e.getMessage());
         }
@@ -381,7 +383,7 @@ public class DownloadOpUtils {
             dm.getQueues().add(allDownloadsQueue);
             dm.getQueues().add(queue);
             dm.setDownloadStatus(DownloadStatus.Trying);
-            DownloadOpUtils.startDownload(dm, 0L, dm.getSize(), false, false, null);
+            DownloadOpUtils.startDownload(dm, 0, dm.getSize(), false, false, null);
             Notifications.create()
                     .title("Downloading now ...")
                     .text(dm.getName())

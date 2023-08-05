@@ -117,8 +117,7 @@ public class MenuUtils {
 
         menuItems.get(openLbl).setOnAction(e -> DownloadOpUtils.openFiles(mainTableUtils.getSelected()));
         menuItems.get(openFolderLbl).setOnAction(e -> DownloadOpUtils.openContainingFolder(mainTableUtils.getSelected().get(0)));
-        menuItems.get(resumeLbl).setOnAction(e -> DownloadOpUtils.resumeDownloads(
-                mainTableUtils.getSelected(), null, null));
+        menuItems.get(resumeLbl).setOnAction(e -> DownloadOpUtils.resumeDownloads(mainTableUtils.getSelected(), 0, 0));
         menuItems.get(pauseLbl).setOnAction(e -> DownloadOpUtils.pauseDownloads(mainTableUtils.getSelected()));
         menuItems.get(pauseAllLbl).setOnAction(e -> DownloadOpUtils.pauseAllDownloads());
         menuItems.get(restartLbl).setOnAction(e -> DownloadOpUtils.restartDownloads(mainTableUtils.getSelected()));
