@@ -116,7 +116,7 @@ public class BitKip extends Application {
 
     private static void startServer() {
         if (serverEnabled) {
-            var threadPool = new QueuedThreadPool(7, 1);
+            var threadPool = new CustomThreadPool(7, 1);
             server = new Server(threadPool);
             var connector = new ServerConnector(server);
             connector.setPort(serverPort);
@@ -136,6 +136,19 @@ public class BitKip extends Application {
                 if (FxUtils.showFailedToStart(header, e.getLocalizedMessage()))
                     Platform.exit();
             }
+        }
+    }
+
+    private static class CustomThreadPool extends QueuedThreadPool {
+        public CustomThreadPool(int maxThreads, int minThreads) {
+            super(maxThreads, minThreads);
+        }
+
+        @Override
+        public Thread newThread(Runnable runnable) {
+            var thread = super.newThread(runnable);
+            thread.setPriority(Thread.MAX_PRIORITY);
+            return thread;
         }
     }
 
