@@ -138,7 +138,7 @@ public class MainTableUtils {
 
         menuItems.get(openLbl).setOnAction(e -> DownloadOpUtils.openFiles(getSelected()));
         menuItems.get(openFolderLbl).setOnAction(e -> DownloadOpUtils.openContainingFolder(getSelected().get(0)));
-        menuItems.get(resumeLbl).setOnAction(e -> DownloadOpUtils.resumeDownloads(getSelected(), 0,0));
+        menuItems.get(resumeLbl).setOnAction(e -> DownloadOpUtils.resumeDownloads(getSelected(), 0, 0));
         menuItems.get(pauseLbl).setOnAction(e -> DownloadOpUtils.pauseDownloads(getSelected()));
         menuItems.get(pauseAllLbl).setOnAction(e -> DownloadOpUtils.pauseAllDownloads());
         menuItems.get(refreshLbl).setOnAction(e -> DownloadOpUtils.refreshDownload(getSelected()));
@@ -181,8 +181,13 @@ public class MainTableUtils {
     }
 
     public void addRow(DownloadModel download) {
-        contentTable.getItems().add(download);
-        contentTable.sort();
+        var items = contentTable.getItems();
+        var queue = items.get(0).getQueues().get(0);
+        var dQueues = download.getQueues();
+        if (dQueues.contains(queue)) {
+            items.add(download);
+            contentTable.sort();
+        }
     }
 
     public void setDownloads(List<DownloadModel> dms, boolean addDateSort) {
