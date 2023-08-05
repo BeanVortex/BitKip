@@ -297,13 +297,7 @@ public class SingleDownload implements QueueObserver {
 
     @Override
     public void updateQueue() {
-        var queues = QueueSubject.getQueues();
-        if (queues.isEmpty())
-            queues = QueuesRepo.getAllQueues(false, false);
-        queues = queues.stream().filter(QueueModel::isCanAddDownload).toList();
-        queueCombo.getItems().clear();
-        queueCombo.getItems().addAll(queues);
-        queueCombo.setValue(queues.get(0));
+        BatchDownload.updateQueueData(queueCombo);
     }
 
     @FXML

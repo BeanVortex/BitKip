@@ -321,6 +321,10 @@ public class BatchDownload implements QueueObserver {
 
     @Override
     public void updateQueue() {
+        updateQueueData(queueCombo);
+    }
+
+    public static void updateQueueData(ComboBox<QueueModel> queueCombo) {
         var queues = QueueSubject.getQueues();
         if (queues.isEmpty())
             queues = QueuesRepo.getAllQueues(false, false);
