@@ -83,70 +83,73 @@ public class MainTableUtils {
 
 
     private Callback<TableView<DownloadModel>, TableRow<DownloadModel>> getTableViewTableRowCallback() {
+
         return param -> {
             var row = new TableRow<DownloadModel>();
 
             row.setOnMouseClicked(event -> {
                 var selectedItems = getSelected();
-                row.setContextMenu(null);
-                if (!row.isEmpty() && event.getButton().equals(MouseButton.SECONDARY)) {
-                    var cMenu = new ContextMenu();
-                    var openLbl = new Label("Open");
-                    var openFolderLbl = new Label("Open folder");
-                    var resumeLbl = new Label("Resume");
-                    var pauseLbl = new Label("Pause");
-                    var pauseAllLbl = new Label("Pause all");
-                    var refreshLbl = new Label("Refresh URL");
-                    var copyLbl = new Label("Copy URL");
-                    var restartLbl = new Label("Restart");
-                    var downloadingLbl = new Label("Details");
-                    var exportLinkLbl = new Label("Export selected");
-                    var deleteFromQueueLbl = new Label("Delete from this queue");
-                    var deleteLbl = new Label("Delete");
-                    var deleteWithFileLbl = new Label("Delete with file");
-                    var lbls = List.of(openLbl, openFolderLbl, resumeLbl, pauseLbl, pauseAllLbl,
-                            refreshLbl, copyLbl, restartLbl, downloadingLbl, exportLinkLbl, deleteFromQueueLbl,
-                            deleteLbl, deleteWithFileLbl);
-                    var keyCodes = Arrays.asList(OPEN_KEY, OPEN_FOLDER_KEY, RESUME_KEY,
-                            PAUSE_KEY, PAUSE_ALL_KEY, REFRESH_KEY, COPY_KEY, RESTART_KEY, DOWNLOADING_STAGE_KEY,
-                            null, null, DELETE_KEY, DELETE_FILE_KEY);
-                    var menuItems = MenuUtils.createMapMenuItems(lbls, keyCodes);
-
-                    var addToQueueMenu = new Menu();
-                    var addToQueueLbl = new Label("Add to queue");
-                    addToQueueMenu.setGraphic(addToQueueLbl);
-                    initAddToQueueMenu(addToQueueMenu);
-                    for (var item : menuItems.values()) {
-                        if (item.getGraphic().equals(deleteFromQueueLbl))
-                            cMenu.getItems().add(addToQueueMenu);
-                        cMenu.getItems().add(item);
-                    }
-
-                    menuItems.put(addToQueueLbl, addToQueueMenu);
-                    MenuUtils.disableMenuItems(resumeLbl, pauseLbl, pauseAllLbl, openLbl, openFolderLbl, deleteFromQueueLbl, refreshLbl, copyLbl, restartLbl,
-                            addToQueueLbl, deleteLbl, deleteWithFileLbl, menuItems, selectedItems);
-
-                    menuItems.get(openLbl).setOnAction(e -> DownloadOpUtils.openFiles(getSelected()));
-                    menuItems.get(openFolderLbl).setOnAction(e -> DownloadOpUtils.openContainingFolder(getSelected().get(0)));
-                    menuItems.get(resumeLbl).setOnAction(e -> DownloadOpUtils.resumeDownloads(getSelected(), 0,0));
-                    menuItems.get(pauseLbl).setOnAction(e -> DownloadOpUtils.pauseDownloads(getSelected()));
-                    menuItems.get(pauseAllLbl).setOnAction(e -> DownloadOpUtils.pauseAllDownloads());
-                    menuItems.get(refreshLbl).setOnAction(e -> DownloadOpUtils.refreshDownload(getSelected()));
-                    menuItems.get(copyLbl).setOnAction(e -> FxUtils.setClipboard(getSelected().get(0).getUrl()));
-                    menuItems.get(restartLbl).setOnAction(e -> DownloadOpUtils.restartDownloads(getSelected()));
-                    menuItems.get(downloadingLbl).setOnAction(e -> getSelected().forEach(FxUtils::newDetailsStage));
-                    menuItems.get(exportLinkLbl).setOnAction(e -> DownloadOpUtils.exportLinks(getSelectedUrls()));
-                    menuItems.get(deleteFromQueueLbl).setOnAction(e -> MenuUtils.deleteFromQueue());
-                    menuItems.get(deleteLbl).setOnAction(e -> DownloadOpUtils.deleteDownloads(getSelected(), false));
-                    menuItems.get(deleteWithFileLbl).setOnAction(ev -> DownloadOpUtils.deleteDownloads(getSelected(), true));
-
-                    row.setContextMenu(cMenu);
+                var cMenu = createMenu(selectedItems);
+                row.setContextMenu(cMenu);
+                if (!row.isEmpty() && event.getButton().equals(MouseButton.SECONDARY))
                     cMenu.show(row, event.getScreenX(), event.getScreenY());
-                }
             });
             row.setOnMousePressed(e -> row.setContextMenu(null));
             return row;
         };
+    }
+
+    private ContextMenu createMenu(ObservableList<DownloadModel> selectedItems) {
+        var cMenu = new ContextMenu();
+        var openLbl = new Label("Open");
+        var openFolderLbl = new Label("Open folder");
+        var resumeLbl = new Label("Resume");
+        var pauseLbl = new Label("Pause");
+        var pauseAllLbl = new Label("Pause all");
+        var refreshLbl = new Label("Refresh URL");
+        var copyLbl = new Label("Copy URL");
+        var restartLbl = new Label("Restart");
+        var downloadingLbl = new Label("Details");
+        var exportLinkLbl = new Label("Export selected");
+        var deleteFromQueueLbl = new Label("Delete from this queue");
+        var deleteLbl = new Label("Delete");
+        var deleteWithFileLbl = new Label("Delete with file");
+        var lbls = List.of(openLbl, openFolderLbl, resumeLbl, pauseLbl, pauseAllLbl,
+                refreshLbl, copyLbl, restartLbl, downloadingLbl, exportLinkLbl, deleteFromQueueLbl,
+                deleteLbl, deleteWithFileLbl);
+        var keyCodes = Arrays.asList(OPEN_KEY, OPEN_FOLDER_KEY, RESUME_KEY,
+                PAUSE_KEY, PAUSE_ALL_KEY, REFRESH_KEY, COPY_KEY, RESTART_KEY, DOWNLOADING_STAGE_KEY,
+                null, null, DELETE_KEY, DELETE_FILE_KEY);
+        var menuItems = MenuUtils.createMapMenuItems(lbls, keyCodes);
+
+        var addToQueueMenu = new Menu();
+        var addToQueueLbl = new Label("Add to queue");
+        addToQueueMenu.setGraphic(addToQueueLbl);
+        initAddToQueueMenu(addToQueueMenu);
+        for (var item : menuItems.values()) {
+            if (item.getGraphic().equals(deleteFromQueueLbl))
+                cMenu.getItems().add(addToQueueMenu);
+            cMenu.getItems().add(item);
+        }
+
+        menuItems.put(addToQueueLbl, addToQueueMenu);
+        MenuUtils.disableMenuItems(resumeLbl, pauseLbl, pauseAllLbl, openLbl, openFolderLbl, deleteFromQueueLbl, refreshLbl, copyLbl, restartLbl,
+                addToQueueLbl, deleteLbl, deleteWithFileLbl, menuItems, selectedItems);
+
+        menuItems.get(openLbl).setOnAction(e -> DownloadOpUtils.openFiles(getSelected()));
+        menuItems.get(openFolderLbl).setOnAction(e -> DownloadOpUtils.openContainingFolder(getSelected().get(0)));
+        menuItems.get(resumeLbl).setOnAction(e -> DownloadOpUtils.resumeDownloads(getSelected(), 0,0));
+        menuItems.get(pauseLbl).setOnAction(e -> DownloadOpUtils.pauseDownloads(getSelected()));
+        menuItems.get(pauseAllLbl).setOnAction(e -> DownloadOpUtils.pauseAllDownloads());
+        menuItems.get(refreshLbl).setOnAction(e -> DownloadOpUtils.refreshDownload(getSelected()));
+        menuItems.get(copyLbl).setOnAction(e -> FxUtils.setClipboard(getSelected().get(0).getUrl()));
+        menuItems.get(restartLbl).setOnAction(e -> DownloadOpUtils.restartDownloads(getSelected()));
+        menuItems.get(downloadingLbl).setOnAction(e -> getSelected().forEach(FxUtils::newDetailsStage));
+        menuItems.get(exportLinkLbl).setOnAction(e -> DownloadOpUtils.exportLinks(getSelectedUrls()));
+        menuItems.get(deleteFromQueueLbl).setOnAction(e -> MenuUtils.deleteFromQueue());
+        menuItems.get(deleteLbl).setOnAction(e -> DownloadOpUtils.deleteDownloads(getSelected(), false));
+        menuItems.get(deleteWithFileLbl).setOnAction(ev -> DownloadOpUtils.deleteDownloads(getSelected(), true));
+        return cMenu;
     }
 
     private void initAddToQueueMenu(Menu addToQueueMenu) {
