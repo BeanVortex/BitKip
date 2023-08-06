@@ -4,6 +4,7 @@
 ## Features
 
 - [x] Download any file based on http/https protocol
+- [x] Extremely fast download in chunk mode 
 - [x] Ability to limit download speed
 - [x] Ability to limit download bytes. lets say you want to download 2GB of a 4GB file
 - [x] Ability to break links to chunks and download each chunk in a thread for maximum download speed
