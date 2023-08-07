@@ -2,10 +2,7 @@ package ir.darkdeveloper.bitkip.controllers;
 
 import ir.darkdeveloper.bitkip.config.observers.QueueObserver;
 import ir.darkdeveloper.bitkip.config.observers.QueueSubject;
-import ir.darkdeveloper.bitkip.models.DownloadModel;
-import ir.darkdeveloper.bitkip.models.DownloadStatus;
-import ir.darkdeveloper.bitkip.models.QueueModel;
-import ir.darkdeveloper.bitkip.models.SingleURLModel;
+import ir.darkdeveloper.bitkip.models.*;
 import ir.darkdeveloper.bitkip.repo.DownloadsRepo;
 import ir.darkdeveloper.bitkip.repo.QueuesRepo;
 import ir.darkdeveloper.bitkip.utils.*;
@@ -297,6 +294,7 @@ public class SingleDownload implements QueueObserver {
         dm.setAddDate(LocalDateTime.now());
         dm.setAddToQueueDate(LocalDateTime.now());
         dm.setShowCompleteDialog(showCompleteDialog);
+        dm.setTurnOffMode(TurnOffMode.NOTHING);
         dm.setOpenAfterComplete(false);
         dm.setSpeedLimit(getBytesFromString(speedField.getText()));
         dm.setByteLimit(Long.parseLong(bytesField.getText()));

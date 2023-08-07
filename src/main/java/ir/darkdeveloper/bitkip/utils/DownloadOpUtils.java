@@ -109,7 +109,8 @@ public class DownloadOpUtils {
         if (!currentDownloadings.contains(dm)) {
             dm.setLastTryDate(LocalDateTime.now());
             dm.setDownloadStatus(DownloadStatus.Trying);
-            dm.setTurnOffMode(TurnOffMode.NOTHING);
+            if (!resume)
+                dm.setTurnOffMode(TurnOffMode.NOTHING);
             DownloadsRepo.updateDownloadLastTryDate(dm);
             mainTableUtils.refreshTable();
             try {

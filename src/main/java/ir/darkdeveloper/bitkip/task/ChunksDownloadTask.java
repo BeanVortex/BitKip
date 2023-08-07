@@ -328,8 +328,8 @@ public class ChunksDownloadTask extends DownloadTask {
                     if (download.isOpenAfterComplete())
                         openFile(download);
                 } else if (!newLimitSet)
-                    openDownloadings.stream().filter(dc -> dc.getDownloadModel().equals(download))
-                            .forEach(DetailsController::onPause);
+                        openDownloadings.stream().filter(dc -> dc.getDownloadModel().equals(download))
+                                .forEach(DetailsController::onPause);
 
                 DownloadsRepo.updateDownloadProgress(download);
                 DownloadsRepo.updateDownloadLastTryDate(download);
@@ -343,8 +343,8 @@ public class ChunksDownloadTask extends DownloadTask {
             if (executor != null && !blocking)
                 executor.shutdownNow();
             System.gc();
-            if (!newLimitSet)
-                whenDone();
+            if (!newLimitSet) whenDone();
+            else newLimitSet = false;
         }
     }
 
