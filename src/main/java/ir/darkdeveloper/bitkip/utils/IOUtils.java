@@ -64,17 +64,18 @@ public class IOUtils {
         if (bytes <= 0) return "0";
         final var units = new String[]{"B", "kB", "MB", "GB", "TB"};
         var digitGroups = (int) (Math.log10(bytes) / Math.log10(1024));
-        return new DecimalFormat("#,##0.#").format(bytes / Math.pow(1024, digitGroups))+ " " + units[digitGroups];
+        return new DecimalFormat("#,##0.#").format(bytes / Math.pow(1024, digitGroups)) + " " + units[digitGroups];
     }
 
     public static double getMbOfBytes(long bytes) {
         double scale = Math.pow(10, 3);
-        return Math.round(((double) bytes /(1024*1024)) * scale) / scale;
+        return Math.round(((double) bytes / (1024 * 1024)) * scale) / scale;
     }
 
     public static long getFreeSpace(Path path) {
         return path.toFile().getUsableSpace();
     }
+
     public static long getBytesFromString(String mb) {
         if (mb.isBlank())
             return 0;
@@ -447,4 +448,17 @@ public class IOUtils {
         writer.close();
     }
 
+    public static void checkAvailableSpace(String filePath, long fileSize) throws IOException {
+        var freeSpace = getFreeSpace(Path.of(filePath).getParent());
+        // if after saving, the space left should be above 100MB
+        if (freeSpace - fileSize <= Math.pow(2, 20) * 100) {
+            var msg = "The location you chose, has not enough space to save the download file: " + filePath;
+            Platform.runLater(() -> Notifications.create()
+                    .title("No Free space")
+                    .text(msg)
+                    .showError());
+            throw new IOException(msg);
+        }
+
+    }
 }

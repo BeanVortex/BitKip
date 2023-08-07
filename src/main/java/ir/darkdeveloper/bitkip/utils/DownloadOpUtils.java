@@ -45,6 +45,7 @@ public class DownloadOpUtils {
 
         try {
             Validations.fillNotFetchedData(dm);
+            IOUtils.checkAvailableSpace(dm.getFilePath(), dm.getSize());
         } catch (IOException e) {
             log.error(e.getMessage());
             var observedDownload = mainTableUtils.getObservedDownload(dm);

@@ -234,7 +234,8 @@ public class SingleDownload implements QueueObserver {
         var prepared = prepareDownload();
         if (prepared) {
             var freeSpace = getFreeSpace(Path.of(dm.getFilePath()).getParent());
-            if (freeSpace - dm.getSize() <= 0) {
+            // if after saving, the space left should be above 100MB
+            if (freeSpace - dm.getSize() <= Math.pow(2, 20) * 100) {
                 var res = FxUtils.askWarning("No Free space",
                         "The location you chose, has not enough space to save the download file." +
                                 " Do you want to change location now?");
