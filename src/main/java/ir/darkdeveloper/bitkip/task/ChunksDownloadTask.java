@@ -142,9 +142,8 @@ public class ChunksDownloadTask extends DownloadTask {
                 try {
                     performSpeedLimitedDownload(fromContinue, from, to,
                             partFile, fileSize, 0, 0);
-                } catch (IOException | InterruptedException e) {
-                    if (e instanceof IOException)
-                        log.error(e.getMessage());
+                } catch (IOException e) {
+                    log.error(e.getMessage());
                     this.pause();
                 }
             }, executor);
@@ -152,9 +151,8 @@ public class ChunksDownloadTask extends DownloadTask {
             c = CompletableFuture.runAsync(() -> {
                 try {
                     performDownload(fromContinue, from, to, partFile, fileSize, 0, 0);
-                } catch (IOException | InterruptedException e) {
-                    if (e instanceof IOException)
-                        log.error(e.getMessage());
+                } catch (IOException e) {
+                    log.error(e.getMessage());
                     this.pause();
                 }
             }, executor);
@@ -166,7 +164,7 @@ public class ChunksDownloadTask extends DownloadTask {
 
     private void performDownload(long fromContinue, long from, long to, File partFile,
                                  long existingFileSize, int rateLimitCount, int retries)
-            throws InterruptedException, IOException {
+            throws IOException {
         try {
             var con = DownloadUtils.connect(url, false);
             con.addRequestProperty("Range", "bytes=" + fromContinue + "-" + to);
@@ -181,7 +179,10 @@ public class ChunksDownloadTask extends DownloadTask {
         } catch (SocketTimeoutException | UnknownHostException | SocketException s) {
             retries++;
             if (!paused && (continueOnLostConnectionLost || retries != downloadRetryCount)) {
-                Thread.sleep(2000);
+                try {
+                    Thread.sleep(2000);
+                } catch (InterruptedException ignore) {
+                }
                 var currFileSize = IOUtils.getFileSize(partFile);
                 performDownload(from + currFileSize, from, to, partFile, currFileSize, rateLimitCount, retries);
             }
@@ -201,7 +202,7 @@ public class ChunksDownloadTask extends DownloadTask {
 
     private void performSpeedLimitedDownload(long fromContinue, long from, long to,
                                              File partFile, long existingFileSize,
-                                             int rateLimitCount, int retries) throws IOException, InterruptedException {
+                                             int rateLimitCount, int retries) throws IOException {
         if (retries != downloadRetryCount) {
             try {
                 var con = DownloadUtils.connect(url, false);
@@ -216,14 +217,20 @@ public class ChunksDownloadTask extends DownloadTask {
                 while (from + finalExistingFileSize < to) {
                     fileChannel.transferFrom(byteChannel, finalExistingFileSize, bytesToDownloadEachInCycleLimited);
                     finalExistingFileSize += bytesToDownloadEachInCycleLimited;
-                    Thread.sleep(ONE_SEC);
+                    try {
+                        Thread.sleep(ONE_SEC);
+                    } catch (InterruptedException ignore) {
+                    }
                 }
                 fileChannel.close();
                 con.disconnect();
             } catch (SocketTimeoutException | UnknownHostException s) {
                 if (!paused) {
                     retries++;
-                    Thread.sleep(2000);
+                    try {
+                        Thread.sleep(2000);
+                    } catch (InterruptedException ignore) {
+                    }
                     var currFileSize = IOUtils.getFileSize(partFile);
                     performSpeedLimitedDownload(from + currFileSize, from, to, partFile,
                             currFileSize, rateLimitCount, retries);

@@ -72,6 +72,9 @@ public class IOUtils {
         return Math.round(((double) bytes /(1024*1024)) * scale) / scale;
     }
 
+    public static long getAvailableSizeInBytes(String path) {
+        return new File(path).getUsableSpace();
+    }
     public static long getBytesFromString(String mb) {
         if (mb.isBlank())
             return 0;
