@@ -162,10 +162,11 @@ public class DownloadOpUtils {
         dm.setProgress(0);
         dm.setCompleteDate(null);
         dm.setLastTryDate(lastTryDate);
+        dm.setTurnOffMode(TurnOffMode.NOTHING);
         dm.setDownloadStatus(DownloadStatus.Restarting);
         mainTableUtils.refreshTable();
-        String[] cols = {COL_DOWNLOADED, COL_PROGRESS, COL_COMPLETE_DATE, COL_LAST_TRY_DATE};
-        String[] values = {"0", "0", "NULL", lastTryDate.toString()};
+        String[] cols = {COL_DOWNLOADED, COL_PROGRESS, COL_COMPLETE_DATE, COL_LAST_TRY_DATE, COL_TURNOFF_MODE};
+        String[] values = {"0", "0", "NULL", lastTryDate.toString(), dm.getTurnOffMode().name()};
         DatabaseHelper.updateCols(cols, values, DatabaseHelper.DOWNLOADS_TABLE_NAME, dmId);
         try {
             triggerDownload(dm, 0, dm.getSize(), true, false, null);

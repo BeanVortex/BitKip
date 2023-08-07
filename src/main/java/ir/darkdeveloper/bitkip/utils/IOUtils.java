@@ -87,6 +87,10 @@ public class IOUtils {
         var currentFileSize = 0L;
         for (int i = 0; i < chunks; i++)
             currentFileSize += Files.size(filePaths.get(i));
+
+        var neededFileSize = currentFileSize + Files.size(filePaths.get(filePaths.size() - 1));
+        checkAvailableSpace(filePaths.get(0), neededFileSize);
+
         if (dm.getDownloaded() == 0)
             dm.setDownloaded(currentFileSize);
         if (filePaths.stream().allMatch(path -> path.toFile().exists())
@@ -449,7 +453,11 @@ public class IOUtils {
     }
 
     public static void checkAvailableSpace(String filePath, long fileSize) throws IOException {
-        var freeSpace = getFreeSpace(Path.of(filePath).getParent());
+        checkAvailableSpace(Path.of(filePath), fileSize);
+    }
+
+    public static void checkAvailableSpace(Path filePath, long fileSize) throws IOException {
+        var freeSpace = getFreeSpace(filePath.getParent());
         // if after saving, the space left should be above 100MB
         if (freeSpace - fileSize <= Math.pow(2, 20) * 100) {
             var msg = "The location you chose, has not enough space to save the download file: " + filePath;
