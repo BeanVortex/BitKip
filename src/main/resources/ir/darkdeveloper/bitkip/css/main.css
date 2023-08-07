@@ -47,7 +47,7 @@
     -fx-min-width: 50;
     -fx-min-height: 50;
     -fx-border-color: transparent;
-    -fx-background-color: #009688;
+    -fx-background-color: -fx-green2-color;
     -fx-background-radius: 40px;
     -fx-cursor: hand;
     -fx-effect: dropshadow(one-pass-box, rgba(55, 71, 79, 0.2), 5, 0, 0, 2);
@@ -55,7 +55,7 @@
 }
 
 #newDownloadBtn:hover {
-    -fx-background-color: #018377;
+    -fx-background-color: -fx-green2-color-hover;
 }
 
 #newDownloadBtn:pressed {
@@ -73,4 +73,31 @@
 }
 .title-opacity{
     -fx-opacity: 0.8;
+}
+
+.min-btn{
+    -fx-background-color: -fx-primary-color;
+    -fx-border-color: -fx-green2-color;
+    -fx-border-radius: 4px;
+    -fx-background-radius: 4px;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(one-pass-box, rgba(55, 71, 79, 0.2), 5, 0, 0, 2);
+}
+
+
+.min-btn:hover{
+    -fx-background-color: -fx-green2-color;
+    -fx-text-fill: white;
+}
+.min-btn:pressed{
+    -fx-background-color: -fx-green2-color-hover;
+}
+
+.min-btn.check .ikonli-font-icon {
+    -fx-icon-code: "fas-check";
+    -fx-icon-color: -fx-secondary-color2;
+    -fx-icon-size: 14;
+}
+.min-btn:hover.check .ikonli-font-icon{
+    -fx-icon-color: #fff;
 }

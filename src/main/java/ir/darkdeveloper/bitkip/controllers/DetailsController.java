@@ -25,6 +25,7 @@ import org.apache.commons.lang3.time.DurationFormatUtils;
 import org.controlsfx.control.Notifications;
 import org.controlsfx.control.PopOver;
 import org.controlsfx.control.ToggleSwitch;
+import org.kordamp.ikonli.javafx.FontIcon;
 
 import java.io.File;
 import java.net.URL;
@@ -220,7 +221,6 @@ public class DetailsController implements FXMLController {
                 Platform.runLater(() -> updatePause(newValue));
             else updatePause(newValue);
         });
-
         openSwitch.selectedProperty().addListener((o, old, newVal) -> {
             downloadModel.setOpenAfterComplete(newVal);
             DownloadsRepo.updateDownloadOpenAfterComplete(downloadModel);
@@ -233,6 +233,7 @@ public class DetailsController implements FXMLController {
         linkPopover.setContentNode(new Label("Copied"));
         link.setOnMouseExited(event -> linkPopover.hide());
         turnOffCombo.setItems(FXCollections.observableArrayList(NOTHING, SLEEP, TURN_OFF));
+        speedApplyBtn.setGraphic(new FontIcon());
         speedApplyBtn.setVisible(false);
         speedApplyBtn.setDisable(true);
         allBytesBtn.setVisible(false);
@@ -279,7 +280,7 @@ public class DetailsController implements FXMLController {
             statusLbl.setText("Status: " + DownloadStatus.Trying);
             controlBtn.setDisable(true);
             DownloadOpUtils.resumeDownloads(List.of(downloadModel),
-                    getBytesFromString(speedField.getText()), Long.valueOf(bytesField.getText()));
+                    getBytesFromString(speedField.getText()), Long.parseLong(bytesField.getText()));
             controlBtn.setDisable(false);
             isPaused.set(false);
         } else {
@@ -374,7 +375,10 @@ public class DetailsController implements FXMLController {
         if (dmTask instanceof ChunksDownloadTask cdt) {
             var speed = getBytesFromString(speedField.getText());
             downloadModel.setSpeed(speed);
+            downloadModel.setSpeedLimit(speed);
             cdt.setSpeedLimit(speed);
+            speedApplyBtn.setDisable(true);
+            speedApplyBtn.setVisible(false);
         }
     }
 
@@ -386,11 +390,14 @@ public class DetailsController implements FXMLController {
     }
 
     private void onBytesChanged() {
-        if (Long.parseLong(bytesField.getText()) < downloadModel.getSize()) {
+        var text = bytesField.getText();
+        if (!text.matches("\\d*"))
+            text = text.replaceAll("\\D", "");
+        if (Long.parseLong(text) < downloadModel.getSize()) {
             allBytesBtn.setVisible(true);
             allBytesBtn.setDisable(false);
         }
-        if (Long.parseLong(bytesField.getText()) < downloadModel.getDownloaded())
+        if (Long.parseLong(text) < downloadModel.getDownloaded())
             bytesField.setText(String.valueOf(downloadModel.getDownloaded()));
 
     }

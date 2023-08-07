@@ -25,8 +25,10 @@ public class Validations {
             return;
 
         bytesField.textProperty().addListener((o, old, newValue) -> {
-            if (!newValue.matches("\\d*"))
-                bytesField.setText(newValue.replaceAll("\\D", ""));
+            if (!newValue.matches("\\d*")) {
+                newValue = newValue.replaceAll("\\D", "");
+                bytesField.setText(newValue);
+            }
             if (newValue.isBlank() || Long.parseLong(newValue) > dm.getSize())
                 bytesField.setText(String.valueOf(dm.getSize()));
         });
