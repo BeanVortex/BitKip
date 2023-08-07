@@ -166,7 +166,7 @@ public class ChunksDownloadTask extends DownloadTask {
                                  long existingFileSize, int rateLimitCount, int retries)
             throws IOException {
         try {
-            var con = DownloadUtils.connect(url, false);
+            var con = DownloadUtils.connect(url);
             con.addRequestProperty("Range", "bytes=" + fromContinue + "-" + to);
             var out = new FileOutputStream(partFile, partFile.exists());
             var fileChannel = out.getChannel();
@@ -205,7 +205,7 @@ public class ChunksDownloadTask extends DownloadTask {
                                              int rateLimitCount, int retries) throws IOException {
         if (retries != downloadRetryCount) {
             try {
-                var con = DownloadUtils.connect(url, false);
+                var con = DownloadUtils.connect(url);
                 if (!downloadModel.isResumable())
                     con.setRequestProperty("User-Agent", userAgent);
                 con.addRequestProperty("Range", "bytes=" + fromContinue + "-" + to);

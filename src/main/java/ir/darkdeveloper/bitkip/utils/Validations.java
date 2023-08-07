@@ -1,6 +1,7 @@
 package ir.darkdeveloper.bitkip.utils;
 
 import ir.darkdeveloper.bitkip.models.DownloadModel;
+import ir.darkdeveloper.bitkip.repo.DatabaseHelper;
 import ir.darkdeveloper.bitkip.repo.DownloadsRepo;
 import javafx.scene.control.Spinner;
 import javafx.scene.control.TextField;
@@ -26,10 +27,12 @@ public class Validations {
 
         bytesField.textProperty().addListener((o, old, newValue) -> {
             if (!newValue.matches("\\d*")) {
-                newValue = newValue.replaceAll("\\D", "");
+                if (newValue.equals("-1"))
+                    newValue = "0";
+                newValue = newValue.replaceAll("\\D-", "");
                 bytesField.setText(newValue);
             }
-            if (newValue.isBlank() || Long.parseLong(newValue) > dm.getSize())
+            if (newValue.isBlank() || (dm.getSize() != -1 && Long.parseLong(newValue) > dm.getSize()))
                 bytesField.setText(String.valueOf(dm.getSize()));
         });
         bytesField.focusedProperty().addListener((o, old, newValue) -> {
@@ -148,29 +151,31 @@ public class Validations {
         return url.startsWith("http") || url.startsWith("https") || url.startsWith("ftp");
     }
 
-    public static void validateDownloadModel(DownloadModel dm) throws IOException {
+    public static void fillNotFetchedData(DownloadModel dm) throws IOException {
         if (dm.getSize() > 0)
             return;
 
-        // when added through batch list and size not fetched
-        var connection = DownloadUtils.connect(dm.getUrl(), true);
+        // when download added and size not fetched
+        var connection = DownloadUtils.connectWithInternetCheck(dm.getUrl(), true);
         var canResume = DownloadUtils.canResume(connection);
         var fileSize = DownloadUtils.getFileSize(connection);
         dm.setSize(fileSize);
         dm.setResumable(canResume);
-        if (!canResume)
-            dm.setChunks(0);
+        if (!canResume) dm.setChunks(0);
+        else dm.setChunks(maxChunks(dm.getSize()));
         if (fileSize == -1 || fileSize == 0)
             return;
         var observedDownload = mainTableUtils.getObservedDownload(dm);
         if (observedDownload != null) {
             observedDownload.setSize(fileSize);
             observedDownload.setResumable(canResume);
+            observedDownload.setChunks(dm.getChunks());
             openDownloadings.stream()
                     .filter(dc -> dc.getDownloadModel().equals(dm))
                     .forEach(dc -> dc.setDownloadModel(dm));
-            DownloadsRepo.updateDownloadProperty(DownloadsRepo.COL_SIZE, String.valueOf(fileSize), dm.getId());
-            DownloadsRepo.updateDownloadProperty(DownloadsRepo.COL_RESUMABLE, String.valueOf(canResume), dm.getId());
+            String[] cols = {DownloadsRepo.COL_SIZE, DownloadsRepo.COL_RESUMABLE, DownloadsRepo.COL_CHUNKS};
+            String[] values = {String.valueOf(fileSize), canResume ? "1" : "0", String.valueOf(dm.getChunks())};
+            DatabaseHelper.updateCols(cols, values, DatabaseHelper.DOWNLOADS_TABLE_NAME, dm.getId());
         }
 
     }

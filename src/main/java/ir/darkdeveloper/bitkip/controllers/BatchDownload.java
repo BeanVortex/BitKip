@@ -122,7 +122,7 @@ public class BatchDownload implements QueueObserver {
             var links = generateLinks(url, start, end, Integer.parseInt(chunksField.getText()), true);
             var link = links.get(0);
             tempLink = link;
-            var connection = DownloadUtils.connect(link.getUrl(), true);
+            var connection = DownloadUtils.connect(link.getUrl());
             var fileNameLocationFuture = CompletableFuture.supplyAsync(() -> DownloadUtils.extractFileName(link.getUrl(), connection))
                     .thenAccept(this::setLocation);
             fileNameLocationFuture

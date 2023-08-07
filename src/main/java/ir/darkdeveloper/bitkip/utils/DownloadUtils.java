@@ -32,29 +32,37 @@ import static ir.darkdeveloper.bitkip.utils.Validations.maxChunks;
 public class DownloadUtils {
 
 
-    public static HttpURLConnection connect(String uri, boolean showErrors) throws IOException {
+    public static HttpURLConnection connect(String uri) throws IOException {
+        if (uri.isBlank())
+            throw new IllegalArgumentException("URL is blank");
+        var url = new URL(uri);
+        var conn = (HttpURLConnection) url.openConnection();
+        conn.setConnectTimeout(connectionTimeout);
+        conn.setReadTimeout(readTimeout);
+        if (userAgentEnabled)
+            conn.setRequestProperty("User-Agent", userAgent);
+        return conn;
+    }
+
+    public static HttpURLConnection connectWithInternetCheck(String uri, boolean showErrors) throws IOException {
         try {
             if (uri.isBlank())
                 throw new IllegalArgumentException("URL is blank");
             var url = new URL(uri);
-            var conn = (HttpURLConnection) url.openConnection();
-            conn.setConnectTimeout(connectionTimeout);
-            conn.setReadTimeout(readTimeout);
-            if (userAgentEnabled)
-                conn.setRequestProperty("User-Agent", userAgent);
-            return conn;
+            var testCon = (HttpURLConnection) url.openConnection();
+            testCon.setConnectTimeout(2000);
+            testCon.connect();
+            return connect(uri);
         } catch (IOException e) {
-            if (showErrors) {
-                var msg = "Connection or read timeout. Connect to the internet or check the url: " + e.getMessage();
-                log.error(msg);
+            var msg = "Connection or read timeout. Connect to the internet or check the url: " + e.getMessage();
+            if (showErrors)
                 Platform.runLater(() -> Notifications.create()
                         .title("Bad Connection")
                         .text(msg)
                         .showError());
-                throw new RuntimeException(msg);
-            } else
-                throw new IOException(e);
+            throw new IOException(msg);
         }
+
     }
 
     public static long getFileSize(HttpURLConnection connection) {
@@ -110,7 +118,7 @@ public class DownloadUtils {
         return CompletableFuture.supplyAsync(() -> {
             if (finalConnection[0] == null) {
                 try {
-                    finalConnection[0] = connect(urlField.getText(), true);
+                    finalConnection[0] = connect(urlField.getText());
                 } catch (IOException e) {
                     log.error(e.getMessage());
                 }
@@ -163,7 +171,7 @@ public class DownloadUtils {
         return CompletableFuture.supplyAsync(() -> {
             if (finalConnection[0] == null) {
                 try {
-                    finalConnection[0] = connect(link, true);
+                    finalConnection[0] = connect(link);
                 } catch (IOException e) {
                     log.error(e.getMessage());
                 }
@@ -279,6 +287,7 @@ public class DownloadUtils {
             run.run();
         else Platform.runLater(run);
     }
+
 
     public interface ERunnable {
         void run() throws DeniedException;

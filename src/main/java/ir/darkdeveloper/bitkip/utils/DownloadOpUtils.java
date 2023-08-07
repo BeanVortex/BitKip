@@ -20,7 +20,6 @@ import org.controlsfx.control.Notifications;
 import java.awt.*;
 import java.io.File;
 import java.io.IOException;
-import java.net.ConnectException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -45,16 +44,15 @@ public class DownloadOpUtils {
                                        ExecutorService executor) throws ExecutionException, InterruptedException {
 
         try {
-            Validations.validateDownloadModel(dm);
-        } catch (ConnectException e) {
-            log.warn(e.getLocalizedMessage() + " : " + dm.getUrl());
-            Platform.runLater(() -> Notifications.create()
-                    .title(e.getLocalizedMessage())
-                    .text(dm.getUrl())
-                    .showWarning());
-            return;
+            Validations.fillNotFetchedData(dm);
         } catch (IOException e) {
             log.error(e.getMessage());
+            var observedDownload = mainTableUtils.getObservedDownload(dm);
+            dm.setDownloadStatus(DownloadStatus.Paused);
+            if (observedDownload != null)
+                observedDownload.setDownloadStatus(dm.getDownloadStatus());
+
+            return;
         }
 
         DownloadTask downloadTask;
@@ -358,7 +356,7 @@ public class DownloadOpUtils {
         var fileSize = urlModel.fileSize();
         dm.setUrl(url);
         try {
-            var conn = DownloadUtils.connect(url, true);
+            var conn = DownloadUtils.connect(url);
             var canResume = DownloadUtils.canResume(conn);
             dm.setResumable(canResume);
             dm.setChunks(canResume ? maxChunks(fileSize) : 0);

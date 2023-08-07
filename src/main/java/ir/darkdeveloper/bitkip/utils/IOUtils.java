@@ -72,8 +72,8 @@ public class IOUtils {
         return Math.round(((double) bytes /(1024*1024)) * scale) / scale;
     }
 
-    public static long getAvailableSizeInBytes(String path) {
-        return new File(path).getUsableSpace();
+    public static long getFreeSpace(Path path) {
+        return path.toFile().getUsableSpace();
     }
     public static long getBytesFromString(String mb) {
         if (mb.isBlank())
@@ -409,7 +409,7 @@ public class IOUtils {
             var chunks = Validations.maxChunks(Long.MAX_VALUE);
             var allDownloadsQueue = QueuesRepo.findByName(ALL_DOWNLOADS_QUEUE, false);
             var firstUrl = lines.get(0);
-            var connection = DownloadUtils.connect(firstUrl, true);
+            var connection = DownloadUtils.connect(firstUrl);
             var firstFileName = DownloadUtils.extractFileName(firstUrl, connection);
             var secondaryQueue = BatchDownload.getSecondaryQueueByFileName(firstFileName);
             var path = DownloadUtils.determineLocation(firstFileName);
