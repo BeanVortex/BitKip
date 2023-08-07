@@ -107,8 +107,8 @@ public class DetailsController implements FXMLController {
         bytesField.setText(byteLimit);
         bytesField.setDisable(downloadModel.getSize() < 0 || !downloadModel.isResumable());
         speedField.setDisable(!downloadModel.isResumable());
-        var speedLimit = String.valueOf(downloadModel.getSpeedLimit());
-        speedField.setText(speedLimit);
+        var mbOfBytes = IOUtils.getMbOfBytes(downloadModel.getSpeedLimit());
+        speedField.setText(downloadModel.getSpeedLimit() == 0 ? "0.0" : String.valueOf(mbOfBytes));
         downloadedBytes.setText(String.valueOf(downloadModel.getDownloaded()));
         link.setText(downloadModel.getUrl());
         locationLbl.setText("Path: " + new File(downloadModel.getFilePath()).getParentFile().getAbsolutePath());

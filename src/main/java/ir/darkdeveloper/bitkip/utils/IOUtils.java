@@ -64,12 +64,19 @@ public class IOUtils {
         if (bytes <= 0) return "0";
         final var units = new String[]{"B", "kB", "MB", "GB", "TB"};
         var digitGroups = (int) (Math.log10(bytes) / Math.log10(1024));
-        return new DecimalFormat("#,##0.#").format(bytes / Math.pow(1024, digitGroups)) + " " + units[digitGroups];
+        return new DecimalFormat("#,##0.#").format(bytes / Math.pow(1024, digitGroups))+ " " + units[digitGroups];
+    }
+
+    public static double getMbOfBytes(long bytes) {
+        double scale = Math.pow(10, 3);
+        return Math.round(((double) bytes /(1024*1024)) * scale) / scale;
     }
 
     public static long getBytesFromString(String mb) {
+        if (mb.isBlank())
+            return 0;
         var mbVal = Double.parseDouble(mb);
-        return (long) (mbVal * Math.pow(2, 20));
+        return (long) (mbVal * 1_048_576);
     }
 
     public static boolean mergeFiles(DownloadModel dm, int chunks, List<Path> filePaths) throws IOException {

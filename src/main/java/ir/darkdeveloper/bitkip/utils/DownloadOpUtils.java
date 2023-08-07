@@ -131,6 +131,7 @@ public class DownloadOpUtils {
                     dm.setDownloadStatus(DownloadStatus.Trying);
                     dm.setShowCompleteDialog(showCompleteDialog);
                     dm.setOpenAfterComplete(false);
+                    dm.setSpeedLimit(speedLimit);
                     DownloadsRepo.updateDownloadLastTryDate(dm);
                     mainTableUtils.refreshTable();
                     if (dm.isResumable()) {
