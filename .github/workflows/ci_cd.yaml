@@ -18,13 +18,10 @@ jobs:
           distribution: 'oracle'
           gpg-private-key: ${{ secrets.GPG_KEY }}
           gpg-passphrase: PASSPHRASE
-      - name: Install NSIS
-        run: |
-          iwr -useb get.scoop.sh -outfile 'install.ps1'
-          .\install.ps1 -RunAsAdmin
-          scoop update
-          scoop bucket add extras
-          scoop install nsis
+      - name: Create nsis installer
+        uses: joncloud/makensis-action@publish
+        with:
+          additional-plugin-paths: ${{ github.workspace }}/NSIS_Plugins/Plugins
       - name: Print NSIS version
         run: makensis -VERSION
       - name: Build using script
