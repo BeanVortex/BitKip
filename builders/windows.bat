@@ -21,6 +21,7 @@ powershell -command "Compress-Archive -Path 'build\jpackage\%NAME%' -Destination
 
 echo creating nsis installer
 makensis builders\windows-installer\uninstall.nsi
+dir builders\windows-installer\
 move builders\windows-installer\uninstall.exe build\jpackage\%NAME%\
 makensis builders\windows-installer\installer.nsi
 
