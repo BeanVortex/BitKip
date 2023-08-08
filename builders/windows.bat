@@ -20,11 +20,11 @@ echo zipping runtime folder
 powershell -command "Compress-Archive -Path 'build\jpackage\%NAME%' -DestinationPath 'build\releases\%FILE_NAME%-win-bin.zip'"
 
 echo creating nsis installer
-makensis .\builders\windows-installer\uninstall.nsi
-makensis .\builders\windows-installer\uninstall.nsi
-dir .\builders\windows-installer\
-move .\builders\windows-installer\uninstall.exe build\jpackage\%NAME%\
-makensis .\builders\windows-installer\installer.nsi
+cd builders\windows-installer
+makensis uninstall.nsi
+move uninstall.exe ..\..\build\jpackage\%NAME%\
+makensis installer.nsi
+cd ..\..\
 
 echo moving files to releases
 move builders\windows-installer\*.exe build\releases\
