@@ -47,7 +47,7 @@ public class BatchServlet extends HttpServlet {
         var chunks = Validations.maxChunks(Long.MAX_VALUE);
         var allDownloadsQueue = QueuesRepo.findByName(ALL_DOWNLOADS_QUEUE, false);
         var firstUrl = links.get(0);
-        var connection = DownloadUtils.connect(firstUrl, true);
+        var connection = DownloadUtils.connect(firstUrl);
         var firstFileName = DownloadUtils.extractFileName(firstUrl, connection);
         var secondaryQueue = BatchDownload.getSecondaryQueueByFileName(firstFileName);
         var path = DownloadUtils.determineLocation(firstFileName);

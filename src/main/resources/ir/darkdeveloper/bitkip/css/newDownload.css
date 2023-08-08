@@ -94,13 +94,13 @@
 }
 
 .cancel_btn {
-    -fx-padding: 5 13 5 13;
-    -fx-border-radius: 7;
-    -fx-background-radius: 7;
+    -fx-padding: 3 10 3 10;
+    -fx-border-radius: 2;
+    -fx-background-radius: 2;
     -fx-background-color: #FFEBEE;
     -fx-text-fill: #F44336;
     -fx-cursor: hand;
-    -fx-font-size: 16;
+    -fx-font-size: 14;
     -fx-effect: dropshadow(one-pass-box, rgba(244, 67, 54, 0.35), 7, 0, 0, 1);
 }
 
@@ -114,13 +114,13 @@
 }
 
 .add_btn {
-    -fx-padding: 5 13 5 13;
-    -fx-border-radius: 7;
-    -fx-background-radius: 7;
+    -fx-padding: 3 10 3 10;
+    -fx-border-radius: 2;
+    -fx-background-radius: 2;
     -fx-background-color: #c9d4d9;
     -fx-text-fill: #051C2D;
     -fx-cursor: hand;
-    -fx-font-size: 16;
+    -fx-font-size: 14;
     -fx-effect: dropshadow(one-pass-box, rgba(3, 169, 244, 0.2), 7, 0, 0, 1);
 }
 
@@ -134,18 +134,18 @@
 }
 
 .download_now_btn {
-    -fx-padding: 5 13 5 13;
-    -fx-border-radius: 7;
-    -fx-background-radius: 7;
+    -fx-padding: 3 10 3 10;
+    -fx-border-radius: 2;
+    -fx-background-radius: 2;
     -fx-background-color: #B2DFDB;
-    -fx-text-fill: #009688;
+    -fx-text-fill: #00695f;
     -fx-cursor: hand;
-    -fx-font-size: 16;
+    -fx-font-size: 14;
     -fx-effect: dropshadow(one-pass-box, rgba(3, 169, 244, 0.2), 7, 0, 0, 1);
 }
 
 .download_now_btn:hover {
-    -fx-background-color: #80CBC4;
+    -fx-background-color: #86e0d6;
 }
 
 .download_now_btn:pressed {

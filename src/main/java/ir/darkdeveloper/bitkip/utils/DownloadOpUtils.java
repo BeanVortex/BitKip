@@ -20,7 +20,6 @@ import org.controlsfx.control.Notifications;
 import java.awt.*;
 import java.io.File;
 import java.io.IOException;
-import java.net.ConnectException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -45,16 +44,16 @@ public class DownloadOpUtils {
                                        ExecutorService executor) throws ExecutionException, InterruptedException {
 
         try {
-            Validations.validateDownloadModel(dm);
-        } catch (ConnectException e) {
-            log.warn(e.getLocalizedMessage() + " : " + dm.getUrl());
-            Platform.runLater(() -> Notifications.create()
-                    .title(e.getLocalizedMessage())
-                    .text(dm.getUrl())
-                    .showWarning());
-            return;
+            Validations.fillNotFetchedData(dm);
+            IOUtils.checkAvailableSpace(dm.getFilePath(), dm.getSize());
         } catch (IOException e) {
             log.error(e.getMessage());
+            var observedDownload = mainTableUtils.getObservedDownload(dm);
+            dm.setDownloadStatus(DownloadStatus.Paused);
+            if (observedDownload != null)
+                observedDownload.setDownloadStatus(dm.getDownloadStatus());
+
+            return;
         }
 
         DownloadTask downloadTask;
@@ -110,7 +109,8 @@ public class DownloadOpUtils {
         if (!currentDownloadings.contains(dm)) {
             dm.setLastTryDate(LocalDateTime.now());
             dm.setDownloadStatus(DownloadStatus.Trying);
-            dm.setTurnOffMode(TurnOffMode.NOTHING);
+            if (!resume)
+                dm.setTurnOffMode(TurnOffMode.NOTHING);
             DownloadsRepo.updateDownloadLastTryDate(dm);
             mainTableUtils.refreshTable();
             try {
@@ -131,6 +131,7 @@ public class DownloadOpUtils {
                     dm.setDownloadStatus(DownloadStatus.Trying);
                     dm.setShowCompleteDialog(showCompleteDialog);
                     dm.setOpenAfterComplete(false);
+                    dm.setSpeedLimit(speedLimit);
                     DownloadsRepo.updateDownloadLastTryDate(dm);
                     mainTableUtils.refreshTable();
                     if (dm.isResumable()) {
@@ -161,10 +162,11 @@ public class DownloadOpUtils {
         dm.setProgress(0);
         dm.setCompleteDate(null);
         dm.setLastTryDate(lastTryDate);
+        dm.setTurnOffMode(TurnOffMode.NOTHING);
         dm.setDownloadStatus(DownloadStatus.Restarting);
         mainTableUtils.refreshTable();
-        String[] cols = {COL_DOWNLOADED, COL_PROGRESS, COL_COMPLETE_DATE, COL_LAST_TRY_DATE};
-        String[] values = {"0", "0", "NULL", lastTryDate.toString()};
+        String[] cols = {COL_DOWNLOADED, COL_PROGRESS, COL_COMPLETE_DATE, COL_LAST_TRY_DATE, COL_TURNOFF_MODE};
+        String[] values = {"0", "0", "NULL", lastTryDate.toString(), dm.getTurnOffMode().name()};
         DatabaseHelper.updateCols(cols, values, DatabaseHelper.DOWNLOADS_TABLE_NAME, dmId);
         try {
             triggerDownload(dm, 0, dm.getSize(), true, false, null);
@@ -357,7 +359,7 @@ public class DownloadOpUtils {
         var fileSize = urlModel.fileSize();
         dm.setUrl(url);
         try {
-            var conn = DownloadUtils.connect(url, true);
+            var conn = DownloadUtils.connect(url);
             var canResume = DownloadUtils.canResume(conn);
             dm.setResumable(canResume);
             dm.setChunks(canResume ? maxChunks(fileSize) : 0);

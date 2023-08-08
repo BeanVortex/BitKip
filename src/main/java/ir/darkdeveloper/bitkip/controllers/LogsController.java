@@ -27,6 +27,7 @@ public class LogsController implements FXMLController {
     private ScrollPane scrollPane;
     @FXML
     private Text text;
+
     private Stage stage;
 
     @Override
@@ -38,7 +39,6 @@ public class LogsController implements FXMLController {
     @Override
     public void initAfterStage() {
         updateTheme(stage.getScene());
-//        text.wrappingWidthProperty().bind(stage.widthProperty());
         stage.widthProperty().addListener((o, ol, n) -> scrollPane.setPrefWidth(n.doubleValue() - 50));
         stage.heightProperty().addListener((o, ol, n) -> scrollPane.setPrefHeight(n.doubleValue() - 50));
     }

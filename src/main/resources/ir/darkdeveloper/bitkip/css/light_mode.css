@@ -9,6 +9,8 @@
     -fx-dark-primary-color: #27374D;
     -fx-red-color: #EF5350 !important;
     -fx-green-color: #51b055 !important;
+    -fx-green2-color: #009688 !important;
+    -fx-green2-color-hover: #018377 !important;
 }
 
 .root,
@@ -258,4 +260,3 @@
     -fx-background-color: -fx-secondary-color;
     -fx-text-fill: -fx-text-color;
 }
-

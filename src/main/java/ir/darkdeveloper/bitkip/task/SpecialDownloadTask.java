@@ -69,7 +69,7 @@ public class SpecialDownloadTask extends DownloadTask {
         ReadableByteChannel rbc = null;
         FileOutputStream fos = null;
         try {
-            var con = DownloadUtils.connect(url, true);
+            var con = DownloadUtils.connect(url);
             con.setRequestProperty("User-Agent", userAgent);
             i = con.getInputStream();
             rbc = Channels.newChannel(i);
