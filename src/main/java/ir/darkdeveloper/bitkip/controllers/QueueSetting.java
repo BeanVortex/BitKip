@@ -146,7 +146,7 @@ public class QueueSetting implements FXMLController, QueueObserver {
 
         Validations.validateTimePickerInputs(startHourSpinner, startMinuteSpinner, startSecondSpinner);
         Validations.validateTimePickerInputs(stopHourSpinner, stopMinuteSpinner, stopSecondSpinner);
-        Validations.validateSpeedInputChecks(speedField);
+        Validations.validateSpeedInput(speedField);
         Validations.validateIntInputCheck(simulDownloadSpinner.getEditor(), 1, 1, 5);
 
 
@@ -381,7 +381,7 @@ public class QueueSetting implements FXMLController, QueueObserver {
             String[] qCols = {COL_SPEED_LIMIT, COL_SIMUL_DOWNLOAD, COL_HAS_FOLDER, COL_DOWN_TOP};
             String[] qValues = {queue.getSpeed(), String.valueOf(queue.getSimultaneouslyDownload()),
                     String.valueOf(queue.hasFolder() ? 1 : 0), String.valueOf(queue.isDownloadFromTop() ? 1 : 0)};
-            DatabaseHelper.updateRow(qCols, qValues, QUEUES_TABLE_NAME, queue.getId());
+            DatabaseHelper.updateCols(qCols, qValues, QUEUES_TABLE_NAME, queue.getId());
             IOUtils.createOrDeleteFolderForQueue(queue);
             ScheduleRepo.updateSchedule(schedule);
             var updatedQueues = QueuesRepo.getAllQueues(false, true);

@@ -69,8 +69,6 @@ public class LinkTableUtils {
         linkCol.setOnEditCommit(e -> e.getTableView().getItems().get(e.getTablePosition().getRow()).setUrl(e.getNewValue()));
         nameCol.setCellFactory(TextFieldTableCell.forTableColumn());
         nameCol.setOnEditCommit(e -> e.getTableView().getItems().get(e.getTablePosition().getRow()).setName(e.getNewValue()));
-        chunksCol.setCellFactory(param -> new ChunksCellFactory());
-        chunksCol.setOnEditCommit(e -> e.getTableView().getItems().get(e.getTablePosition().getRow()).setChunks(e.getNewValue()));
         var queuesToShow = getQueues().stream()
                 .filter(qm -> qm.getName().equals(ALL_DOWNLOADS_QUEUE) || !staticQueueNames.contains(qm.getName()))
                 .toList();

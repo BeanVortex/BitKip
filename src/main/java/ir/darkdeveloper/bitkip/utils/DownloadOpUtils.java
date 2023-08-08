@@ -5,11 +5,12 @@ import ir.darkdeveloper.bitkip.exceptions.DeniedException;
 import ir.darkdeveloper.bitkip.models.DownloadModel;
 import ir.darkdeveloper.bitkip.models.DownloadStatus;
 import ir.darkdeveloper.bitkip.models.SingleURLModel;
+import ir.darkdeveloper.bitkip.models.TurnOffMode;
 import ir.darkdeveloper.bitkip.repo.DatabaseHelper;
 import ir.darkdeveloper.bitkip.repo.DownloadsRepo;
 import ir.darkdeveloper.bitkip.repo.QueuesRepo;
-import ir.darkdeveloper.bitkip.task.DownloadInChunksTask;
-import ir.darkdeveloper.bitkip.task.DownloadLimitedTask;
+import ir.darkdeveloper.bitkip.task.ChunksDownloadTask;
+import ir.darkdeveloper.bitkip.task.SpecialDownloadTask;
 import ir.darkdeveloper.bitkip.task.DownloadTask;
 import javafx.application.Platform;
 import javafx.collections.ObservableList;
@@ -19,7 +20,6 @@ import org.controlsfx.control.Notifications;
 import java.awt.*;
 import java.io.File;
 import java.io.IOException;
-import java.net.ConnectException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -32,7 +32,6 @@ import static ir.darkdeveloper.bitkip.config.AppConfigs.*;
 import static ir.darkdeveloper.bitkip.repo.DownloadsRepo.*;
 import static ir.darkdeveloper.bitkip.utils.Defaults.ALL_DOWNLOADS_QUEUE;
 import static ir.darkdeveloper.bitkip.utils.DownloadUtils.getNewFileNameIfExists;
-import static ir.darkdeveloper.bitkip.utils.IOUtils.getBytesFromString;
 import static ir.darkdeveloper.bitkip.utils.Validations.maxChunks;
 
 public class DownloadOpUtils {
@@ -41,43 +40,34 @@ public class DownloadOpUtils {
      * @param blocking of course, it should be done in concurrent environment otherwise it will block the main thread.
      *                 mostly using for queue downloading
      */
-    private static void triggerDownload(DownloadModel dm, String speed, String bytes, boolean resume, boolean blocking,
-                                        ExecutorService executor) throws ExecutionException, InterruptedException {
+    public static void triggerDownload(DownloadModel dm, long speed, long bytes, boolean resume, boolean blocking,
+                                       ExecutorService executor) throws ExecutionException, InterruptedException {
 
         try {
-            Validations.validateDownloadModel(dm);
-        } catch (ConnectException e) {
-            log.warn(e.getLocalizedMessage() + " : " + dm.getUrl());
-            Platform.runLater(() -> Notifications.create()
-                    .title(e.getLocalizedMessage())
-                    .text(dm.getUrl())
-                    .showWarning());
-            return;
+            Validations.fillNotFetchedData(dm);
+            IOUtils.checkAvailableSpace(dm.getFilePath(), dm.getSize());
         } catch (IOException e) {
             log.error(e.getMessage());
+            var observedDownload = mainTableUtils.getObservedDownload(dm);
+            dm.setDownloadStatus(DownloadStatus.Paused);
+            if (observedDownload != null)
+                observedDownload.setDownloadStatus(dm.getDownloadStatus());
+
+            return;
         }
 
-        DownloadTask downloadTask = new DownloadLimitedTask(dm, Long.MAX_VALUE, false);
-        if (dm.getChunks() == 0) {
-            if (speed != null) {
-                if (speed.equals("0")) {
-                    if (bytes != null) {
-                        if (bytes.equals(String.valueOf(dm.getSize())))
-                            downloadTask = new DownloadLimitedTask(dm, Long.MAX_VALUE, false);
-                        else
-                            downloadTask = new DownloadLimitedTask(dm, Long.parseLong(bytes), false);
-                    }
-                } else
-                    downloadTask = new DownloadLimitedTask(dm, getBytesFromString(speed), true);
+        DownloadTask downloadTask;
+        if (dm.getChunks() == 0)
+            downloadTask = new SpecialDownloadTask(dm);
+        else {
+            try {
+                if (dm.getSize() > 0)
+                    bytes = dm.getSize();
+                downloadTask = new ChunksDownloadTask(dm, speed, bytes);
+            } catch (DeniedException e) {
+                log.error(e.getMessage());
+                return;
             }
-        } else {
-            if (speed != null) {
-                if (speed.equals("0"))
-                    downloadTask = new DownloadInChunksTask(dm, null);
-                else
-                    downloadTask = new DownloadInChunksTask(dm, getBytesFromString(speed));
-            } else
-                downloadTask = new DownloadInChunksTask(dm, null);
         }
 
         if (dm.getSize() == -1)
@@ -114,11 +104,13 @@ public class DownloadOpUtils {
 
     }
 
-    public static void startDownload(DownloadModel dm, String speedLimit, String byteLimit, boolean resume,
+    public static void startDownload(DownloadModel dm, long speedLimit, long byteLimit, boolean resume,
                                      boolean blocking, ExecutorService executor) {
         if (!currentDownloadings.contains(dm)) {
             dm.setLastTryDate(LocalDateTime.now());
             dm.setDownloadStatus(DownloadStatus.Trying);
+            if (!resume)
+                dm.setTurnOffMode(TurnOffMode.NOTHING);
             DownloadsRepo.updateDownloadLastTryDate(dm);
             mainTableUtils.refreshTable();
             try {
@@ -132,13 +124,14 @@ public class DownloadOpUtils {
     /**
      * Resumes downloads non-blocking
      */
-    public static void resumeDownloads(List<DownloadModel> dms, String speedLimit, String byteLimit) {
+    public static void resumeDownloads(List<DownloadModel> dms, long speedLimit, long byteLimit) {
         dms.stream().filter(dm -> !currentDownloadings.contains(dm))
                 .forEach(dm -> {
                     dm.setLastTryDate(LocalDateTime.now());
                     dm.setDownloadStatus(DownloadStatus.Trying);
                     dm.setShowCompleteDialog(showCompleteDialog);
                     dm.setOpenAfterComplete(false);
+                    dm.setSpeedLimit(speedLimit);
                     DownloadsRepo.updateDownloadLastTryDate(dm);
                     mainTableUtils.refreshTable();
                     if (dm.isResumable()) {
@@ -169,13 +162,14 @@ public class DownloadOpUtils {
         dm.setProgress(0);
         dm.setCompleteDate(null);
         dm.setLastTryDate(lastTryDate);
+        dm.setTurnOffMode(TurnOffMode.NOTHING);
         dm.setDownloadStatus(DownloadStatus.Restarting);
         mainTableUtils.refreshTable();
-        String[] cols = {COL_DOWNLOADED, COL_PROGRESS, COL_COMPLETE_DATE, COL_LAST_TRY_DATE};
-        String[] values = {"0", "0", "NULL", lastTryDate.toString()};
-        DatabaseHelper.updateRow(cols, values, DatabaseHelper.DOWNLOADS_TABLE_NAME, dmId);
+        String[] cols = {COL_DOWNLOADED, COL_PROGRESS, COL_COMPLETE_DATE, COL_LAST_TRY_DATE, COL_TURNOFF_MODE};
+        String[] values = {"0", "0", "NULL", lastTryDate.toString(), dm.getTurnOffMode().name()};
+        DatabaseHelper.updateCols(cols, values, DatabaseHelper.DOWNLOADS_TABLE_NAME, dmId);
         try {
-            triggerDownload(dm, null, null, true, false, null);
+            triggerDownload(dm, 0, dm.getSize(), true, false, null);
         } catch (ExecutionException | InterruptedException e) {
             log.error(e.getMessage());
         }
@@ -365,7 +359,7 @@ public class DownloadOpUtils {
         var fileSize = urlModel.fileSize();
         dm.setUrl(url);
         try {
-            var conn = DownloadUtils.connect(url, true);
+            var conn = DownloadUtils.connect(url);
             var canResume = DownloadUtils.canResume(conn);
             dm.setResumable(canResume);
             dm.setChunks(canResume ? maxChunks(fileSize) : 0);
@@ -391,8 +385,7 @@ public class DownloadOpUtils {
             dm.getQueues().add(allDownloadsQueue);
             dm.getQueues().add(queue);
             dm.setDownloadStatus(DownloadStatus.Trying);
-            DownloadOpUtils.startDownload(dm, "0", String.valueOf(dm.getSize()),
-                    false, false, null);
+            DownloadOpUtils.startDownload(dm, 0, dm.getSize(), false, false, null);
             Notifications.create()
                     .title("Downloading now ...")
                     .text(dm.getName())

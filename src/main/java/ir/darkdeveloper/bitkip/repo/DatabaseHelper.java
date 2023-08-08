@@ -51,7 +51,7 @@ public class DatabaseHelper {
         }
     }
 
-    public static void updateRow(String[] columns, String[] values, String table, int id) {
+    public static void updateCols(String[] columns, String[] values, String table, int id) {
         var length = columns.length;
         if (length != values.length)
             throw new RuntimeException("columns and values do not match by length");
@@ -74,6 +74,25 @@ public class DatabaseHelper {
         }
         builder.append(" WHERE ").append(COL_ID).append("=").append(id).append(";");
         DatabaseHelper.executeUpdateSql(builder.toString(), false);
+    }
+
+    public static void updateCol(String column, String value, String table, int id) {
+
+        boolean isInteger = false;
+        try {
+            Integer.parseInt(value);
+            isInteger = true;
+        } catch (Exception ignore) {
+        }
+        if (!isInteger && !value.equals("NULL"))
+            value = "\"" + value + "\"";
+
+        var sql = """
+                UPDATE %s SET %s=%s WHERE %s=%d;
+                """
+                .formatted(table, column, value, COL_ID, id);
+
+        DatabaseHelper.executeUpdateSql(sql, false);
     }
 
 

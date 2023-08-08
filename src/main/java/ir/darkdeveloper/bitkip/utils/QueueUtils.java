@@ -1,10 +1,7 @@
 package ir.darkdeveloper.bitkip.utils;
 
 import ir.darkdeveloper.bitkip.config.observers.QueueSubject;
-import ir.darkdeveloper.bitkip.models.DownloadModel;
-import ir.darkdeveloper.bitkip.models.DownloadStatus;
-import ir.darkdeveloper.bitkip.models.QueueModel;
-import ir.darkdeveloper.bitkip.models.StartedQueue;
+import ir.darkdeveloper.bitkip.models.*;
 import ir.darkdeveloper.bitkip.repo.QueuesRepo;
 import ir.darkdeveloper.bitkip.repo.ScheduleRepo;
 import javafx.application.Platform;
@@ -21,6 +18,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import static ir.darkdeveloper.bitkip.config.AppConfigs.*;
 import static ir.darkdeveloper.bitkip.config.observers.QueueSubject.addAllQueues;
 import static ir.darkdeveloper.bitkip.config.observers.QueueSubject.getQueues;
+import static ir.darkdeveloper.bitkip.utils.IOUtils.getBytesFromString;
 
 public class QueueUtils {
 
@@ -79,6 +77,7 @@ public class QueueUtils {
                 if (dm.getDownloadStatus() == DownloadStatus.Paused) {
                     dm.setOpenAfterComplete(false);
                     dm.setShowCompleteDialog(false);
+                    dm.setTurnOffMode(TurnOffMode.NOTHING);
                     if (!dm.getQueues().contains(qm))
                         dm.getQueues().add(qm);
                     String speedLimit = null;
@@ -92,7 +91,7 @@ public class QueueUtils {
                                     sDownloads - simulDownloads.get(),
                                     simulDownloads,
                                     dm, speedLimit);
-                    } else DownloadOpUtils.startDownload(dm, speedLimit, null, true, true, null);
+                    } else DownloadOpUtils.startDownload(dm, getBytesFromString(speedLimit), 0, true, true, null);
 
                 }
                 if (!startedQueues.contains(startedQueue))
@@ -118,8 +117,8 @@ public class QueueUtils {
     private static int performSimultaneousDownloadWaitForPrev(QueueModel qm, AtomicInteger simulDownloads,
                                                               int i, DownloadModel dm, String speedLimit, int sDownloads) {
         if (simulDownloads.get() < sDownloads) {
-            DownloadOpUtils.startDownload(dm, speedLimit,
-                    null, true, false, null);
+            DownloadOpUtils.startDownload(dm, getBytesFromString(speedLimit),
+                    0, true, false, null);
             simulDownloads.getAndIncrement();
         } else {
             while (true) {
@@ -147,7 +146,7 @@ public class QueueUtils {
     private static void performSimultaneousDownloadDontWaitForPrev(int remainingSimul, AtomicInteger simulDownloads,
                                                                    DownloadModel dm, String speedLimit) {
         if (remainingSimul != 0) {
-            DownloadOpUtils.startDownload(dm, speedLimit, null, true, false, null);
+            DownloadOpUtils.startDownload(dm, getBytesFromString(speedLimit), 0, true, false, null);
             simulDownloads.getAndIncrement();
         }
     }

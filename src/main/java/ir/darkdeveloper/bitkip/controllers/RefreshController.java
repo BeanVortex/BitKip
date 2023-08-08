@@ -83,7 +83,7 @@ public class RefreshController implements FXMLController {
     @FXML
     private void onResume() {
         saveToDB();
-        DownloadOpUtils.resumeDownloads(List.of(dm), null, null);
+        DownloadOpUtils.resumeDownloads(List.of(dm), 0, 0);
         stage.close();
     }
 

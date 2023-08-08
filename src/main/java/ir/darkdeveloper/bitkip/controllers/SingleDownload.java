@@ -2,10 +2,7 @@ package ir.darkdeveloper.bitkip.controllers;
 
 import ir.darkdeveloper.bitkip.config.observers.QueueObserver;
 import ir.darkdeveloper.bitkip.config.observers.QueueSubject;
-import ir.darkdeveloper.bitkip.models.DownloadModel;
-import ir.darkdeveloper.bitkip.models.DownloadStatus;
-import ir.darkdeveloper.bitkip.models.QueueModel;
-import ir.darkdeveloper.bitkip.models.SingleURLModel;
+import ir.darkdeveloper.bitkip.models.*;
 import ir.darkdeveloper.bitkip.repo.DownloadsRepo;
 import ir.darkdeveloper.bitkip.repo.QueuesRepo;
 import ir.darkdeveloper.bitkip.utils.*;
@@ -23,6 +20,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.util.ResourceBundle;
 import java.util.concurrent.CompletableFuture;
@@ -33,6 +31,8 @@ import static ir.darkdeveloper.bitkip.config.observers.QueueSubject.getQueueSubj
 import static ir.darkdeveloper.bitkip.utils.Defaults.ALL_DOWNLOADS_QUEUE;
 import static ir.darkdeveloper.bitkip.utils.DownloadUtils.getNewFileNameIfExists;
 import static ir.darkdeveloper.bitkip.utils.DownloadUtils.handleError;
+import static ir.darkdeveloper.bitkip.utils.IOUtils.getBytesFromString;
+import static ir.darkdeveloper.bitkip.utils.IOUtils.getFreeSpace;
 import static ir.darkdeveloper.bitkip.utils.Validations.maxChunks;
 
 public class SingleDownload implements QueueObserver {
@@ -93,8 +93,8 @@ public class SingleDownload implements QueueObserver {
         });
         var questionBtns = new Button[]{questionBtnSpeed, questionBtnBytes, questionBtnChunks};
         var contents = new String[]{
-                "You can limit downloading speed. calculated in MB. (0.8 means 800KB)",
-                "You can specify how many bytes of the file to download (Disabled in chunks downloading mode)",
+                "You can limit downloading speed. calculated in MB. (0.8 means 838KB)",
+                "You can specify how many bytes of the file to download (roughly)",
                 "File is seperated into parts and will be downloaded concurrently"
         };
 
@@ -134,19 +134,19 @@ public class SingleDownload implements QueueObserver {
         urlField.setText(urlModel.url());
         nameField.setText(urlModel.filename());
         setLocation(urlModel.filename());
-        sizeLabel.setText(IOUtils.formatBytes(urlModel.fileSize()));
-        bytesField.setText(String.valueOf(urlModel.fileSize()));
+        sizeLabel.setText(IOUtils.formatBytes(fileSize));
+        bytesField.setText(String.valueOf(fileSize));
         HttpURLConnection conn;
         try {
-            conn = DownloadUtils.connect(urlModel.url(), true);
+            conn = DownloadUtils.connect(urlModel.url());
         } catch (IOException e) {
             log.error(e.getMessage());
             return;
         }
         var resumable = DownloadUtils.canResume(conn);
-        chunksField.setDisable(!resumable);
         chunksField.setText(resumable ? String.valueOf(maxChunks(fileSize)) : "0");
-        speedField.setDisable(false);
+        speedField.setDisable(!resumable);
+        bytesField.setDisable(!resumable);
         if (resumable) {
             resumableLabel.setText("Yes");
             resumableLabel.getStyleClass().add("yes");
@@ -167,13 +167,13 @@ public class SingleDownload implements QueueObserver {
             // firing select event
             queueCombo.getSelectionModel().select(queueCombo.getSelectionModel().getSelectedIndex());
             var url = urlField.getText();
-            var connection = DownloadUtils.connect(url, true);
+            var connection = DownloadUtils.connect(url);
             var executor = Executors.newFixedThreadPool(2);
             var fileNameLocationFuture =
                     DownloadUtils.prepareFileNameAndFieldsAsync(connection, url, nameField, executor)
                             .thenAccept(this::setLocation);
-            var sizeFuture = DownloadUtils.prepareFileSizeAndFieldsAsync(connection, urlField, sizeLabel,
-                    resumableLabel, chunksField, bytesField, dm, executor);
+            var sizeFuture = DownloadUtils.prepareFileSizeAndFieldsAsync(connection,
+                    urlField, sizeLabel, resumableLabel, speedField, chunksField, bytesField, dm, executor);
             CompletableFuture.allOf(fileNameLocationFuture, sizeFuture)
                     .whenComplete((unused, throwable) -> {
                         handleError(() -> DownloadUtils.checkIfFileIsOKToSave(locationField.getText(),
@@ -219,7 +219,6 @@ public class SingleDownload implements QueueObserver {
     private void onAdd() {
         var prepared = prepareDownload();
         if (prepared) {
-            dm.setDownloadStatus(DownloadStatus.Paused);
             DownloadsRepo.insertDownload(dm);
             mainTableUtils.addRow(dm);
             getQueueSubject().removeObserver(this);
@@ -231,7 +230,21 @@ public class SingleDownload implements QueueObserver {
     private void onDownload() {
         var prepared = prepareDownload();
         if (prepared) {
-            DownloadOpUtils.startDownload(dm, speedField.getText(), bytesField.getText(),
+            var freeSpace = getFreeSpace(Path.of(dm.getFilePath()).getParent());
+            // if after saving, the space left should be above 100MB
+            if (freeSpace - dm.getSize() <= Math.pow(2, 20) * 100) {
+                var res = FxUtils.askWarning("No Free space",
+                        "The location you chose, has not enough space to save the download file." +
+                                " Do you want to change location now?");
+                if (!res) {
+                    DownloadsRepo.insertDownload(dm);
+                    mainTableUtils.addRow(dm);
+                    getQueueSubject().removeObserver(this);
+                    stage.close();
+                }
+                return;
+            }
+            DownloadOpUtils.startDownload(dm, getBytesFromString(speedField.getText()), Long.parseLong(bytesField.getText()),
                     false, false, null);
             DownloadOpUtils.openDetailsStage(dm);
             getQueueSubject().removeObserver(this);
@@ -281,26 +294,23 @@ public class SingleDownload implements QueueObserver {
         dm.setAddDate(LocalDateTime.now());
         dm.setAddToQueueDate(LocalDateTime.now());
         dm.setShowCompleteDialog(showCompleteDialog);
+        dm.setTurnOffMode(TurnOffMode.NOTHING);
         dm.setOpenAfterComplete(false);
+        dm.setSpeedLimit(getBytesFromString(speedField.getText()));
+        dm.setByteLimit(Long.parseLong(bytesField.getText()));
         var selectedQueue = queueCombo.getSelectionModel().getSelectedItem();
         var allDownloadsQueue = QueuesRepo.findByName(ALL_DOWNLOADS_QUEUE, false);
         dm.getQueues().add(allDownloadsQueue);
         if (selectedQueue.getId() != allDownloadsQueue.getId())
             dm.getQueues().add(selectedQueue);
-        dm.setDownloadStatus(DownloadStatus.Trying);
+        dm.setDownloadStatus(DownloadStatus.Paused);
         return true;
     }
 
 
     @Override
     public void updateQueue() {
-        var queues = QueueSubject.getQueues();
-        if (queues.isEmpty())
-            queues = QueuesRepo.getAllQueues(false, false);
-        queues = queues.stream().filter(QueueModel::isCanAddDownload).toList();
-        queueCombo.getItems().clear();
-        queueCombo.getItems().addAll(queues);
-        queueCombo.setValue(queues.get(0));
+        BatchDownload.updateQueueData(queueCombo);
     }
 
     @FXML

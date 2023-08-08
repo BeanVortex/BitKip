@@ -32,29 +32,37 @@ import static ir.darkdeveloper.bitkip.utils.Validations.maxChunks;
 public class DownloadUtils {
 
 
-    public static HttpURLConnection connect(String uri, boolean showErrors) throws IOException {
+    public static HttpURLConnection connect(String uri) throws IOException {
+        if (uri.isBlank())
+            throw new IllegalArgumentException("URL is blank");
+        var url = new URL(uri);
+        var conn = (HttpURLConnection) url.openConnection();
+        conn.setConnectTimeout(connectionTimeout);
+        conn.setReadTimeout(readTimeout);
+        if (userAgentEnabled)
+            conn.setRequestProperty("User-Agent", userAgent);
+        return conn;
+    }
+
+    public static HttpURLConnection connectWithInternetCheck(String uri, boolean showErrors) throws IOException {
         try {
             if (uri.isBlank())
                 throw new IllegalArgumentException("URL is blank");
             var url = new URL(uri);
-            var conn = (HttpURLConnection) url.openConnection();
-            conn.setConnectTimeout(connectionTimeout);
-            conn.setReadTimeout(readTimeout);
-            if (userAgentEnabled)
-                conn.setRequestProperty("User-Agent", userAgent);
-            return conn;
+            var testCon = (HttpURLConnection) url.openConnection();
+            testCon.setConnectTimeout(2000);
+            testCon.connect();
+            return connect(uri);
         } catch (IOException e) {
-            if (showErrors) {
-                var msg = "Connection or read timeout. Connect to the internet or check the url: " + e.getMessage();
-                log.error(msg);
+            var msg = "Connection or read timeout. Connect to the internet or check the url: " + e.getMessage();
+            if (showErrors)
                 Platform.runLater(() -> Notifications.create()
                         .title("Bad Connection")
                         .text(msg)
                         .showError());
-                throw new RuntimeException(msg);
-            } else
-                throw new IOException(e);
+            throw new IOException(msg);
         }
+
     }
 
     public static long getFileSize(HttpURLConnection connection) {
@@ -65,21 +73,34 @@ public class DownloadUtils {
     }
 
     /**
-    * @return new file name like file(1), file(2). if not existed in db, returns fileName
-    * */
+     * @return new file name like file(1), file(2). if not existed in db, returns fileName
+     */
     public static String getNewFileNameIfExists(String fileName, String path) {
         var pathToFind = path + fileName;
         var nextNum = DownloadsRepo.getNextNumberOfExistedDownload(pathToFind);
-        if (nextNum == 0 || nextNum == 1)
+        var containsDot = false;
+        if ((nextNum == 0 || nextNum == 1) && fileName.contains(".")) {
+            containsDot = true;
             pathToFind = pathToFind.substring(0, pathToFind.lastIndexOf('.'));
+        }
+
         nextNum = DownloadsRepo.getNextNumberOfExistedDownload(pathToFind);
         if (nextNum == 0)
             return fileName;
-        var newFileName = new StringBuilder(fileName.substring(0, fileName.lastIndexOf('.')));
+
+        var newFileName = new StringBuilder();
+        if (containsDot)
+            newFileName.append(fileName, 0, fileName.lastIndexOf('.'));
+        else
+            newFileName.append(fileName);
+
         newFileName.append("(")
                 .append(nextNum)
-                .append(")")
-                .append(fileName.substring(fileName.lastIndexOf('.')));
+                .append(")");
+
+        if (containsDot)
+            newFileName.append(fileName.substring(fileName.lastIndexOf('.')));
+
         return String.valueOf(newFileName);
     }
 
@@ -89,14 +110,15 @@ public class DownloadUtils {
     }
 
     public static CompletableFuture<Long> prepareFileSizeAndFieldsAsync(HttpURLConnection connection, TextField urlField,
-                                                                        Label sizeLabel, Label resumableLabel, TextField chunksField,
+                                                                        Label sizeLabel, Label resumableLabel,
+                                                                        TextField speedField, TextField chunksField,
                                                                         TextField bytesField, DownloadModel dm,
                                                                         Executor executor) {
         final HttpURLConnection[] finalConnection = {connection};
         return CompletableFuture.supplyAsync(() -> {
             if (finalConnection[0] == null) {
                 try {
-                    finalConnection[0] = connect(urlField.getText(), true);
+                    finalConnection[0] = connect(urlField.getText());
                 } catch (IOException e) {
                     log.error(e.getMessage());
                 }
@@ -106,8 +128,7 @@ public class DownloadUtils {
             Platform.runLater(() -> {
                 if (resumable) {
                     chunksField.setText(String.valueOf(maxChunks(fileSize)));
-                    chunksField.setDisable(false);
-                    bytesField.setDisable(true);
+                    bytesField.setDisable(false);
                     resumableLabel.setText("Yes");
                     resumableLabel.getStyleClass().add("yes");
                     resumableLabel.getStyleClass().remove("no");
@@ -116,8 +137,8 @@ public class DownloadUtils {
                     resumableLabel.getStyleClass().add("no");
                     resumableLabel.getStyleClass().remove("yes");
                     chunksField.setText("0");
-                    chunksField.setDisable(true);
                     bytesField.setDisable(true);
+                    speedField.setDisable(true);
                 }
                 sizeLabel.setText(IOUtils.formatBytes(fileSize));
                 bytesField.setText(String.valueOf(fileSize));
@@ -150,7 +171,7 @@ public class DownloadUtils {
         return CompletableFuture.supplyAsync(() -> {
             if (finalConnection[0] == null) {
                 try {
-                    finalConnection[0] = connect(link, true);
+                    finalConnection[0] = connect(link);
                 } catch (IOException e) {
                     log.error(e.getMessage());
                 }
@@ -266,6 +287,7 @@ public class DownloadUtils {
             run.run();
         else Platform.runLater(run);
     }
+
 
     public interface ERunnable {
         void run() throws DeniedException;

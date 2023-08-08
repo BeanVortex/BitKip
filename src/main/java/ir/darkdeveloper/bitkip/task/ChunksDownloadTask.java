@@ -1,6 +1,7 @@
 package ir.darkdeveloper.bitkip.task;
 
 import ir.darkdeveloper.bitkip.controllers.DetailsController;
+import ir.darkdeveloper.bitkip.exceptions.DeniedException;
 import ir.darkdeveloper.bitkip.models.DownloadModel;
 import ir.darkdeveloper.bitkip.models.DownloadStatus;
 import ir.darkdeveloper.bitkip.repo.DownloadsRepo;
@@ -30,25 +31,33 @@ import java.util.concurrent.ExecutorService;
 import static ir.darkdeveloper.bitkip.config.AppConfigs.*;
 import static ir.darkdeveloper.bitkip.utils.DownloadOpUtils.openFile;
 
-public class DownloadInChunksTask extends DownloadTask {
+public class ChunksDownloadTask extends DownloadTask {
     private final int chunks;
-    private final Long limit;
+    private long speedLimit;
+    private final long byteLimit;
+    private boolean isSpeedLimited;
     private final List<FileChannel> fileChannels = new ArrayList<>();
     private final List<Path> filePaths = new ArrayList<>();
     private volatile boolean paused;
     private volatile boolean isCalculating;
-    private final boolean isLimited;
+    private final boolean isByteLimited;
     private ExecutorService executor;
     private boolean blocking;
     private String url;
+    private long bytesToDownloadEachInCycleLimited;
+    private boolean newLimitSet;
 
-    public DownloadInChunksTask(DownloadModel downloadModel, Long limit) {
+    public ChunksDownloadTask(DownloadModel downloadModel, long speedLimit, long byteLimit) throws DeniedException {
         super(downloadModel);
         if (downloadModel.getChunks() == 0)
             throw new IllegalArgumentException("To download file in chunks, chunks must not be 0");
+        if (byteLimit == 0)
+            throw new DeniedException("File did not download due to 0 bytes chosen to download");
         this.chunks = downloadModel.getChunks();
-        this.limit = limit;
-        isLimited = limit != null;
+        this.speedLimit = speedLimit;
+        this.byteLimit = byteLimit;
+        isByteLimited = true;
+        isSpeedLimited = speedLimit != 0;
     }
 
 
@@ -58,7 +67,7 @@ public class DownloadInChunksTask extends DownloadTask {
             url = downloadModel.getUrl();
             var file = new File(downloadModel.getFilePath());
             var fileSize = downloadModel.getSize();
-            if (file.exists() && isCompleted(downloadModel, file, mainTableUtils))
+            if (file.exists() && isCompleted(file, mainTableUtils))
                 return 0L;
             var parentFolder = Path.of(file.getPath()).getParent().toFile();
             if (!parentFolder.exists())
@@ -73,7 +82,7 @@ public class DownloadInChunksTask extends DownloadTask {
 
     private void downloadInChunks(long fileSize)
             throws IOException, InterruptedException, ExecutionException {
-        calculateSpeedAndProgressChunks(fileSize);
+        calculateSpeedAndProgress(fileSize);
         var futures = prepareParts(fileSize);
         if (!futures.isEmpty()) {
             isCalculating = true;
@@ -127,27 +136,25 @@ public class DownloadInChunksTask extends DownloadTask {
     private void addFutures(long fileSize, ArrayList<CompletableFuture<Void>> futures,
                             File partFile, long fromContinue, long from, long to) {
         CompletableFuture<Void> c;
-        if (isLimited) {
-            c = CompletableFuture.supplyAsync(() -> {
+        if (isSpeedLimited) {
+            bytesToDownloadEachInCycleLimited = speedLimit / chunks;
+            c = CompletableFuture.runAsync(() -> {
                 try {
-                    performLimitedDownload(fromContinue, from, to, partFile, fileSize, 0, 0);
-                } catch (IOException | InterruptedException e) {
-                    if (e instanceof IOException)
-                        log.error(e.getMessage());
+                    performSpeedLimitedDownload(fromContinue, from, to,
+                            partFile, fileSize, 0, 0);
+                } catch (IOException e) {
+                    log.error(e.getMessage());
                     this.pause();
                 }
-                return null;
             }, executor);
         } else {
-            c = CompletableFuture.supplyAsync(() -> {
+            c = CompletableFuture.runAsync(() -> {
                 try {
                     performDownload(fromContinue, from, to, partFile, fileSize, 0, 0);
-                } catch (IOException | InterruptedException e) {
-                    if (e instanceof IOException)
-                        log.error(e.getMessage());
+                } catch (IOException e) {
+                    log.error(e.getMessage());
                     this.pause();
                 }
-                return null;
             }, executor);
         }
         c.whenComplete((unused, throwable) -> Thread.currentThread().interrupt());
@@ -157,9 +164,9 @@ public class DownloadInChunksTask extends DownloadTask {
 
     private void performDownload(long fromContinue, long from, long to, File partFile,
                                  long existingFileSize, int rateLimitCount, int retries)
-            throws InterruptedException, IOException {
+            throws IOException {
         try {
-            var con = DownloadUtils.connect(url, false);
+            var con = DownloadUtils.connect(url);
             con.addRequestProperty("Range", "bytes=" + fromContinue + "-" + to);
             var out = new FileOutputStream(partFile, partFile.exists());
             var fileChannel = out.getChannel();
@@ -172,7 +179,10 @@ public class DownloadInChunksTask extends DownloadTask {
         } catch (SocketTimeoutException | UnknownHostException | SocketException s) {
             retries++;
             if (!paused && (continueOnLostConnectionLost || retries != downloadRetryCount)) {
-                Thread.sleep(2000);
+                try {
+                    Thread.sleep(2000);
+                } catch (InterruptedException ignore) {
+                }
                 var currFileSize = IOUtils.getFileSize(partFile);
                 performDownload(from + currFileSize, from, to, partFile, currFileSize, rateLimitCount, retries);
             }
@@ -190,13 +200,12 @@ public class DownloadInChunksTask extends DownloadTask {
     }
 
 
-    private void performLimitedDownload(long fromContinue, long from, long to,
-                                        File partFile, long existingFileSize,
-                                        int rateLimitCount, int retries) throws IOException, InterruptedException {
+    private void performSpeedLimitedDownload(long fromContinue, long from, long to,
+                                             File partFile, long existingFileSize,
+                                             int rateLimitCount, int retries) throws IOException {
         if (retries != downloadRetryCount) {
             try {
-                var bytesToDownloadEachInCycle = limit / chunks;
-                var con = DownloadUtils.connect(url, false);
+                var con = DownloadUtils.connect(url);
                 if (!downloadModel.isResumable())
                     con.setRequestProperty("User-Agent", userAgent);
                 con.addRequestProperty("Range", "bytes=" + fromContinue + "-" + to);
@@ -205,34 +214,40 @@ public class DownloadInChunksTask extends DownloadTask {
                 fileChannels.add(fileChannel);
                 var byteChannel = Channels.newChannel(con.getInputStream());
                 long finalExistingFileSize = existingFileSize;
-                var lock = fileChannel.lock();
                 while (from + finalExistingFileSize < to) {
-                    fileChannel.transferFrom(byteChannel, finalExistingFileSize, bytesToDownloadEachInCycle);
-                    finalExistingFileSize += bytesToDownloadEachInCycle;
-                    Thread.sleep(ONE_SEC);
+                    fileChannel.transferFrom(byteChannel, finalExistingFileSize, bytesToDownloadEachInCycleLimited);
+                    finalExistingFileSize += bytesToDownloadEachInCycleLimited;
+                    try {
+                        Thread.sleep(ONE_SEC);
+                    } catch (InterruptedException ignore) {
+                    }
                 }
-                lock.release();
                 fileChannel.close();
                 con.disconnect();
             } catch (SocketTimeoutException | UnknownHostException s) {
                 if (!paused) {
                     retries++;
-                    Thread.sleep(2000);
+                    try {
+                        Thread.sleep(2000);
+                    } catch (InterruptedException ignore) {
+                    }
                     var currFileSize = IOUtils.getFileSize(partFile);
-                    performLimitedDownload(from + currFileSize, from, to, partFile, currFileSize, rateLimitCount, retries);
+                    performSpeedLimitedDownload(from + currFileSize, from, to, partFile,
+                            currFileSize, rateLimitCount, retries);
                 }
             } catch (ClosedChannelException ignore) {
             }
             var currFileSize = IOUtils.getFileSize(partFile);
             if (!paused && currFileSize != (to - from + 1) && downloadRateLimitCount < rateLimitCount) {
                 rateLimitCount++;
-                performLimitedDownload(from + currFileSize, from, to, partFile, currFileSize, rateLimitCount, retries);
+                performSpeedLimitedDownload(from + currFileSize, from, to, partFile, currFileSize
+                        , rateLimitCount, retries);
             }
         }
     }
 
 
-    private void calculateSpeedAndProgressChunks(long fileSize) {
+    private void calculateSpeedAndProgress(long fileSize) {
         executor.submit(() -> {
             Thread.currentThread().setName("calculator: " + Thread.currentThread().getName());
             try {
@@ -244,7 +259,8 @@ public class DownloadInChunksTask extends DownloadTask {
                         currentFileSize += Files.size(filePaths.get(i));
                     updateProgress(currentFileSize, fileSize);
                     updateValue(currentFileSize);
-
+                    if (isByteLimited && currentFileSize >= byteLimit)
+                        pause();
                     Thread.sleep(ONE_SEC);
                 }
             } catch (InterruptedException | NoSuchFileException ignore) {
@@ -260,7 +276,7 @@ public class DownloadInChunksTask extends DownloadTask {
         log.info("Paused download: " + downloadModel);
         try {
             //this will cause execution get out of transferFrom
-            for (var channel : fileChannels)
+            for (var channel : new ArrayList<>(fileChannels))
                 if (channel != null)
                     channel.close();
         } catch (IOException e) {
@@ -276,6 +292,7 @@ public class DownloadInChunksTask extends DownloadTask {
 
     @Override
     protected void succeeded() {
+
         if (!Platform.isFxApplicationThread())
             runFinalization();
         else executor.submit(this::runFinalization);
@@ -283,7 +300,7 @@ public class DownloadInChunksTask extends DownloadTask {
 
     private void runFinalization() {
         try {
-            for (var channel : fileChannels)
+            for (var channel : new ArrayList<>(fileChannels))
                 if (channel != null)
                     channel.close();
             var dmOpt = currentDownloadings.stream()
@@ -291,7 +308,8 @@ public class DownloadInChunksTask extends DownloadTask {
                     .findFirst();
             if (dmOpt.isPresent()) {
                 var download = dmOpt.get();
-                download.setDownloadStatus(DownloadStatus.Paused);
+                if (!newLimitSet)
+                    download.setDownloadStatus(DownloadStatus.Paused);
                 if (IOUtils.mergeFiles(download, chunks, filePaths)) {
                     log.info("File successfully downloaded: " + download);
                     download.setCompleteDate(LocalDateTime.now());
@@ -309,9 +327,9 @@ public class DownloadInChunksTask extends DownloadTask {
                                     });
                     if (download.isOpenAfterComplete())
                         openFile(download);
-                } else
-                    openDownloadings.stream().filter(dc -> dc.getDownloadModel().equals(download))
-                            .forEach(DetailsController::onPause);
+                } else if (!newLimitSet)
+                        openDownloadings.stream().filter(dc -> dc.getDownloadModel().equals(download))
+                                .forEach(DetailsController::onPause);
 
                 DownloadsRepo.updateDownloadProgress(download);
                 DownloadsRepo.updateDownloadLastTryDate(download);
@@ -325,6 +343,8 @@ public class DownloadInChunksTask extends DownloadTask {
             if (executor != null && !blocking)
                 executor.shutdownNow();
             System.gc();
+            if (!newLimitSet) whenDone();
+            else newLimitSet = false;
         }
     }
 
@@ -353,5 +373,21 @@ public class DownloadInChunksTask extends DownloadTask {
             return;
         }
         succeeded();
+    }
+
+    public void setSpeedLimit(long speedLimit) {
+        this.speedLimit = speedLimit;
+        if (isSpeedLimited && speedLimit != 0)
+            bytesToDownloadEachInCycleLimited = speedLimit / chunks;
+        else {
+            newLimitSet = true;
+            pause();
+            try {
+                DownloadOpUtils.triggerDownload(downloadModel, speedLimit, downloadModel.getSize(), true, false, null);
+            } catch (ExecutionException | InterruptedException e) {
+                log.error(e.getMessage());
+            }
+        }
+        this.isSpeedLimited = true;
     }
 }

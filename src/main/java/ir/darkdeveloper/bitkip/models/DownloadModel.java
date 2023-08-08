@@ -38,6 +38,10 @@ public class DownloadModel {
     private boolean openAfterComplete;
     private boolean showCompleteDialog;
     private boolean resumable;
+    private TurnOffMode turnOffMode;
+
+    private long speedLimit;
+    private long byteLimit;
 
     private String sizeString;
     private String downloadedString;

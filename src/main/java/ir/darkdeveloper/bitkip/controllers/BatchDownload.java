@@ -80,7 +80,7 @@ public class BatchDownload implements QueueObserver {
         errorLabel.setVisible(false);
         checkBtn.setDisable(true);
         Validations.prepareLinkFromClipboard(urlField);
-        Validations.validateChunksInputChecks(chunksField);
+        Validations.validateChunksInput(chunksField);
         Validations.validateIntInputCheck(startField, 0L);
         Validations.validateIntInputCheck(endField, 0L);
         var questionBtns = new Button[]{questionBtnUrl, questionBtnChunks};
@@ -122,7 +122,7 @@ public class BatchDownload implements QueueObserver {
             var links = generateLinks(url, start, end, Integer.parseInt(chunksField.getText()), true);
             var link = links.get(0);
             tempLink = link;
-            var connection = DownloadUtils.connect(link.getUrl(), true);
+            var connection = DownloadUtils.connect(link.getUrl());
             var fileNameLocationFuture = CompletableFuture.supplyAsync(() -> DownloadUtils.extractFileName(link.getUrl(), connection))
                     .thenAccept(this::setLocation);
             fileNameLocationFuture
@@ -321,6 +321,10 @@ public class BatchDownload implements QueueObserver {
 
     @Override
     public void updateQueue() {
+        updateQueueData(queueCombo);
+    }
+
+    public static void updateQueueData(ComboBox<QueueModel> queueCombo) {
         var queues = QueueSubject.getQueues();
         if (queues.isEmpty())
             queues = QueuesRepo.getAllQueues(false, false);
