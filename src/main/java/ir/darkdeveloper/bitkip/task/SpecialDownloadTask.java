@@ -34,6 +34,7 @@ public class SpecialDownloadTask extends DownloadTask {
     private boolean blocking;
     private long fileSize;
     private String url;
+    private boolean isCalculating;
 
 
     /**
@@ -55,8 +56,7 @@ public class SpecialDownloadTask extends DownloadTask {
             if (!parentFolder.exists())
                 parentFolder.mkdir();
             fileSize = downloadModel.getSize();
-            if (fileSize == -1 || fileSize == 0 || !downloadModel.isResumable())
-                performDownloadInStream();
+            performDownloadInStream();
         } catch (IOException e) {
             log.error(e.getMessage());
             this.pause();
@@ -68,6 +68,7 @@ public class SpecialDownloadTask extends DownloadTask {
         InputStream i = null;
         ReadableByteChannel rbc = null;
         FileOutputStream fos = null;
+        var notResumableOnly = fileSize > 0;
         try {
             var con = DownloadUtils.connect(url);
             con.setRequestProperty("User-Agent", userAgent);
@@ -76,14 +77,16 @@ public class SpecialDownloadTask extends DownloadTask {
 
             fos = new FileOutputStream(file, file.exists());
             fileChannel = fos.getChannel();
-
-            updateProgress(0, 1);
+            if (!notResumableOnly)
+                updateProgress(0, 1);
+            else
+                calculateSpeedAndProgress();
 
             var buffer = ByteBuffer.allocate(8192);
             while (rbc.read(buffer) != -1) {
                 buffer.flip();
                 fileChannel.write(buffer);
-                if (fileSize < 0)
+                if (!notResumableOnly)
                     updateValue(fileChannel.position());
                 buffer.clear();
             }
@@ -91,7 +94,8 @@ public class SpecialDownloadTask extends DownloadTask {
             var size = fileChannel.size();
             downloadModel.setSize(size);
 
-            DownloadsRepo.updateDownloadProperty(DownloadsRepo.COL_SIZE, String.valueOf(size), downloadModel.getId());
+            if (!notResumableOnly)
+                DownloadsRepo.updateDownloadProperty(DownloadsRepo.COL_SIZE, String.valueOf(size), downloadModel.getId());
 
 
         } catch (IOException e) {
@@ -110,6 +114,28 @@ public class SpecialDownloadTask extends DownloadTask {
             if (i != null)
                 i.close();
         }
+    }
+
+    private void calculateSpeedAndProgress() {
+        if (isCalculating)
+            return;
+        executor.submit(() -> {
+            Thread.currentThread().setName("calculator: " + Thread.currentThread().getName());
+            try {
+                isCalculating = true;
+                while (!paused) {
+                    Thread.sleep(ONE_SEC);
+                    var currentFileSize = IOUtils.getFileSize(file);
+                    updateProgress(currentFileSize, fileSize);
+                    updateValue(currentFileSize);
+                }
+                isCalculating = false;
+
+            } catch (InterruptedException ignore) {
+            } catch (IOException e) {
+                log.error(e.getMessage());
+            }
+        });
     }
 
 
