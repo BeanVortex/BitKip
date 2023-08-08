@@ -134,8 +134,8 @@ public class SingleDownload implements QueueObserver {
         urlField.setText(urlModel.url());
         nameField.setText(urlModel.filename());
         setLocation(urlModel.filename());
-        sizeLabel.setText(IOUtils.formatBytes(urlModel.fileSize()));
-        bytesField.setText(String.valueOf(urlModel.fileSize()));
+        sizeLabel.setText(IOUtils.formatBytes(fileSize));
+        bytesField.setText(String.valueOf(fileSize));
         HttpURLConnection conn;
         try {
             conn = DownloadUtils.connect(urlModel.url());

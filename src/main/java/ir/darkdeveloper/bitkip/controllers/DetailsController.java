@@ -390,6 +390,8 @@ public class DetailsController implements FXMLController {
 
     private void onBytesChanged() {
         var text = bytesField.getText();
+        if (text.isBlank())
+            return;
         if (!text.matches("\\d*"))
             text = text.replaceAll("\\D", "");
         if (Long.parseLong(text) < downloadModel.getSize()) {

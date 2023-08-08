@@ -75,19 +75,18 @@
     -fx-opacity: 0.8;
 }
 
-.min-btn{
+.min-btn {
     -fx-background-color: -fx-primary-color;
     -fx-border-color: -fx-green2-color;
     -fx-border-radius: 4px;
     -fx-background-radius: 4px;
     -fx-cursor: hand;
     -fx-effect: dropshadow(one-pass-box, rgba(55, 71, 79, 0.2), 5, 0, 0, 2);
+    -fx-text-fill: -fx-text-color;
 }
-
 
 .min-btn:hover{
     -fx-background-color: -fx-green2-color;
-    -fx-text-fill: white;
 }
 .min-btn:pressed{
     -fx-background-color: -fx-green2-color-hover;

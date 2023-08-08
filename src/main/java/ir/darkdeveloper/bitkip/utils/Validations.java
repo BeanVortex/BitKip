@@ -16,12 +16,12 @@ public class Validations {
 
     public static void validateInputChecks(TextField chunksField, TextField bytesField,
                                            TextField speedField, DownloadModel dm) {
-        validateChunksInputChecks(chunksField);
-        validateSpeedInputChecks(speedField);
-        validateBytesInputChecks(bytesField, dm);
+        validateChunksInput(chunksField);
+        validateSpeedInput(speedField);
+        validateBytesInput(bytesField, dm.getSize());
     }
 
-    private static void validateBytesInputChecks(TextField bytesField, DownloadModel dm) {
+    private static void validateBytesInput(TextField bytesField, long fileSize) {
         if (bytesField == null)
             return;
 
@@ -29,19 +29,19 @@ public class Validations {
             if (!newValue.matches("\\d*")) {
                 if (newValue.equals("-1"))
                     newValue = "0";
-                newValue = newValue.replaceAll("\\D-", "");
+                newValue = newValue.replaceAll("\\D", "");
                 bytesField.setText(newValue);
             }
-            if (newValue.isBlank() || (dm.getSize() != -1 && Long.parseLong(newValue) > dm.getSize()))
-                bytesField.setText(String.valueOf(dm.getSize()));
+            if (newValue.isBlank() || (fileSize > 0 && Long.parseLong(newValue) > fileSize))
+                bytesField.setText(String.valueOf(fileSize));
         });
         bytesField.focusedProperty().addListener((o, old, newValue) -> {
             if (!newValue && bytesField.getText().isBlank())
-                bytesField.setText(String.valueOf(dm.getSize()));
+                bytesField.setText(String.valueOf(fileSize));
         });
     }
 
-    public static void validateSpeedInputChecks(TextField speedField) {
+    public static void validateSpeedInput(TextField speedField) {
         if (speedField == null)
             return;
         speedField.textProperty().addListener((o, old, newValue) -> {
@@ -54,7 +54,7 @@ public class Validations {
         });
     }
 
-    public static void validateChunksInputChecks(TextField chunksField) {
+    public static void validateChunksInput(TextField chunksField) {
         if (chunksField == null)
             return;
         var threads = maxChunks(Long.MAX_VALUE);

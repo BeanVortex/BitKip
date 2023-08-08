@@ -80,7 +80,7 @@ public class BatchDownload implements QueueObserver {
         errorLabel.setVisible(false);
         checkBtn.setDisable(true);
         Validations.prepareLinkFromClipboard(urlField);
-        Validations.validateChunksInputChecks(chunksField);
+        Validations.validateChunksInput(chunksField);
         Validations.validateIntInputCheck(startField, 0L);
         Validations.validateIntInputCheck(endField, 0L);
         var questionBtns = new Button[]{questionBtnUrl, questionBtnChunks};
