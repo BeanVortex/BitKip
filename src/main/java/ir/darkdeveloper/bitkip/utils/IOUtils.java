@@ -24,6 +24,7 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
+import java.util.regex.Pattern;
 
 import static ir.darkdeveloper.bitkip.config.AppConfigs.*;
 import static ir.darkdeveloper.bitkip.config.observers.QueueSubject.getQueues;
@@ -468,5 +469,51 @@ public class IOUtils {
             throw new IOException(msg);
         }
 
+    }
+
+    public static void writeUpdateDescription(UpdateModel.Description description) {
+        try {
+            var file = new File(dataPath + "patch_note.txt");
+            if (!file.exists())
+                file.createNewFile();
+
+            var writer = new FileWriter(file);
+            writer.append(description.header()).append("\n");
+            for (var s : description.features())
+                writer.append(s).append("\n");
+            writer.flush();
+            writer.close();
+            log.info("Saved patch note");
+        } catch (IOException e) {
+            log.error(e.getMessage());
+        }
+    }
+
+    public static String readUpdateDescription() {
+        try {
+            var file = new File(dataPath + "patch_note.txt");
+            var reader = new BufferedReader(new FileReader(file));
+            String line;
+            var str = new StringBuilder();
+            if ((line = reader.readLine()) != null) {
+                var pattern = Pattern.compile("\\d+(\\.\\d+)*");
+                var matcher = pattern.matcher(line);
+
+                String version = "";
+                while (matcher.find())
+                    version = matcher.group();
+
+                if (!VERSION.equals(version))
+                    return "No recent patch notes";
+            }
+            while ((line = reader.readLine()) != null)
+                str.append(line).append("\n");
+            reader.close();
+            log.info("Read patch note");
+            return str.toString();
+        } catch (IOException e) {
+            log.error(e.getMessage());
+        }
+        return "No recent patch notes";
     }
 }
