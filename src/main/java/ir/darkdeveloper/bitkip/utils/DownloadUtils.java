@@ -19,7 +19,7 @@ import org.controlsfx.control.PopOver;
 import java.io.File;
 import java.io.IOException;
 import java.net.HttpURLConnection;
-import java.net.URL;
+import java.net.URI;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
@@ -35,7 +35,7 @@ public class DownloadUtils {
     public static HttpURLConnection connect(String uri) throws IOException {
         if (uri.isBlank())
             throw new IllegalArgumentException("URL is blank");
-        var url = new URL(uri);
+        var url = URI.create(uri).toURL();
         var conn = (HttpURLConnection) url.openConnection();
         conn.setConnectTimeout(connectionTimeout);
         conn.setReadTimeout(readTimeout);
@@ -48,7 +48,7 @@ public class DownloadUtils {
         try {
             if (uri.isBlank())
                 throw new IllegalArgumentException("URL is blank");
-            var url = new URL(uri);
+            var url = URI.create(uri).toURL();
             var testCon = (HttpURLConnection) url.openConnection();
             testCon.setConnectTimeout(2000);
             testCon.connect();
