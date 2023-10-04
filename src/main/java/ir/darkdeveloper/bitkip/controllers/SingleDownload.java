@@ -245,7 +245,7 @@ public class SingleDownload implements QueueObserver {
                 return;
             }
             DownloadOpUtils.startDownload(dm, getBytesFromString(speedField.getText()), Long.parseLong(bytesField.getText()),
-                    false, false, null);
+                    false, false);
             DownloadOpUtils.openDetailsStage(dm);
             getQueueSubject().removeObserver(this);
             stage.close();

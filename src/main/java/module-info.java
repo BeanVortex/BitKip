@@ -19,18 +19,16 @@ module ir.darkdeveloper.bitkip {
     requires java.desktop;
     requires javafx.swing;
     requires com.sun.jna;
-    requires org.eclipse.jetty.servlet;
-    requires org.eclipse.jetty.server;
-    requires org.eclipse.jetty.util;
     requires org.slf4j;
     requires ch.qos.logback.classic;
     requires com.fasterxml.jackson.databind;
+    requires io.helidon.webserver;
+    requires io.helidon.media.jackson;
 
     opens ir.darkdeveloper.bitkip to javafx.fxml, javafx.controls;
-    opens ir.darkdeveloper.bitkip.controllers to javafx.fxml, javafx.base, org.eclipse.jetty.servlet, org.eclipse.jetty.server;
+    opens ir.darkdeveloper.bitkip.controllers to javafx.fxml, javafx.base;
     opens ir.darkdeveloper.bitkip.models to javafx.fxml, javafx.base, com.fasterxml.jackson.databind;
     opens ir.darkdeveloper.bitkip.controllers.interfaces to javafx.base, javafx.fxml;
-    opens ir.darkdeveloper.bitkip.servlets to javafx.base, javafx.fxml,
-            org.eclipse.jetty.server, org.eclipse.jetty.servlet, com.fasterxml.jackson.databind;
+    opens ir.darkdeveloper.bitkip.servlets to javafx.base, javafx.fxml, com.fasterxml.jackson.databind;
     exports ir.darkdeveloper.bitkip;
 }

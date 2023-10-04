@@ -24,9 +24,9 @@ import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Future;
 
 import static ir.darkdeveloper.bitkip.config.AppConfigs.*;
 import static ir.darkdeveloper.bitkip.utils.DownloadOpUtils.openFile;
@@ -82,20 +82,20 @@ public class ChunksDownloadTask extends DownloadTask {
 
     private void downloadInChunks(long fileSize)
             throws IOException, InterruptedException, ExecutionException {
-        calculateSpeedAndProgress(fileSize);
         var futures = prepareParts(fileSize);
+//        futures.addFirst(calculateSpeedAndProgress(fileSize));
+        calculateSpeedAndProgress(fileSize);
         if (!futures.isEmpty()) {
             isCalculating = true;
             log.info("Downloading : " + downloadModel);
-            var futureArr = new CompletableFuture[futures.size()];
-            futures.toArray(futureArr);
-            CompletableFuture.allOf(futureArr).get();
+            for (var future : futures)
+                future.get();
         }
     }
 
-    private List<CompletableFuture<Void>> prepareParts(long fileSize) throws IOException {
+    private List<Future<?>> prepareParts(long fileSize) throws IOException {
+        var futures = new ArrayList<Future<?>>();
         var bytesForEach = fileSize / chunks;
-        var futures = new ArrayList<CompletableFuture<Void>>();
         var to = bytesForEach;
         var from = 0L;
         var fromContinue = 0L;
@@ -133,12 +133,12 @@ public class ChunksDownloadTask extends DownloadTask {
         return futures;
     }
 
-    private void addFutures(long fileSize, ArrayList<CompletableFuture<Void>> futures,
+    private void addFutures(long fileSize, ArrayList<Future<?>> futures,
                             File partFile, long fromContinue, long from, long to) {
-        CompletableFuture<Void> c;
+        Future<?> c;
         if (isSpeedLimited) {
             bytesToDownloadEachInCycleLimited = speedLimit / chunks;
-            c = CompletableFuture.runAsync(() -> {
+            c = executor.submit(() -> {
                 try {
                     performSpeedLimitedDownload(fromContinue, from, to,
                             partFile, fileSize, 0, 0);
@@ -146,18 +146,17 @@ public class ChunksDownloadTask extends DownloadTask {
                     log.error(e.getMessage());
                     this.pause();
                 }
-            }, executor);
+            });
         } else {
-            c = CompletableFuture.runAsync(() -> {
+            c = executor.submit(() -> {
                 try {
                     performDownload(fromContinue, from, to, partFile, fileSize, 0, 0);
                 } catch (IOException e) {
                     log.error(e.getMessage());
                     this.pause();
                 }
-            }, executor);
+            });
         }
-        c.whenComplete((unused, throwable) -> Thread.currentThread().interrupt());
         futures.add(c);
     }
 
@@ -248,7 +247,7 @@ public class ChunksDownloadTask extends DownloadTask {
 
 
     private void calculateSpeedAndProgress(long fileSize) {
-        executor.submit(() -> {
+        new Thread(() -> {
             Thread.currentThread().setName("calculator: " + Thread.currentThread().getName());
             try {
                 while (!isCalculating) Thread.onSpinWait();
@@ -267,7 +266,7 @@ public class ChunksDownloadTask extends DownloadTask {
             } catch (IOException e) {
                 log.error(e.getLocalizedMessage());
             }
-        });
+        }).start();
     }
 
     @Override
@@ -328,8 +327,8 @@ public class ChunksDownloadTask extends DownloadTask {
                     if (download.isOpenAfterComplete())
                         openFile(download);
                 } else if (!newLimitSet)
-                        openDownloadings.stream().filter(dc -> dc.getDownloadModel().equals(download))
-                                .forEach(DetailsController::onPause);
+                    openDownloadings.stream().filter(dc -> dc.getDownloadModel().equals(download))
+                            .forEach(DetailsController::onPause);
 
                 DownloadsRepo.updateDownloadProgress(download);
                 DownloadsRepo.updateDownloadLastTryDate(download);
@@ -383,7 +382,7 @@ public class ChunksDownloadTask extends DownloadTask {
             newLimitSet = true;
             pause();
             try {
-                DownloadOpUtils.triggerDownload(downloadModel, speedLimit, downloadModel.getSize(), true, false, null);
+                DownloadOpUtils.triggerDownload(downloadModel, speedLimit, downloadModel.getSize(), true, false);
             } catch (ExecutionException | InterruptedException e) {
                 log.error(e.getMessage());
             }

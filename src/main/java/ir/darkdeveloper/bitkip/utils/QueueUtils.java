@@ -80,7 +80,7 @@ public class QueueUtils {
                     dm.setTurnOffMode(TurnOffMode.NOTHING);
                     if (!dm.getQueues().contains(qm))
                         dm.getQueues().add(qm);
-                    String speedLimit = null;
+                    String speedLimit = "0";
                     if (qm.getSpeed() != null)
                         speedLimit = qm.getSpeed();
                     if (sDownloads > 1) {
@@ -91,7 +91,7 @@ public class QueueUtils {
                                     sDownloads - simulDownloads.get(),
                                     simulDownloads,
                                     dm, speedLimit);
-                    } else DownloadOpUtils.startDownload(dm, getBytesFromString(speedLimit), 0, true, true, null);
+                    } else DownloadOpUtils.startDownload(dm, getBytesFromString(speedLimit), 0, true, true);
 
                 }
                 if (!startedQueues.contains(startedQueue))
@@ -118,7 +118,7 @@ public class QueueUtils {
                                                               int i, DownloadModel dm, String speedLimit, int sDownloads) {
         if (simulDownloads.get() < sDownloads) {
             DownloadOpUtils.startDownload(dm, getBytesFromString(speedLimit),
-                    0, true, false, null);
+                    0, true, false);
             simulDownloads.getAndIncrement();
         } else {
             while (true) {
@@ -146,7 +146,7 @@ public class QueueUtils {
     private static void performSimultaneousDownloadDontWaitForPrev(int remainingSimul, AtomicInteger simulDownloads,
                                                                    DownloadModel dm, String speedLimit) {
         if (remainingSimul != 0) {
-            DownloadOpUtils.startDownload(dm, getBytesFromString(speedLimit), 0, true, false, null);
+            DownloadOpUtils.startDownload(dm, getBytesFromString(speedLimit), 0, true, false);
             simulDownloads.getAndIncrement();
         }
     }
