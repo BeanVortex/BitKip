@@ -226,7 +226,9 @@ public class BatchDownload implements QueueObserver {
 
     @FXML
     private void onSelectLocation(ActionEvent e) {
-        DownloadUtils.selectLocation(e, locationField);
+        var path = DownloadUtils.selectLocation(FxUtils.getStageFromEvent(e));
+        if (path != null)
+            locationField.setText(path);
         if (tempLink != null)
             handleError(() -> DownloadUtils.checkIfFileIsOKToSave(locationField.getText(),
                     tempLink.getName(), null, checkBtn, null), errorLabel);

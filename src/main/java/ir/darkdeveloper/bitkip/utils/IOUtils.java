@@ -198,7 +198,7 @@ public class IOUtils {
         }
     }
 
-    public static void moveDownloadFilesFiles(DownloadModel dm, String newFilePath) {
+    public static void moveDownloadFiles(DownloadModel dm, String newFilePath) {
         if (dm.getProgress() != 100) {
             if (dm.getChunks() != 0) {
                 var oldTempPath = Paths.get(dm.getFilePath()).getParent() + File.separator + ".temp" + File.separator + dm.getName();
@@ -221,7 +221,7 @@ public class IOUtils {
                 .filter(dm -> dm.getFilePath().contains(downloadPath))
                 .peek(dm -> {
                     var newFilePath = FileType.determineFileType(dm.getName()).getPath() + dm.getName();
-                    moveDownloadFilesFiles(dm, newFilePath);
+                    moveDownloadFiles(dm, newFilePath);
                 });
         removeFolder("Queues" + File.separator + queueName + File.separator + ".temp");
         removeFolder("Queues" + File.separator + queueName);
@@ -261,7 +261,7 @@ public class IOUtils {
                 var downloadsByQueueName = DownloadsRepo.getDownloadsByQueueName(queue.getName());
                 var newFilePath = queuesPath + queue.getName() + File.separator;
                 if (FxUtils.askToMoveFilesForQueues(downloadsByQueueName, queue, newFilePath))
-                    downloadsByQueueName.forEach(dm -> moveDownloadFilesFiles(dm, newFilePath + dm.getName()));
+                    downloadsByQueueName.forEach(dm -> moveDownloadFiles(dm, newFilePath + dm.getName()));
             }
         } else moveFilesAndDeleteQueueFolder(queue.getName());
     }

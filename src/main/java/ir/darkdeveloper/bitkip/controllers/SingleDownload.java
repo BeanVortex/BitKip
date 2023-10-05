@@ -199,7 +199,9 @@ public class SingleDownload implements QueueObserver {
 
     @FXML
     private void onSelectLocation(ActionEvent e) {
-        DownloadUtils.selectLocation(e, locationField);
+        var path = DownloadUtils.selectLocation(FxUtils.getStageFromEvent(e));
+        if (path != null)
+            locationField.setText(path);
         handleError(() -> DownloadUtils.checkIfFileIsOKToSave(locationField.getText(),
                 nameField.getText(), downloadBtn, addBtn, refreshBtn), errorLabel);
     }

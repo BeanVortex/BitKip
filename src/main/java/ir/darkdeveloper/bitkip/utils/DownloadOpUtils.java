@@ -20,6 +20,7 @@ import org.controlsfx.control.Notifications;
 import java.awt.*;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -30,6 +31,7 @@ import static com.sun.jna.Platform.*;
 import static ir.darkdeveloper.bitkip.config.AppConfigs.*;
 import static ir.darkdeveloper.bitkip.repo.DownloadsRepo.*;
 import static ir.darkdeveloper.bitkip.utils.Defaults.ALL_DOWNLOADS_QUEUE;
+import static ir.darkdeveloper.bitkip.utils.DownloadUtils.determineLocation;
 import static ir.darkdeveloper.bitkip.utils.DownloadUtils.getNewFileNameIfExists;
 import static ir.darkdeveloper.bitkip.utils.Validations.maxChunks;
 
@@ -400,5 +402,40 @@ public class DownloadOpUtils {
         var cpyStartedQueues = new ArrayList<>(startedQueues);
         cpyStartedQueues.forEach(q -> QueueUtils.stopQueue(q, false));
         pauseDownloads(currentDownloadings);
+    }
+
+    public static void changeLocation(ObservableList<DownloadModel> selected, ActionEvent e) {
+
+        final String[] path = {DownloadUtils.selectLocation(FxUtils.getStageFromEvent(e))};
+        if (path[0] == null) {
+            Notifications.create()
+                    .title("No Directory")
+                    .text("Nothing changed")
+                    .showError();
+            return;
+        }
+        path[0] = Paths.get(path[0]).normalize().toString();
+
+        var executor = Executors.newCachedThreadPool();
+        executor.submit(() -> {
+            if (!path[0].endsWith(File.separator))
+                path[0] += File.separator;
+
+            selected.forEach(dm -> {
+                if (path[0].contains(Paths.get(downloadPath).normalize().toString()))
+                    path[0] = determineLocation(dm.getName());
+                var newFilePath = path[0] + dm.getName();
+                IOUtils.moveDownloadFiles(dm, newFilePath);
+                dm.setFilePath(newFilePath);
+                mainTableUtils.refreshTable();
+            });
+            Platform.runLater(() ->
+                    Notifications.create()
+                            .title("Moved")
+                            .text("Files moved to the new location:\n" + path[0])
+                            .showConfirm()
+            );
+            executor.shutdownNow();
+        });
     }
 }
