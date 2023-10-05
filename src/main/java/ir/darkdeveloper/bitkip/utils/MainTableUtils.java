@@ -182,12 +182,18 @@ public class MainTableUtils {
 
     public void addRow(DownloadModel download) {
         var items = contentTable.getItems();
-        var queue = items.get(0).getQueues().get(0);
-        var dQueues = download.getQueues();
-        if (dQueues.contains(queue)) {
+        if (items.size() != 0) {
+            var queue = items.get(0).getQueues().get(0);
+            var dQueues = download.getQueues();
+            if (dQueues.contains(queue)) {
+                items.add(download);
+                contentTable.sort();
+            }
+        } else {
             items.add(download);
             contentTable.sort();
         }
+
     }
 
     public void setDownloads(List<DownloadModel> dms, boolean addDateSort) {
