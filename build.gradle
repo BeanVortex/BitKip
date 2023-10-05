@@ -8,7 +8,7 @@ plugins {
 }
 
 group 'ir.darkdeveloper'
-version '1.3.0'
+version '1.4.0'
 sourceCompatibility = '21'
 targetCompatibility = '21'
 mainClassName = 'ir.darkdeveloper.bitkip.BitKip'

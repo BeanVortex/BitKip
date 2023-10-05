@@ -1,6 +1,5 @@
 package ir.darkdeveloper.bitkip.config;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import ir.darkdeveloper.bitkip.controllers.DetailsController;
 import ir.darkdeveloper.bitkip.models.DownloadModel;
 import ir.darkdeveloper.bitkip.models.QueueModel;
@@ -18,7 +17,7 @@ import java.util.*;
 
 public class AppConfigs {
 
-    public static final String VERSION = "1.3.0";
+    public static final String VERSION = "1.4.0";
 
     public static final String dataPath = System.getProperty("user.home")
             + File.separator + "Documents"
@@ -60,7 +59,6 @@ public class AppConfigs {
     public static boolean addSameDownload  = defaultAddSameDownload;
 
 
-    public static final ObjectMapper mapper = new ObjectMapper();
 
     public static Logger log;
     public static String pathToLogFile;
