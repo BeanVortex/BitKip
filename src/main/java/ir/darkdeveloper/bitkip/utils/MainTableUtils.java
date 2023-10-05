@@ -306,5 +306,19 @@ public class MainTableUtils {
         return findDownload(dm.getId());
     }
 
+    public void highlightItem(DownloadModel dm) {
+        if (dm == null)
+            return;
+        clearSelection();
+        contentTable.scrollTo(dm);
+        contentTable.getSelectionModel().select(dm);
+    }
+    public void unhighlightItem() {
+        clearSelection();
+    }
 
+    public DownloadModel searchDownload(String name) {
+        return contentTable.getItems().stream().filter(dm -> dm.getName().toLowerCase().contains(name.toLowerCase()))
+                        .findFirst().orElse(contentTable.getItems().get(0));
+    }
 }

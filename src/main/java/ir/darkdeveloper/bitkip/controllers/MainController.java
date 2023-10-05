@@ -14,10 +14,7 @@ import ir.darkdeveloper.bitkip.utils.SideUtils;
 import javafx.animation.TranslateTransition;
 import javafx.fxml.FXML;
 import javafx.geometry.Pos;
-import javafx.scene.control.Button;
-import javafx.scene.control.ScrollBar;
-import javafx.scene.control.TableView;
-import javafx.scene.control.TreeView;
+import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.input.ScrollEvent;
 import javafx.scene.layout.HBox;
@@ -37,6 +34,8 @@ import static ir.darkdeveloper.bitkip.utils.Defaults.ALL_DOWNLOADS_QUEUE;
 
 public class MainController implements FXMLController, QueueObserver {
 
+    @FXML
+    private TextField searchField;
     @FXML
     private TreeView<String> sideTree;
     @FXML
@@ -86,6 +85,14 @@ public class MainController implements FXMLController, QueueObserver {
         MenuUtils.initFileMenu(menuFile);
         MenuUtils.initOperationMenu(operationMenu);
         MenuUtils.initMoreMenu(moreBtn, contentTable);
+        searchField.textProperty().addListener((o, ol, n) -> {
+            if (n.length() < 3){
+                mainTableUtils.unhighlightItem();
+                return;
+            }
+            var dm = mainTableUtils.searchDownload(n);
+            mainTableUtils.highlightItem(dm);
+        });
     }
 
 
