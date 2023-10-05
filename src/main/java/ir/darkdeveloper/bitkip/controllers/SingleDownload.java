@@ -168,7 +168,7 @@ public class SingleDownload implements QueueObserver {
             queueCombo.getSelectionModel().select(queueCombo.getSelectionModel().getSelectedIndex());
             var url = urlField.getText();
             var connection = DownloadUtils.connect(url);
-            var executor = Executors.newFixedThreadPool(2);
+            var executor = Executors.newVirtualThreadPerTaskExecutor();
             var fileNameLocationFuture =
                     DownloadUtils.prepareFileNameAndFieldsAsync(connection, url, nameField, executor)
                             .thenAccept(this::setLocation);
