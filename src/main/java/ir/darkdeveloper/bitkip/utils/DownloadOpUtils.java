@@ -414,7 +414,6 @@ public class DownloadOpUtils {
                     .showError();
             return;
         }
-        path[0] = Paths.get(path[0]).normalize().toString();
 
         var executor = Executors.newCachedThreadPool();
         executor.submit(() -> {
@@ -422,6 +421,7 @@ public class DownloadOpUtils {
                 path[0] += File.separator;
 
             selected.forEach(dm -> {
+                path[0] = Paths.get(path[0]).normalize().toString();
                 if (path[0].contains(Paths.get(downloadPath).normalize().toString()))
                     path[0] = determineLocation(dm.getName());
                 var newFilePath = path[0] + dm.getName();
@@ -432,7 +432,7 @@ public class DownloadOpUtils {
             Platform.runLater(() ->
                     Notifications.create()
                             .title("Moved")
-                            .text("Files moved to the new location:\n" + path[0])
+                            .text("Files moved to the new location(s):\n" + path[0])
                             .showConfirm()
             );
             executor.shutdownNow();
