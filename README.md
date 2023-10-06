@@ -9,6 +9,8 @@
 - [x] Ability to limit download bytes. lets say you want to download 2GB of a 4GB file
 - [x] Ability to break links to chunks and download each chunk in a thread for maximum download speed
 - [x] Track and control download progress and state
+- [x] Search donwloads
+- [x] Move downloads to another path 
 - [x] Save chunks parts in application folders to isolate BitKip filesystem usage
 - [x] Add Links in single and batch way
 - [x] Ability to refresh expired or damaged links
