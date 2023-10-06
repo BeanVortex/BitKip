@@ -315,7 +315,7 @@ public class FxUtils {
         stage.showAndWait();
     }
 
-    public static boolean askToMoveFilesForQueues(List<DownloadModel> downloads, QueueModel desQueue) {
+    public static boolean askToMoveFilesForQueues(List<DownloadModel> downloads, QueueModel desQueue, String newPath) {
         var downloadsHasFolder = downloads.stream().filter(dm ->
                 !dm.getQueues().stream().filter(QueueModel::hasFolder).toList().isEmpty()
         ).toList();
@@ -333,7 +333,7 @@ public class FxUtils {
         var yes = new ButtonType("Yes", ButtonBar.ButtonData.YES);
         var no = new ButtonType("No", ButtonBar.ButtonData.NO);
         var alert = new Alert(Alert.AlertType.CONFIRMATION,
-                "Would you also like to move download files to the new location?", yes, no);
+                "Would you also like to move download files to the new location under:\n" + newPath, yes, no);
         alert.setTitle("Confirmation");
         alert.setHeaderText("Move files?");
         return showAlert(yes, no, alert);

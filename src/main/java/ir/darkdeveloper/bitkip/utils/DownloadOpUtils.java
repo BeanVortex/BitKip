@@ -10,8 +10,8 @@ import ir.darkdeveloper.bitkip.repo.DatabaseHelper;
 import ir.darkdeveloper.bitkip.repo.DownloadsRepo;
 import ir.darkdeveloper.bitkip.repo.QueuesRepo;
 import ir.darkdeveloper.bitkip.task.ChunksDownloadTask;
-import ir.darkdeveloper.bitkip.task.SpecialDownloadTask;
 import ir.darkdeveloper.bitkip.task.DownloadTask;
+import ir.darkdeveloper.bitkip.task.SpecialDownloadTask;
 import javafx.application.Platform;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -20,17 +20,18 @@ import org.controlsfx.control.Notifications;
 import java.awt.*;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import static com.sun.jna.Platform.*;
 import static ir.darkdeveloper.bitkip.config.AppConfigs.*;
 import static ir.darkdeveloper.bitkip.repo.DownloadsRepo.*;
 import static ir.darkdeveloper.bitkip.utils.Defaults.ALL_DOWNLOADS_QUEUE;
+import static ir.darkdeveloper.bitkip.utils.DownloadUtils.determineLocation;
 import static ir.darkdeveloper.bitkip.utils.DownloadUtils.getNewFileNameIfExists;
 import static ir.darkdeveloper.bitkip.utils.Validations.maxChunks;
 
@@ -40,8 +41,7 @@ public class DownloadOpUtils {
      * @param blocking of course, it should be done in concurrent environment otherwise it will block the main thread.
      *                 mostly using for queue downloading
      */
-    public static void triggerDownload(DownloadModel dm, long speed, long bytes, boolean resume, boolean blocking,
-                                       ExecutorService executor) throws ExecutionException, InterruptedException {
+    public static void triggerDownload(DownloadModel dm, long speed, long bytes, boolean resume, boolean blocking) throws ExecutionException, InterruptedException {
 
         try {
             Validations.fillNotFetchedData(dm);
@@ -93,8 +93,7 @@ public class DownloadOpUtils {
             DownloadsRepo.insertDownload(dm);
             mainTableUtils.addRow(dm);
         }
-        if (executor == null)
-            executor = Executors.newCachedThreadPool();
+        var executor = Executors.newVirtualThreadPerTaskExecutor();
         downloadTask.setExecutor(executor);
         log.info(("Starting download in " + (blocking ? "blocking" : "non-blocking") + ": %s").formatted(dm));
         if (blocking)
@@ -104,8 +103,7 @@ public class DownloadOpUtils {
 
     }
 
-    public static void startDownload(DownloadModel dm, long speedLimit, long byteLimit, boolean resume,
-                                     boolean blocking, ExecutorService executor) {
+    public static void startDownload(DownloadModel dm, long speedLimit, long byteLimit, boolean resume, boolean blocking) {
         if (!currentDownloadings.contains(dm)) {
             dm.setLastTryDate(LocalDateTime.now());
             dm.setDownloadStatus(DownloadStatus.Trying);
@@ -114,7 +112,7 @@ public class DownloadOpUtils {
             DownloadsRepo.updateDownloadLastTryDate(dm);
             mainTableUtils.refreshTable();
             try {
-                triggerDownload(dm, speedLimit, byteLimit, resume, blocking, executor);
+                triggerDownload(dm, speedLimit, byteLimit, resume, blocking);
             } catch (ExecutionException | InterruptedException e) {
                 log.error(e.getMessage());
             }
@@ -136,7 +134,7 @@ public class DownloadOpUtils {
                     mainTableUtils.refreshTable();
                     if (dm.isResumable()) {
                         log.info("Resuming download : " + dm);
-                        startDownload(dm, speedLimit, byteLimit, true, false, null);
+                        startDownload(dm, speedLimit, byteLimit, true, false);
                     } else
                         restartDownload(dm);
                     openDownloadings.stream().filter(dc -> dc.getDownloadModel().equals(dm))
@@ -169,7 +167,7 @@ public class DownloadOpUtils {
         String[] values = {"0", "0", "NULL", lastTryDate.toString(), dm.getTurnOffMode().name()};
         DatabaseHelper.updateCols(cols, values, DatabaseHelper.DOWNLOADS_TABLE_NAME, dmId);
         try {
-            triggerDownload(dm, 0, dm.getSize(), true, false, null);
+            triggerDownload(dm, 0, dm.getSize(), true, false);
         } catch (ExecutionException | InterruptedException e) {
             log.error(e.getMessage());
         }
@@ -385,7 +383,7 @@ public class DownloadOpUtils {
             dm.getQueues().add(allDownloadsQueue);
             dm.getQueues().add(queue);
             dm.setDownloadStatus(DownloadStatus.Trying);
-            DownloadOpUtils.startDownload(dm, 0, dm.getSize(), false, false, null);
+            DownloadOpUtils.startDownload(dm, 0, dm.getSize(), false, false);
             Notifications.create()
                     .title("Downloading now ...")
                     .text(dm.getName())
@@ -404,5 +402,40 @@ public class DownloadOpUtils {
         var cpyStartedQueues = new ArrayList<>(startedQueues);
         cpyStartedQueues.forEach(q -> QueueUtils.stopQueue(q, false));
         pauseDownloads(currentDownloadings);
+    }
+
+    public static void changeLocation(ObservableList<DownloadModel> selected, ActionEvent e) {
+
+        final String[] path = {DownloadUtils.selectLocation(FxUtils.getStageFromEvent(e))};
+        if (path[0] == null) {
+            Notifications.create()
+                    .title("No Directory")
+                    .text("Nothing changed")
+                    .showError();
+            return;
+        }
+
+        var executor = Executors.newCachedThreadPool();
+        executor.submit(() -> {
+            if (!path[0].endsWith(File.separator))
+                path[0] += File.separator;
+
+            selected.forEach(dm -> {
+                path[0] = Paths.get(path[0]).normalize().toString();
+                if (path[0].contains(Paths.get(downloadPath).normalize().toString()))
+                    path[0] = determineLocation(dm.getName());
+                var newFilePath = path[0] + dm.getName();
+                IOUtils.moveDownloadFiles(dm, newFilePath);
+                dm.setFilePath(newFilePath);
+                mainTableUtils.refreshTable();
+            });
+            Platform.runLater(() ->
+                    Notifications.create()
+                            .title("Moved")
+                            .text("Files moved to the new location(s):\n" + path[0])
+                            .showConfirm()
+            );
+            executor.shutdownNow();
+        });
     }
 }

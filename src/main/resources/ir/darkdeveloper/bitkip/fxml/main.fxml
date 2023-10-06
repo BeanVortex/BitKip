@@ -29,7 +29,13 @@
         <StackPane>
             <HBox>
                 <TreeView prefWidth="180" minWidth="160" fx:id="sideTree"/>
-                <TableView minWidth="750" prefWidth="Infinity" fx:id="contentTable"/>
+                <VBox>
+                    <HBox spacing="8" alignment="CENTER_LEFT" style="-fx-padding: 5 10">
+                        <Label text="Search"/>
+                        <TextField fx:id="searchField" HBox.hgrow="ALWAYS" maxHeight="60"/>
+                    </HBox>
+                    <TableView minWidth="750" prefWidth="Infinity" fx:id="contentTable" VBox.vgrow="ALWAYS"/>
+                </VBox>
             </HBox>
             <Button fx:id="newDownloadBtn" onAction="#onNewDownload">
                 <StackPane.margin>

@@ -1,43 +1,47 @@
 package ir.darkdeveloper.bitkip.servlets;
 
+import io.helidon.webserver.Routing;
+import io.helidon.webserver.ServerRequest;
+import io.helidon.webserver.ServerResponse;
+import io.helidon.webserver.Service;
 import ir.darkdeveloper.bitkip.controllers.BatchDownload;
 import ir.darkdeveloper.bitkip.models.BatchURLModel;
 import ir.darkdeveloper.bitkip.models.LinkModel;
 import ir.darkdeveloper.bitkip.repo.QueuesRepo;
+import ir.darkdeveloper.bitkip.utils.DownloadUtils;
 import ir.darkdeveloper.bitkip.utils.FxUtils;
 import ir.darkdeveloper.bitkip.utils.Validations;
-import ir.darkdeveloper.bitkip.utils.DownloadUtils;
-import jakarta.servlet.http.HttpServlet;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
 import javafx.application.Platform;
 
 import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 
-import static ir.darkdeveloper.bitkip.config.AppConfigs.log;
-import static ir.darkdeveloper.bitkip.config.AppConfigs.mapper;
 import static ir.darkdeveloper.bitkip.utils.Defaults.ALL_DOWNLOADS_QUEUE;
 
-public class BatchServlet extends HttpServlet {
-
+public class BatchService implements Service {
     @Override
-    protected void doPost(HttpServletRequest req, HttpServletResponse resp) {
-        try {
-            resp.setContentType("application/json");
-            resp.setCharacterEncoding("UTF-8");
+    public void update(Routing.Rules rules) {
+        rules.post("/", this::doPost);
+    }
 
-            var urlModel = mapper.readValue(req.getReader(), BatchURLModel.class);
-            var links = convertToLinks(urlModel);
-            if (links.isEmpty())
-                throw new IOException("Empty data sent by extension");
-            Platform.runLater(() -> FxUtils.newBatchListStage(links));
-            resp.setStatus(200);
-        } catch (IOException e) {
-            log.warn(e.getLocalizedMessage());
-            resp.setStatus(400);
-        }
+    private void doPost(ServerRequest req, ServerResponse res) {
+            var urlModel = req.content().as(BatchURLModel.class);
+            urlModel.thenAccept(batchURLModel -> {
+                List<LinkModel> links;
+                try {
+                    links = convertToLinks(batchURLModel);
+                } catch (IOException e) {
+                    res.status(400).send("Connection error");
+                    return;
+                }
+                if (links.isEmpty()){
+                    res.status(400).send("Empty data sent by extension");
+                    return;
+                }
+                Platform.runLater(() -> FxUtils.newBatchListStage(links));
+                res.status(200).send();
+            });
     }
 
     private List<LinkModel> convertToLinks(BatchURLModel urlModel) throws IOException {
@@ -59,4 +63,6 @@ public class BatchServlet extends HttpServlet {
             return lm;
         }).toList();
     }
+
+
 }

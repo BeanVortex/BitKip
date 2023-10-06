@@ -3,14 +3,14 @@ import org.gradle.internal.os.OperatingSystem
 plugins {
     id 'java'
     id 'application'
-    id 'org.openjfx.javafxplugin' version '0.0.13'
-    id 'org.beryx.jlink' version '2.26.0'
+    id 'org.openjfx.javafxplugin' version '0.1.0'
+    id 'org.beryx.jlink' version '3.0.0'
 }
 
 group 'ir.darkdeveloper'
-version '1.3.0'
-sourceCompatibility = '19'
-targetCompatibility = '19'
+version '1.4.0'
+sourceCompatibility = '21'
+targetCompatibility = '21'
 mainClassName = 'ir.darkdeveloper.bitkip.BitKip'
 
 repositories {
@@ -33,7 +33,7 @@ application {
 }
 
 javafx {
-    version = '19.0.2.1'
+    version = '21'
     modules = ['javafx.controls', 'javafx.fxml', 'javafx.graphics', 'javafx.swing']
 }
 
@@ -42,8 +42,9 @@ dependencies {
     implementation 'org.kordamp.ikonli:ikonli-javafx:12.3.1'
     implementation 'org.xerial:sqlite-jdbc:3.42.0.0'
     implementation 'org.jsoup:jsoup:1.15.3'
-    implementation 'org.eclipse.jetty:jetty-servlet:11.0.15'
-    implementation 'org.eclipse.jetty:jetty-server:11.0.15'
+    implementation 'org.slf4j:slf4j-api:2.0.9'
+    implementation "io.helidon.webserver:helidon-webserver:3.2.2"
+    implementation 'io.helidon.media:helidon-media-jackson:3.2.2'
     implementation 'com.fasterxml.jackson.core:jackson-databind:2.15.0'
     implementation 'ch.qos.logback:logback-classic:1.4.7'
     implementation 'org.kordamp.ikonli:ikonli-fontawesome5-pack:12.3.1'
@@ -52,10 +53,10 @@ dependencies {
     implementation 'net.java.dev.jna:jna:5.13.0'
     implementation 'org.apache.commons:commons-lang3:3.12.0'
     testImplementation 'org.junit.jupiter:junit-jupiter:5.8.1'
-    compileOnly 'org.projectlombok:lombok:1.18.28'
-    annotationProcessor 'org.projectlombok:lombok:1.18.28'
-    testCompileOnly 'org.projectlombok:lombok:1.18.28'
-    testAnnotationProcessor 'org.projectlombok:lombok:1.18.28'
+    compileOnly 'org.projectlombok:lombok:1.18.30'
+    annotationProcessor 'org.projectlombok:lombok:1.18.30'
+    testCompileOnly 'org.projectlombok:lombok:1.18.30'
+    testAnnotationProcessor 'org.projectlombok:lombok:1.18.30'
 }
 
 test {
@@ -89,6 +90,7 @@ jlink {
             imageOptions = ['--icon', 'src/main/resources/ir/darkdeveloper/bitkip/icons/logo.icns']
         }
     }
+    addExtraDependencies 'slf4j'
     mergedModule {
         excludeProvides servicePattern: 'reactor.blockhound.*'
     }

@@ -168,7 +168,7 @@ public class SingleDownload implements QueueObserver {
             queueCombo.getSelectionModel().select(queueCombo.getSelectionModel().getSelectedIndex());
             var url = urlField.getText();
             var connection = DownloadUtils.connect(url);
-            var executor = Executors.newFixedThreadPool(2);
+            var executor = Executors.newVirtualThreadPerTaskExecutor();
             var fileNameLocationFuture =
                     DownloadUtils.prepareFileNameAndFieldsAsync(connection, url, nameField, executor)
                             .thenAccept(this::setLocation);
@@ -199,7 +199,9 @@ public class SingleDownload implements QueueObserver {
 
     @FXML
     private void onSelectLocation(ActionEvent e) {
-        DownloadUtils.selectLocation(e, locationField);
+        var path = DownloadUtils.selectLocation(FxUtils.getStageFromEvent(e));
+        if (path != null)
+            locationField.setText(path);
         handleError(() -> DownloadUtils.checkIfFileIsOKToSave(locationField.getText(),
                 nameField.getText(), downloadBtn, addBtn, refreshBtn), errorLabel);
     }
@@ -245,7 +247,7 @@ public class SingleDownload implements QueueObserver {
                 return;
             }
             DownloadOpUtils.startDownload(dm, getBytesFromString(speedField.getText()), Long.parseLong(bytesField.getText()),
-                    false, false, null);
+                    false, false);
             DownloadOpUtils.openDetailsStage(dm);
             getQueueSubject().removeObserver(this);
             stage.close();

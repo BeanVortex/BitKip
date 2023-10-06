@@ -1,6 +1,6 @@
 [Desktop Entry]
 Name=BitKip
-Version=1.3.0
+Version=1.4.0
 Comment=Free download manager
 Keywords=download,java,app
 Exec=/usr/share/BitKip/bin/BitKip

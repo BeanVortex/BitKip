@@ -27,6 +27,9 @@
 .padding_x_10{
     -fx-padding: 0 10;
 }
+.padding_y_5{
+    -fx-padding: 5 0;
+}
 
 .padding_20 {
     -fx-padding: 20;
@@ -100,3 +103,4 @@
 .min-btn:hover.check .ikonli-font-icon{
     -fx-icon-color: #fff;
 }
+

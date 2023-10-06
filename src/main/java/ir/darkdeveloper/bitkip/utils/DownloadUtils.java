@@ -7,19 +7,19 @@ import ir.darkdeveloper.bitkip.models.QueueModel;
 import ir.darkdeveloper.bitkip.repo.DownloadsRepo;
 import ir.darkdeveloper.bitkip.repo.QueuesRepo;
 import javafx.application.Platform;
-import javafx.event.ActionEvent;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.stage.DirectoryChooser;
+import javafx.stage.Stage;
 import org.controlsfx.control.Notifications;
 import org.controlsfx.control.PopOver;
 
 import java.io.File;
 import java.io.IOException;
 import java.net.HttpURLConnection;
-import java.net.URL;
+import java.net.URI;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
@@ -35,7 +35,7 @@ public class DownloadUtils {
     public static HttpURLConnection connect(String uri) throws IOException {
         if (uri.isBlank())
             throw new IllegalArgumentException("URL is blank");
-        var url = new URL(uri);
+        var url = URI.create(uri).toURL();
         var conn = (HttpURLConnection) url.openConnection();
         conn.setConnectTimeout(connectionTimeout);
         conn.setReadTimeout(readTimeout);
@@ -48,7 +48,7 @@ public class DownloadUtils {
         try {
             if (uri.isBlank())
                 throw new IllegalArgumentException("URL is blank");
-            var url = new URL(uri);
+            var url = URI.create(uri).toURL();
             var testCon = (HttpURLConnection) url.openConnection();
             testCon.setConnectTimeout(2000);
             testCon.connect();
@@ -230,22 +230,22 @@ public class DownloadUtils {
     }
 
 
-    public static void selectLocation(ActionEvent e, TextField locationField) {
+    public static String selectLocation(Stage stage) {
         var dirChooser = new DirectoryChooser();
         dirChooser.setTitle("Select download save location");
         dirChooser.setInitialDirectory(new File(AppConfigs.downloadPath));
-        var selectedDir = dirChooser.showDialog(FxUtils.getStageFromEvent(e));
+        var selectedDir = dirChooser.showDialog(stage);
         if (selectedDir != null) {
             var path = selectedDir.getPath();
             if (!path.endsWith(File.separator))
                 path += File.separator;
-            locationField.setText(path);
-            return;
+            return path;
         }
         Notifications.create()
                 .title("No Directory")
                 .text("Location is wrong!")
                 .showError();
+        return null;
     }
 
     public static void checkIfFileIsOKToSave(String location, String name, Button downloadBtn,

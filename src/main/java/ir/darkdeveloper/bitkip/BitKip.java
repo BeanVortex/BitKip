@@ -1,12 +1,15 @@
 package ir.darkdeveloper.bitkip;
 
+import io.helidon.media.jackson.JacksonSupport;
+import io.helidon.webserver.Routing;
+import io.helidon.webserver.WebServer;
 import ir.darkdeveloper.bitkip.config.AppConfigs;
 import ir.darkdeveloper.bitkip.config.observers.QueueSubject;
 import ir.darkdeveloper.bitkip.repo.DownloadsRepo;
 import ir.darkdeveloper.bitkip.repo.QueuesRepo;
 import ir.darkdeveloper.bitkip.repo.ScheduleRepo;
-import ir.darkdeveloper.bitkip.servlets.BatchServlet;
-import ir.darkdeveloper.bitkip.servlets.SingleServlet;
+import ir.darkdeveloper.bitkip.servlets.BatchService;
+import ir.darkdeveloper.bitkip.servlets.SingleService;
 import ir.darkdeveloper.bitkip.task.ScheduleTask;
 import ir.darkdeveloper.bitkip.utils.FxUtils;
 import ir.darkdeveloper.bitkip.utils.IOUtils;
@@ -14,11 +17,7 @@ import ir.darkdeveloper.bitkip.utils.MoreUtils;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.stage.Stage;
-import org.eclipse.jetty.server.Connector;
-import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.server.ServerConnector;
-import org.eclipse.jetty.servlet.ServletHandler;
-import org.eclipse.jetty.util.thread.QueuedThreadPool;
+
 
 import java.awt.*;
 import java.awt.event.ActionListener;
@@ -29,7 +28,7 @@ import static ir.darkdeveloper.bitkip.config.AppConfigs.*;
 
 public class BitKip extends Application {
 
-    private static Server server;
+    private static WebServer server;
 
     @Override
     public void start(Stage stage) {
@@ -101,7 +100,7 @@ public class BitKip extends Application {
         });
         try {
             if (server != null)
-                server.stop();
+                server.shutdown();
         } catch (Exception e) {
             log.error(e.getMessage());
         }
@@ -116,40 +115,29 @@ public class BitKip extends Application {
 
     private static void startServer() {
         if (serverEnabled) {
-            var threadPool = new CustomThreadPool(7, 1);
-            server = new Server(threadPool);
-            var connector = new ServerConnector(server);
-            connector.setPort(serverPort);
-            server.setConnectors(new Connector[]{connector});
-            var handler = new ServletHandler();
-            server.setHandler(handler);
 
-            handler.addServletWithMapping(SingleServlet.class, "/single");
-            handler.addServletWithMapping(BatchServlet.class, "/batch");
-
-            // Start the server
-            try {
-                server.start();
-            } catch (Exception e) {
-                log.error(e.getMessage());
+            var routing = Routing.builder()
+                    .register("/single", new SingleService())
+                    .register("/batch", new BatchService())
+                    .build();
+            var jacksonSupport = JacksonSupport.create();
+            server = WebServer.builder()
+                    .bindAddress("127.0.0.1")
+                    .port(serverPort)
+                    .addRouting(routing)
+                    .addMediaSupport(jacksonSupport)
+                    .build();
+            server.start().exceptionally(throwable -> {
                 var header = "Failed to start server. Is there another instance running?\nIf not you may need to change application server port and restart";
-                if (FxUtils.showFailedToStart(header, e.getLocalizedMessage()))
-                    Platform.exit();
-            }
-        }
-    }
-
-    private static class CustomThreadPool extends QueuedThreadPool {
-        public CustomThreadPool(int maxThreads, int minThreads) {
-            super(maxThreads, minThreads);
+                log.error(header);
+                Platform.runLater(() -> {
+                    if (FxUtils.showFailedToStart(header, throwable.getCause().getLocalizedMessage()))
+                        Platform.exit();
+                });
+                return null;
+            });
         }
 
-        @Override
-        public Thread newThread(Runnable runnable) {
-            var thread = super.newThread(runnable);
-            thread.setPriority(Thread.MAX_PRIORITY);
-            return thread;
-        }
     }
 
     public static URL getResource(String path) {
