@@ -93,7 +93,8 @@ public class DownloadOpUtils {
             DownloadsRepo.insertDownload(dm);
             mainTableUtils.addRow(dm);
         }
-        var executor = Executors.newVirtualThreadPerTaskExecutor();
+
+        var executor = lessCpuIntensive ? Executors.newVirtualThreadPerTaskExecutor() : Executors.newCachedThreadPool();
         downloadTask.setExecutor(executor);
         log.info(("Starting download in " + (blocking ? "blocking" : "non-blocking") + ": %s").formatted(dm));
         if (blocking)

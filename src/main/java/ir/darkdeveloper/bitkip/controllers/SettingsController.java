@@ -39,7 +39,7 @@ public class SettingsController implements FXMLController {
 
     @FXML
     private CheckBox immediateCheck, triggerOffCheck, agentCheck, addDownCheck,
-            continueCheck, completeDialogCheck, serverCheck;
+            continueCheck, completeDialogCheck, serverCheck, lessCpuCheck;
     @FXML
     private VBox root, actionArea, queueContainer;
     @FXML
@@ -89,11 +89,11 @@ public class SettingsController implements FXMLController {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        Validations.validateIntInputCheck(portField, (long) serverPort);
-        Validations.validateIntInputCheck(retryField, (long) downloadRetryCount);
-        Validations.validateIntInputCheck(rateLimitField, (long) downloadRateLimitCount);
-        Validations.validateIntInputCheck(connectionField, (long) connectionTimeout);
-        Validations.validateIntInputCheck(readField, (long) readTimeout);
+        Validations.validateIntInputCheck(portField, (long) serverPort, 0, null);
+        Validations.validateIntInputCheck(retryField, (long) downloadRetryCount, 1, null);
+        Validations.validateIntInputCheck(rateLimitField, (long) downloadRateLimitCount, 1, null);
+        Validations.validateIntInputCheck(connectionField, (long) connectionTimeout, 0, null);
+        Validations.validateIntInputCheck(readField, (long) readTimeout, 0, null);
         agentDesc.setText("Note: If you enter wrong agent, your downloads may not start. Your agent will update when you use extension");
         initElements();
     }
@@ -104,6 +104,7 @@ public class SettingsController implements FXMLController {
         triggerOffCheck.setSelected(triggerTurnOffOnEmptyQueue);
         immediateCheck.setSelected(downloadImmediately);
         addDownCheck.setSelected(addSameDownload);
+        lessCpuCheck.setSelected(lessCpuIntensive);
         portField.setText(String.valueOf(serverPort));
         retryField.setText(String.valueOf(downloadRetryCount));
         rateLimitField.setText(String.valueOf(downloadRateLimitCount));
@@ -251,6 +252,7 @@ public class SettingsController implements FXMLController {
         userAgentEnabled = defaultUserAgentEnabled;
         connectionTimeout = defaultConnectionTimeout;
         readTimeout = defaultReadTimeout;
+        lessCpuIntensive = defaultLessCpuIntensive;
         IOUtils.saveConfigs();
         initElements();
         showSavedMessage();
@@ -278,6 +280,12 @@ public class SettingsController implements FXMLController {
     @FXML
     private void onAddDownCheck() {
         addSameDownload = addDownCheck.isSelected();
+        IOUtils.saveConfigs();
+    }
+
+    @FXML
+    private void onLessCpuCheck() {
+        lessCpuIntensive = lessCpuCheck.isSelected();
         IOUtils.saveConfigs();
     }
 

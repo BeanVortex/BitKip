@@ -6,6 +6,7 @@ import ir.darkdeveloper.bitkip.repo.DownloadsRepo;
 import javafx.scene.control.Spinner;
 import javafx.scene.control.TextField;
 import javafx.scene.input.Clipboard;
+import org.apache.commons.lang3.StringUtils;
 
 import java.io.IOException;
 
@@ -14,30 +15,45 @@ import static ir.darkdeveloper.bitkip.config.AppConfigs.openDownloadings;
 
 public class Validations {
 
-    public static void validateInputChecks(TextField chunksField, TextField bytesField,
-                                           TextField speedField, DownloadModel dm) {
+    public static void validateInputChecks(TextField chunksField, TextField bytesField, TextField speedField, DownloadModel dm) {
         validateChunksInput(chunksField);
         validateSpeedInput(speedField);
-        validateBytesInput(bytesField, dm.getSize());
+        validateBytesInput(bytesField, dm);
     }
 
-    private static void validateBytesInput(TextField bytesField, long fileSize) {
+    public static void validateBytesInput(TextField bytesField, DownloadModel dm) {
         if (bytesField == null)
             return;
-
         bytesField.textProperty().addListener((o, old, newValue) -> {
+            var fileSize = dm.getSize();
             if (!newValue.matches("\\d*")) {
                 if (newValue.equals("-1"))
                     newValue = "0";
                 newValue = newValue.replaceAll("\\D", "");
                 bytesField.setText(newValue);
+            } else {
+                if (newValue.isBlank() || (fileSize > 0 && Long.parseLong(newValue) > fileSize)) {
+                    bytesField.setText(String.valueOf(fileSize));
+                } else
+                     return;
+                long newV;
+                if (newValue.length() > 1) {
+                    var stripped = StringUtils.stripStart(newValue, "0");
+                    if (stripped.isBlank()) {
+                        bytesField.setText(String.valueOf(fileSize));
+                        return;
+                    }
+                    newV = Long.parseLong(stripped);
+                } else
+                    newV = Long.parseLong(newValue);
+
+                if (newV > fileSize)
+                    bytesField.setText(String.valueOf(fileSize));
             }
-            if (newValue.isBlank() || (fileSize > 0 && Long.parseLong(newValue) > fileSize))
-                bytesField.setText(String.valueOf(fileSize));
         });
         bytesField.focusedProperty().addListener((o, old, newValue) -> {
             if (!newValue && bytesField.getText().isBlank())
-                bytesField.setText(String.valueOf(fileSize));
+                bytesField.setText(String.valueOf(dm.getSize()));
         });
     }
 
@@ -58,41 +74,35 @@ public class Validations {
         if (chunksField == null)
             return;
         var threads = maxChunks(Long.MAX_VALUE);
+        validateIntInputCheck(chunksField, (long) threads, 0, threads);
         chunksField.setText(String.valueOf(threads));
-        chunksField.setDisable(true);
     }
 
-    public static void validateIntInputCheck(TextField field, Long defaultVal) {
+    public static void validateIntInputCheck(TextField field, Long defaultVal, Integer min, Integer max) {
         if (field == null)
             return;
         field.textProperty().addListener((o, old, newValue) -> {
-            if (!newValue.matches("\\d*")) {
+            if (!newValue.matches("\\d*"))
                 field.setText(newValue.replaceAll("\\D", ""));
-                if (defaultVal != null && field.getText().isBlank())
-                    field.setText(String.valueOf(defaultVal));
-            }
-        });
-        field.focusedProperty().addListener((o, old, newValue) -> {
-            if (defaultVal != null && !newValue && field.getText().isBlank())
-                field.setText(String.valueOf(defaultVal));
-        });
-    }
-
-    public static void validateIntInputCheck(TextField field, long defaultVal, long minValue, long maxValue) {
-        if (field == null)
-            return;
-        field.textProperty().addListener((o, old, newValue) -> {
-            if (!newValue.matches("\\d*")) {
-                field.setText(newValue.replaceAll("\\D", ""));
-                if (field.getText().isBlank())
-                    field.setText(String.valueOf(defaultVal));
-            } else {
-                if (newValue.isBlank())
+            else {
+                if (newValue.isBlank()) {
+                    field.setText(String.valueOf(min));
                     return;
-                if (Long.parseLong(newValue) > maxValue)
-                    field.setText(String.valueOf(maxValue));
-                if (Long.parseLong(newValue) < minValue)
-                    field.setText(String.valueOf(minValue));
+                }
+                var newV = 0;
+                if (newValue.length() > 1) {
+                    var stripped = StringUtils.stripStart(newValue, "0");
+                    if (stripped.isBlank()) {
+                        field.setText(String.valueOf(min));
+                        return;
+                    }
+                    newV = Integer.parseInt(stripped);
+                } else
+                    newV = Integer.parseInt(newValue);
+                if (min != null && newV < min)
+                    field.setText(String.valueOf(min));
+                else if (max != null && newV > max)
+                    field.setText(String.valueOf(max));
             }
         });
         field.focusedProperty().addListener((o, old, newValue) -> {
@@ -113,38 +123,18 @@ public class Validations {
     public static void validateTimePickerInputs(Spinner<Integer> hourSpinner,
                                                 Spinner<Integer> minuteSpinner,
                                                 Spinner<Integer> secondSpinner) {
-        validateIntInputCheck(hourSpinner.getEditor(), null);
-        validateIntInputCheck(minuteSpinner.getEditor(), null);
-        validateIntInputCheck(secondSpinner.getEditor(), null);
-
-        hourSpinner.getEditor().textProperty().addListener((o, o2, n) -> {
-            if (n == null)
-                return;
-            if (n.isBlank())
-                hourSpinner.getEditor().setText("0");
-            if (!n.isBlank() && Integer.parseInt(n) > 23)
-                hourSpinner.getEditor().setText("23");
-        });
-        zeroToSixtySpinner(minuteSpinner);
-        zeroToSixtySpinner(secondSpinner);
+        validateIntInputCheck(hourSpinner.getEditor(), null, 0, 23);
+        validateIntInputCheck(minuteSpinner.getEditor(), null, 0, 59);
+        validateIntInputCheck(secondSpinner.getEditor(), null, 0, 59);
     }
-
-    private static void zeroToSixtySpinner(Spinner<Integer> minuteSpinner) {
-        minuteSpinner.getEditor().textProperty().addListener((o, o2, n) -> {
-            if (n == null)
-                return;
-            if (n.isBlank())
-                minuteSpinner.getEditor().setText("0");
-            if (!n.isBlank() && Integer.parseInt(n) > 59)
-                minuteSpinner.getEditor().setText("59");
-        });
-    }
-
 
     public static int maxChunks(long fileSize) {
         if (fileSize < 2_000_000)
             return 0;
-        return Runtime.getRuntime().availableProcessors() * 2;
+        int processors = Runtime.getRuntime().availableProcessors();
+        if (processors < 10)
+            return processors * 2;
+        return processors;
     }
 
     public static boolean validateUrl(String url) {

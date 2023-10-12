@@ -66,7 +66,7 @@ public class DetailsController implements FXMLController {
     private Button controlBtn, openFolderBtn;
 
     private Stage stage;
-    private DownloadModel downloadModel;
+    private DownloadModel dm;
     private boolean isComplete = false;
     private final BooleanProperty isPaused = new SimpleBooleanProperty(true);
     private final PopOver linkPopover = new PopOver();
@@ -93,41 +93,41 @@ public class DetailsController implements FXMLController {
         return stage;
     }
 
-    public void setDownloadModel(DownloadModel downloadModel) {
-        this.downloadModel = downloadModel;
+    public void setDownloadModel(DownloadModel dm) {
+        this.dm = dm;
         initDownloadData();
         initDownloadListeners();
     }
 
     private void initDownloadData() {
-        Validations.validateInputChecks(null, bytesField, speedField, downloadModel);
-        var byteLimit = String.valueOf(downloadModel.getByteLimit());
+        Validations.validateInputChecks(null, bytesField, speedField, dm);
+        var byteLimit = String.valueOf(dm.getByteLimit());
         if (byteLimit.equals("0"))
-            byteLimit = String.valueOf(downloadModel.getSize());
+            byteLimit = String.valueOf(dm.getSize());
         bytesField.setText(byteLimit);
-        bytesField.setDisable(downloadModel.getSize() < 0 || !downloadModel.isResumable());
-        speedField.setDisable(!downloadModel.isResumable());
-        var mbOfBytes = IOUtils.getMbOfBytes(downloadModel.getSpeedLimit());
-        speedField.setText(downloadModel.getSpeedLimit() == 0 ? "0.0" : String.valueOf(mbOfBytes));
-        downloadedBytes.setText(String.valueOf(downloadModel.getDownloaded()));
-        link.setText(downloadModel.getUrl());
-        locationLbl.setText("Path: " + new File(downloadModel.getFilePath()).getParentFile().getAbsolutePath());
-        var end = downloadModel.getName().length();
+        bytesField.setDisable(dm.getSize() < 0 || !dm.isResumable());
+        speedField.setDisable(!dm.isResumable());
+        var mbOfBytes = IOUtils.getMbOfBytes(dm.getSpeedLimit());
+        speedField.setText(dm.getSpeedLimit() == 0 ? "0.0" : String.valueOf(mbOfBytes));
+        downloadedBytes.setText(String.valueOf(dm.getDownloaded()));
+        link.setText(dm.getUrl());
+        locationLbl.setText("Path: " + new File(dm.getFilePath()).getParentFile().getAbsolutePath());
+        var end = dm.getName().length();
         if (end > 60)
             end = 60;
-        stage.setTitle(downloadModel.getName().substring(0, end));
-        nameLbl.setText("Name: " + downloadModel.getName());
-        var queues = QueuesRepo.findQueuesOfADownload(downloadModel.getId()).toString();
+        stage.setTitle(dm.getName().substring(0, end));
+        nameLbl.setText("Name: " + dm.getName());
+        var queues = QueuesRepo.findQueuesOfADownload(dm.getId()).toString();
         queueLbl.setText("Queues: " + queues.substring(1, queues.length() - 1));
-        statusLbl.setText("Status: " + downloadModel.getDownloadStatus().name());
+        statusLbl.setText("Status: " + dm.getDownloadStatus().name());
         var downloadOf = "%s / %s"
-                .formatted(IOUtils.formatBytes(downloadModel.getDownloaded()),
-                        IOUtils.formatBytes(downloadModel.getSize()));
+                .formatted(IOUtils.formatBytes(dm.getDownloaded()),
+                        IOUtils.formatBytes(dm.getSize()));
         downloadedOfLbl.setText(downloadOf);
-        progressLbl.setText("Progress: %.2f%%".formatted(downloadModel.getProgress()));
-        downloadProgress.setProgress(downloadModel.getProgress() / 100);
-        chunksLbl.setText("Chunks: " + downloadModel.getChunks());
-        var resumable = downloadModel.isResumable();
+        progressLbl.setText("Progress: %.2f%%".formatted(dm.getProgress()));
+        downloadProgress.setProgress(dm.getProgress() / 100);
+        chunksLbl.setText("Chunks: " + dm.getChunks());
+        var resumable = dm.isResumable();
         if (resumable) {
             resumableLbl.getStyleClass().add("yes");
             resumableLbl.getStyleClass().remove("no");
@@ -138,10 +138,10 @@ public class DetailsController implements FXMLController {
             resumableLbl.setText("No");
         }
         controlBtn.setText(isPaused.get() ? (resumable ? "Resume" : "Restart") : "Pause");
-        openSwitch.setSelected(downloadModel.isOpenAfterComplete());
-        showSwitch.setSelected(downloadModel.isShowCompleteDialog());
-        onComplete(downloadModel);
-        turnOffCombo.getSelectionModel().select(downloadModel.getTurnOffMode());
+        openSwitch.setSelected(dm.isOpenAfterComplete());
+        showSwitch.setSelected(dm.isShowCompleteDialog());
+        onComplete(dm);
+        turnOffCombo.getSelectionModel().select(dm.getTurnOffMode());
     }
 
     public void initDownloadListeners() {
@@ -156,13 +156,13 @@ public class DetailsController implements FXMLController {
 
     private DownloadTask getDownloadTask() {
         return currentDownloadings.stream()
-                .filter(dm -> dm.equals(downloadModel))
+                .filter(dm -> dm.equals(this.dm))
                 .findFirst()
                 .map(DownloadModel::getDownloadTask).orElse(null);
     }
 
     private void bytesDownloadedListener(DownloadTask dt) {
-        if (downloadModel.getSize() != -1)
+        if (dm.getSize() != -1)
             dt.valueProperty().addListener((ob, o, bytes) -> {
                 if (!isPaused.get()) {
                     if (o == null)
@@ -171,22 +171,22 @@ public class DetailsController implements FXMLController {
 
                     downloadedBytes.setText(String.valueOf(bytes));
                     if (bytes == 0) {
-                        downloadedBytes.setText(String.valueOf(downloadModel.getDownloaded()));
+                        downloadedBytes.setText(String.valueOf(dm.getDownloaded()));
                         speed = 0;
                     } else
-                        downloadModel.setDownloaded(bytes);
+                        dm.setDownloaded(bytes);
 
-                    downloadModel.setSpeed(speed);
-                    downloadModel.setDownloadStatus(Downloading);
+                    dm.setSpeed(speed);
+                    dm.setDownloadStatus(Downloading);
 
                     speedLbl.setText(IOUtils.formatBytes(speed));
                     statusLbl.setText("Status: " + Downloading);
                     var downloadOf = "%s / %s"
                             .formatted(IOUtils.formatBytes(bytes),
-                                    IOUtils.formatBytes(downloadModel.getSize()));
+                                    IOUtils.formatBytes(dm.getSize()));
                     downloadedOfLbl.setText(downloadOf);
                     if (speed > 0) {
-                        long delta = downloadModel.getSize() - bytes;
+                        long delta = dm.getSize() - bytes;
                         var remaining = DurationFormatUtils.formatDuration((delta / speed) * 1000, "dd:HH:mm:ss");
                         remainingLbl.setText("Remaining: " + remaining);
                     }
@@ -195,8 +195,8 @@ public class DetailsController implements FXMLController {
         else
             dt.valueProperty().addListener((ob, o, bytes) -> {
                 if (!isPaused.get()) {
-                    downloadModel.setDownloadStatus(Downloading);
-                    downloadModel.setDownloaded(bytes);
+                    dm.setDownloadStatus(Downloading);
+                    dm.setDownloaded(bytes);
                     statusLbl.setText("Status: " + Downloading);
                     var downloadOf = "%s / %s".formatted(IOUtils.formatBytes(bytes), IOUtils.formatBytes(0));
                     downloadedOfLbl.setText(downloadOf);
@@ -222,12 +222,12 @@ public class DetailsController implements FXMLController {
             else updatePause(newValue);
         });
         openSwitch.selectedProperty().addListener((o, old, newVal) -> {
-            downloadModel.setOpenAfterComplete(newVal);
-            DownloadsRepo.updateDownloadOpenAfterComplete(downloadModel);
+            dm.setOpenAfterComplete(newVal);
+            DownloadsRepo.updateDownloadOpenAfterComplete(dm);
         });
         showSwitch.selectedProperty().addListener((o, old, newVal) -> {
-            downloadModel.setShowCompleteDialog(newVal);
-            DownloadsRepo.updateDownloadShowCompleteDialog(downloadModel);
+            dm.setShowCompleteDialog(newVal);
+            DownloadsRepo.updateDownloadShowCompleteDialog(dm);
         });
         linkPopover.setAnimated(true);
         linkPopover.setContentNode(new Label("Copied"));
@@ -243,22 +243,22 @@ public class DetailsController implements FXMLController {
     }
 
     private void updatePause(Boolean paused) {
-        if (downloadModel.getDownloadStatus() == DownloadStatus.Completed)
+        if (dm.getDownloadStatus() == DownloadStatus.Completed)
             return;
         controlBtn.setDisable(false);
 
-        controlBtn.setText(paused ? (downloadModel.isResumable() ? "Resume" : "Restart") : "Pause");
+        controlBtn.setText(paused ? (dm.isResumable() ? "Resume" : "Restart") : "Pause");
         if (paused)
             remainingLbl.setText("Remaining: Paused");
-        if (downloadModel.getDownloadStatus() == DownloadStatus.Merging) {
+        if (dm.getDownloadStatus() == DownloadStatus.Merging) {
             setPauseButtonDisable(true);
             updateLabels("Status: " + DownloadStatus.Merging.name(), "Remaining: Merging");
             downloadProgress.setProgress(ProgressBar.INDETERMINATE_PROGRESS);
         } else
             statusLbl.setText("Status: " + (paused ? DownloadStatus.Paused : Downloading));
         var downloadOf = "%s / %s"
-                .formatted(IOUtils.formatBytes(downloadModel.getDownloaded()),
-                        IOUtils.formatBytes(downloadModel.getSize()));
+                .formatted(IOUtils.formatBytes(dm.getDownloaded()),
+                        IOUtils.formatBytes(dm.getSize()));
         downloadedOfLbl.setText(downloadOf);
 
     }
@@ -271,7 +271,7 @@ public class DetailsController implements FXMLController {
     @FXML
     private void onControl() {
         if (isComplete) {
-            openFile(downloadModel);
+            openFile(dm);
             stage.close();
             return;
         }
@@ -279,7 +279,7 @@ public class DetailsController implements FXMLController {
         if (isPaused.get()) {
             statusLbl.setText("Status: " + DownloadStatus.Trying);
             controlBtn.setDisable(true);
-            DownloadOpUtils.resumeDownloads(List.of(downloadModel),
+            DownloadOpUtils.resumeDownloads(List.of(dm),
                     getBytesFromString(speedField.getText()), Long.parseLong(bytesField.getText()));
             controlBtn.setDisable(false);
             isPaused.set(false);
@@ -319,8 +319,8 @@ public class DetailsController implements FXMLController {
                 statusLbl.setText("Status: Complete");
                 progressLbl.setText("Progress: 100%");
                 var downloadOf = "%s / %s"
-                        .formatted(IOUtils.formatBytes(downloadModel.getSize()),
-                                IOUtils.formatBytes(downloadModel.getSize()));
+                        .formatted(IOUtils.formatBytes(dm.getSize()),
+                                IOUtils.formatBytes(dm.getSize()));
                 downloadedOfLbl.setText(downloadOf);
                 bytesField.setDisable(true);
                 speedField.setDisable(true);
@@ -341,25 +341,25 @@ public class DetailsController implements FXMLController {
     }
 
     public DownloadModel getDownloadModel() {
-        return downloadModel;
+        return dm;
     }
 
 
     @FXML
     private void onFolderOpen() {
-        DownloadOpUtils.openContainingFolder(downloadModel);
+        DownloadOpUtils.openContainingFolder(dm);
         stage.close();
     }
 
     @FXML
     private void onTurnOffChanged() {
         var value = turnOffCombo.getValue();
-        downloadModel.setTurnOffMode(value);
-        var downloadTask = downloadModel.getDownloadTask();
+        dm.setTurnOffMode(value);
+        var downloadTask = dm.getDownloadTask();
         if (downloadTask != null)
-            downloadTask.setDownloadModel(downloadModel);
+            downloadTask.setDownloadModel(dm);
         DatabaseHelper.updateCol(COL_TURNOFF_MODE,
-                value.toString(), DOWNLOADS_TABLE_NAME, downloadModel.getId());
+                value.toString(), DOWNLOADS_TABLE_NAME, dm.getId());
         if (value != NOTHING) {
             Notifications.create()
                     .title("Turn off mode changed")
@@ -370,11 +370,11 @@ public class DetailsController implements FXMLController {
 
     @FXML
     private void onSpeedApplied() {
-        var dmTask = downloadModel.getDownloadTask();
+        var dmTask = dm.getDownloadTask();
         if (dmTask instanceof ChunksDownloadTask cdt) {
             var speed = getBytesFromString(speedField.getText());
-            downloadModel.setSpeed(speed);
-            downloadModel.setSpeedLimit(speed);
+            dm.setSpeed(speed);
+            dm.setSpeedLimit(speed);
             cdt.setSpeedLimit(speed);
             speedApplyBtn.setDisable(true);
             speedApplyBtn.setVisible(false);
@@ -383,7 +383,7 @@ public class DetailsController implements FXMLController {
 
     @FXML
     private void onAllBytes() {
-        bytesField.setText(String.valueOf(downloadModel.getSize()));
+        bytesField.setText(String.valueOf(dm.getSize()));
         allBytesBtn.setVisible(false);
         allBytesBtn.setDisable(true);
     }
@@ -394,17 +394,17 @@ public class DetailsController implements FXMLController {
             return;
         if (!text.matches("\\d*"))
             text = text.replaceAll("\\D", "");
-        if (Long.parseLong(text) < downloadModel.getSize()) {
+        if (Long.parseLong(text) < dm.getSize()) {
             allBytesBtn.setVisible(true);
             allBytesBtn.setDisable(false);
         }
-        if (Long.parseLong(text) < downloadModel.getDownloaded())
-            bytesField.setText(String.valueOf(downloadModel.getDownloaded()));
+        if (Long.parseLong(text) < dm.getDownloaded())
+            bytesField.setText(String.valueOf(dm.getDownloaded()));
 
     }
 
     private void onSpeedChanged() {
-        var isDownloading = downloadModel.getDownloadStatus() == Downloading;
+        var isDownloading = dm.getDownloadStatus() == Downloading;
         var isZero = speedField.getText().equals("0");
         speedApplyBtn.setVisible(isDownloading && !isZero);
         speedApplyBtn.setDisable(isDownloading && isZero);

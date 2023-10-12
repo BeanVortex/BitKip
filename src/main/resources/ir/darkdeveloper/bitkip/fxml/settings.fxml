@@ -101,6 +101,11 @@
                     <CheckBox text="Add downloads even if exist" fx:id="addDownCheck" onAction="#onAddDownCheck"/>
                     <Label wrapText="true" styleClass="settingDescription, opacity_7"
                            text="It will add downloads with numbered name"/>
+
+                    <CheckBox text="Less cpu intensive for downloads(virtual threads)" fx:id="lessCpuCheck" onAction="#onLessCpuCheck"/>
+                    <Label wrapText="true" styleClass="settingDescription, opacity_7"
+                           text="After it changed, It will affect on newly started downloads. Not recommended for multiple downloads"/>
+
                 </VBox>
             </ScrollPane>
         </Tab>

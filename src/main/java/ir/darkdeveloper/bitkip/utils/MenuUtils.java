@@ -215,6 +215,8 @@ public class MenuUtils {
                     menuItems.get(refreshLbl).setDisable(false);
                     menuItems.get(addToQueueLbl).setDisable(false);
                 });
+        selectedItems.stream().filter(dm -> dm.getDownloadStatus() == DownloadStatus.Merging)
+                .findFirst().ifPresent(dm -> menuItems.values().forEach(menuItem -> menuItem.setDisable(true)));
     }
 
     public static void initMoreMenu(Button moreBtn, TableView<DownloadModel> table) {

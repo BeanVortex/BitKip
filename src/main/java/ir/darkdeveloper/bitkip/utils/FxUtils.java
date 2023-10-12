@@ -530,7 +530,7 @@ public class FxUtils {
         dialog.getDialogPane().getButtonTypes().addAll(ButtonType.APPLY, ButtonType.CANCEL);
 
         var portField = new TextField();
-        Validations.validateIntInputCheck(portField, (long) serverPort);
+        Validations.validateIntInputCheck(portField, (long) serverPort, 0, null);
         portField.setText(String.valueOf(serverPort));
         var contentLabel = new Label();
         contentLabel.setText(content);

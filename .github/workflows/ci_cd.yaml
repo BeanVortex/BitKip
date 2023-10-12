@@ -4,7 +4,7 @@ on:
     branches:
       - main
 env:
-  VERSION: 1.4.0
+  VERSION: 1.4.1
   NAME: BitKip
 jobs:
   build-windows:
