@@ -82,9 +82,8 @@ public class ChunksDownloadTask extends DownloadTask {
 
     private void downloadInChunks(long fileSize)
             throws IOException, InterruptedException, ExecutionException {
-        var futures = prepareParts(fileSize);
-//        futures.addFirst(calculateSpeedAndProgress(fileSize));
         calculateSpeedAndProgress(fileSize);
+        var futures = prepareParts(fileSize);
         if (!futures.isEmpty()) {
             isCalculating = true;
             log.info("Downloading : " + downloadModel);
@@ -247,7 +246,7 @@ public class ChunksDownloadTask extends DownloadTask {
 
 
     private void calculateSpeedAndProgress(long fileSize) {
-        new Thread(() -> {
+        Runnable runnable = () -> {
             Thread.currentThread().setName("calculator: " + Thread.currentThread().getName());
             try {
                 while (!isCalculating) Thread.onSpinWait();
@@ -266,7 +265,11 @@ public class ChunksDownloadTask extends DownloadTask {
             } catch (IOException e) {
                 log.error(e.getLocalizedMessage());
             }
-        }).start();
+        };
+        if (lessCpuIntensive)
+            new Thread(runnable).start();
+        else
+            executor.submit(runnable);
     }
 
     @Override

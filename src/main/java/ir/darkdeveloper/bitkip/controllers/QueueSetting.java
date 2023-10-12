@@ -147,7 +147,7 @@ public class QueueSetting implements FXMLController, QueueObserver {
         Validations.validateTimePickerInputs(startHourSpinner, startMinuteSpinner, startSecondSpinner);
         Validations.validateTimePickerInputs(stopHourSpinner, stopMinuteSpinner, stopSecondSpinner);
         Validations.validateSpeedInput(speedField);
-        Validations.validateIntInputCheck(simulDownloadSpinner.getEditor(), 1, 1, 5);
+        Validations.validateIntInputCheck(simulDownloadSpinner.getEditor(), 1L, 1, 5);
 
 
         datePicker.setDayCellFactory(dp -> new DateCell() {

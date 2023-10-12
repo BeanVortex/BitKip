@@ -81,8 +81,8 @@ public class BatchDownload implements QueueObserver {
         checkBtn.setDisable(true);
         Validations.prepareLinkFromClipboard(urlField);
         Validations.validateChunksInput(chunksField);
-        Validations.validateIntInputCheck(startField, 0L);
-        Validations.validateIntInputCheck(endField, 0L);
+        Validations.validateIntInputCheck(startField, 0L, 0, null);
+        Validations.validateIntInputCheck(endField, 0L, 0, null);
         var questionBtns = new Button[]{questionBtnUrl, questionBtnChunks};
         var contents = new String[]{
                 "You want to download several files, clarify where urls are different by $ sign." +

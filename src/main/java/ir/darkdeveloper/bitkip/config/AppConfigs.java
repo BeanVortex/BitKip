@@ -17,7 +17,7 @@ import java.util.*;
 
 public class AppConfigs {
 
-    public static final String VERSION = "1.4.0";
+    public static final String VERSION = "1.4.1";
 
     public static final String dataPath = System.getProperty("user.home")
             + File.separator + "Documents"
@@ -57,6 +57,8 @@ public class AppConfigs {
     public static boolean downloadImmediately = defaultDownloadImmediately;
     public static final boolean defaultAddSameDownload = true;
     public static boolean addSameDownload  = defaultAddSameDownload;
+    public static final boolean defaultLessCpuIntensive = false;
+    public static boolean lessCpuIntensive = defaultLessCpuIntensive;
 
 
 
