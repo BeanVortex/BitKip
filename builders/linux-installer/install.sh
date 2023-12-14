@@ -21,6 +21,7 @@ done
 mv "$desktopFilePath" /usr/share/applications/
 mv "$uninstallDesktopFile" /usr/share/applications/
 
+chmod a+rx ./application/bitkip
 mv ./application/bitkip /usr/bin/
 mkdir BitKip 
 mv -v ./application/* ./BitKip
