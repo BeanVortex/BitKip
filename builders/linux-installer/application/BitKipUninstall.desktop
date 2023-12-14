@@ -1,8 +1,8 @@
 [Desktop Entry]
 Name=Uninstall BitKip
 Keywords=download,java,app
-Exec=/usr/share/BitKip/uninstall.sh
-Terminal=false
+Exec=bash -c '/usr/share/BitKip/uninstall.sh'
+Terminal=true
 Icon=/usr/share/BitKip/logo.png
 Type=Application
 Categories=app,download

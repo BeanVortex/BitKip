@@ -1,8 +1,5 @@
-if [ "$EUID" -ne 0 ]
-then
-echo "Please run as root to delete the application folder and files from /usr/share and /usr/bin"
-exit
-fi
+# sudo
+[ "$UID" -eq 0 ] || exec sudo "$0" "$@"
 
 read -p "Are you sure you want to uninstall BitKip? (y/n) " RESP
 if [ "$RESP" = "n" ]; then
