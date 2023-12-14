@@ -123,7 +123,7 @@ public class MenuUtils {
         menuItems.get(pauseAllLbl).setOnAction(e -> DownloadOpUtils.pauseAllDownloads());
         menuItems.get(exportLinkLbl).setOnAction(e -> DownloadOpUtils.exportLinks(mainTableUtils.getSelectedUrls()));
         menuItems.get(refreshLbl).setOnAction(e -> DownloadOpUtils.refreshDownload(mainTableUtils.getSelected()));
-        menuItems.get(copyLbl).setOnAction(e -> FxUtils.setClipboard(mainTableUtils.getSelected().get(0).getUrl()));
+        menuItems.get(copyLbl).setOnAction(e -> FxUtils.setClipboard(mainTableUtils.getSelected().get(0).getUri()));
         menuItems.get(restartLbl).setOnAction(e -> DownloadOpUtils.restartDownloads(mainTableUtils.getSelected()));
         menuItems.get(locationLbl).setOnAction(e -> DownloadOpUtils.changeLocation(mainTableUtils.getSelected(), e));
         menuItems.get(deleteLbl).setOnAction(e -> DownloadOpUtils.deleteDownloads(mainTableUtils.getSelected(), false));

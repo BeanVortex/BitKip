@@ -36,7 +36,7 @@
 
 #questionBtnSpeed .ikonli-font-icon,
 #questionBtnChunks .ikonli-font-icon,
-#questionBtnUrl .ikonli-font-icon,
+#questionBtnUri .ikonli-font-icon,
 #questionBtnBytes .ikonli-font-icon {
     -fx-icon-code: "far-question-circle";
     -fx-icon-color: #009688;
@@ -55,7 +55,7 @@
 #questionBtnSpeed,
 #refreshBtn,
 #questionBtnChunks,
-#questionBtnUrl,
+#questionBtnUri,
 #questionBtnBytes {
     -fx-background-color: transparent;
     -fx-background-radius: 5;

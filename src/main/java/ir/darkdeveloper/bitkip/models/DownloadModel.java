@@ -22,7 +22,7 @@ public class DownloadModel {
     private float progress;
     private long size;
     private long downloaded;
-    private String url;
+    private String uri;
     private String filePath;
     private String remainingTime;
     @Builder.Default
@@ -115,7 +115,7 @@ public class DownloadModel {
                 ", progress=" + progress +
                 ", size=" + size +
                 ", downloaded=" + downloaded +
-                ", url='" + url + '\'' +
+                ", uri='" + uri + '\'' +
                 ", filePath='" + filePath + '\'' +
                 ", remainingTime='" + remainingTime + '\'' +
                 ", queues=" + queues.stream().map(QueueModel::toStringModel).toList() +

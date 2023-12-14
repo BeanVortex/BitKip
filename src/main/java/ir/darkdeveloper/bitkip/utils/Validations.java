@@ -137,8 +137,16 @@ public class Validations {
         return processors;
     }
 
-    public static boolean validateUrl(String url) {
-        return url.startsWith("http") || url.startsWith("https") || url.startsWith("ftp");
+    public static boolean validateUri(String uri) {
+        return uri.startsWith("http") || uri.startsWith("https") || uri.startsWith("ftp");
+    }
+    public static String fixURIChars(String uri){
+        uri = uri.replace("{", "%7b");
+        uri = uri.replace("}", "%7d");
+        uri = uri.replace("[", "%5b");
+        uri = uri.replace("]", "%5d");
+        uri = uri.replace("`", "%60");
+        return uri;
     }
 
     public static void fillNotFetchedData(DownloadModel dm) throws IOException {
@@ -146,7 +154,7 @@ public class Validations {
             return;
 
         // when download added and size not fetched
-        var connection = DownloadUtils.connectWithInternetCheck(dm.getUrl(), true);
+        var connection = DownloadUtils.connectWithInternetCheck(dm.getUri(), true);
         var canResume = DownloadUtils.canResume(connection);
         var fileSize = DownloadUtils.getFileSize(connection);
         dm.setSize(fileSize);

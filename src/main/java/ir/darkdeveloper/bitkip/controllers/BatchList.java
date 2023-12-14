@@ -157,7 +157,7 @@ public class BatchList implements QueueObserver {
         for (int i = 0; i < links.size(); i++) {
             var lm = links.get(i);
             var dm = new DownloadModel();
-            dm.setUrl(lm.getUrl());
+            dm.setUri(lm.getUri());
             var fileName = lm.getName();
             var path = lm.getPath();
             if (path.endsWith(File.separator))

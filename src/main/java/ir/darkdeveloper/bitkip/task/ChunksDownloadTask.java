@@ -64,7 +64,7 @@ public class ChunksDownloadTask extends DownloadTask {
     @Override
     protected Long call() {
         try {
-            url = downloadModel.getUrl();
+            url = downloadModel.getUri();
             var file = new File(downloadModel.getFilePath());
             var fileSize = downloadModel.getSize();
             if (file.exists() && isCompleted(file, mainTableUtils))

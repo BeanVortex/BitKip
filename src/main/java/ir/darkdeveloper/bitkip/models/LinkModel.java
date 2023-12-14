@@ -13,7 +13,7 @@ import java.util.List;
 @NoArgsConstructor
 @Builder
 public class LinkModel {
-    private String url;
+    private String uri;
     private long size;
     private int chunks;
     private Boolean resumable;
@@ -28,8 +28,8 @@ public class LinkModel {
     private String queuesString;
 
 
-    public LinkModel(String url, int chunks) {
-        this.url = url;
+    public LinkModel(String uri, int chunks) {
+        this.uri = uri;
         this.chunks = chunks;
     }
 

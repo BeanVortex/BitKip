@@ -317,7 +317,7 @@ public class DownloadOpUtils {
     public static void exportLinks(String queue) {
         try {
             var urls = DownloadsRepo.getDownloadsByQueueName(queue)
-                    .stream().map(DownloadModel::getUrl)
+                    .stream().map(DownloadModel::getUri)
                     .toList();
             IOUtils.writeLinksToFile(urls, queue);
         } catch (IOException e) {
@@ -356,7 +356,7 @@ public class DownloadOpUtils {
         var url = urlModel.url();
         var fileName = urlModel.filename();
         var fileSize = urlModel.fileSize();
-        dm.setUrl(url);
+        dm.setUri(url);
         try {
             var conn = DownloadUtils.connect(url);
             var canResume = DownloadUtils.canResume(conn);

@@ -422,7 +422,7 @@ public class IOUtils {
             var path = DownloadUtils.determineLocation(firstFileName);
 
             return lines.stream().map(li -> {
-                        if (!Validations.validateUrl(li))
+                        if (!Validations.validateUri(li))
                             return null;
                         var lm = new LinkModel(li, chunks);
                         lm.getQueues().add(allDownloadsQueue);

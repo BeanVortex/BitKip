@@ -43,7 +43,7 @@ public class RefreshController implements FXMLController {
             errorLabel.setVisible(false);
             saveBtn.setDisable(false);
             resumeBtn.setDisable(false);
-            if (n.equals(dm.getUrl()))
+            if (n.equals(dm.getUri()))
                 DownloadUtils.disableControlsAndShowError("Same URL", errorLabel, saveBtn, resumeBtn, null);
             if (n.isBlank())
                 DownloadUtils.disableControlsAndShowError("URL is blank", errorLabel, saveBtn, resumeBtn, null);
@@ -64,7 +64,7 @@ public class RefreshController implements FXMLController {
 
     private void setDownloadData() {
         nameLbl.setText("Name: " + dm.getName());
-        urlField.setText(dm.getUrl());
+        urlField.setText(dm.getUri());
         Validations.prepareLinkFromClipboard(urlField);
     }
 
@@ -89,7 +89,7 @@ public class RefreshController implements FXMLController {
 
     private void saveToDB() {
         var url = urlField.getText();
-        dm.setUrl(url);
+        dm.setUri(url);
         DownloadsRepo.updateDownloadProperty(COL_URL, url, dm.getId());
         log.info("URL refreshed for : " + dm.getName());
     }

@@ -48,7 +48,7 @@ public class SpecialDownloadTask extends DownloadTask {
     @Override
     protected Long call() throws IOException {
         try {
-            url = downloadModel.getUrl();
+            url = downloadModel.getUri();
             file = new File(downloadModel.getFilePath());
             if (file.exists() && isCompleted(file, mainTableUtils))
                 return 0L;

@@ -39,7 +39,7 @@ public class BatchDownload implements QueueObserver {
     @FXML
     private Label errorLabel;
     @FXML
-    private Button questionBtnUrl, checkBtn, cancelBtn, questionBtnChunks, openLocation, newQueue;
+    private Button questionBtnUri, checkBtn, cancelBtn, questionBtnChunks, openLocation, newQueue;
     @FXML
     private TextField startField, locationField, endField;
     @FXML
@@ -69,7 +69,7 @@ public class BatchDownload implements QueueObserver {
         cancelBtn.setGraphic(new FontIcon());
         questionBtnChunks.setGraphic(new FontIcon());
         openLocation.setGraphic(new FontIcon());
-        questionBtnUrl.setGraphic(new FontIcon());
+        questionBtnUri.setGraphic(new FontIcon());
         newQueue.setGraphic(new FontIcon());
         var queues = QueueSubject.getQueues();
         if (queues.isEmpty())
@@ -83,7 +83,7 @@ public class BatchDownload implements QueueObserver {
         Validations.validateChunksInput(chunksField);
         Validations.validateIntInputCheck(startField, 0L, 0, null);
         Validations.validateIntInputCheck(endField, 0L, 0, null);
-        var questionBtns = new Button[]{questionBtnUrl, questionBtnChunks};
+        var questionBtns = new Button[]{questionBtnUri, questionBtnChunks};
         var contents = new String[]{
                 "You want to download several files, clarify where urls are different by $ sign." +
                         " (for example 'https://www.url.com/file00.zip', change 00 to $$)",
@@ -122,8 +122,8 @@ public class BatchDownload implements QueueObserver {
             var links = generateLinks(url, start, end, Integer.parseInt(chunksField.getText()), true);
             var link = links.get(0);
             tempLink = link;
-            var connection = DownloadUtils.connect(link.getUrl());
-            var fileNameLocationFuture = CompletableFuture.supplyAsync(() -> DownloadUtils.extractFileName(link.getUrl(), connection))
+            var connection = DownloadUtils.connect(link.getUri());
+            var fileNameLocationFuture = CompletableFuture.supplyAsync(() -> DownloadUtils.extractFileName(link.getUri(), connection))
                     .thenAccept(this::setLocation);
             fileNameLocationFuture
                     .whenComplete((unused, throwable) ->
@@ -255,7 +255,7 @@ public class BatchDownload implements QueueObserver {
 
             if (!addSameDownload)
                 for (var link : links) {
-                    var byURL = DownloadsRepo.findByURL(link.getUrl());
+                    var byURL = DownloadsRepo.findByURL(link.getUri());
                     if (!byURL.isEmpty()) {
                         var found = byURL.stream()
                                 .filter(dm -> {
@@ -265,7 +265,7 @@ public class BatchDownload implements QueueObserver {
                                 .findFirst();
                         if (found.isPresent()) {
                             var msg = "At least one URL exists for this location. Change location or change start, end.\n"
-                                    + found.get().getUrl();
+                                    + found.get().getUri();
                             log.warn(msg);
                             DownloadUtils.disableControlsAndShowError(msg, errorLabel, checkBtn, null, null);
                             return;

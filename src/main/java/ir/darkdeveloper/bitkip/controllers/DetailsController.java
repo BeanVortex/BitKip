@@ -110,7 +110,7 @@ public class DetailsController implements FXMLController {
         var mbOfBytes = IOUtils.getMbOfBytes(dm.getSpeedLimit());
         speedField.setText(dm.getSpeedLimit() == 0 ? "0.0" : String.valueOf(mbOfBytes));
         downloadedBytes.setText(String.valueOf(dm.getDownloaded()));
-        link.setText(dm.getUrl());
+        link.setText(dm.getUri());
         locationLbl.setText("Path: " + new File(dm.getFilePath()).getParentFile().getAbsolutePath());
         var end = dm.getName().length();
         if (end > 60)

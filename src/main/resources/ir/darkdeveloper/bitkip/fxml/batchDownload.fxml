@@ -12,7 +12,7 @@
     <HBox spacing="20" alignment="CENTER">
         <Label text="URL :" minWidth="60" styleClass="bold"/>
         <TextField fx:id="urlField" HBox.hgrow="ALWAYS"/>
-        <Button fx:id="questionBtnUrl"/>
+        <Button fx:id="questionBtnUri"/>
     </HBox>
 
     <HBox alignment="BASELINE_LEFT">

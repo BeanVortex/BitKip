@@ -144,7 +144,7 @@ public class MainTableUtils {
         menuItems.get(pauseLbl).setOnAction(e -> DownloadOpUtils.pauseDownloads(getSelected()));
         menuItems.get(pauseAllLbl).setOnAction(e -> DownloadOpUtils.pauseAllDownloads());
         menuItems.get(refreshLbl).setOnAction(e -> DownloadOpUtils.refreshDownload(getSelected()));
-        menuItems.get(copyLbl).setOnAction(e -> FxUtils.setClipboard(getSelected().get(0).getUrl()));
+        menuItems.get(copyLbl).setOnAction(e -> FxUtils.setClipboard(getSelected().get(0).getUri()));
         menuItems.get(restartLbl).setOnAction(e -> DownloadOpUtils.restartDownloads(getSelected()));
         menuItems.get(detailsLbl).setOnAction(e -> getSelected().forEach(FxUtils::newDetailsStage));
         menuItems.get(locationLbl).setOnAction(e -> DownloadOpUtils.changeLocation(getSelected(), e));
@@ -284,7 +284,7 @@ public class MainTableUtils {
 
     public List<String> getSelectedUrls() {
         return getSelected().stream()
-                .map(DownloadModel::getUrl)
+                .map(DownloadModel::getUri)
                 .toList();
     }
 

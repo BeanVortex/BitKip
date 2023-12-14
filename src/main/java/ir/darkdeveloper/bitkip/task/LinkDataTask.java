@@ -29,14 +29,14 @@ public class LinkDataTask extends Task<Flux<LinkModel>> {
                     break;
                 HttpURLConnection connection;
                 try {
-                    connection = DownloadUtils.connect(lm.getUrl());
+                    connection = DownloadUtils.connect(lm.getUri());
                 } catch (IOException e) {
                     log.error(e.getMessage());
                     break;
                 }
-                var url = lm.getUrl();
+                var uri = lm.getUri();
                 var fileSize = DownloadUtils.getFileSize(connection);
-                var fileName = DownloadUtils.extractFileName(url, connection);
+                var fileName = DownloadUtils.extractFileName(uri, connection);
                 lm.setName(getNewFileNameIfExists(fileName, lm.getPath()));
                 lm.setSize(fileSize);
                 lm.setResumable(DownloadUtils.canResume(connection));

@@ -100,7 +100,7 @@ public class DownloadsRepo {
                 dm.getProgress(),
                 dm.getDownloaded(),
                 dm.getSize(),
-                dm.getUrl(),
+                dm.getUri(),
                 dm.getFilePath(),
                 dm.getChunks(),
                 dm.getAddDate().toString(),
@@ -292,7 +292,7 @@ public class DownloadsRepo {
         var downloadStatus = progress != 100 ? DownloadStatus.Paused : DownloadStatus.Completed;
 
         var build = DownloadModel.builder()
-                .id(id).name(name).progress(progress).downloaded(downloaded).size(size).url(url).filePath(filePath)
+                .id(id).name(name).progress(progress).downloaded(downloaded).size(size).uri(url).filePath(filePath)
                 .chunks(chunks).addDate(addDateStr).addToQueueDate(addToQueueDateStr).turnOffMode(turnOffMode)
                 .lastTryDate(lastTryDateStr).completeDate(completeDateStr).openAfterComplete(openAfterComplete)
                 .showCompleteDialog(showCompleteDialog).downloadStatus(downloadStatus).resumable(resumable)

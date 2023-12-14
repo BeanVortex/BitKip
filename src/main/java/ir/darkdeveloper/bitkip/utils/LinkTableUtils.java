@@ -62,11 +62,11 @@ public class LinkTableUtils {
         sizeCol.setCellValueFactory(new PropertyValueFactory<>("sizeString"));
         chunksCol.setCellValueFactory(new PropertyValueFactory<>("chunks"));
         resumeCol.setCellValueFactory(new PropertyValueFactory<>("resumableString"));
-        linkCol.setCellValueFactory(new PropertyValueFactory<>("url"));
+        linkCol.setCellValueFactory(new PropertyValueFactory<>("uri"));
         queuesCol.setCellValueFactory(new PropertyValueFactory<>("queuesString"));
 
         linkCol.setCellFactory(TextFieldTableCell.forTableColumn());
-        linkCol.setOnEditCommit(e -> e.getTableView().getItems().get(e.getTablePosition().getRow()).setUrl(e.getNewValue()));
+        linkCol.setOnEditCommit(e -> e.getTableView().getItems().get(e.getTablePosition().getRow()).setUri(e.getNewValue()));
         nameCol.setCellFactory(TextFieldTableCell.forTableColumn());
         nameCol.setOnEditCommit(e -> e.getTableView().getItems().get(e.getTablePosition().getRow()).setName(e.getNewValue()));
         var queuesToShow = getQueues().stream()
@@ -129,7 +129,7 @@ public class LinkTableUtils {
 
     public LinkModel findLinkModel(LinkModel link) {
         for (var d : data)
-            if (link.getUrl().equals(d.getUrl()))
+            if (link.getUri().equals(d.getUri()))
                 return d;
         return null;
     }

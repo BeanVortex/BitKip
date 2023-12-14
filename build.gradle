@@ -4,7 +4,7 @@ plugins {
     id 'java'
     id 'application'
     id 'org.openjfx.javafxplugin' version '0.1.0'
-    id 'org.beryx.jlink' version '3.0.0'
+    id 'org.beryx.jlink' version '3.0.1'
 }
 
 group 'ir.darkdeveloper'

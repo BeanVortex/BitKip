@@ -86,7 +86,7 @@ class DownloadUtilsTest {
         AppConfigs.log = LoggerFactory.getLogger("BitKip");
         var dm = DownloadModel.builder()
                 .name(name).progress(0).downloaded(0).size(1254631)
-                .url(UUID.randomUUID().toString()).filePath(downloadPath + name)
+                .uri(UUID.randomUUID().toString()).filePath(downloadPath + name)
                 .chunks(8).addDate(LocalDateTime.now()).addToQueueDate(LocalDateTime.now())
                 .lastTryDate(LocalDateTime.now()).completeDate(LocalDateTime.now())
                 .queues(new CopyOnWriteArrayList<>(List.of(QueuesRepo.findByName(ALL_DOWNLOADS_QUEUE, false))))

@@ -285,7 +285,7 @@ public class SingleDownload implements QueueObserver {
         }
 
 
-        dm.setUrl(url);
+        dm.setUri(url);
         if (path.endsWith(File.separator))
             dm.setFilePath(path + fileName);
         else

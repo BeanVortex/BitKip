@@ -27,7 +27,7 @@ import java.util.concurrent.Executor;
 import static ir.darkdeveloper.bitkip.config.AppConfigs.*;
 import static ir.darkdeveloper.bitkip.utils.Defaults.OTHERS_QUEUE;
 import static ir.darkdeveloper.bitkip.utils.Defaults.extensions;
-import static ir.darkdeveloper.bitkip.utils.Validations.maxChunks;
+import static ir.darkdeveloper.bitkip.utils.Validations.*;
 
 public class DownloadUtils {
 
@@ -35,6 +35,7 @@ public class DownloadUtils {
     public static HttpURLConnection connect(String uri) throws IOException {
         if (uri.isBlank())
             throw new IllegalArgumentException("URL is blank");
+        uri = fixURIChars(uri);
         var url = URI.create(uri).toURL();
         var conn = (HttpURLConnection) url.openConnection();
         conn.setConnectTimeout(connectionTimeout);
@@ -43,6 +44,7 @@ public class DownloadUtils {
             conn.setRequestProperty("User-Agent", userAgent);
         return conn;
     }
+
 
     public static HttpURLConnection connectWithInternetCheck(String uri, boolean showErrors) throws IOException {
         try {
