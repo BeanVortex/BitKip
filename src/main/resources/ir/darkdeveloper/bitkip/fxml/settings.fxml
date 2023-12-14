@@ -41,6 +41,11 @@
                 </VBox>
 
                 <VBox styleClass="padding_10" spacing="10">
+                    <Label styleClass="settingTile" text="Startup"/>
+                    <CheckBox text="Run application on startup" fx:id="startupCheck" onAction="#onStartupCheck"/>
+                </VBox>
+
+                <VBox styleClass="padding_10" spacing="10">
                     <Label styleClass="settingTile" text="Server"/>
                     <CheckBox text="Listen to links from Browser" fx:id="serverCheck"
                               onAction="#onServerCheck"/>

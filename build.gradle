@@ -8,7 +8,7 @@ plugins {
 }
 
 group 'ir.darkdeveloper'
-version '1.4.1'
+version '1.4.2'
 sourceCompatibility = '21'
 targetCompatibility = '21'
 mainClassName = 'ir.darkdeveloper.bitkip.BitKip'
@@ -50,7 +50,8 @@ dependencies {
     implementation 'org.kordamp.ikonli:ikonli-fontawesome5-pack:12.3.1'
     implementation 'org.kordamp.bootstrapfx:bootstrapfx-core:0.4.0'
     implementation 'io.projectreactor:reactor-core:3.4.24'
-    implementation 'net.java.dev.jna:jna:5.13.0'
+    implementation 'net.java.dev.jna:jna:5.14.0'
+    implementation 'net.java.dev.jna:jna-platform:5.14.0'
     implementation 'org.apache.commons:commons-lang3:3.12.0'
     testImplementation 'org.junit.jupiter:junit-jupiter:5.8.1'
     compileOnly 'org.projectlombok:lombok:1.18.30'
@@ -96,7 +97,7 @@ jlink {
     }
 }
 
-task fatJar(type: Jar) {
+tasks.register('fatJar', Jar) {
     manifest {
         attributes 'Main-Class': "ir.darkdeveloper.bitkip.Launcher"
     }

@@ -17,7 +17,7 @@ import java.util.*;
 
 public class AppConfigs {
 
-    public static final String VERSION = "1.4.1";
+    public static final String VERSION = "1.4.2";
 
     public static final String dataPath = System.getProperty("user.home")
             + File.separator + "Documents"
@@ -31,6 +31,8 @@ public class AppConfigs {
 
     public static final String defaultTheme = "light";
     public static String theme = defaultTheme;
+    public static final boolean defaultStartup = true;
+    public static boolean startup = defaultStartup;
     public static final boolean defaultServerEnabled = true;
     public static boolean serverEnabled = defaultServerEnabled;
     public static final int defaultServerPort = 9563;

@@ -1,7 +1,10 @@
 package ir.darkdeveloper.bitkip.controllers;
 
+import com.sun.jna.platform.win32.Advapi32Util;
+import com.sun.jna.platform.win32.WinReg;
 import ir.darkdeveloper.bitkip.config.AppConfigs;
 import ir.darkdeveloper.bitkip.controllers.interfaces.FXMLController;
+import ir.darkdeveloper.bitkip.exceptions.DeniedException;
 import ir.darkdeveloper.bitkip.models.QueueModel;
 import ir.darkdeveloper.bitkip.task.FileMoveTask;
 import ir.darkdeveloper.bitkip.utils.FxUtils;
@@ -26,6 +29,9 @@ import org.controlsfx.control.Notifications;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.util.ResourceBundle;
 import java.util.concurrent.Executors;
 
@@ -38,7 +44,7 @@ import static ir.darkdeveloper.bitkip.config.observers.ThemeSubject.setTheme;
 public class SettingsController implements FXMLController {
 
     @FXML
-    private CheckBox immediateCheck, triggerOffCheck, agentCheck, addDownCheck,
+    private CheckBox immediateCheck, startupCheck, triggerOffCheck, agentCheck, addDownCheck,
             continueCheck, completeDialogCheck, serverCheck, lessCpuCheck;
     @FXML
     private VBox root, actionArea, queueContainer;
@@ -101,6 +107,7 @@ public class SettingsController implements FXMLController {
     private void initElements() {
         lblLocation.setText(downloadPath);
         serverCheck.setSelected(serverEnabled);
+        startupCheck.setSelected(startup);
         triggerOffCheck.setSelected(triggerTurnOffOnEmptyQueue);
         immediateCheck.setSelected(downloadImmediately);
         addDownCheck.setSelected(addSameDownload);
@@ -287,6 +294,75 @@ public class SettingsController implements FXMLController {
     private void onLessCpuCheck() {
         lessCpuIntensive = lessCpuCheck.isSelected();
         IOUtils.saveConfigs();
+    }
+
+    @FXML
+    private void onStartupCheck() {
+        startup = startupCheck.isSelected();
+        initStartup();
+    }
+
+    public static void initStartup() {
+        try {
+            if (startup && !existsOnStartup())
+                addToStartup();
+            else
+                removeFromStartup();
+            IOUtils.saveConfigs();
+        } catch (DeniedException e) {
+            Notifications.create()
+                    .title("Failed")
+                    .text(e.getMessage())
+                    .showError();
+        }
+    }
+
+    public static void addToStartup() throws DeniedException {
+        if (com.sun.jna.Platform.isWindows()) {
+            Advapi32Util.registrySetStringValue(WinReg.HKEY_CURRENT_USER,
+                    "Software\\Microsoft\\Windows\\CurrentVersion\\Run",
+                    "BitKip",
+                    System.getProperty("user.dir") + "\\BitKip.exe");
+        } else if (com.sun.jna.Platform.isLinux()) {
+            var userHome = System.getProperty("user.home");
+            var path = userHome + File.separator + ".config" + File.separator + "autostart" + "BitKip.d";
+            var changedNamePath = userHome + File.separator + ".config" + File.separator + "autostart" + "BitKip.desktop";
+            try {
+                Files.move(Path.of(path), Path.of(changedNamePath), StandardCopyOption.REPLACE_EXISTING);
+            } catch (IOException e) {
+                throw new DeniedException("Failed to add BitKip to startup");
+            }
+        }
+    }
+
+    public static boolean existsOnStartup() {
+        if (com.sun.jna.Platform.isWindows())
+            return Advapi32Util.registryValueExists(WinReg.HKEY_CURRENT_USER,
+                    "Software\\Microsoft\\Windows\\CurrentVersion\\Run",
+                    "BitKip");
+        else if (com.sun.jna.Platform.isLinux()) {
+            var userHome = System.getProperty("user.home");
+            var path = userHome + File.separator + ".config" + File.separator + "autostart" + "BitKip.desktop";
+            return new File(path).exists();
+        }
+        return false;
+    }
+
+    public static void removeFromStartup() throws DeniedException {
+        if (com.sun.jna.Platform.isWindows()) {
+            Advapi32Util.registryDeleteValue(WinReg.HKEY_CURRENT_USER,
+                    "Software\\Microsoft\\Windows\\CurrentVersion\\Run",
+                    "BitKip");
+        } else if (com.sun.jna.Platform.isLinux()) {
+            var userHome = System.getProperty("user.home");
+            var path = userHome + File.separator + ".config" + File.separator + "autostart" + "BitKip.desktop";
+            var changedNamePath = userHome + File.separator + ".config" + File.separator + "autostart" + "BitKip.d";
+            try {
+                Files.move(Path.of(path), Path.of(changedNamePath), StandardCopyOption.REPLACE_EXISTING);
+            } catch (IOException e) {
+                throw new DeniedException("Failed to remove BitKip from startup");
+            }
+        }
     }
 
     public void setQueue(QueueModel selectedQueue) {

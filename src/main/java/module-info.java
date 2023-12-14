@@ -19,11 +19,13 @@ module ir.darkdeveloper.bitkip {
     requires java.desktop;
     requires javafx.swing;
     requires com.sun.jna;
+    requires com.sun.jna.platform;
     requires org.slf4j;
     requires ch.qos.logback.classic;
     requires com.fasterxml.jackson.databind;
     requires io.helidon.webserver;
     requires io.helidon.media.jackson;
+    requires java.prefs;
 
     opens ir.darkdeveloper.bitkip to javafx.fxml, javafx.controls;
     opens ir.darkdeveloper.bitkip.controllers to javafx.fxml, javafx.base;

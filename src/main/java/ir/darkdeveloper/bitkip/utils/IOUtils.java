@@ -275,6 +275,7 @@ public class IOUtils {
             var writer = new FileWriter(file);
             writer.append("save_location=").append(downloadPath).append("\n")
                     .append("theme=").append(theme).append("\n")
+                    .append("startup=").append(String.valueOf(startup)).append("\n")
                     .append("server_enabled=").append(String.valueOf(serverEnabled)).append("\n")
                     .append("port=").append(String.valueOf(serverPort)).append("\n")
                     .append("trigger_turn_off_on_empty_queue=").append(String.valueOf(triggerTurnOffOnEmptyQueue)).append("\n")
@@ -311,6 +312,7 @@ public class IOUtils {
                     switch (key) {
                         case "save_location" -> downloadPath = value;
                         case "theme" -> theme = value;
+                        case "startup" -> startup = value.equals("true");
                         case "server_enabled" -> serverEnabled = value.equals("true");
                         case "port" -> serverPort = Integer.parseInt(value);
                         case "trigger_turn_off_on_empty_queue" -> triggerTurnOffOnEmptyQueue = value.equals("true");

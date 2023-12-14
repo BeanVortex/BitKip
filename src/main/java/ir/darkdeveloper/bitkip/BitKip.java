@@ -25,6 +25,7 @@ import java.net.URL;
 import java.util.ArrayList;
 
 import static ir.darkdeveloper.bitkip.config.AppConfigs.*;
+import static ir.darkdeveloper.bitkip.controllers.SettingsController.*;
 
 public class BitKip extends Application {
 
@@ -49,6 +50,7 @@ public class BitKip extends Application {
         ScheduleTask.scheduleQueues();
         MoreUtils.checkUpdates(false);
         IOUtils.moveChunkFilesToTemp(downloadPath);
+        initStartup();
         initTray(stage);
         startServer();
     }
