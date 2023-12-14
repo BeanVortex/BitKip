@@ -5,6 +5,7 @@ import io.helidon.webserver.Routing;
 import io.helidon.webserver.WebServer;
 import ir.darkdeveloper.bitkip.config.AppConfigs;
 import ir.darkdeveloper.bitkip.config.observers.QueueSubject;
+import ir.darkdeveloper.bitkip.exceptions.DeniedException;
 import ir.darkdeveloper.bitkip.repo.DownloadsRepo;
 import ir.darkdeveloper.bitkip.repo.QueuesRepo;
 import ir.darkdeveloper.bitkip.repo.ScheduleRepo;
@@ -17,6 +18,7 @@ import ir.darkdeveloper.bitkip.utils.MoreUtils;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.stage.Stage;
+import org.controlsfx.control.Notifications;
 
 
 import java.awt.*;
@@ -53,6 +55,20 @@ public class BitKip extends Application {
         initStartup();
         initTray(stage);
         startServer();
+    }
+
+    private void initStartup() {
+        try {
+            if (!startup && existsOnStartup())
+                removeFromStartup();
+            if (startup && !existsOnStartup())
+                addToStartup();
+        } catch (DeniedException e) {
+            Notifications.create()
+                    .title("Failed")
+                    .text(e.getMessage())
+                    .showError();
+        }
     }
 
 

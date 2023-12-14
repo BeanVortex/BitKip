@@ -302,7 +302,7 @@ public class SettingsController implements FXMLController {
         initStartup();
     }
 
-    public static void initStartup() {
+    private void initStartup() {
         try {
             if (startup && !existsOnStartup())
                 addToStartup();
@@ -325,10 +325,16 @@ public class SettingsController implements FXMLController {
                     System.getProperty("user.dir") + "\\BitKip.exe");
         } else if (com.sun.jna.Platform.isLinux()) {
             var userHome = System.getProperty("user.home");
-            var path = userHome + File.separator + ".config" + File.separator + "autostart" + "BitKip.d";
-            var changedNamePath = userHome + File.separator + ".config" + File.separator + "autostart" + "BitKip.desktop";
+            var configPath = userHome + File.separator + ".config" + File.separator + "autostart" + File.separator;
+            var path = configPath + "BitKip.d";
+            var changedNamePath = configPath + "BitKip.desktop";
+            var of = Path.of(changedNamePath);
+
             try {
-                Files.move(Path.of(path), Path.of(changedNamePath), StandardCopyOption.REPLACE_EXISTING);
+                if (!new File(path).exists())
+                    Files.copy(Path.of("/usr/share/applications/BitKip.desktop"), of, StandardCopyOption.REPLACE_EXISTING);
+                else
+                    Files.move(Path.of(path), of, StandardCopyOption.REPLACE_EXISTING);
             } catch (IOException e) {
                 throw new DeniedException("Failed to add BitKip to startup");
             }
@@ -342,7 +348,7 @@ public class SettingsController implements FXMLController {
                     "BitKip");
         else if (com.sun.jna.Platform.isLinux()) {
             var userHome = System.getProperty("user.home");
-            var path = userHome + File.separator + ".config" + File.separator + "autostart" + "BitKip.desktop";
+            var path = userHome + File.separator + ".config" + File.separator + "autostart" + File.separator + "BitKip.desktop";
             return new File(path).exists();
         }
         return false;
@@ -355,8 +361,8 @@ public class SettingsController implements FXMLController {
                     "BitKip");
         } else if (com.sun.jna.Platform.isLinux()) {
             var userHome = System.getProperty("user.home");
-            var path = userHome + File.separator + ".config" + File.separator + "autostart" + "BitKip.desktop";
-            var changedNamePath = userHome + File.separator + ".config" + File.separator + "autostart" + "BitKip.d";
+            var path = userHome + File.separator + ".config" + File.separator + "autostart" + File.separator + "BitKip.desktop";
+            var changedNamePath = userHome + File.separator + ".config" + File.separator + "autostart" + File.separator + "BitKip.d";
             try {
                 Files.move(Path.of(path), Path.of(changedNamePath), StandardCopyOption.REPLACE_EXISTING);
             } catch (IOException e) {

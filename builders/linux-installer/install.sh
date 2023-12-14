@@ -9,6 +9,7 @@ fi
 desktopFile="BitKip.desktop"
 uninstallDesktopFile="BitKipUninstall.desktop"
 desktopFilePath="./application/$desktopFile"
+uninstallDesktopFilePath="./application/$uninstallDesktopFile"
 
 
 for user in $(cut -d: -f1 /etc/passwd); do
@@ -19,7 +20,7 @@ for user in $(cut -d: -f1 /etc/passwd); do
 done
 
 mv "$desktopFilePath" /usr/share/applications/
-mv "$uninstallDesktopFile" /usr/share/applications/
+mv "$uninstallDesktopFilePath" /usr/share/applications/
 
 chmod a+rx ./application/bitkip
 mv ./application/bitkip /usr/bin/
