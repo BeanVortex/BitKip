@@ -7,6 +7,7 @@ exit
 fi
 
 desktopFile="BitKip.desktop"
+uninstallDesktopFile="BitKipUninstall.desktop"
 desktopFilePath="./application/$desktopFile"
 
 
@@ -18,6 +19,7 @@ for user in $(cut -d: -f1 /etc/passwd); do
 done
 
 mv "$desktopFilePath" /usr/share/applications/
+mv "$uninstallDesktopFile" /usr/share/applications/
 
 mv ./application/bitkip /usr/bin/
 mkdir BitKip 

@@ -20,6 +20,7 @@ echo "creating run file for other linux distributions"
 mkdir ./builders/linux-installer/application
 mv ./build/image/* ./builders/linux-installer/application
 chmod +x ./builders/linux-installer/install.sh
+chmod +x ./builders/linux-installer/uninstall.sh
 makeself ./builders/linux-installer $FILE_NAME-linux.run "Description" ./install.sh
 chmod +x ./builders/linux-installer/$FILE_NAME-linux.run
 
