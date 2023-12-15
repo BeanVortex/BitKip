@@ -28,5 +28,6 @@ echo "moving files to releases"
 #ls -R | grep ":$" | sed -e 's/:$//' -e 's/[^-][^\/]*\//--/g' -e 's/^/   /' -e 's/-/|/'
 #mv ./build/jpackage/$FILE_NAME* ./build/releases/
 mv ./build/libs/*.jar ./build/releases/$FILE_NAME-linux.jar
+chmod +x ./*.run
 mv ./*.run ./build/releases
 ls ./build/releases

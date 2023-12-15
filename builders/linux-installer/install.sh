@@ -1,10 +1,7 @@
 #!/bin/bash
 
-if [ "$EUID" -ne 0 ]
-then
-echo "Please run as root to copy the application folder and files to /usr/share and /usr/bin"
-exit
-fi
+# sudo
+[ "$UID" -eq 0 ] || exec sudo "$0" "$@"
 
 desktopFile="BitKip.desktop"
 uninstallDesktopFile="BitKipUninstall.desktop"
