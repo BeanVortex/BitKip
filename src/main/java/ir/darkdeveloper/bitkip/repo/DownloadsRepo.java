@@ -90,11 +90,11 @@ public class DownloadsRepo {
         var resumable = dm.isResumable() ? 1 : 0;
 
         var downloadSql = """
-                INSERT INTO %s (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
-                VALUES ("%s", %f, %d, %d, "%s", "%s", %d, "%s", "%s", %s, %d, %d, %d)
+                INSERT INTO %s (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                VALUES ("%s", %f, %d, %d, "%s", "%s", %d, "%s", "%s", "%s", %s, %d, %d, %d)
                 """.formatted(
                 DOWNLOADS_TABLE_NAME,
-                COL_NAME, COL_PROGRESS, COL_DOWNLOADED, COL_SIZE, COL_URL, COL_PATH, COL_CHUNKS, COL_ADD_DATE,
+                COL_NAME, COL_PROGRESS, COL_DOWNLOADED, COL_SIZE, COL_URL, COL_PATH, COL_CHUNKS, COL_ADD_DATE, COL_TURNOFF_MODE,
                 COL_ADD_TO_QUEUE_DATE, COL_LAST_TRY_DATE, COL_SHOW_COMPLETE_DIALOG, COL_OPEN_AFTER_COMPLETE, COL_RESUMABLE,
                 dm.getName(),
                 dm.getProgress(),
@@ -104,6 +104,7 @@ public class DownloadsRepo {
                 dm.getFilePath(),
                 dm.getChunks(),
                 dm.getAddDate().toString(),
+                dm.getTurnOffMode(),
                 dm.getAddToQueueDate(),
                 lastTryDate,
                 showDialog,
@@ -163,7 +164,7 @@ public class DownloadsRepo {
                 list.add(createDownload(rs, fetchQueue));
             return list;
         } catch (SQLException e) {
-            log.error(e.getLocalizedMessage());
+            log.error(e.getMessage());
         }
         return list;
     }
