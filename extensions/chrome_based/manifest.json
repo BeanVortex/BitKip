@@ -1,0 +1,35 @@
+{
+  "name": "BitKip extension",
+  "action": {
+    "default_popup": "./src/resources/popup.html",
+    "icon" : "./src/resources/icons/logo.png"
+  },
+  "manifest_version": 3,
+  "version": "1.0",
+  "description": "Download grabber that works with BitKip application",
+  "host_permissions": ["*://*/*"],
+  "permissions": [
+    "downloads",
+    "webRequest",
+    "tabs",
+    "storage",
+    "notifications",
+    "contextMenus",
+    "scripting"
+  ],
+  "background": {
+    "service_worker": "./src/scripts/connector.js",
+    "type": "module"
+  },
+  "content_scripts": [
+    {
+      "all_frames": true,
+      "matches": ["http://*/*", "https://*/*", "ftp://*/*", "file:///*"],
+      "js": ["./src/scripts/content.js"]
+    }
+  ],
+  
+  "icons": {
+    "128": "./src/resources/icons/logo.png"
+  }
+}
