@@ -31,6 +31,27 @@
 - [x] Interaction with the user clicks and inputs on a browser through [BitKip Extension](https://github.com/DarkDeveloper-arch/BitKip-extensions)
 - [x] Tricky feature: You can create an empty queue and schedule it to run on a specific date and time and set the scheduler to turn off or sleep the computer, in this case you have a scheduler to sleep or turn off the computer :)
 
+
+# BitKip-extensions
+
+This extension will install on your browser to grab download links from browser and send to [BitKip](https://github.com/DarkDeveloper-arch/BitKip) application
+
+How to install:
+- download from [latest release](https://github.com/DarkDeveloper-arch/BitKip/releases/latest)
+- extract downloaded zip
+- go to your browser extension settings
+- enable developer mode
+- load unpacked
+- select the folder that has manifest.json
+
+Or install from FireFox add-ons
+https://addons.mozilla.org/en-US/firefox/addon/bitkip-extension/
+
+Preview of the extension:
+
+![latest release](https://github.com/DarkDeveloper-arch/BitKip-extensions/blob/main/src/resources/images/popup.png)
+
+
 ## BitKip Demo
 
 ![main](https://github.com/DarkDeveloper-arch/BitKip/blob/main/readme-img/main.png)

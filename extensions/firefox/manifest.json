@@ -4,8 +4,7 @@
   "name": "BitKip extension",
 
   "action": {
-    "default_popup": "./src/resources/popup.html",
-    "icon" : "./src/resources/icons/logo.png"
+    "default_popup": "./src/resources/popup.html"
   },
   "description": "Download grabber that works with BitKip application",
   "host_permissions": ["*://*/*"],
@@ -32,8 +31,7 @@
 
   "browser_specific_settings": {
     "gecko": {
-      "id": "bitkip_id@beanvortex.com",
-      "strict_min_version": "60.0"
+      "id": "bitkip_extension@beanvortex.com"
     }
   },
 
