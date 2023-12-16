@@ -1,4 +1,4 @@
-package ir.darkdeveloper.bitkip.servlets;
+package ir.darkdeveloper.bitkip.api;
 
 import io.helidon.webserver.Routing;
 import io.helidon.webserver.ServerRequest;

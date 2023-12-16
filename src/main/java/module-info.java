@@ -24,6 +24,7 @@ module ir.darkdeveloper.bitkip {
     requires ch.qos.logback.classic;
     requires com.fasterxml.jackson.databind;
     requires io.helidon.webserver;
+    requires io.helidon.webserver.cors;
     requires io.helidon.media.jackson;
     requires java.prefs;
 
@@ -31,6 +32,6 @@ module ir.darkdeveloper.bitkip {
     opens ir.darkdeveloper.bitkip.controllers to javafx.fxml, javafx.base;
     opens ir.darkdeveloper.bitkip.models to javafx.fxml, javafx.base, com.fasterxml.jackson.databind;
     opens ir.darkdeveloper.bitkip.controllers.interfaces to javafx.base, javafx.fxml;
-    opens ir.darkdeveloper.bitkip.servlets to javafx.base, javafx.fxml, com.fasterxml.jackson.databind;
+    opens ir.darkdeveloper.bitkip.api to javafx.base, javafx.fxml, com.fasterxml.jackson.databind;
     exports ir.darkdeveloper.bitkip;
 }

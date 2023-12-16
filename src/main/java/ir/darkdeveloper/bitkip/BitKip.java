@@ -3,14 +3,17 @@ package ir.darkdeveloper.bitkip;
 import io.helidon.media.jackson.JacksonSupport;
 import io.helidon.webserver.Routing;
 import io.helidon.webserver.WebServer;
+import io.helidon.webserver.cors.CorsSupport;
+import io.helidon.webserver.cors.CrossOriginConfig;
+import ir.darkdeveloper.bitkip.api.SyncService;
 import ir.darkdeveloper.bitkip.config.AppConfigs;
 import ir.darkdeveloper.bitkip.config.observers.QueueSubject;
 import ir.darkdeveloper.bitkip.exceptions.DeniedException;
 import ir.darkdeveloper.bitkip.repo.DownloadsRepo;
 import ir.darkdeveloper.bitkip.repo.QueuesRepo;
 import ir.darkdeveloper.bitkip.repo.ScheduleRepo;
-import ir.darkdeveloper.bitkip.servlets.BatchService;
-import ir.darkdeveloper.bitkip.servlets.SingleService;
+import ir.darkdeveloper.bitkip.api.BatchService;
+import ir.darkdeveloper.bitkip.api.SingleService;
 import ir.darkdeveloper.bitkip.task.ScheduleTask;
 import ir.darkdeveloper.bitkip.utils.FxUtils;
 import ir.darkdeveloper.bitkip.utils.IOUtils;
@@ -133,10 +136,16 @@ public class BitKip extends Application {
 
     private static void startServer() {
         if (serverEnabled) {
-
+            var cors = CorsSupport.builder()
+                    .addCrossOrigin(CrossOriginConfig.builder()
+                            .allowMethods("POST", "GET")
+                            .build()
+                    )
+                    .build();
             var routing = Routing.builder()
-                    .register("/single", new SingleService())
-                    .register("/batch", new BatchService())
+                    .register("/single", cors, new SingleService())
+                    .register("/batch", cors, new BatchService())
+                    .register("/sync", cors, new SyncService())
                     .build();
             var jacksonSupport = JacksonSupport.create();
             server = WebServer.builder()

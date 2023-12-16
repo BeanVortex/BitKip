@@ -3,6 +3,25 @@
 let port = 9563;
 let enabled = true;
 
+// should give alarms permission
+// browser.alarms.create('syncAlarm', { periodInMinutes: 2 });
+// browser.alarms.onAlarm.addListener(alarm => {
+//     if (alarm.name === 'syncAlarm')
+//         sync();
+// });
+//
+// const sync = () => {
+//         fetch(`http://localhost:${port}/sync`, {
+//             method: 'GET',
+//             mode: "cors",
+//         }).then(res => {
+//
+//         }).catch(reason => {
+//             // todo run the app
+//         })
+// };
+//
+// sync();
 
 const updatePort = () => {
     chrome.storage.sync.get(["port"])
@@ -23,7 +42,6 @@ const updateEnable = async () => {
 updatePort()
 updateEnable()
 const postLinks = async (data, isBatch) => {
-    console.log(data)
     await updatePort()
     let URL_TO_POST = `http://localhost:${port}/single`;
     if (isBatch)
@@ -31,8 +49,6 @@ const postLinks = async (data, isBatch) => {
     fetch(URL_TO_POST, {
         method: 'POST',
         body: JSON.stringify(data),
-    }).then(res => {
-        console.log(res);
     }).catch(_ => {
         chrome.notifications.create('', {
             title: 'BitKip Extension',
@@ -40,6 +56,7 @@ const postLinks = async (data, isBatch) => {
             iconUrl: '../resources/icons/logo.png',
             type: 'basic'
         });
+        browser.downloads.download({url: data.url})
     });
 }
 
@@ -77,10 +94,9 @@ chrome.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
 const triggerDownload = (downloadItem, suggest) => {
     // final url is used when url itself is a redirecting link
     updateEnable();
-    if (!enabled || downloadItem.mime.includes("image"))
+    if (!enabled || (downloadItem.mime && downloadItem.mime.includes("image")))
         return;
     let url = downloadItem.finalUrl || downloadItem.url;
-    console.log(downloadItem)
     if (isSupportedProtocol(url)) {
         suggest({cancel: true, filename: downloadItem.filename});
         chrome.downloads.cancel(downloadItem.id, () =>
@@ -90,7 +106,6 @@ const triggerDownload = (downloadItem, suggest) => {
             url,
             filename: downloadItem.filename,
             fileSize: downloadItem.fileSize,
-            mimeType: downloadItem.mime,
             agent: navigator.userAgent
         };
         postLinks(data, false);
@@ -105,23 +120,16 @@ chrome.contextMenus.onClicked.addListener((info) => {
     if (info.menuItemId === "extract_selected_link") {
         if (isSupportedProtocol(info.linkUrl))
             chrome.downloads.download({url: info.linkUrl})
-    }/* else if (info.menuItemId === "batch_extract")
-        chrome.action.openPopup();
-    */
+    }
 });
 
 //Adding menus to right-click
 chrome.contextMenus.removeAll(() => {
     chrome.contextMenus.create({
-        id: '',
+        id: 'extract_selected_link',
         title: 'Download this link',
         contexts: ['all'],
     });
-    // chrome.contextMenus.create({
-    //     id: 'batch_extract',
-    //     title: 'Extract links',
-    //     contexts: ['all'],
-    // });
 });
 
 

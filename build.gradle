@@ -44,6 +44,7 @@ dependencies {
     implementation 'org.jsoup:jsoup:1.15.3'
     implementation 'org.slf4j:slf4j-api:2.0.9'
     implementation "io.helidon.webserver:helidon-webserver:3.2.2"
+    implementation "io.helidon.webserver:helidon-webserver-cors:3.2.2"
     implementation 'io.helidon.media:helidon-media-jackson:3.2.2'
     implementation 'com.fasterxml.jackson.core:jackson-databind:2.15.0'
     implementation 'ch.qos.logback:logback-classic:1.4.7'

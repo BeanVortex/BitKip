@@ -3,6 +3,25 @@
 let port = 9563;
 let enabled = true;
 
+// should give alarms permission
+// browser.alarms.create('syncAlarm', { periodInMinutes: 2 });
+// browser.alarms.onAlarm.addListener(alarm => {
+//     if (alarm.name === 'syncAlarm')
+//         sync();
+// });
+//
+// const sync = () => {
+//         fetch(`http://localhost:${port}/sync`, {
+//             method: 'GET',
+//             mode: "cors",
+//         }).then(res => {
+//
+//         }).catch(reason => {
+//             // todo run the app
+//         })
+// };
+//
+// sync();
 
 const updatePort = () => {
     browser.storage.sync.get(["port"])
@@ -23,16 +42,14 @@ const updateEnable = async () => {
 updatePort()
 updateEnable()
 const postLinks = async (data, isBatch) => {
-    console.log(data)
     await updatePort()
     let URL_TO_POST = `http://localhost:${port}/single`;
     if (isBatch)
         URL_TO_POST = `http://localhost:${port}/batch`;
     fetch(URL_TO_POST, {
         method: 'POST',
+        mode: "cors",
         body: JSON.stringify(data),
-    }).then(res => {
-        console.log(res);
     }).catch(_ => {
         browser.notifications.create('', {
             title: 'BitKip Extension',
@@ -40,9 +57,9 @@ const postLinks = async (data, isBatch) => {
             iconUrl: '../resources/icons/logo.png',
             type: 'basic'
         });
+        browser.downloads.download({url: data.url})
     });
 }
-
 
 const loadedContentScripts = {};
 browser.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
@@ -74,54 +91,46 @@ browser.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
 
 // Prevent the download from starting
 // get download link from Chrome Api
-const triggerDownload = (downloadItem, suggest) => {
+const triggerDownload = (downloadItem) => {
     // final url is used when url itself is a redirecting link
     updateEnable();
-    if (!enabled || downloadItem.mime.includes("image"))
+    if (!enabled || (downloadItem.mime  && downloadItem.mime.includes("image")))
         return;
     let url = downloadItem.finalUrl || downloadItem.url;
-    console.log(downloadItem)
     if (isSupportedProtocol(url)) {
-        suggest({cancel: true, filename: downloadItem.filename});
-        browser.downloads.cancel(downloadItem.id, () =>
-            browser.downloads.erase({id: downloadItem.id})
-        );
+        let filename = downloadItem.filename;
+        if (filename.includes('/')){
+            const start = downloadItem.filename.lastIndexOf('/');
+            filename = downloadItem.filename.substring(start === -1 ? 0 : start + 1);
+        }
         let data = {
             url,
-            filename: downloadItem.filename,
+            filename,
             fileSize: downloadItem.fileSize,
-            mimeType: downloadItem.mime,
             agent: navigator.userAgent
         };
+        browser.downloads.cancel(downloadItem.id);
         postLinks(data, false);
     }
 }
 
 //Main code to maintain download link and start doing job
-browser.downloads.onDeterminingFilename.addListener(triggerDownload);
-
+browser.downloads.onCreated.addListener(triggerDownload);
 //Add BitKip right-click menu listener to browser page
 browser.contextMenus.onClicked.addListener((info) => {
     if (info.menuItemId === "extract_selected_link") {
         if (isSupportedProtocol(info.linkUrl))
             browser.downloads.download({url: info.linkUrl})
-    }/* else if (info.menuItemId === "batch_extract")
-        browser.action.openPopup();
-    */
+    }
 });
 
 //Adding menus to right-click
 browser.contextMenus.removeAll(() => {
     browser.contextMenus.create({
-        id: '',
+        id: 'extract_selected_link',
         title: 'Download this link',
         contexts: ['all'],
     });
-    // browser.contextMenus.create({
-    //     id: 'batch_extract',
-    //     title: 'Extract links',
-    //     contexts: ['all'],
-    // });
 });
 
 
