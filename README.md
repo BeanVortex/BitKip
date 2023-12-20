@@ -28,7 +28,7 @@
 - [x] Viewing logs of the application
 - [x] Settings for customization (includes dark mode)
 - [x] You can change download behavior like user agent, retry counts
-- [x] Interaction with the user clicks and inputs on a browser through [BitKip Extension](https://github.com/BeanVortex/BitKip-extensions)
+- [x] Interaction with the user clicks and inputs on a browser through BitKip Extensions
 - [x] Tricky feature: You can create an empty queue and schedule it to run on a specific date and time and set the scheduler to turn off or sleep the computer, in this case you have a scheduler to sleep or turn off the computer :)
 
 
