@@ -28,16 +28,16 @@
 - [x] Viewing logs of the application
 - [x] Settings for customization (includes dark mode)
 - [x] You can change download behavior like user agent, retry counts
-- [x] Interaction with the user clicks and inputs on a browser through [BitKip Extension](https://github.com/DarkDeveloper-arch/BitKip-extensions)
+- [x] Interaction with the user clicks and inputs on a browser through [BitKip Extension](https://github.com/BeanVortex/BitKip-extensions)
 - [x] Tricky feature: You can create an empty queue and schedule it to run on a specific date and time and set the scheduler to turn off or sleep the computer, in this case you have a scheduler to sleep or turn off the computer :)
 
 
 # BitKip-extensions
 
-This extension will install on your browser to grab download links from browser and send to [BitKip](https://github.com/DarkDeveloper-arch/BitKip) application
+This extension will install on your browser to grab download links from browser and send to [BitKip](https://github.com/BeanVortex/BitKip) application
 
 How to install:
-- download from [latest release](https://github.com/DarkDeveloper-arch/BitKip/releases/latest)
+- download from [latest release](https://github.com/BeanVortex/BitKip/releases/latest)
 - extract downloaded zip
 - go to your browser extension settings
 - enable developer mode
@@ -45,23 +45,23 @@ How to install:
 - select the folder that has manifest.json
 
 Or install from FireFox add-ons
-https://addons.mozilla.org/en-US/firefox/addon/bitkip-extension/
+https://addons.mozilla.org/en-US/firefox/addon/bitkip-add-on/
 
 Preview of the extension:
 
-![latest release](https://github.com/DarkDeveloper-arch/BitKip-extensions/blob/main/src/resources/images/popup.png)
+![latest release](https://github.com/BeanVortex/BitKip-extensions/blob/main/src/resources/images/popup.png)
 
 
 ## BitKip Demo
 
-![main](https://github.com/DarkDeveloper-arch/BitKip/blob/main/readme-img/main.png)
-![main](https://github.com/DarkDeveloper-arch/BitKip/blob/main/readme-img/single.png)
-![main](https://github.com/DarkDeveloper-arch/BitKip/blob/main/readme-img/batch.png)
-![main](https://github.com/DarkDeveloper-arch/BitKip/blob/main/readme-img/batch-list.png)
-![main](https://github.com/DarkDeveloper-arch/BitKip/blob/main/readme-img/queue-settings.png)
-![main](https://github.com/DarkDeveloper-arch/BitKip/blob/main/readme-img/queue-scheduler.png)
-![main](https://github.com/DarkDeveloper-arch/BitKip/blob/main/readme-img/settings-1.png)
-![main](https://github.com/DarkDeveloper-arch/BitKip/blob/main/readme-img/settings-2.png)
-![main](https://github.com/DarkDeveloper-arch/BitKip/blob/main/readme-img/logs.png)
+![main](https://github.com/BeanVortex/BitKip/blob/main/readme-img/main.png)
+![main](https://github.com/BeanVortex/BitKip/blob/main/readme-img/single.png)
+![main](https://github.com/BeanVortex/BitKip/blob/main/readme-img/batch.png)
+![main](https://github.com/BeanVortex/BitKip/blob/main/readme-img/batch-list.png)
+![main](https://github.com/BeanVortex/BitKip/blob/main/readme-img/queue-settings.png)
+![main](https://github.com/BeanVortex/BitKip/blob/main/readme-img/queue-scheduler.png)
+![main](https://github.com/BeanVortex/BitKip/blob/main/readme-img/settings-1.png)
+![main](https://github.com/BeanVortex/BitKip/blob/main/readme-img/settings-2.png)
+![main](https://github.com/BeanVortex/BitKip/blob/main/readme-img/logs.png)
 
 
