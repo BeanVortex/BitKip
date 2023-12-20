@@ -4,7 +4,8 @@ on:
     branches:
       - main
 env:
-  VERSION: 1.4.3
+  VERSION: 1.4.4
+  EXT_VERSION: 1.0
   NAME: BitKip
 jobs:
   build-windows:
@@ -58,9 +59,23 @@ jobs:
           name: linux-build
           path: ./build/releases
 
+  package-extension:
+    runs-on: [ ubuntu-latest ]
+    steps:
+      - uses: actions/checkout@v3
+      - name: Make script executable
+        run: chmod +x ./builders/package_extension.sh
+      - name: packaging extension
+        run: ./builders/package_extension.sh
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: extension-package
+          path: ./build/releases
+
   release-artifacts:
     runs-on: [ ubuntu-latest ]
-    needs: [ build-windows, build-linux ]
+    needs: [ build-windows, build-linux, package-extension ]
     steps:
       - name: Download Windows Artifacts
         uses: actions/download-artifact@v2
@@ -70,6 +85,10 @@ jobs:
         uses: actions/download-artifact@v2
         with:
           name: linux-build
+      - name: Download Extension Artifact
+        uses: actions/download-artifact@v2
+        with:
+          name: extension-package
       - name: tree
         run: tree .
       - name: Release Artifacts

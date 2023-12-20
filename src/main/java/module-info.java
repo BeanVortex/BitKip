@@ -1,4 +1,4 @@
-module ir.darkdeveloper.bitkip {
+module io.beanvortex.bitkip {
 
     requires javafx.controls;
     requires javafx.fxml;
@@ -24,13 +24,14 @@ module ir.darkdeveloper.bitkip {
     requires ch.qos.logback.classic;
     requires com.fasterxml.jackson.databind;
     requires io.helidon.webserver;
+    requires io.helidon.webserver.cors;
     requires io.helidon.media.jackson;
     requires java.prefs;
 
-    opens ir.darkdeveloper.bitkip to javafx.fxml, javafx.controls;
-    opens ir.darkdeveloper.bitkip.controllers to javafx.fxml, javafx.base;
-    opens ir.darkdeveloper.bitkip.models to javafx.fxml, javafx.base, com.fasterxml.jackson.databind;
-    opens ir.darkdeveloper.bitkip.controllers.interfaces to javafx.base, javafx.fxml;
-    opens ir.darkdeveloper.bitkip.servlets to javafx.base, javafx.fxml, com.fasterxml.jackson.databind;
-    exports ir.darkdeveloper.bitkip;
+    opens io.beanvortex.bitkip to javafx.fxml, javafx.controls;
+    opens io.beanvortex.bitkip.controllers to javafx.fxml, javafx.base;
+    opens io.beanvortex.bitkip.models to javafx.fxml, javafx.base, com.fasterxml.jackson.databind;
+    opens io.beanvortex.bitkip.controllers.interfaces to javafx.base, javafx.fxml;
+    opens io.beanvortex.bitkip.api to javafx.base, javafx.fxml, com.fasterxml.jackson.databind;
+    exports io.beanvortex.bitkip;
 }

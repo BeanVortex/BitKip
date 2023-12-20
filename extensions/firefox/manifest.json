@@ -1,0 +1,41 @@
+{
+  "manifest_version": 3,
+  "version": "1.0",
+  "name": "BitKip extension",
+
+  "action": {
+    "default_popup": "./src/resources/popup.html"
+  },
+  "description": "Download grabber that works with BitKip application",
+  "host_permissions": ["*://*/*"],
+  "permissions": [
+    "downloads",
+    "webRequest",
+    "tabs",
+    "storage",
+    "notifications",
+    "contextMenus",
+    "scripting"
+  ],
+  "background": {
+    "scripts": ["./src/scripts/connector.js"],
+    "type": "module"
+  },
+  "content_scripts": [
+    {
+      "all_frames": true,
+      "matches": ["http://*/*", "https://*/*", "ftp://*/*", "file:///*"],
+      "js": ["./src/scripts/content.js"]
+    }
+  ],
+
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "bitkip_extension@beanvortex.com"
+    }
+  },
+
+  "icons": {
+    "128": "./src/resources/icons/logo.png"
+  }
+}

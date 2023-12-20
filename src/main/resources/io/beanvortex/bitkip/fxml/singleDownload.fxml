@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<VBox xmlns="http://javafx.com/javafx"
+      xmlns:fx="http://javafx.com/fxml"
+      stylesheets="@../css/light_mode.css"
+      fx:controller="io.beanvortex.bitkip.controllers.SingleDownload"
+      spacing="10">
+
+    <HBox spacing="20" alignment="CENTER">
+        <Label text="URL :" minWidth="60" styleClass="bold"/>
+        <TextField fx:id="urlField" HBox.hgrow="ALWAYS"/>
+    </HBox>
+
+    <HBox spacing="20" alignment="CENTER">
+        <Label text="Name :" minWidth="60" styleClass="bold"/>
+        <TextField fx:id="nameField" HBox.hgrow="ALWAYS"/>
+    </HBox>
+
+    <HBox spacing="15" alignment="CENTER">
+        <Label text="Location :" minWidth="60" styleClass="bold"/>
+        <TextField fx:id="locationField" HBox.hgrow="ALWAYS"/>
+        <Button fx:id="openLocation" onAction="#onSelectLocation"/>
+    </HBox>
+
+    <HBox alignment="BASELINE_LEFT">
+        <HBox spacing="20" alignment="CENTER">
+            <Label text="Queue :" minWidth="60" styleClass="bold"/>
+            <ComboBox fx:id="queueCombo" onAction="#onQueueChanged"/>
+            <Button fx:id="newQueue" onAction="#onNewQueue"/>
+        </HBox>
+    </HBox>
+
+
+    <HBox alignment="BASELINE_LEFT">
+        <HBox spacing="20" alignment="CENTER">
+            <Label text="chunks :" minWidth="60" styleClass="bold"/>
+            <TextField fx:id="chunksField"/>
+            <Button fx:id="questionBtnChunks"/>
+        </HBox>
+    </HBox>
+
+    <HBox alignment="BASELINE_LEFT">
+        <HBox spacing="20" alignment="CENTER">
+            <Label text="Speed limit (MB) :" minWidth="60" styleClass="bold"/>
+            <TextField fx:id="speedField" text="0"/>
+            <Button fx:id="questionBtnSpeed"/>
+        </HBox>
+    </HBox>
+
+    <HBox spacing="15" alignment="BASELINE_LEFT">
+        <Label text="Download till :" minWidth="60" styleClass="bold"/>
+        <TextField fx:id="bytesField"/>
+        <Button fx:id="questionBtnBytes"/>
+    </HBox>
+
+    <HBox alignment="BASELINE_LEFT">
+        <HBox spacing="20" alignment="CENTER">
+            <Label text="Size :" minWidth="60" styleClass="bold"/>
+            <Label fx:id="sizeLabel" styleClass="bold"/>
+        </HBox>
+    </HBox>
+
+    <HBox alignment="BASELINE_LEFT">
+        <HBox spacing="20" alignment="CENTER">
+            <Label text="Resumable :" minWidth="60" styleClass="bold"/>
+            <Label fx:id="resumableLabel" styleClass="bold"/>
+        </HBox>
+    </HBox>
+
+    <HBox alignment="BASELINE_LEFT">
+        <HBox spacing="20" alignment="CENTER">
+            <Label fx:id="errorLabel" styleClass="bold"/>
+        </HBox>
+    </HBox>
+
+    <HBox alignment="BASELINE_LEFT">
+        <HBox alignment="CENTER">
+            <Button fx:id="refreshBtn" minWidth="50"/>
+        </HBox>
+    </HBox>
+
+    <HBox alignment="BOTTOM_CENTER" style="-fx-padding: 15 0 0 0">
+        <HBox spacing="20" alignment="CENTER">
+            <Button text="Cancel" styleClass="cancel_btn" onAction="#onCancel"/>
+            <Button text="Add" styleClass="add_btn" fx:id="addBtn" onAction="#onAdd"/>
+            <Button text="Download Now" styleClass="download_now_btn" fx:id="downloadBtn" onAction="#onDownload"/>
+        </HBox>
+    </HBox>
+</VBox>

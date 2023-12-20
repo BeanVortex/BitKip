@@ -8,10 +8,10 @@ plugins {
 }
 
 group 'ir.darkdeveloper'
-version '1.4.3'
+version '1.4.4'
 sourceCompatibility = '21'
 targetCompatibility = '21'
-mainClassName = 'ir.darkdeveloper.bitkip.BitKip'
+mainClassName = 'io.beanvortex.bitkip.BitKip'
 
 repositories {
     mavenCentral()
@@ -29,7 +29,7 @@ tasks.withType(JavaCompile).configureEach {
 
 application {
     mainClass = mainClassName
-    mainModule = 'ir.darkdeveloper.bitkip'
+    mainModule = 'io.beanvortex.bitkip'
 }
 
 javafx {
@@ -44,6 +44,7 @@ dependencies {
     implementation 'org.jsoup:jsoup:1.15.3'
     implementation 'org.slf4j:slf4j-api:2.0.9'
     implementation "io.helidon.webserver:helidon-webserver:3.2.2"
+    implementation "io.helidon.webserver:helidon-webserver-cors:3.2.2"
     implementation 'io.helidon.media:helidon-media-jackson:3.2.2'
     implementation 'com.fasterxml.jackson.core:jackson-databind:2.15.0'
     implementation 'ch.qos.logback:logback-classic:1.4.7'
@@ -73,22 +74,22 @@ jlink {
             appVersion = version
             installerName = 'BitKip'
             installerOptions = ['--win-menu', '--win-shortcut',
-                                '--icon', 'src/main/resources/ir/darkdeveloper/bitkip/icons/logo.ico',
+                                '--icon', 'src/main/resources/io/beanvortex/bitkip/icons/logo.ico',
                                 "--app-version", version as String,
                                 "--win-menu-group", "BitKip",
                                 "--description", "Free download manager for desktop",
-                                '--vendor', 'DarkDeveloper']
-            imageOptions = ['--icon', 'src/main/resources/ir/darkdeveloper/bitkip/icons/logo.ico']
+                                '--vendor', 'BeanVortex']
+            imageOptions = ['--icon', 'src/main/resources/io/beanvortex/bitkip/icons/logo.ico']
         }
         if (OperatingSystem.current().macOsX) {
             appVersion = version
             installerName = 'BitKip'
             installerOptions = ['--mac-package-name', 'BitKip',
-                                '--icon', 'src/main/resources/ir/darkdeveloper/bitkip/icons/logo.icns',
+                                '--icon', 'src/main/resources/io/beanvortex/bitkip/icons/logo.icns',
                                 "--app-version", version as String,
                                 "--description", "Free download manager for desktop",
-                                '--vendor', 'DarkDeveloper']
-            imageOptions = ['--icon', 'src/main/resources/ir/darkdeveloper/bitkip/icons/logo.icns']
+                                '--vendor', 'BeanVortex']
+            imageOptions = ['--icon', 'src/main/resources/io/beanvortex/bitkip/icons/logo.icns']
         }
     }
     addExtraDependencies 'slf4j'
@@ -99,7 +100,7 @@ jlink {
 
 tasks.register('fatJar', Jar) {
     manifest {
-        attributes 'Main-Class': "ir.darkdeveloper.bitkip.Launcher"
+        attributes 'Main-Class': "io.beanvortex.bitkip.Launcher"
     }
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
     from { configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) } }
