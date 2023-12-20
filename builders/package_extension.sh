@@ -2,7 +2,7 @@ FILE_NAME=$NAME-extension-$EXT_VERSION
 
 
 echo "creating releases folder"
-mkdir ./build/releases/
+mkdir -p ./build/releases/
 
 echo "zipping folder"
 zip -r $FILE_NAME.zip ./extensions
