@@ -2,7 +2,7 @@
 !define version "$%VERSION%"
 !define appName "$%NAME%"
 !define filename "${appName}-${version}.exe"
-!define publisher "DarkDeveloper"
+!define publisher "BeanVortex"
 !define uninstallerName "uninstall.exe"
 !include "x64.nsh"
 
@@ -75,7 +75,7 @@ UpgradeInstallation:
     ; Copy application files to the installation directory
     SetOverwrite on
     File /r "..\..\build\jpackage\${appName}\*"
-    File "..\..\src\main\resources\ir\darkdeveloper\bitkip\icons\logo.ico"
+    File "..\..\src\main\resources\io\beanvortex\bitkip\icons\logo.ico"
 
     ; Create a shortcut in the Start Menu
     CreateShortCut "$SMPROGRAMS\${appName}.lnk" "$InstallFolder\${appName}.exe"

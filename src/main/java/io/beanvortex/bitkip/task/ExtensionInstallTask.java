@@ -14,7 +14,7 @@ public class ExtensionInstallTask extends Task<Integer> {
 
     @Override
     protected Integer call() throws InterruptedException, IOException {
-        var url = "https://github.com/DarkDeveloper-arch/BitKip-extensions/releases";
+        var url = "https://github.com/BeanVortex/BitKip-extensions/releases";
         var doc = getDocument(url);
         var updateVersion = doc.select(".Box-body").get(0)
                 .select("div").get(0)

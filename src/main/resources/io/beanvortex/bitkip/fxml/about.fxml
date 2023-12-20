@@ -39,7 +39,7 @@
     </Accordion>
 
     <VBox alignment="CENTER">
-        <Label styleClass="settingDescription" text="Developed by DarkDeveloper 2023"/>
-        <Hyperlink text="https://github.com/DarkDeveloper-arch/BitKip" onAction="#openGithubPage"/>
+        <Label styleClass="settingDescription" text="Developed by BeanVortex 2023"/>
+        <Hyperlink text="https://github.com/BeanVortex/BitKip" onAction="#openGithubPage"/>
     </VBox>
 </VBox>

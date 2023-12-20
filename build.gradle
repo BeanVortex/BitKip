@@ -7,7 +7,7 @@ plugins {
     id 'org.beryx.jlink' version '3.0.1'
 }
 
-group 'ir.darkdeveloper'
+group 'io.beanvortex'
 version '1.4.4'
 sourceCompatibility = '21'
 targetCompatibility = '21'
