@@ -56,7 +56,7 @@ const postLinks = async (data, isBatch) => {
             iconUrl: '../resources/icons/logo.png',
             type: 'basic'
         });
-        browser.downloads.download({url: data.url})
+        chrome.downloads.download({url: data.url})
     });
 }
 
