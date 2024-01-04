@@ -1,16 +1,13 @@
 package io.beanvortex.bitkip.controllers;
 
 import io.beanvortex.bitkip.BitKip;
-import io.beanvortex.bitkip.models.DownloadModel;
-import io.beanvortex.bitkip.models.QueueModel;
+import io.beanvortex.bitkip.models.*;
 import io.beanvortex.bitkip.repo.DownloadsRepo;
 import io.beanvortex.bitkip.task.LinkDataTask;
 import io.beanvortex.bitkip.utils.Defaults;
 import io.beanvortex.bitkip.utils.FxUtils;
 import io.beanvortex.bitkip.utils.LinkTableUtils;
 import io.beanvortex.bitkip.config.observers.QueueObserver;
-import io.beanvortex.bitkip.models.DownloadStatus;
-import io.beanvortex.bitkip.models.LinkModel;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
@@ -173,6 +170,7 @@ public class BatchList implements QueueObserver {
             else
                 dm.setAddToQueueDate(list.get(i - 1).getAddToQueueDate().plusSeconds(1));
             dm.setResumable(lm.getResumable());
+            dm.setTurnOffMode(TurnOffMode.NOTHING);
             dm.setQueues(new CopyOnWriteArrayList<>(lm.getQueues()));
             dm.setDownloadStatus(DownloadStatus.Paused);
             list.add(dm);

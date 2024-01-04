@@ -14,7 +14,7 @@ public class ExtensionInstallTask extends Task<Integer> {
 
     @Override
     protected Integer call() throws InterruptedException, IOException {
-        var url = "https://github.com/BeanVortex/BitKip-extensions/releases";
+        var url = "https://github.com/BeanVortex/BitKip/releases";
         var doc = getDocument(url);
         var updateVersion = doc.select(".Box-body").get(0)
                 .select("div").get(0)
@@ -25,8 +25,16 @@ public class ExtensionInstallTask extends Task<Integer> {
         var newUrlToCrawl = url + "/expanded_assets/v" + updateVersion;
         var doc2 = getDocument(newUrlToCrawl);
         var rows = doc2.select("li");
-        var fileATag = rows.get(0).select("a").get(0);
-        var fileLink = "https://github.com" + fileATag.attr("href");
+        var extensionPath = "";
+        for (var row : rows) {
+            var aTag = row.select("a").get(0);
+            var href = aTag.attr("href");
+            if (href.contains("extension")){
+                extensionPath = aTag.attr("href");
+                break;
+            }
+        }
+        var fileLink = "https://github.com" + extensionPath;
         Platform.runLater(() -> {
             FxUtils.setClipboard(fileLink);
             FxUtils.newDownloadStage(true, null);
