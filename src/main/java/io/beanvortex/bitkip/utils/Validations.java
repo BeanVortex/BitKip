@@ -144,6 +144,12 @@ public class Validations {
         uri = uri.replace("[", "%5b");
         uri = uri.replace("]", "%5d");
         uri = uri.replace("`", "%60");
+        uri = uri.replace(" ", "%20");
+        uri = uri.replace("<", "%3c");
+        uri = uri.replace(">", "%3e");
+        uri = uri.replace("#", "%23");
+        uri = uri.replace("?", "%3f");
+        uri = uri.replace("&", "%26");
         return uri;
     }
 

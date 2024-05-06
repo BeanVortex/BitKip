@@ -288,6 +288,7 @@ public class IOUtils {
                     .append("immediate_download=").append(String.valueOf(downloadImmediately)).append("\n")
                     .append("add_same_download=").append(String.valueOf(addSameDownload)).append("\n")
                     .append("less_cpu_intensive=").append(String.valueOf(lessCpuIntensive)).append("\n")
+                    .append("last_saved_dir=").append(String.valueOf(lastSavedDir)).append("\n")
                     .append("user_agent_enabled=").append(String.valueOf(userAgentEnabled)).append("\n")
                     .append("user_agent=").append(userAgent);
             writer.flush();
@@ -310,7 +311,11 @@ public class IOUtils {
                     var key = cfg.split("=")[0];
                     var value = cfg.split("=")[1];
                     switch (key) {
-                        case "save_location" -> downloadPath = value;
+                        case "save_location" -> {
+                            downloadPath = value;
+                            if (lastSavedDir == null || !lastSavedDir.equals(downloadPath))
+                                lastSavedDir = downloadPath;
+                        }
                         case "theme" -> theme = value;
                         case "startup" -> startup = value.equals("true");
                         case "server_enabled" -> serverEnabled = value.equals("true");
@@ -325,6 +330,7 @@ public class IOUtils {
                         case "immediate_download" -> downloadImmediately = value.equals("true");
                         case "add_same_download" -> addSameDownload = value.equals("true");
                         case "less_cpu_intensive" -> lessCpuIntensive = value.equals("true");
+                        case "last_saved_dir" -> lastSavedDir = value;
                         case "user_agent" -> userAgent = value;
                         case "user_agent_enabled" -> userAgentEnabled = value.equals("true");
                     }
