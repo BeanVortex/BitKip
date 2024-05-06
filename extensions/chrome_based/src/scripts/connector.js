@@ -49,14 +49,16 @@ const postLinks = async (data, isBatch) => {
     fetch(URL_TO_POST, {
         method: 'POST',
         body: JSON.stringify(data),
-    }).catch(_ => {
+    }).catch(async _ => {
         chrome.notifications.create('', {
             title: 'BitKip Extension',
             message: "Can't send url to BitKip, Is application running on the same port?",
             iconUrl: '../resources/icons/logo.png',
             type: 'basic'
         });
-        chrome.downloads.download({url: data.url})
+        chrome.downloads.onDeterminingFilename.removeListener(triggerDownload)
+        await chrome.downloads.download({url: data.url})
+        chrome.downloads.onDeterminingFilename.addListener(triggerDownload)
     });
 }
 

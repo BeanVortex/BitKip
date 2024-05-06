@@ -29,11 +29,14 @@
         </HBox>
     </HBox>
 
-    <HBox spacing="15" alignment="CENTER">
-        <Label text="Location :" minWidth="60" styleClass="bold"/>
-        <TextField fx:id="locationField" HBox.hgrow="ALWAYS"/>
-        <Button fx:id="openLocation" onAction="#onSelectLocation"/>
-    </HBox>
+    <VBox spacing="10">
+        <HBox spacing="15" alignment="CENTER">
+            <Label text="Location :" minWidth="60" styleClass="bold"/>
+            <TextField fx:id="locationField" HBox.hgrow="ALWAYS"/>
+            <Button fx:id="openLocation" onAction="#onSelectLocation"/>
+        </HBox>
+        <CheckBox text="Use the last selected location" fx:id="lastLocationCheck" onAction="#onLastLocationCheck"/>
+    </VBox>
 
     <HBox alignment="BASELINE_LEFT">
         <HBox spacing="20" alignment="CENTER">

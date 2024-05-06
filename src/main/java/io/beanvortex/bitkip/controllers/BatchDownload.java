@@ -1,5 +1,6 @@
 package io.beanvortex.bitkip.controllers;
 
+import io.beanvortex.bitkip.config.AppConfigs;
 import io.beanvortex.bitkip.utils.FxUtils;
 import io.beanvortex.bitkip.config.observers.QueueObserver;
 import io.beanvortex.bitkip.config.observers.QueueSubject;
@@ -12,10 +13,7 @@ import io.beanvortex.bitkip.utils.DownloadUtils;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.scene.control.Button;
-import javafx.scene.control.ComboBox;
-import javafx.scene.control.Label;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 import javafx.stage.Stage;
 import org.kordamp.ikonli.javafx.FontIcon;
 
@@ -46,7 +44,8 @@ public class BatchDownload implements QueueObserver {
     private ComboBox<QueueModel> queueCombo;
     @FXML
     private TextField chunksField, urlField;
-
+    @FXML
+    private CheckBox lastLocationCheck;
 
     private LinkModel tempLink;
     private Stage stage;
@@ -79,6 +78,7 @@ public class BatchDownload implements QueueObserver {
         queueCombo.setValue(queues.get(0));
         errorLabel.setVisible(false);
         checkBtn.setDisable(true);
+        lastLocationCheck.setDisable(true);
         Validations.prepareLinkFromClipboard(urlField);
         Validations.validateChunksInput(chunksField);
         Validations.validateIntInputCheck(startField, 0L, 0, null);
@@ -109,7 +109,7 @@ public class BatchDownload implements QueueObserver {
     private void onOfflineFieldsChanged() {
         if (tempLink != null)
             handleError(() -> DownloadUtils.onOfflineFieldsChanged(locationField, tempLink.getName(),
-                    null, queueCombo, null, checkBtn, openLocation, null), errorLabel);
+                    null, queueCombo, null, checkBtn, openLocation, null, lastLocationCheck), errorLabel);
 
     }
 
@@ -128,7 +128,7 @@ public class BatchDownload implements QueueObserver {
             fileNameLocationFuture
                     .whenComplete((unused, throwable) ->
                             handleError(() -> DownloadUtils.checkIfFileIsOKToSave(locationField.getText(),
-                                    tempLink.getName(), null, checkBtn, null), errorLabel))
+                                    tempLink.getName(), null, checkBtn, null, lastLocationCheck), errorLabel))
                     .exceptionally(throwable -> {
                         var errorMsg = throwable.getCause().getLocalizedMessage();
                         Platform.runLater(() ->
@@ -231,7 +231,7 @@ public class BatchDownload implements QueueObserver {
             locationField.setText(path);
         if (tempLink != null)
             handleError(() -> DownloadUtils.checkIfFileIsOKToSave(locationField.getText(),
-                    tempLink.getName(), null, checkBtn, null), errorLabel);
+                    tempLink.getName(), null, checkBtn, null, lastLocationCheck), errorLabel);
     }
 
     @FXML
@@ -341,6 +341,13 @@ public class BatchDownload implements QueueObserver {
         onOfflineFieldsChanged();
     }
 
+    @FXML
+    private void onLastLocationCheck() {
+        if (lastLocationCheck.isSelected())
+            locationField.setText(AppConfigs.lastSavedDir);
+        else
+            setLocation(tempLink.getName());
+    }
 }
 
 

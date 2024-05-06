@@ -10,10 +10,7 @@ import io.beanvortex.bitkip.utils.*;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.scene.control.Button;
-import javafx.scene.control.ComboBox;
-import javafx.scene.control.Label;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 import javafx.stage.Stage;
 import org.kordamp.ikonli.javafx.FontIcon;
 
@@ -29,6 +26,8 @@ import java.util.concurrent.Executors;
 
 public class SingleDownload implements QueueObserver {
 
+    @FXML
+    private CheckBox lastLocationCheck;
     @FXML
     private Label sizeLabel, resumableLabel, errorLabel;
     @FXML
@@ -78,6 +77,7 @@ public class SingleDownload implements QueueObserver {
         refreshBtn.setGraphic(new FontIcon());
         refreshBtn.setDisable(true);
         refreshBtn.setVisible(false);
+        lastLocationCheck.setDisable(true);
         refreshBtn.setOnAction(e -> {
             refreshBtn.setDisable(true);
             refreshBtn.setVisible(false);
@@ -162,14 +162,14 @@ public class SingleDownload implements QueueObserver {
             var connection = DownloadUtils.connect(url);
             var executor = Executors.newVirtualThreadPerTaskExecutor();
             var fileNameLocationFuture =
-                    DownloadUtils.prepareFileNameAndFieldsAsync(connection, url, nameField, executor)
+                    DownloadUtils.prepareFileNameAndFieldsAsync(connection, url, nameField, dm, executor)
                             .thenAccept(this::setLocation);
             var sizeFuture = DownloadUtils.prepareFileSizeAndFieldsAsync(connection,
                     urlField, sizeLabel, resumableLabel, speedField, chunksField, bytesField, dm, executor);
             CompletableFuture.allOf(fileNameLocationFuture, sizeFuture)
                     .whenComplete((unused, throwable) -> {
                         DownloadUtils.handleError(() -> DownloadUtils.checkIfFileIsOKToSave(locationField.getText(),
-                                nameField.getText(), downloadBtn, addBtn, refreshBtn), errorLabel);
+                                nameField.getText(), downloadBtn, addBtn, refreshBtn, lastLocationCheck), errorLabel);
                         executor.shutdown();
                     })
                     .exceptionally(throwable -> {
@@ -195,7 +195,15 @@ public class SingleDownload implements QueueObserver {
         if (path != null)
             locationField.setText(path);
         DownloadUtils.handleError(() -> DownloadUtils.checkIfFileIsOKToSave(locationField.getText(),
-                nameField.getText(), downloadBtn, addBtn, refreshBtn), errorLabel);
+                nameField.getText(), downloadBtn, addBtn, refreshBtn, lastLocationCheck), errorLabel);
+    }
+
+    @FXML
+    private void onLastLocationCheck() {
+        if (lastLocationCheck.isSelected())
+            locationField.setText(AppConfigs.lastSavedDir);
+        else
+            setLocation(dm.getName());
     }
 
     @FXML
@@ -314,7 +322,7 @@ public class SingleDownload implements QueueObserver {
 
     private void onOfflineFieldsChanged() {
         DownloadUtils.handleError(() -> DownloadUtils.onOfflineFieldsChanged(locationField, nameField.getText(), dm, queueCombo,
-                downloadBtn, addBtn, openLocation, refreshBtn), errorLabel);
+                downloadBtn, addBtn, openLocation, refreshBtn, lastLocationCheck), errorLabel);
     }
 
 
@@ -322,5 +330,6 @@ public class SingleDownload implements QueueObserver {
         this.urlModel = urlModel;
         initAfterUrlModel();
     }
+
 
 }

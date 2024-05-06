@@ -1,16 +1,12 @@
 package io.beanvortex.bitkip.utils;
 
-import io.beanvortex.bitkip.config.AppConfigs;
 import io.beanvortex.bitkip.exceptions.DeniedException;
 import io.beanvortex.bitkip.models.DownloadModel;
 import io.beanvortex.bitkip.models.QueueModel;
 import io.beanvortex.bitkip.repo.DownloadsRepo;
 import io.beanvortex.bitkip.repo.QueuesRepo;
 import javafx.application.Platform;
-import javafx.scene.control.Button;
-import javafx.scene.control.ComboBox;
-import javafx.scene.control.Label;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.Stage;
 import org.controlsfx.control.Notifications;
@@ -35,7 +31,7 @@ public class DownloadUtils {
     public static HttpURLConnection connect(String uri) throws IOException {
         if (uri.isBlank())
             throw new IllegalArgumentException("URL is blank");
-        uri = fixURIChars(uri);
+        uri = Validations.fixURIChars(uri);
         var url = URI.create(uri).toURL();
         var conn = (HttpURLConnection) url.openConnection();
         conn.setConnectTimeout(connectionTimeout);
@@ -168,7 +164,7 @@ public class DownloadUtils {
     }
 
     public static CompletableFuture<String> prepareFileNameAndFieldsAsync(HttpURLConnection connection, String link,
-                                                                          TextField nameField, Executor executor) {
+                                                                          TextField nameField, DownloadModel dm, Executor executor) {
         final HttpURLConnection[] finalConnection = {connection};
         return CompletableFuture.supplyAsync(() -> {
             if (finalConnection[0] == null) {
@@ -181,6 +177,7 @@ public class DownloadUtils {
             var fileName = extractFileName(link, finalConnection[0]);
             if (nameField != null)
                 Platform.runLater(() -> nameField.setText(fileName));
+            dm.setName(fileName);
             return fileName;
         }, executor);
     }
@@ -235,12 +232,16 @@ public class DownloadUtils {
     public static String selectLocation(Stage stage) {
         var dirChooser = new DirectoryChooser();
         dirChooser.setTitle("Select download save location");
-        dirChooser.setInitialDirectory(new File(AppConfigs.downloadPath));
+        dirChooser.setInitialDirectory(new File(lastSavedDir));
         var selectedDir = dirChooser.showDialog(stage);
         if (selectedDir != null) {
             var path = selectedDir.getPath();
             if (!path.endsWith(File.separator))
                 path += File.separator;
+            if (!lastSavedDir.equals(path)) {
+                lastSavedDir = path;
+                IOUtils.saveConfigs();
+            }
             return path;
         }
         Notifications.create()
@@ -251,7 +252,7 @@ public class DownloadUtils {
     }
 
     public static void checkIfFileIsOKToSave(String location, String name, Button downloadBtn,
-                                             Button addBtn, Button refreshBtn) throws DeniedException {
+                                             Button addBtn, Button refreshBtn, CheckBox lastLocationCheck) throws DeniedException {
         var file = new File(location + name);
         var chunkFile = new File(location + name + "#0");
         if (file.exists() || chunkFile.exists()) {
@@ -271,6 +272,7 @@ public class DownloadUtils {
                 refreshBtn.setDisable(true);
                 refreshBtn.setVisible(false);
             }
+            lastLocationCheck.setDisable(false);
             addBtn.setDisable(false);
         }
     }
@@ -297,7 +299,7 @@ public class DownloadUtils {
 
     public static void onOfflineFieldsChanged(TextField locationField, String filename, DownloadModel dm,
                                               ComboBox<QueueModel> queueCombo, Button downloadBtn, Button addBtn,
-                                              Button openLocation, Button refreshBtn) throws DeniedException {
+                                              Button openLocation, Button refreshBtn, CheckBox lastLocationCheck) throws DeniedException {
         // when saving outside BitKip folder
         var selectedQueue = queueCombo.getSelectionModel().getSelectedItem();
         if (!locationField.getText().contains("BitKip")
@@ -320,7 +322,7 @@ public class DownloadUtils {
             setLocationAndQueue(locationField, filename, dm);
             openLocation.setDisable(false);
         }
-        checkIfFileIsOKToSave(locationField.getText(), filename, downloadBtn, addBtn, refreshBtn);
+        checkIfFileIsOKToSave(locationField.getText(), filename, downloadBtn, addBtn, refreshBtn, lastLocationCheck);
     }
 
     public static void disableControlsAndShowError(String error, Label errorLbl,
