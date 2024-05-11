@@ -1,20 +1,24 @@
 package io.beanvortex.bitkip.controllers;
 
 import io.beanvortex.bitkip.BitKip;
+import io.beanvortex.bitkip.config.AppConfigs;
 import io.beanvortex.bitkip.models.*;
 import io.beanvortex.bitkip.repo.DownloadsRepo;
 import io.beanvortex.bitkip.task.LinkDataTask;
 import io.beanvortex.bitkip.utils.Defaults;
+import io.beanvortex.bitkip.utils.DownloadUtils;
 import io.beanvortex.bitkip.utils.FxUtils;
 import io.beanvortex.bitkip.utils.LinkTableUtils;
 import io.beanvortex.bitkip.config.observers.QueueObserver;
 import javafx.collections.FXCollections;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.scene.control.Button;
-import javafx.scene.control.ComboBox;
-import javafx.scene.control.TableView;
+import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.stage.Stage;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.Setter;
 import org.kordamp.ikonli.javafx.FontIcon;
 
 import java.io.File;
@@ -32,10 +36,15 @@ import static io.beanvortex.bitkip.config.AppConfigs.mainTableUtils;
 import static io.beanvortex.bitkip.config.observers.QueueSubject.getQueues;
 
 public class BatchList implements QueueObserver {
+
+    @FXML
+    private TextField locationField;
+    @FXML
+    private CheckBox lastLocationCheck;
     @FXML
     private ComboBox<QueueModel> comboQueue;
     @FXML
-    private Button addBtn,newQueue;
+    private Button addBtn, newQueue, openLocation;
     @FXML
     private TableView<LinkModel> linkTable;
 
@@ -45,12 +54,28 @@ public class BatchList implements QueueObserver {
     private static final QueueModel customQueue = new QueueModel("CUSTOM", false);
 
 
+    @AllArgsConstructor
+    @Getter
+    @Setter
+    public static class LocationData {
+        private TextField locationField;
+        private String firstPath;
+        private boolean change;
+
+        public void revertPath() {
+            locationField.setText(firstPath);
+        }
+    }
+
+    private LocationData location;
+
     @Override
-    public void initialize(URL location, ResourceBundle resources) {
+    public void initialize(URL l, ResourceBundle resources) {
         addBtn.requestFocus();
         addBtn.setDisable(true);
         comboQueue.setDisable(true);
         newQueue.setGraphic(new FontIcon());
+        location = new LocationData(locationField, null, true);
     }
 
 
@@ -64,6 +89,14 @@ public class BatchList implements QueueObserver {
         this.links = links;
         linkTableUtils = new LinkTableUtils(linkTable, links, comboQueue, stage);
         linkTableUtils.tableInits();
+        location.setFirstPath(links.get(0).getPath());
+        locationField.setText(location.getFirstPath());
+        locationField.textProperty().addListener((o, ol, n) -> {
+            if (location.isChange()) {
+                links.forEach(l -> l.setPath(n));
+                linkTableUtils.refreshTable();
+            } else location.setChange(true);
+        });
         fetchLinksData(links);
         initQueueCombo();
     }
@@ -107,7 +140,7 @@ public class BatchList implements QueueObserver {
             var selectedItem = comboQueue.getSelectionModel().getSelectedItem();
             if (selectedItem.getName().equals(customQueue.getName()))
                 return;
-            linkTableUtils.changeQueues(selectedItem);
+            linkTableUtils.changeQueues(selectedItem, location);
         });
     }
 
@@ -119,6 +152,7 @@ public class BatchList implements QueueObserver {
     @Override
     public void initAfterStage() {
         updateTheme(stage.getScene());
+        openLocation.setGraphic(new FontIcon());
         stage.widthProperty().addListener((ob, o, n) -> linkTable.setPrefWidth(n.doubleValue() + 90));
         var logoPath = BitKip.getResource("icons/logo.png");
         if (logoPath != null) {
@@ -188,4 +222,22 @@ public class BatchList implements QueueObserver {
         FxUtils.newQueueStage();
 
     }
+
+    @FXML
+    private void onSelectLocation(ActionEvent e) {
+        var path = DownloadUtils.selectLocation(FxUtils.getStageFromEvent(e));
+        if (path != null)
+            locationField.setText(path);
+//        DownloadUtils.handleError(() -> DownloadUtils.checkIfFileIsOKToSave(locationField.getText(),
+//                null, null, addBtn, null, lastLocationCheck), null);
+    }
+
+    @FXML
+    private void onLastLocationCheck() {
+        if (lastLocationCheck.isSelected())
+            locationField.setText(AppConfigs.lastSavedDir);
+        else
+            locationField.setText(location.getFirstPath());
+    }
+
 }

@@ -21,11 +21,22 @@
         <HBox maxWidth="2" minWidth="2" styleClass="csm_toolbar"/>
     </HBox>
 
-    <HBox spacing="5" alignment="CENTER_LEFT">
-        <Label text="Change queue for all"/>
-        <ComboBox fx:id="comboQueue"/>
-        <Button fx:id="newQueue" onAction="#onNewQueue"/>
-    </HBox>
+    <VBox styleClass="padding_5" spacing="10">
+        <HBox spacing="5" alignment="CENTER_LEFT">
+            <Label text="Change queue for all"/>
+            <ComboBox fx:id="comboQueue"/>
+            <Button fx:id="newQueue" onAction="#onNewQueue"/>
+        </HBox>
+
+        <VBox spacing="10">
+            <HBox spacing="15" alignment="CENTER">
+                <Label text="Location :" minWidth="60" styleClass="bold"/>
+                <TextField fx:id="locationField" HBox.hgrow="ALWAYS"/>
+                <Button fx:id="openLocation" onAction="#onSelectLocation"/>
+            </HBox>
+            <CheckBox text="Use the last selected location" fx:id="lastLocationCheck" onAction="#onLastLocationCheck"/>
+        </VBox>
+    </VBox>
 
     <HBox alignment="BOTTOM_CENTER" style="-fx-padding: 15 0 15 0">
         <HBox spacing="20" alignment="CENTER">
