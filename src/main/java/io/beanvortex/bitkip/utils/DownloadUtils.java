@@ -23,7 +23,7 @@ import java.util.concurrent.Executor;
 import static io.beanvortex.bitkip.config.AppConfigs.*;
 import static io.beanvortex.bitkip.utils.Defaults.OTHERS_QUEUE;
 import static io.beanvortex.bitkip.utils.Defaults.extensions;
-import static io.beanvortex.bitkip.utils.Validations.*;
+import static io.beanvortex.bitkip.utils.Validations.maxChunks;
 
 public class DownloadUtils {
 
