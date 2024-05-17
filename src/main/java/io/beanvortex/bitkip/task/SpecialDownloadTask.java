@@ -18,7 +18,9 @@ import java.nio.ByteBuffer;
 import java.nio.channels.Channels;
 import java.nio.channels.FileChannel;
 import java.nio.channels.ReadableByteChannel;
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.attribute.FileTime;
 import java.time.LocalDateTime;
 import java.util.concurrent.ExecutorService;
 
@@ -34,6 +36,7 @@ public class SpecialDownloadTask extends DownloadTask {
     private long fileSize;
     private String url;
     private boolean isCalculating;
+    private long lastModified;
 
 
     /**
@@ -70,6 +73,8 @@ public class SpecialDownloadTask extends DownloadTask {
         var notResumableOnly = fileSize > 0;
         try {
             var con = DownloadUtils.connect(url);
+            var con2 = DownloadUtils.connect(url);
+            lastModified = con2.getLastModified();
             con.setRequestProperty("User-Agent", userAgent);
             i = con.getInputStream();
             rbc = Channels.newChannel(i);
@@ -167,7 +172,8 @@ public class SpecialDownloadTask extends DownloadTask {
                                     });
                     if (download.isOpenAfterComplete())
                         DownloadOpUtils.openFile(downloadModel);
-
+                    var fileTime = FileTime.fromMillis(lastModified);
+                    Files.setLastModifiedTime(Path.of(download.getFilePath()), fileTime);
                 } else openDownloadings.stream().filter(dc -> dc.getDownloadModel().equals(download))
                         .forEach(DetailsController::onPause);
 

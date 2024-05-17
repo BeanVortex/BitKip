@@ -46,6 +46,7 @@ public class DownloadUtils {
         try {
             if (uri.isBlank())
                 throw new IllegalArgumentException("URL is blank");
+            uri = Validations.fixURIChars(uri);
             var url = URI.create(uri).toURL();
             var testCon = (HttpURLConnection) url.openConnection();
             testCon.setConnectTimeout(2000);

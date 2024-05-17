@@ -21,6 +21,7 @@ import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.attribute.FileTime;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -45,6 +46,7 @@ public class ChunksDownloadTask extends DownloadTask {
     private String url;
     private long bytesToDownloadEachInCycleLimited;
     private boolean newLimitSet;
+    private long lastModified;
 
     public ChunksDownloadTask(DownloadModel downloadModel, long speedLimit, long byteLimit) throws DeniedException {
         super(downloadModel);
@@ -164,6 +166,8 @@ public class ChunksDownloadTask extends DownloadTask {
             throws IOException {
         try {
             var con = DownloadUtils.connect(url);
+            var con2 = DownloadUtils.connect(url);
+            lastModified = con2.getLastModified();
             con.addRequestProperty("Range", "bytes=" + fromContinue + "-" + to);
             var out = new FileOutputStream(partFile, partFile.exists());
             var fileChannel = out.getChannel();
@@ -203,6 +207,8 @@ public class ChunksDownloadTask extends DownloadTask {
         if (retries != downloadRetryCount) {
             try {
                 var con = DownloadUtils.connect(url);
+                var con2 = DownloadUtils.connect(url);
+                lastModified = con2.getLastModified();
                 if (!downloadModel.isResumable())
                     con.setRequestProperty("User-Agent", userAgent);
                 con.addRequestProperty("Range", "bytes=" + fromContinue + "-" + to);
@@ -328,6 +334,8 @@ public class ChunksDownloadTask extends DownloadTask {
                                     });
                     if (download.isOpenAfterComplete())
                         DownloadOpUtils.openFile(download);
+                    var fileTime = FileTime.fromMillis(lastModified);
+                    Files.setLastModifiedTime(Path.of(download.getFilePath()), fileTime);
                 } else if (!newLimitSet)
                     openDownloadings.stream().filter(dc -> dc.getDownloadModel().equals(download))
                             .forEach(DetailsController::onPause);
