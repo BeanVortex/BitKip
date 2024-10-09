@@ -46,6 +46,15 @@
     -fx-background-color: -fx-secondary-color;
 }
 
+#drag{
+    -fx-background-color: -fx-secondary-color2;
+}
+
+.drag_img {
+    -fx-image: url("../icons/drag-and-drop-light.png");
+}
+
+
 .scroll-bar:horizontal .thumb,
 .scroll-bar:vertical .thumb {
     -fx-background-color: -fx-secondary-color2;

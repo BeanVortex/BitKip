@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-
 <?import java.net.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 <?import org.controlsfx.control.*?>
+<?import javafx.scene.image.ImageView?>
 
 <ScrollPane fx:id="scrollPane" minHeight="450.0" minWidth="600" prefHeight="450.0" prefWidth="600"
             xmlns="http://javafx.com/javafx/17.0.2-ea" xmlns:fx="http://javafx.com/fxml/1"
@@ -70,6 +70,12 @@
             <Button onAction="#onClose" styleClass="cancel_btn" text="Close"/>
             <Button fx:id="openFolderBtn" onAction="#onFolderOpen" styleClass="add_btn" visible="false"/>
             <Button fx:id="controlBtn" onAction="#onControl" styleClass="download_now_btn" text="Pause"/>
+        </HBox>
+
+        <HBox alignment="BOTTOM_RIGHT">
+            <HBox fx:id="drag">
+                <ImageView styleClass="drag_img" fitWidth="28" fitHeight="28"/>
+            </HBox>
         </HBox>
 
     </VBox>
