@@ -16,6 +16,8 @@ import java.io.File;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URI;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
@@ -151,13 +153,20 @@ public class DownloadUtils {
 
     public static String extractFileName(String link, HttpURLConnection connection) {
         var raw = connection.getHeaderField("Content-Disposition");
-        if (raw != null && raw.contains("="))
-            return raw.split("=")[1].replaceAll("\"", "");
+        if (raw != null && raw.contains("=")){
+            try {
+                return raw.split("=")[1].replaceAll("\"", "");
+            }catch (IndexOutOfBoundsException ignore){
+            }
+        }
+
         var extractedFileName = link.substring(link.lastIndexOf('/') + 1);
         var lastIndexParameter = extractedFileName.lastIndexOf('?');
         var hasParameter = lastIndexParameter != -1;
         if (hasParameter)
             extractedFileName = extractedFileName.substring(0, lastIndexParameter);
+        if (extractedFileName.contains("%"))
+            extractedFileName = URLDecoder.decode(extractedFileName, StandardCharsets.UTF_8);
 
         if (!extractedFileName.isBlank())
             return extractedFileName;
