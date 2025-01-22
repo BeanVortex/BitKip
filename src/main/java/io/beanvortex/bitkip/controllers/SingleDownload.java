@@ -77,7 +77,8 @@ public class SingleDownload implements QueueObserver {
         refreshBtn.setGraphic(new FontIcon());
         refreshBtn.setDisable(true);
         refreshBtn.setVisible(false);
-        lastLocationCheck.setDisable(true);
+        if (AppConfigs.lastSavedDir == null)
+            lastLocationCheck.setDisable(true);
         refreshBtn.setOnAction(e -> {
             refreshBtn.setDisable(true);
             refreshBtn.setVisible(false);
@@ -140,11 +141,11 @@ public class SingleDownload implements QueueObserver {
         speedField.setDisable(!resumable);
         bytesField.setDisable(!resumable);
         if (resumable) {
-            resumableLabel.setText("Yes");
+            resumableLabel.setText("Resumable");
             resumableLabel.getStyleClass().add("yes");
             resumableLabel.getStyleClass().remove("no");
         } else {
-            resumableLabel.setText("No");
+            resumableLabel.setText("Not Resumable");
             resumableLabel.getStyleClass().add("no");
             resumableLabel.getStyleClass().remove("yes");
         }
