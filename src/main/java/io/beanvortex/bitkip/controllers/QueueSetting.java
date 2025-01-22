@@ -247,7 +247,7 @@ public class QueueSetting implements FXMLController, QueueObserver {
             stopSecondSpinner.getValueFactory().setValue(stopTime.getSecond());
         }
         whenDoneCheck.setSelected(schedule.isTurnOffEnabled());
-        powerCombo.setDisable(!schedule.isTurnOffEnabled());
+        powerCombo.setDisable(!whenDoneCheck.isSelected());
         if (schedule.getTurnOffMode() != null)
             powerCombo.setValue(schedule.getTurnOffMode());
 
