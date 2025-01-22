@@ -53,7 +53,7 @@ public class DownloadsRepo {
                 + COL_LAST_TRY_DATE + " VARCHAR,"
                 + COL_COMPLETE_DATE + " VARCHAR"
                 + ");";
-        DatabaseHelper.createTable(sql);
+        DatabaseHelper.runSQL(sql, false);
         alters();
 
     }
@@ -73,7 +73,7 @@ public class DownloadsRepo {
                         DatabaseHelper.DOWNLOADS_TABLE_NAME, COL_OPEN_AFTER_COMPLETE,
                         DatabaseHelper.DOWNLOADS_TABLE_NAME, COL_ADD_TO_QUEUE_DATE, LocalDateTime.now().toString(),
                         DatabaseHelper.DOWNLOADS_TABLE_NAME, COL_RESUMABLE);
-        DatabaseHelper.executeUpdateSql(addAlters, true);
+        DatabaseHelper.runSQL(addAlters, true);
     }
 
 
@@ -255,7 +255,7 @@ public class DownloadsRepo {
                 DELETE FROM %s WHERE %s=%d;
                 """
                 .formatted(DatabaseHelper.DOWNLOADS_TABLE_NAME, COL_ID, download.getId());
-        DatabaseHelper.executeUpdateSql(sql, false);
+        DatabaseHelper.runSQL(sql, false);
     }
 
     public static void deleteDownloadQueue(int downloadId, int queueId) {
@@ -263,7 +263,7 @@ public class DownloadsRepo {
                 DELETE FROM %s WHERE %s = %d AND %s = %d;
                 """
                 .formatted(DatabaseHelper.QUEUE_DOWNLOAD_TABLE_NAME, DatabaseHelper.COL_DOWNLOAD_ID, downloadId, DatabaseHelper.COL_QUEUE_ID, queueId);
-        DatabaseHelper.executeUpdateSql(sql, false);
+        DatabaseHelper.runSQL(sql, false);
     }
 
     private static DownloadModel createDownload(ResultSet rs, boolean fetchQueue) throws SQLException {
@@ -317,7 +317,7 @@ public class DownloadsRepo {
                         COL_PROGRESS, dm.getProgress(),
                         COL_DOWNLOADED, dm.getDownloaded(),
                         COL_ID, dm.getId());
-        DatabaseHelper.executeUpdateSql(sql, false);
+        DatabaseHelper.runSQL(sql, false);
     }
 
     public static void updateDownloadCompleteDate(DownloadModel dm) {
@@ -327,7 +327,7 @@ public class DownloadsRepo {
                 .formatted(DatabaseHelper.DOWNLOADS_TABLE_NAME,
                         COL_COMPLETE_DATE, dm.getCompleteDate(),
                         COL_ID, dm.getId());
-        DatabaseHelper.executeUpdateSql(sql, false);
+        DatabaseHelper.runSQL(sql, false);
     }
 
     public static void updateDownloadLastTryDate(DownloadModel dm) {
@@ -337,7 +337,7 @@ public class DownloadsRepo {
                 .formatted(DatabaseHelper.DOWNLOADS_TABLE_NAME,
                         COL_LAST_TRY_DATE, dm.getLastTryDate(),
                         COL_ID, dm.getId());
-        DatabaseHelper.executeUpdateSql(sql, false);
+        DatabaseHelper.runSQL(sql, false);
     }
 
     public static void updateDownloadOpenAfterComplete(DownloadModel dm) {
@@ -347,7 +347,7 @@ public class DownloadsRepo {
                 .formatted(DatabaseHelper.DOWNLOADS_TABLE_NAME,
                         COL_OPEN_AFTER_COMPLETE, dm.isOpenAfterComplete() ? 1 : 0,
                         COL_ID, dm.getId());
-        DatabaseHelper.executeUpdateSql(sql, false);
+        DatabaseHelper.runSQL(sql, false);
     }
 
     public static void updateDownloadShowCompleteDialog(DownloadModel dm) {
@@ -357,7 +357,7 @@ public class DownloadsRepo {
                 .formatted(DatabaseHelper.DOWNLOADS_TABLE_NAME,
                         COL_SHOW_COMPLETE_DIALOG, dm.isShowCompleteDialog() ? 1 : 0,
                         COL_ID, dm.getId());
-        DatabaseHelper.executeUpdateSql(sql, false);
+        DatabaseHelper.runSQL(sql, false);
     }
 
     public static void updateTableStatus(DownloadModel dm) {
@@ -377,7 +377,7 @@ public class DownloadsRepo {
                         COL_COMPLETE_DATE, completeDate,
                         COL_LAST_TRY_DATE, lastTryDate,
                         COL_ID, dm.getId());
-        DatabaseHelper.executeUpdateSql(sql, false);
+        DatabaseHelper.runSQL(sql, false);
     }
 
     public static void insertDownloads(List<DownloadModel> dms) {
@@ -391,7 +391,7 @@ public class DownloadsRepo {
                 .formatted(DatabaseHelper.DOWNLOADS_TABLE_NAME,
                         column, value,
                         COL_ID, downloadId);
-        DatabaseHelper.executeUpdateSql(sql, false);
+        DatabaseHelper.runSQL(sql, false);
     }
 
     public static void updateDownloadLocation(String downloadPath, int id) {
@@ -401,7 +401,7 @@ public class DownloadsRepo {
                 .formatted(DatabaseHelper.DOWNLOADS_TABLE_NAME,
                         COL_PATH, downloadPath, COL_NAME,
                         COL_ID, id);
-        DatabaseHelper.executeUpdateSql(sql, false);
+        DatabaseHelper.runSQL(sql, false);
     }
 
     public static int getNextNumberOfExistedDownload(String path) {

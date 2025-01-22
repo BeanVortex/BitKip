@@ -43,6 +43,7 @@ dependencies {
     implementation 'org.xerial:sqlite-jdbc:3.42.0.0'
     implementation 'org.jsoup:jsoup:1.15.3'
     implementation 'org.slf4j:slf4j-api:2.0.9'
+    implementation 'com.zaxxer:HikariCP:6.2.1'
     implementation "io.helidon.webserver:helidon-webserver:3.2.2"
     implementation "io.helidon.webserver:helidon-webserver-cors:3.2.2"
     implementation 'io.helidon.media:helidon-media-jackson:3.2.2'

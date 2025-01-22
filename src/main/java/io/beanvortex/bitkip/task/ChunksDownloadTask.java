@@ -345,6 +345,7 @@ public class ChunksDownloadTask extends DownloadTask {
 
             }
         } catch (IOException e) {
+            e.printStackTrace();
             log.error(e.getMessage());
         } finally {
             currentDownloadings.remove(downloadModel);
