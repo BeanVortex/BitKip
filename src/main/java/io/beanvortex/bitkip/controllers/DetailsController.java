@@ -24,7 +24,6 @@ import javafx.scene.input.ClipboardContent;
 import javafx.scene.input.Dragboard;
 import javafx.scene.input.TransferMode;
 import javafx.scene.layout.HBox;
-import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import org.apache.commons.lang3.time.DurationFormatUtils;
 import org.controlsfx.control.Notifications;
@@ -44,10 +43,6 @@ public class DetailsController implements FXMLController {
     private Button speedApplyBtn, allBytesBtn;
     @FXML
     private ComboBox<TurnOffMode> turnOffCombo;
-    @FXML
-    private VBox container;
-    @FXML
-    private ScrollPane scrollPane;
     @FXML
     private Hyperlink link;
     @FXML
@@ -76,11 +71,6 @@ public class DetailsController implements FXMLController {
     @Override
     public void initAfterStage() {
         updateTheme(stage.getScene());
-        stage.heightProperty().addListener((o, ol, n) -> scrollPane.setPrefHeight(n.doubleValue()));
-        stage.widthProperty().addListener((o, ol, n) -> {
-            scrollPane.setPrefWidth(n.doubleValue());
-            container.setPrefWidth(n.doubleValue() - 20);
-        });
     }
 
     @Override
@@ -132,11 +122,11 @@ public class DetailsController implements FXMLController {
         if (resumable) {
             resumableLbl.getStyleClass().add("yes");
             resumableLbl.getStyleClass().remove("no");
-            resumableLbl.setText("Yes");
+            resumableLbl.setText("Resumable");
         } else {
             resumableLbl.getStyleClass().add("no");
             resumableLbl.getStyleClass().remove("yes");
-            resumableLbl.setText("No");
+            resumableLbl.setText("Not Resumable");
         }
         controlBtn.setText(isPaused.get() ? (resumable ? "Resume" : "Restart") : "Pause");
         openSwitch.setSelected(dm.isOpenAfterComplete());

@@ -221,7 +221,7 @@ public class FxUtils {
     public static void newDetailsStage(DownloadModel dm) {
         FXMLLoader loader;
         var stage = new Stage();
-        ScrollPane root;
+        VBox root;
         try {
             loader = new FXMLLoader(getResource("fxml/details.fxml"));
             root = loader.load();
@@ -233,6 +233,10 @@ public class FxUtils {
         stage.setScene(scene);
         stage.setMinWidth(root.getMinWidth());
         stage.setMinHeight(root.getMinHeight());
+        stage.setMaxWidth(root.getMaxWidth());
+        stage.setMaxHeight(root.getMaxHeight());
+        stage.setWidth(root.getPrefWidth());
+        stage.setHeight(root.getPrefHeight());
         var end = dm.getName().length();
         if (end > 60)
             end = 60;
