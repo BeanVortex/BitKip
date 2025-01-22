@@ -2,13 +2,16 @@ package io.beanvortex.bitkip.repo;
 
 import io.beanvortex.bitkip.models.DownloadModel;
 import io.beanvortex.bitkip.models.DownloadStatus;
+import io.beanvortex.bitkip.models.QueueModel;
 import io.beanvortex.bitkip.models.TurnOffMode;
+import io.beanvortex.bitkip.utils.Defaults;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
@@ -418,4 +421,34 @@ public class DownloadsRepo {
             throw new RuntimeException(e);
         }
     }
+
+    public static List<DownloadModel> searchLike(String value, QueueModel selectedQueue) {
+        var tokens = value.split("\\s+");
+
+        var whereClause = new StringBuilder();
+        for (var token : tokens) {
+            if (whereClause.length() > 0)
+                whereClause.append(" AND ");
+            whereClause.append(COL_NAME).append(" LIKE '%").append(token).append("%'");
+        }
+        if (!selectedQueue.getName().equals(Defaults.ALL_DOWNLOADS_QUEUE))
+            whereClause.append(" AND id IN (")
+                    .append("SELECT download_id FROM queue_download WHERE queue_id=")
+                    .append(selectedQueue.getId()).append(")");
+        var sql = """
+                SELECT * FROM %s WHERE %s;
+                """
+                .formatted(DatabaseHelper.DOWNLOADS_TABLE_NAME, whereClause);
+        var list = new LinkedList<DownloadModel>();
+        try (var con = DatabaseHelper.openConnection();
+             var stmt = con.createStatement();
+             var rs = stmt.executeQuery(sql)) {
+            while (rs.next())
+                list.add(createDownload(rs, false));
+        } catch (SQLException e) {
+            log.error(e.getMessage());
+        }
+        return list;
+    }
+
 }

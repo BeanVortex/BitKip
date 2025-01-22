@@ -1,5 +1,6 @@
 package io.beanvortex.bitkip.controllers;
 
+import io.beanvortex.bitkip.repo.DownloadsRepo;
 import io.beanvortex.bitkip.utils.DownloadOpUtils;
 import io.beanvortex.bitkip.utils.MainTableUtils;
 import io.beanvortex.bitkip.utils.MenuUtils;
@@ -24,6 +25,7 @@ import javafx.util.Duration;
 import org.kordamp.ikonli.javafx.FontIcon;
 
 import java.net.URL;
+import java.util.List;
 import java.util.ResourceBundle;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -86,15 +88,14 @@ public class MainController implements FXMLController, QueueObserver {
         MenuUtils.initOperationMenu(operationMenu);
         MenuUtils.initMoreMenu(moreBtn, contentTable);
         searchField.textProperty().addListener((o, ol, n) -> {
-            if (n.length() < 3){
-                mainTableUtils.unhighlightItem();
+            if (n.length() < 3) {
+                mainTableUtils.setDownloads(normalizeDownloadsList(selectedQueue.getDownloads()), true);
                 return;
             }
-            var dm = mainTableUtils.searchDownload(n);
-            mainTableUtils.highlightItem(dm);
+            var foundItems = DownloadsRepo.searchLike(n, selectedQueue);
+            mainTableUtils.setDownloads(normalizeDownloadsList(foundItems), true);
         });
     }
-
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -103,16 +104,8 @@ public class MainController implements FXMLController, QueueObserver {
     }
 
     private void initSides() {
-        var allDownloadsQueue = QueuesRepo.findByName(ALL_DOWNLOADS_QUEUE, true);
-        var downloadList = allDownloadsQueue.getDownloads().stream()
-                .peek(dm -> {
-                    dm.setDownloadStatus(DownloadStatus.Paused);
-                    if (dm.getProgress() == 100)
-                        dm.setDownloadStatus(DownloadStatus.Completed);
-                })
-                .toList();
-        selectedQueue = allDownloadsQueue;
-        mainTableUtils.setDownloads(downloadList, true);
+        selectedQueue = QueuesRepo.findByName(ALL_DOWNLOADS_QUEUE, true);
+        mainTableUtils.setDownloads(normalizeDownloadsList(selectedQueue.getDownloads()), true);
         var queues = QueueSubject.getQueues();
         if (queues.isEmpty())
             queues = QueuesRepo.getAllQueues(false, true);
@@ -120,6 +113,16 @@ public class MainController implements FXMLController, QueueObserver {
         sideTree.focusedProperty().addListener(o -> mainTableUtils.clearSelection());
         SideUtils.prepareSideTree(sideTree, queues);
 
+    }
+
+    private static List<DownloadModel> normalizeDownloadsList(List<DownloadModel> dms) {
+        return dms.stream()
+                .peek(dm -> {
+                    dm.setDownloadStatus(DownloadStatus.Paused);
+                    if (dm.getProgress() == 100)
+                        dm.setDownloadStatus(DownloadStatus.Completed);
+                })
+                .toList();
     }
 
     private void newDownloadBtnInits() {
