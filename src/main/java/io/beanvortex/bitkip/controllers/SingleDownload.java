@@ -15,8 +15,6 @@ import javafx.stage.Stage;
 import org.kordamp.ikonli.javafx.FontIcon;
 
 import java.io.File;
-import java.io.IOException;
-import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.file.Path;
 import java.time.LocalDateTime;
@@ -77,7 +75,8 @@ public class SingleDownload implements QueueObserver {
         refreshBtn.setGraphic(new FontIcon());
         refreshBtn.setDisable(true);
         refreshBtn.setVisible(false);
-        lastLocationCheck.setDisable(true);
+        if (AppConfigs.lastSavedDir == null)
+            lastLocationCheck.setDisable(true);
         refreshBtn.setOnAction(e -> {
             refreshBtn.setDisable(true);
             refreshBtn.setVisible(false);
@@ -97,7 +96,7 @@ public class SingleDownload implements QueueObserver {
 
     private void initAfterUrlModel() {
         if (urlModel != null)
-            setInputValuesFromExtension(urlModel);
+            urlField.setText(urlModel.url());
         else
             Validations.prepareLinkFromClipboard(urlField);
 
@@ -117,40 +116,9 @@ public class SingleDownload implements QueueObserver {
                 DownloadUtils.disableControlsAndShowError("Location is blank", errorLabel, downloadBtn, addBtn, refreshBtn);
             else onOfflineFieldsChanged();
         });
-        if (urlModel == null)
-            autoFillLocationAndSizeAndName();
+        autoFillLocationAndSizeAndName();
     }
 
-    private void setInputValuesFromExtension(SingleURLModel urlModel) {
-        var fileSize = urlModel.fileSize();
-        urlField.setText(urlModel.url());
-        nameField.setText(urlModel.filename());
-        setLocation(urlModel.filename());
-        sizeLabel.setText(IOUtils.formatBytes(fileSize));
-        bytesField.setText(String.valueOf(fileSize));
-        HttpURLConnection conn;
-        try {
-            conn = DownloadUtils.connect(urlModel.url());
-        } catch (IOException e) {
-            AppConfigs.log.error(e.getMessage());
-            return;
-        }
-        var resumable = DownloadUtils.canResume(conn);
-        chunksField.setText(resumable ? String.valueOf(Validations.maxChunks(fileSize)) : "0");
-        speedField.setDisable(!resumable);
-        bytesField.setDisable(!resumable);
-        if (resumable) {
-            resumableLabel.setText("Yes");
-            resumableLabel.getStyleClass().add("yes");
-            resumableLabel.getStyleClass().remove("no");
-        } else {
-            resumableLabel.setText("No");
-            resumableLabel.getStyleClass().add("no");
-            resumableLabel.getStyleClass().remove("yes");
-        }
-        dm.setResumable(resumable);
-        dm.setSize(fileSize);
-    }
 
     private void autoFillLocationAndSizeAndName() {
         try {

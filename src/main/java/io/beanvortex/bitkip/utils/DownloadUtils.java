@@ -1,5 +1,6 @@
 package io.beanvortex.bitkip.utils;
 
+import io.beanvortex.bitkip.config.AppConfigs;
 import io.beanvortex.bitkip.exceptions.DeniedException;
 import io.beanvortex.bitkip.models.DownloadModel;
 import io.beanvortex.bitkip.models.QueueModel;
@@ -16,6 +17,8 @@ import java.io.File;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URI;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
@@ -128,11 +131,11 @@ public class DownloadUtils {
                 if (resumable) {
                     chunksField.setText(String.valueOf(maxChunks(fileSize)));
                     bytesField.setDisable(false);
-                    resumableLabel.setText("Yes");
+                    resumableLabel.setText("Resumable");
                     resumableLabel.getStyleClass().add("yes");
                     resumableLabel.getStyleClass().remove("no");
                 } else {
-                    resumableLabel.setText("No");
+                    resumableLabel.setText("Not Resumable");
                     resumableLabel.getStyleClass().add("no");
                     resumableLabel.getStyleClass().remove("yes");
                     chunksField.setText("0");
@@ -151,13 +154,20 @@ public class DownloadUtils {
 
     public static String extractFileName(String link, HttpURLConnection connection) {
         var raw = connection.getHeaderField("Content-Disposition");
-        if (raw != null && raw.contains("="))
-            return raw.split("=")[1].replaceAll("\"", "");
+        if (raw != null && raw.contains("=")) {
+            try {
+                return raw.split("=")[1].replaceAll("\"", "");
+            } catch (IndexOutOfBoundsException ignore) {
+            }
+        }
+
         var extractedFileName = link.substring(link.lastIndexOf('/') + 1);
         var lastIndexParameter = extractedFileName.lastIndexOf('?');
         var hasParameter = lastIndexParameter != -1;
         if (hasParameter)
             extractedFileName = extractedFileName.substring(0, lastIndexParameter);
+        if (extractedFileName.contains("%"))
+            extractedFileName = URLDecoder.decode(extractedFileName, StandardCharsets.UTF_8);
 
         if (!extractedFileName.isBlank())
             return extractedFileName;
@@ -233,13 +243,13 @@ public class DownloadUtils {
     public static String selectLocation(Stage stage) {
         var dirChooser = new DirectoryChooser();
         dirChooser.setTitle("Select download save location");
-        dirChooser.setInitialDirectory(new File(lastSavedDir));
+        dirChooser.setInitialDirectory(new File(lastSavedDir == null ? System.getProperty("user.home") : lastSavedDir));
         var selectedDir = dirChooser.showDialog(stage);
         if (selectedDir != null) {
             var path = selectedDir.getPath();
             if (!path.endsWith(File.separator))
                 path += File.separator;
-            if (!lastSavedDir.equals(path)) {
+            if (lastSavedDir == null || !lastSavedDir.equals(path)) {
                 lastSavedDir = path;
                 IOUtils.saveConfigs();
             }
@@ -274,6 +284,8 @@ public class DownloadUtils {
                 refreshBtn.setVisible(false);
             }
             lastLocationCheck.setDisable(false);
+            if (AppConfigs.lastSavedDir == null)
+                lastLocationCheck.setDisable(true);
             addBtn.setDisable(false);
         }
     }

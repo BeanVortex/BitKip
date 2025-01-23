@@ -39,7 +39,7 @@
     </Accordion>
 
     <VBox alignment="CENTER">
-        <Label styleClass="settingDescription" text="Developed by BeanVortex 2023"/>
+        <Label styleClass="settingDescription" text="Developed by BeanVortex 2025"/>
         <Hyperlink text="https://github.com/BeanVortex/BitKip" onAction="#openGithubPage"/>
     </VBox>
 </VBox>

@@ -1,11 +1,12 @@
 {
+  "manifest_version": 3,
+  "version": "1.2",
   "name": "BitKip extension",
   "action": {
-    "default_popup": "./src/resources/popup.html",
-    "icon" : "./src/resources/icons/logo.png"
+    "icon": "./resources/icons/logo.png",
+    "default_title": "Click to toggle overlay"
   },
-  "manifest_version": 3,
-  "version": "1.1",
+  
   "description": "Download grabber that works with BitKip application",
   "host_permissions": ["*://*/*"],
   "permissions": [
@@ -17,19 +18,33 @@
     "contextMenus",
     "scripting"
   ],
+
   "background": {
-    "service_worker": "./src/scripts/connector.js",
+    "service_worker": "./scripts/connector.js",
     "type": "module"
   },
   "content_scripts": [
     {
       "all_frames": true,
-      "matches": ["http://*/*", "https://*/*", "ftp://*/*", "file:///*"],
-      "js": ["./src/scripts/content.js"]
+      "matches": ["<all_urls>"],
+      "js": ["./scripts/content.js"],
+      "css": ["resources/overlay.css"]
     }
   ],
-  
+
+  "web_accessible_resources": [
+    {
+      "resources": ["./scripts/uSelect_overlay.js", "./scripts/uSelect_statemachine.js"],
+      "matches": ["<all_urls>"]
+    }
+  ],
+
+  "default_locale": "en",
+
+  "options_page": "resources/options.html",
+
+
   "icons": {
-    "128": "./src/resources/icons/logo.png"
+    "128": "./resources/icons/logo.png"
   }
 }

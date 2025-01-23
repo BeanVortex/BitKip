@@ -1,9 +1,10 @@
 package io.beanvortex.bitkip.repo;
 
+import com.zaxxer.hikari.HikariConfig;
+import com.zaxxer.hikari.HikariDataSource;
 import io.beanvortex.bitkip.config.AppConfigs;
 
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.SQLException;
 
 import static io.beanvortex.bitkip.config.AppConfigs.log;
@@ -20,38 +21,39 @@ public class DatabaseHelper {
     static String COL_DOWNLOAD_ID = "download_id",
             COL_QUEUE_ID = "queue_id", COL_QUEUE_NAME = "queue_name";
 
+    private static final HikariDataSource dataSource;
 
-    static Connection openConnection() throws SQLException {
-        var path = AppConfigs.dataPath + "bitkip.db";
-        var conn = DriverManager.getConnection("jdbc:sqlite:" + path);
-        conn.createStatement().execute("PRAGMA foreign_keys=ON;");
-        return conn;
+    static {
+        HikariConfig config = new HikariConfig();
+        config.setJdbcUrl("jdbc:sqlite:" + AppConfigs.dataPath + "bitkip.db"); // JDBC URL
+        config.setMaximumPoolSize(10); // Maximum number of connections in the pool
+        config.setMinimumIdle(2); // Minimum number of idle connections
+        config.setIdleTimeout(30000); // Timeout for idle connections (in milliseconds)
+        config.setMaxLifetime(1800000); // Maximum lifetime of a connection (in milliseconds)
+        config.setConnectionTimeout(30000); // Timeout for acquiring a connection (in milliseconds)
+        config.setPoolName("BitKipDBPool"); // Name of the connection pool
+        config.setConnectionInitSql("PRAGMA foreign_keys=ON;");
+        dataSource = new HikariDataSource(config);
     }
 
 
-    static void createTable(String sql) {
-        try {
-            var con = openConnection();
-            var stmt = con.createStatement();
-            stmt.executeUpdate(sql);
-            stmt.close();
-            con.close();
-        } catch (SQLException e) {
-            log.error(e.getLocalizedMessage());
-        }
+
+    synchronized static Connection openConnection() throws SQLException {
+        return dataSource.getConnection();
     }
 
-    static void executeUpdateSql(String sql, boolean ignoreStackTrace) {
+
+    synchronized static void runSQL(String sql, boolean ignoreStackTrace) {
         try (var conn = openConnection();
              var stmt = conn.createStatement()) {
-            stmt.executeUpdate(sql);
+            stmt.execute(sql);
         } catch (SQLException e) {
             if (!ignoreStackTrace)
                 log.error(e.getLocalizedMessage());
         }
     }
 
-    public static void updateCols(String[] columns, String[] values, String table, int id) {
+    public synchronized static void updateCols(String[] columns, String[] values, String table, int id) {
         var length = columns.length;
         if (length != values.length)
             throw new RuntimeException("columns and values do not match by length");
@@ -73,10 +75,10 @@ public class DatabaseHelper {
                 builder.append(",");
         }
         builder.append(" WHERE ").append(COL_ID).append("=").append(id).append(";");
-        DatabaseHelper.executeUpdateSql(builder.toString(), false);
+        DatabaseHelper.runSQL(builder.toString(), false);
     }
 
-    public static void updateCol(String column, String value, String table, int id) {
+    public synchronized static void updateCol(String column, String value, String table, int id) {
 
         boolean isInteger = false;
         try {
@@ -92,7 +94,7 @@ public class DatabaseHelper {
                 """
                 .formatted(table, column, value, COL_ID, id);
 
-        DatabaseHelper.executeUpdateSql(sql, false);
+        DatabaseHelper.runSQL(sql, false);
     }
 
 

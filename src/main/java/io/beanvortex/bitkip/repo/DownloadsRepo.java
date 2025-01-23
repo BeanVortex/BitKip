@@ -2,13 +2,16 @@ package io.beanvortex.bitkip.repo;
 
 import io.beanvortex.bitkip.models.DownloadModel;
 import io.beanvortex.bitkip.models.DownloadStatus;
+import io.beanvortex.bitkip.models.QueueModel;
 import io.beanvortex.bitkip.models.TurnOffMode;
+import io.beanvortex.bitkip.utils.Defaults;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
@@ -53,7 +56,7 @@ public class DownloadsRepo {
                 + COL_LAST_TRY_DATE + " VARCHAR,"
                 + COL_COMPLETE_DATE + " VARCHAR"
                 + ");";
-        DatabaseHelper.createTable(sql);
+        DatabaseHelper.runSQL(sql, false);
         alters();
 
     }
@@ -73,7 +76,7 @@ public class DownloadsRepo {
                         DatabaseHelper.DOWNLOADS_TABLE_NAME, COL_OPEN_AFTER_COMPLETE,
                         DatabaseHelper.DOWNLOADS_TABLE_NAME, COL_ADD_TO_QUEUE_DATE, LocalDateTime.now().toString(),
                         DatabaseHelper.DOWNLOADS_TABLE_NAME, COL_RESUMABLE);
-        DatabaseHelper.executeUpdateSql(addAlters, true);
+        DatabaseHelper.runSQL(addAlters, true);
     }
 
 
@@ -255,7 +258,7 @@ public class DownloadsRepo {
                 DELETE FROM %s WHERE %s=%d;
                 """
                 .formatted(DatabaseHelper.DOWNLOADS_TABLE_NAME, COL_ID, download.getId());
-        DatabaseHelper.executeUpdateSql(sql, false);
+        DatabaseHelper.runSQL(sql, false);
     }
 
     public static void deleteDownloadQueue(int downloadId, int queueId) {
@@ -263,7 +266,7 @@ public class DownloadsRepo {
                 DELETE FROM %s WHERE %s = %d AND %s = %d;
                 """
                 .formatted(DatabaseHelper.QUEUE_DOWNLOAD_TABLE_NAME, DatabaseHelper.COL_DOWNLOAD_ID, downloadId, DatabaseHelper.COL_QUEUE_ID, queueId);
-        DatabaseHelper.executeUpdateSql(sql, false);
+        DatabaseHelper.runSQL(sql, false);
     }
 
     private static DownloadModel createDownload(ResultSet rs, boolean fetchQueue) throws SQLException {
@@ -317,7 +320,7 @@ public class DownloadsRepo {
                         COL_PROGRESS, dm.getProgress(),
                         COL_DOWNLOADED, dm.getDownloaded(),
                         COL_ID, dm.getId());
-        DatabaseHelper.executeUpdateSql(sql, false);
+        DatabaseHelper.runSQL(sql, false);
     }
 
     public static void updateDownloadCompleteDate(DownloadModel dm) {
@@ -327,7 +330,7 @@ public class DownloadsRepo {
                 .formatted(DatabaseHelper.DOWNLOADS_TABLE_NAME,
                         COL_COMPLETE_DATE, dm.getCompleteDate(),
                         COL_ID, dm.getId());
-        DatabaseHelper.executeUpdateSql(sql, false);
+        DatabaseHelper.runSQL(sql, false);
     }
 
     public static void updateDownloadLastTryDate(DownloadModel dm) {
@@ -337,7 +340,7 @@ public class DownloadsRepo {
                 .formatted(DatabaseHelper.DOWNLOADS_TABLE_NAME,
                         COL_LAST_TRY_DATE, dm.getLastTryDate(),
                         COL_ID, dm.getId());
-        DatabaseHelper.executeUpdateSql(sql, false);
+        DatabaseHelper.runSQL(sql, false);
     }
 
     public static void updateDownloadOpenAfterComplete(DownloadModel dm) {
@@ -347,7 +350,7 @@ public class DownloadsRepo {
                 .formatted(DatabaseHelper.DOWNLOADS_TABLE_NAME,
                         COL_OPEN_AFTER_COMPLETE, dm.isOpenAfterComplete() ? 1 : 0,
                         COL_ID, dm.getId());
-        DatabaseHelper.executeUpdateSql(sql, false);
+        DatabaseHelper.runSQL(sql, false);
     }
 
     public static void updateDownloadShowCompleteDialog(DownloadModel dm) {
@@ -357,7 +360,7 @@ public class DownloadsRepo {
                 .formatted(DatabaseHelper.DOWNLOADS_TABLE_NAME,
                         COL_SHOW_COMPLETE_DIALOG, dm.isShowCompleteDialog() ? 1 : 0,
                         COL_ID, dm.getId());
-        DatabaseHelper.executeUpdateSql(sql, false);
+        DatabaseHelper.runSQL(sql, false);
     }
 
     public static void updateTableStatus(DownloadModel dm) {
@@ -377,7 +380,7 @@ public class DownloadsRepo {
                         COL_COMPLETE_DATE, completeDate,
                         COL_LAST_TRY_DATE, lastTryDate,
                         COL_ID, dm.getId());
-        DatabaseHelper.executeUpdateSql(sql, false);
+        DatabaseHelper.runSQL(sql, false);
     }
 
     public static void insertDownloads(List<DownloadModel> dms) {
@@ -391,7 +394,7 @@ public class DownloadsRepo {
                 .formatted(DatabaseHelper.DOWNLOADS_TABLE_NAME,
                         column, value,
                         COL_ID, downloadId);
-        DatabaseHelper.executeUpdateSql(sql, false);
+        DatabaseHelper.runSQL(sql, false);
     }
 
     public static void updateDownloadLocation(String downloadPath, int id) {
@@ -401,7 +404,7 @@ public class DownloadsRepo {
                 .formatted(DatabaseHelper.DOWNLOADS_TABLE_NAME,
                         COL_PATH, downloadPath, COL_NAME,
                         COL_ID, id);
-        DatabaseHelper.executeUpdateSql(sql, false);
+        DatabaseHelper.runSQL(sql, false);
     }
 
     public static int getNextNumberOfExistedDownload(String path) {
@@ -418,4 +421,37 @@ public class DownloadsRepo {
             throw new RuntimeException(e);
         }
     }
+
+    public static List<DownloadModel> searchLike(String value, QueueModel selectedQueue) {
+        var tokens = value.split("\\s+");
+
+        var whereClause = new StringBuilder();
+        for (var token : tokens) {
+            if (whereClause.length() > 0)
+                whereClause.append(" AND ");
+            whereClause.append(COL_NAME).append(" LIKE '%").append(token).append("%'");
+        }
+        if (!selectedQueue.getName().equals(Defaults.ALL_DOWNLOADS_QUEUE))
+            whereClause.append(" AND id IN (")
+                    .append("SELECT download_id FROM queue_download WHERE queue_id=")
+                    .append(selectedQueue.getId()).append(")");
+        var sql = """
+                SELECT * FROM %s WHERE %s;
+                """
+                .formatted(DatabaseHelper.DOWNLOADS_TABLE_NAME, whereClause);
+        var list = new LinkedList<DownloadModel>();
+        try (var con = DatabaseHelper.openConnection();
+             var stmt = con.createStatement();
+             var rs = stmt.executeQuery(sql)) {
+            while (rs.next()) {
+                var download = createDownload(rs, false);
+                download.getQueues().add(selectedQueue);
+                list.add(download);
+            }
+        } catch (SQLException e) {
+            log.error(e.getMessage());
+        }
+        return list;
+    }
+
 }

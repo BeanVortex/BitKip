@@ -63,7 +63,7 @@ public class ScheduleRepo {
                         COL_TURN_OFF_MODE,
                         COL_QUEUE_ID,
                         COL_QUEUE_ID, QUEUES_TABLE_NAME, COL_ID);
-        DatabaseHelper.createTable(sql);
+        DatabaseHelper.runSQL(sql, false);
     }
 
     public static void insertSchedule(ScheduleModel schedule, int queueId) {
@@ -158,7 +158,7 @@ public class ScheduleRepo {
                         COL_STOP_TIME_ENABLED, schedule.isStopTimeEnabled() ? 1 : 0,
                         COL_ID, schedule.getId()
                 );
-        DatabaseHelper.executeUpdateSql(sql, false);
+        DatabaseHelper.runSQL(sql, false);
     }
 
     public static void updateScheduleEnabled(int id, boolean enabled) {
@@ -169,7 +169,7 @@ public class ScheduleRepo {
                 .formatted(SCHEDULE_TABLE_NAME,
                         COL_ENABLED, enabled ? 1 : 0,
                         COL_ID, id);
-        DatabaseHelper.executeUpdateSql(sql, false);
+        DatabaseHelper.runSQL(sql, false);
     }
 
     public static void updateScheduleQueueId(int scheduleId, int queueId) {
@@ -177,7 +177,7 @@ public class ScheduleRepo {
                 UPDATE %s SET %s=%d WHERE %s=%d;
                 """
                 .formatted(SCHEDULE_TABLE_NAME, COL_QUEUE_ID, queueId, COL_ID, scheduleId);
-        DatabaseHelper.executeUpdateSql(sql, false);
+        DatabaseHelper.runSQL(sql, false);
     }
 
     // for removal in future

@@ -15,19 +15,20 @@
     -fx-fill: -fx-white-color !important;
 }
 
-.hyperlink{
+.hyperlink {
     -fx-text-fill: -fx-white-color;
 }
 
-.text-field{
+.text-field {
     -fx-background-color: -fx-primary-color2 !important;
     -fx-border-color: -fx-white-color !important;
     -fx-text-fill: -fx-text-color;
     -fx-border-radius: 8;
     -fx-background-radius: 8;
 }
+
 .text-area .content,
-.text-area{
+.text-area {
     -fx-background-color: -fx-primary-color2 !important;
     -fx-text-fill: -fx-text-color;
 }
@@ -39,6 +40,14 @@
 
 .progress-bar .bar {
     -fx-background-color: -fx-secondary-color !important;
+}
+
+#drag {
+    -fx-background-color: -fx-secondary-color2 !important;
+}
+
+.drag_img {
+    -fx-image: url("../icons/drag-and-drop-dark.png") !important;
 }
 
 .tab-pane .tab:selected {

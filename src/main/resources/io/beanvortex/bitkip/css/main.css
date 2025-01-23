@@ -30,6 +30,9 @@
 .padding_y_5{
     -fx-padding: 5 0;
 }
+.padding_x_25{
+    -fx-padding: 0 25;
+}
 
 .padding_20 {
     -fx-padding: 20;

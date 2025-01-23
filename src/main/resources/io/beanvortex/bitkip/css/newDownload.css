@@ -152,3 +152,11 @@
     -fx-background-color: #009688;
     -fx-text-fill: #fafafa;
 }
+
+#drag{
+    -fx-background-color: white;
+    -fx-padding: 1px;
+    -fx-border-radius: 5px;
+    -fx-background-radius: 5px;
+    -fx-cursor: hand;
+}

@@ -1,5 +1,6 @@
 package io.beanvortex.bitkip.task;
 
+import io.beanvortex.bitkip.controllers.BatchDownload;
 import io.beanvortex.bitkip.utils.DownloadUtils;
 import io.beanvortex.bitkip.models.LinkModel;
 import javafx.concurrent.Task;
@@ -36,8 +37,12 @@ public class LinkDataTask extends Task<Flux<LinkModel>> {
                 var uri = lm.getUri();
                 var fileSize = DownloadUtils.getFileSize(connection);
                 var fileName = DownloadUtils.extractFileName(uri, connection);
+                var secondaryQueue = BatchDownload.getSecondaryQueueByFileName(fileName);
+                var path = DownloadUtils.determineLocation(fileName);
                 lm.setName(DownloadUtils.getNewFileNameIfExists(fileName, lm.getPath()));
                 lm.setSize(fileSize);
+                lm.setPath(path);
+                lm.getQueues().add(secondaryQueue);
                 lm.setResumable(DownloadUtils.canResume(connection));
                 fluxSink.next(lm);
             }

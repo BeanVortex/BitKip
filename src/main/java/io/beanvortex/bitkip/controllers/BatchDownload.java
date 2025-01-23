@@ -25,8 +25,7 @@ import java.util.List;
 import java.util.ResourceBundle;
 import java.util.concurrent.CompletableFuture;
 
-import static io.beanvortex.bitkip.config.AppConfigs.addSameDownload;
-import static io.beanvortex.bitkip.config.AppConfigs.log;
+import static io.beanvortex.bitkip.config.AppConfigs.*;
 import static io.beanvortex.bitkip.config.observers.QueueSubject.getQueueSubject;
 import static io.beanvortex.bitkip.utils.Defaults.ALL_DOWNLOADS_QUEUE;
 import static io.beanvortex.bitkip.utils.Defaults.extensions;
@@ -78,7 +77,8 @@ public class BatchDownload implements QueueObserver {
         queueCombo.setValue(queues.get(0));
         errorLabel.setVisible(false);
         checkBtn.setDisable(true);
-        lastLocationCheck.setDisable(true);
+        if (AppConfigs.lastSavedDir == null)
+            lastLocationCheck.setDisable(true);
         Validations.prepareLinkFromClipboard(urlField);
         Validations.validateChunksInput(chunksField);
         Validations.validateIntInputCheck(startField, 0L, 0, null);
@@ -239,6 +239,9 @@ public class BatchDownload implements QueueObserver {
         try {
             var url = urlField.getText();
             var path = locationField.getText();
+            if (lastLocationCheck.isSelected())
+                path = AppConfigs.lastSavedDir;
+            var finalPath = path;
             if (url.isBlank()) {
                 log.warn("URL is blank");
                 DownloadUtils.disableControlsAndShowError("URL is blank", errorLabel, checkBtn, null, null);
@@ -260,7 +263,7 @@ public class BatchDownload implements QueueObserver {
                         var found = byURL.stream()
                                 .filter(dm -> {
                                     var s = Paths.get(dm.getFilePath()).getParent().toString() + File.separator;
-                                    return s.equals(path);
+                                    return s.equals(finalPath);
                                 })
                                 .findFirst();
                         if (found.isPresent()) {
@@ -280,8 +283,8 @@ public class BatchDownload implements QueueObserver {
                 lm.getQueues().add(secondaryQueue);
                 if (selectedQueue.getId() != allDownloadsQueue.getId())
                     lm.getQueues().add(selectedQueue);
-                lm.setPath(path);
-                lm.setSelectedPath(path);
+                lm.setPath(finalPath);
+                lm.setSelectedPath(finalPath);
             });
             FxUtils.newBatchListStage(links);
             getQueueSubject().removeObserver(this);

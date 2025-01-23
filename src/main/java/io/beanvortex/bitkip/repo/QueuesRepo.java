@@ -73,7 +73,7 @@ public class QueuesRepo {
                         COL_SPEED_LIMIT,
                         COL_SCHEDULE_ID,
                         COL_SCHEDULE_ID, SCHEDULE_TABLE_NAME, COL_ID);
-        DatabaseHelper.createTable(sql);
+        DatabaseHelper.runSQL(sql, false);
         alters();
     }
 
@@ -91,7 +91,7 @@ public class QueuesRepo {
                         COL_DOWNLOAD_ID, COL_QUEUE_ID,
                         COL_DOWNLOAD_ID, DOWNLOADS_TABLE_NAME, COL_ID,
                         COL_QUEUE_ID, QUEUES_TABLE_NAME, COL_ID);
-        DatabaseHelper.createTable(sql);
+        DatabaseHelper.runSQL(sql, false);
     }
 
 
@@ -162,7 +162,7 @@ public class QueuesRepo {
                 DELETE FROM %s WHERE %s = "%s";
                 """
                 .formatted(QUEUES_TABLE_NAME, COL_NAME, name);
-        DatabaseHelper.executeUpdateSql(sql, false);
+        DatabaseHelper.runSQL(sql, false);
     }
 
     public static List<QueueModel> findQueuesOfADownload(int downloadId) {
@@ -196,7 +196,7 @@ public class QueuesRepo {
                         QUEUES_TABLE_NAME, COL_SPEED_LIMIT,
                         QUEUES_TABLE_NAME, COL_SCHEDULE_ID, SCHEDULE_TABLE_NAME, COL_ID
                 );
-        DatabaseHelper.executeUpdateSql(addAlters, true);
+        DatabaseHelper.runSQL(addAlters, true);
     }
 
     static QueueModel createQueueModel(ResultSet rs, boolean fetchDownloads, boolean fetchSchedule) throws SQLException {

@@ -181,7 +181,7 @@ public class QueueUtils {
         queueDoneNotification(qm);
         startedQueues.remove(startedQueue);
         var schedule = qm.getSchedule();
-        if (schedule.isEnabled() && schedule.isTurnOffEnabled() && canTurnOff) {
+        if (schedule.isTurnOffEnabled() && canTurnOff) {
             shutdownSchedulersOnOnceDownload(qm);
             var turnOffMode = schedule.getTurnOffMode();
             Platform.runLater(() -> {

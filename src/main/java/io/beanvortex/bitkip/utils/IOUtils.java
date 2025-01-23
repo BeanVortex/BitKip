@@ -311,11 +311,7 @@ public class IOUtils {
                     var key = cfg.split("=")[0];
                     var value = cfg.split("=")[1];
                     switch (key) {
-                        case "save_location" -> {
-                            downloadPath = value;
-                            if (lastSavedDir == null || !lastSavedDir.equals(downloadPath))
-                                lastSavedDir = downloadPath;
-                        }
+                        case "save_location" -> downloadPath = value;
                         case "theme" -> theme = value;
                         case "startup" -> startup = value.equals("true");
                         case "server_enabled" -> serverEnabled = value.equals("true");

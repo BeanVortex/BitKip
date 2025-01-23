@@ -20,7 +20,10 @@ import javafx.beans.property.SimpleBooleanProperty;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
-import javafx.scene.layout.VBox;
+import javafx.scene.input.ClipboardContent;
+import javafx.scene.input.Dragboard;
+import javafx.scene.input.TransferMode;
+import javafx.scene.layout.HBox;
 import javafx.stage.Stage;
 import org.apache.commons.lang3.time.DurationFormatUtils;
 import org.controlsfx.control.Notifications;
@@ -30,6 +33,7 @@ import org.kordamp.ikonli.javafx.FontIcon;
 
 import java.io.File;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.ResourceBundle;
 
@@ -39,10 +43,6 @@ public class DetailsController implements FXMLController {
     private Button speedApplyBtn, allBytesBtn;
     @FXML
     private ComboBox<TurnOffMode> turnOffCombo;
-    @FXML
-    private VBox container;
-    @FXML
-    private ScrollPane scrollPane;
     @FXML
     private Hyperlink link;
     @FXML
@@ -56,22 +56,21 @@ public class DetailsController implements FXMLController {
             statusLbl, speedLbl, downloadedOfLbl, downloadedBytes;
     @FXML
     private Button controlBtn, openFolderBtn;
+    @FXML
+    HBox drag;
 
     private Stage stage;
     private DownloadModel dm;
     private boolean isComplete = false;
     private final BooleanProperty isPaused = new SimpleBooleanProperty(true);
     private final PopOver linkPopover = new PopOver();
+    private final ClipboardContent filesToCopyClipboard = new ClipboardContent();
+    private final List<File> dragFiles = new ArrayList<>();
 
 
     @Override
     public void initAfterStage() {
         updateTheme(stage.getScene());
-        stage.heightProperty().addListener((o, ol, n) -> scrollPane.setPrefHeight(n.doubleValue()));
-        stage.widthProperty().addListener((o, ol, n) -> {
-            scrollPane.setPrefWidth(n.doubleValue());
-            container.setPrefWidth(n.doubleValue() - 20);
-        });
     }
 
     @Override
@@ -123,15 +122,17 @@ public class DetailsController implements FXMLController {
         if (resumable) {
             resumableLbl.getStyleClass().add("yes");
             resumableLbl.getStyleClass().remove("no");
-            resumableLbl.setText("Yes");
+            resumableLbl.setText("Resumable");
         } else {
             resumableLbl.getStyleClass().add("no");
             resumableLbl.getStyleClass().remove("yes");
-            resumableLbl.setText("No");
+            resumableLbl.setText("Not Resumable");
         }
         controlBtn.setText(isPaused.get() ? (resumable ? "Resume" : "Restart") : "Pause");
         openSwitch.setSelected(dm.isOpenAfterComplete());
         showSwitch.setSelected(dm.isShowCompleteDialog());
+        drag.setDisable(true);
+        drag.setVisible(false);
         onComplete(dm);
         turnOffCombo.getSelectionModel().select(dm.getTurnOffMode());
     }
@@ -322,8 +323,27 @@ public class DetailsController implements FXMLController {
                 showSwitch.setDisable(true);
                 speedApplyBtn.setDisable(true);
                 speedApplyBtn.setVisible(false);
+                drag.setDisable(false);
+                drag.setVisible(true);
+                initDragAndDrop(download);
                 setPauseButtonDisable(false);
             });
+    }
+
+    private void initDragAndDrop(DownloadModel download) {
+        drag.setOnDragDetected(me -> {
+            Dragboard db = drag.startDragAndDrop(TransferMode.ANY);
+
+            File f = new File(download.getFilePath());
+            dragFiles.add(f);
+            filesToCopyClipboard.putFiles(dragFiles);
+            db.setContent(filesToCopyClipboard);
+        });
+        drag.setOnDragDone(me -> {
+            filesToCopyClipboard.clear();
+            dragFiles.clear();
+            me.consume();
+        });
     }
 
     public void closeStage() {

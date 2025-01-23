@@ -35,33 +35,37 @@
 # BitKip-extensions
 
 This extension will install on your browser to grab download links from browser and send to [BitKip](https://github.com/BeanVortex/BitKip) application
+This project utilizes [uSelect-iDownload](https://github.com/lasagnacode/uselect-idownload) extension, which is licensed under the GNU General Public License (GPL).
 
 How to install:
 - download from [latest release](https://github.com/BeanVortex/BitKip/releases/latest)
+- follow this [tutorial](https://www.youtube.com/watch?v=nssgVVxmswc) or follow these steps
 - extract downloaded zip
 - go to your browser extension settings
 - enable developer mode
 - load unpacked
 - select the folder that has manifest.json
+- if you delete or move the folder, the extension will no longer be available
 
 Or install from FireFox add-ons
 https://addons.mozilla.org/en-US/firefox/addon/bitkip-add-on/
 
 Preview of the extension:
 
-![latest release](https://github.com/BeanVortex/BitKip-extensions/blob/main/src/resources/images/popup.png)
+![latest release](./readme-img/extension.gif)
 
 
 ## BitKip Demo
 
-![main](https://github.com/BeanVortex/BitKip/blob/main/readme-img/main.png)
-![main](https://github.com/BeanVortex/BitKip/blob/main/readme-img/single.png)
-![main](https://github.com/BeanVortex/BitKip/blob/main/readme-img/batch.png)
-![main](https://github.com/BeanVortex/BitKip/blob/main/readme-img/batch-list.png)
-![main](https://github.com/BeanVortex/BitKip/blob/main/readme-img/queue-settings.png)
-![main](https://github.com/BeanVortex/BitKip/blob/main/readme-img/queue-scheduler.png)
-![main](https://github.com/BeanVortex/BitKip/blob/main/readme-img/settings-1.png)
-![main](https://github.com/BeanVortex/BitKip/blob/main/readme-img/settings-2.png)
-![main](https://github.com/BeanVortex/BitKip/blob/main/readme-img/logs.png)
+![main](./readme-img/main.png)
+![single](./readme-img/single.png)
+![details](./readme-img/details.png)
+![batch](./readme-img/batch.png)
+![batch list](./readme-img/batch-list.png)
+![queue settings](./readme-img/queue-settings.png)
+![queue scheduler](./readme-img/queue-scheduler.png)
+![settings1](./readme-img/settings-1.png)
+![settings2](./readme-img/settings-2.png)
+![logs](./readme-img/logs.png)
 
 
