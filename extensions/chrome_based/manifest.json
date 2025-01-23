@@ -41,6 +41,9 @@
 
   "default_locale": "en",
 
+  "options_page": "resources/options.html",
+
+
   "icons": {
     "128": "./resources/icons/logo.png"
   }

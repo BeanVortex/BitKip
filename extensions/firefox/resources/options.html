@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>BitKip Extension Settings</title>
+    <link rel="stylesheet" href="./main.css" />
+  </head>
+  <body>
+    <div class="header">BitKip Extension Settings</div>
+
+    <div class="padding_10" style="display: flex; justify-content: center;">
+      <input type="checkbox" id="enableCheck" />
+      <label for="enableCheck">Enable/Disable extension link grab</label>
+    </div>
+    <!-- <form id="form">
+    <input type="radio" id="similarOption" checked/>
+    <label for="similarOption">Extract similar links</label>
+    <br/>
+    <input type="radio" id="regexOption" value="regex"/>
+    <label for="regexOption">Extract using regular expression</label>
+    <br/>
+    <br/>
+    <input type="text" id="linkInput" class="input" placeholder="Enter only common parts of a link"/>
+    <br>
+    <br>
+    <div class="text-center">
+        <input type="submit" id="extractBtn" class="btn" value="Extract"/>
+    </div>
+</form> -->
+    <div style="display: flex; justify-content: center">
+      <form>
+        <label for="portInput">Port to talk with BitKip:</label>
+        <br />
+        <br />
+        <input type="number" id="portInput" class="input" placeholder="Port" />
+        <br />
+        <br />
+        <input type="submit" class="save_btn" value="Save" id="savePortBtn" />
+      </form>
+    </div>
+  </body>
+  <script src="../scripts/options.js"></script>
+</html>

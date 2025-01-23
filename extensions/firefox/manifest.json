@@ -31,10 +31,13 @@
       "css": ["resources/overlay.css"]
     }
   ],
-  
+
   "web_accessible_resources": [
     {
-      "resources": ["./scripts/uSelect_overlay.js", "./scripts/uSelect_statemachine.js"],
+      "resources": [
+        "./scripts/uSelect_overlay.js",
+        "./scripts/uSelect_statemachine.js"
+      ],
       "matches": ["<all_urls>"]
     }
   ],
@@ -46,6 +49,8 @@
   },
 
   "default_locale": "en",
+
+  "options_page": "resources/options.html",
 
   "icons": {
     "128": "./resources/icons/logo.png"

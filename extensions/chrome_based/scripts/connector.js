@@ -111,7 +111,8 @@ chrome.contextMenus.onClicked.addListener((info) => {
             };
             postLinks(data, false);
         }
-    }
+    } else if (info.menuItemId === "settings")
+        chrome.runtime.openOptionsPage();
 });
 
 //Adding menus to right-click
@@ -120,6 +121,11 @@ chrome.contextMenus.removeAll(() => {
         id: 'extract_selected_link',
         title: 'Download this link',
         contexts: ['all'],
+    });
+    chrome.contextMenus.create({
+        id: 'settings',
+        title: 'Settings',
+        contexts: ['action']
     });
 });
 

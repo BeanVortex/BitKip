@@ -7,7 +7,7 @@ let enabled = true;
 const updatePort = () => {
     browser.storage.sync.get(["port"])
         .then((result) => {
-            if (isObjectEmpty(result) || result === undefined) browser.storage.sync.set({port});
+            if (isObjectEmpty(result) || result === undefined) browser.storage.sync.set({ port });
             else port = result.port;
         });
 }
@@ -15,7 +15,7 @@ const updatePort = () => {
 const updateEnable = async () => {
     await browser.storage.local.get(["enabled"])
         .then(res => {
-            if (isObjectEmpty(res) || res === undefined) browser.storage.local.set({enabled});
+            if (isObjectEmpty(res) || res === undefined) browser.storage.local.set({ enabled });
             else enabled = res.enabled;
         });
 }
@@ -41,7 +41,7 @@ const postLinks = async (data, isBatch) => {
             type: 'basic'
         });
         browser.downloads.onCreated.removeListener(triggerDownload);
-        await browser.downloads.download({url: data.url});
+        await browser.downloads.download({ url: data.url });
         browser.downloads.onCreated.addListener(triggerDownload);
     });
 }
@@ -69,7 +69,7 @@ browser.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
             }
             break;
         case "setPort":
-            browser.storage.sync.set({port: message.value});
+            browser.storage.sync.set({ port: message.value });
             break;
     }
 });
@@ -113,7 +113,8 @@ browser.contextMenus.onClicked.addListener((info) => {
             };
             postLinks(data, false);
         }
-    }
+    } else if (info.menuItemId === "settings")
+        browser.runtime.openOptionsPage();
 });
 
 //Adding menus to right-click
@@ -121,7 +122,12 @@ browser.contextMenus.removeAll(() => {
     browser.contextMenus.create({
         id: 'extract_selected_link',
         title: 'Download this link',
-        contexts: ['all'],
+        contexts: ['all']
+    });
+    browser.contextMenus.create({
+        id: 'settings',
+        title: 'Settings',
+        contexts: ['action']
     });
 });
 
@@ -142,7 +148,7 @@ let isScriptInjected = false;
 
 browser.action.onClicked.addListener(async (tab) => {
     if (!isScriptInjected) {
-    
+
         browser.scripting.executeScript({
             target: { tabId: tab.id },
             files: ['scripts/uSelect_statemachine.js']
