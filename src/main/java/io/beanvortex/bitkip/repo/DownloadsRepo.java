@@ -443,8 +443,11 @@ public class DownloadsRepo {
         try (var con = DatabaseHelper.openConnection();
              var stmt = con.createStatement();
              var rs = stmt.executeQuery(sql)) {
-            while (rs.next())
-                list.add(createDownload(rs, false));
+            while (rs.next()) {
+                var download = createDownload(rs, false);
+                download.getQueues().add(selectedQueue);
+                list.add(download);
+            }
         } catch (SQLException e) {
             log.error(e.getMessage());
         }
