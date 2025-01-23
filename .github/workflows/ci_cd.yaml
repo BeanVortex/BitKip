@@ -54,7 +54,7 @@ jobs:
       - name: Build using script
         run: ./builders/linux.sh
       - name: Upload Artifacts
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           name: linux-build
           path: ./build/releases
@@ -68,7 +68,7 @@ jobs:
       - name: packaging extension
         run: ./builders/package_extension.sh
       - name: Upload Artifacts
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           name: extension-package
           path: ./build/releases
@@ -78,15 +78,15 @@ jobs:
     needs: [ build-windows, build-linux, package-extension ]
     steps:
       - name: Download Windows Artifacts
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v4
         with:
           name: windows-build
       - name: Download Linux Artifacts
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v4
         with:
           name: linux-build
       - name: Download Extension Artifact
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v4
         with:
           name: extension-package
       - name: tree
