@@ -3,25 +3,6 @@
 let port = 9563;
 let enabled = true;
 
-// should give alarms permission
-// browser.alarms.create('syncAlarm', { periodInMinutes: 2 });
-// browser.alarms.onAlarm.addListener(alarm => {
-//     if (alarm.name === 'syncAlarm')
-//         sync();
-// });
-//
-// const sync = () => {
-//         fetch(`http://localhost:${port}/sync`, {
-//             method: 'GET',
-//             mode: "cors",
-//         }).then(res => {
-//
-//         }).catch(reason => {
-//             // todo run the app
-//         })
-// };
-//
-// sync();
 
 const updatePort = () => {
     browser.storage.sync.get(["port"])
@@ -48,8 +29,10 @@ const postLinks = async (data, isBatch) => {
         URL_TO_POST = `http://localhost:${port}/batch`;
     fetch(URL_TO_POST, {
         method: 'POST',
-        mode: "cors",
         body: JSON.stringify(data),
+        headers: {
+            'Content-Type': 'application/json', // Only necessary headers
+        }
     }).catch(async _ => {
         browser.notifications.create('', {
             title: 'BitKip Extension',
@@ -57,11 +40,12 @@ const postLinks = async (data, isBatch) => {
             iconUrl: '../resources/icons/logo.png',
             type: 'basic'
         });
-        browser.downloads.onCreated.removeListener(triggerDownload)
-        await browser.downloads.download({url: data.url})
-        browser.downloads.onCreated.addListener(triggerDownload)
+        browser.downloads.onCreated.removeListener(triggerDownload);
+        await browser.downloads.download({url: data.url});
+        browser.downloads.onCreated.addListener(triggerDownload);
     });
 }
+
 
 const loadedContentScripts = {};
 browser.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
@@ -69,20 +53,20 @@ browser.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
         case "captcha":
             const tabId = sender.tab.id;
             loadedContentScripts[tabId] = false;
-            sendResponse({isOkToAddListener: true});
+            sendResponse({ isOkToAddListener: true });
             break;
         case "storeFirstUrl":
             const tabId2 = sender.tab.id;
             if (!loadedContentScripts[tabId2]) {
-                sendResponse({isOkToAddListener: true});
+                sendResponse({ isOkToAddListener: true });
                 loadedContentScripts[tabId2] = true;
-            } else sendResponse({isOkToAddListener: false});
+            } else sendResponse({ isOkToAddListener: false });
             break;
-        case "extractSimilarLinks":
-        case "extractLinksWithRegex":
-            const tabs = await browser.tabs.query({active: true, currentWindow: true, lastFocusedWindow: true});
-            const resData = await browser.tabs.sendMessage(tabs[0].id, message);
-            postLinks(resData, true)
+        case "downloadBatch":
+            if (message.urls !== 0) {
+                const links = message.urls;
+                postLinks({ links }, true)
+            }
             break;
         case "setPort":
             browser.storage.sync.set({port: message.value});
@@ -92,8 +76,8 @@ browser.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
 
 
 // Prevent the download from starting
-// get download link from Chrome Api
-const triggerDownload = (downloadItem) => {
+// get download link from Firefox Api
+const triggerDownload = (downloadItem, suggest) => {
     // final url is used when url itself is a redirecting link
     updateEnable();
     if (!enabled || (downloadItem.mime && downloadItem.mime.includes("image")))
@@ -118,11 +102,17 @@ const triggerDownload = (downloadItem) => {
 
 //Main code to maintain download link and start doing job
 browser.downloads.onCreated.addListener(triggerDownload);
+
 //Add BitKip right-click menu listener to browser page
 browser.contextMenus.onClicked.addListener((info) => {
     if (info.menuItemId === "extract_selected_link") {
-        if (isSupportedProtocol(info.linkUrl))
-            browser.downloads.download({url: info.linkUrl})
+        if (isSupportedProtocol(info.linkUrl)) {
+            let data = {
+                url: info.linkUrl,
+                agent: navigator.userAgent
+            };
+            postLinks(data, false);
+        }
     }
 });
 
@@ -147,3 +137,29 @@ const isSupportedProtocol = (url) => {
 const isObjectEmpty = (objectName) => {
     return JSON.stringify(objectName) === "{}";
 };
+
+let isScriptInjected = false;
+
+browser.action.onClicked.addListener(async (tab) => {
+    if (!isScriptInjected) {
+    
+        browser.scripting.executeScript({
+            target: { tabId: tab.id },
+            files: ['scripts/uSelect_statemachine.js']
+        }).then(() => {
+            return browser.scripting.executeScript({
+                target: { tabId: tab.id },
+                files: ['scripts/uSelect_overlay.js'],
+            });
+        }).then(async () => {
+            const tabs = await browser.tabs.query({ active: true, currentWindow: true, lastFocusedWindow: true });
+            browser.tabs.sendMessage(tabs[0].id, { type: 'toggleOverlay' });
+        }).catch((error) => {
+            console.error('Failed to inject scripts:', error);
+        });
+        isScriptInjected = true;
+    } else {
+        const tabs = await browser.tabs.query({ active: true, currentWindow: true, lastFocusedWindow: true });
+        browser.tabs.sendMessage(tabs[0].id, { type: 'toggleOverlay' });
+    }
+});

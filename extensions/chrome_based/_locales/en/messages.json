@@ -1,0 +1,5 @@
+{
+  "extDesc": {"message": "Open or download several links at once with a simple selection."},
+  "actionTitle": {"message": "Start link selection"},
+  "usage":   {"message": "Select links by drawing rectangles (left click selects, right click deselects).<br/>You can temporarily hide the overlay and scroll the page holding the <strong>H</strong> key.<br/>Press <strong>Enter</strong> to send selected links to BitKip"}
+}

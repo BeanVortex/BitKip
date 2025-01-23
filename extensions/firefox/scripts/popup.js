@@ -10,9 +10,9 @@ const extract = () => {
     const linkPattern = linkInput.value;
     const isSimilarOption = similarOption.checked;
     if (isSimilarOption)
-        browser.runtime.sendMessage({type: 'extractSimilarLinks', linkPattern: linkPattern});
+        chrome.runtime.sendMessage({type: 'extractSimilarLinks', linkPattern: linkPattern});
     else
-        browser.runtime.sendMessage({type: 'extractLinksWithRegex', linkPattern: linkPattern});
+        chrome.runtime.sendMessage({type: 'extractLinksWithRegex', linkPattern: linkPattern});
     window.close();
 }
 document.getElementById('form').addEventListener('submit', extract);
@@ -31,19 +31,19 @@ regexOption.addEventListener('change', () => {
 });
 
 
-browser.storage.sync.get("port", (result) => portInput.value = result.port)
-browser.storage.local.get("enabled", (result) => {
+chrome.storage.sync.get("port", (result) => portInput.value = result.port)
+chrome.storage.local.get("enabled", (result) => {
     enableCheck.checked = result.enabled;
     disableControls();
 });
 
 
 enableCheck.onchange = () => {
-    browser.storage.local.set({enabled: enableCheck.checked});
+    chrome.storage.local.set({enabled: enableCheck.checked});
     disableControls();
 }
 savePortBtn.onclick = () => {
-    browser.storage.sync.set({port: portInput.value});
+    chrome.storage.sync.set({port: portInput.value});
 };
 
 const disableControls = () => {

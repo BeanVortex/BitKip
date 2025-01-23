@@ -1,16 +1,14 @@
 package io.beanvortex.bitkip.api;
 
-import io.beanvortex.bitkip.controllers.BatchDownload;
-import io.beanvortex.bitkip.utils.DownloadUtils;
+import io.beanvortex.bitkip.models.BatchURLModel;
+import io.beanvortex.bitkip.models.LinkModel;
+import io.beanvortex.bitkip.repo.QueuesRepo;
 import io.beanvortex.bitkip.utils.FxUtils;
+import io.beanvortex.bitkip.utils.Validations;
 import io.helidon.webserver.Routing;
 import io.helidon.webserver.ServerRequest;
 import io.helidon.webserver.ServerResponse;
 import io.helidon.webserver.Service;
-import io.beanvortex.bitkip.models.BatchURLModel;
-import io.beanvortex.bitkip.models.LinkModel;
-import io.beanvortex.bitkip.repo.QueuesRepo;
-import io.beanvortex.bitkip.utils.Validations;
 import javafx.application.Platform;
 
 import java.io.IOException;
@@ -50,16 +48,9 @@ public class BatchService implements Service {
             return Collections.emptyList();
         var chunks = Validations.maxChunks(Long.MAX_VALUE);
         var allDownloadsQueue = QueuesRepo.findByName(ALL_DOWNLOADS_QUEUE, false);
-        var firstUrl = links.get(0);
-        var connection = DownloadUtils.connect(firstUrl);
-        var firstFileName = DownloadUtils.extractFileName(firstUrl, connection);
-        var secondaryQueue = BatchDownload.getSecondaryQueueByFileName(firstFileName);
-        var path = DownloadUtils.determineLocation(firstFileName);
         return urlModel.links().stream().map(s -> {
             var lm = new LinkModel(s, chunks);
             lm.getQueues().add(allDownloadsQueue);
-            lm.getQueues().add(secondaryQueue);
-            lm.setPath(path);
             return lm;
         }).toList();
     }
