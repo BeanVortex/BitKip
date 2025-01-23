@@ -8,7 +8,7 @@ plugins {
 }
 
 group 'io.beanvortex'
-version '1.4.9'
+version '1.5.0'
 sourceCompatibility = '21'
 targetCompatibility = '21'
 mainClassName = 'io.beanvortex.bitkip.BitKip'
