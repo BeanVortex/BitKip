@@ -227,6 +227,7 @@ public class ChunksDownloadTask extends DownloadTask {
                 }
                 fileChannel.close();
                 con.disconnect();
+                con2.disconnect();
             } catch (SocketTimeoutException | UnknownHostException s) {
                 if (!paused) {
                     retries++;
@@ -334,6 +335,13 @@ public class ChunksDownloadTask extends DownloadTask {
                                     });
                     if (download.isOpenAfterComplete())
                         DownloadOpUtils.openFile(download);
+                    if (lastModified == 0) {
+                        var con2 = DownloadUtils.connect(url);
+                        lastModified = con2.getLastModified();
+                        con2.disconnect();
+                        if (lastModified == 0)
+                            lastModified = System.currentTimeMillis();
+                    }
                     var fileTime = FileTime.fromMillis(lastModified);
                     Files.setLastModifiedTime(Path.of(download.getFilePath()), fileTime);
                 } else if (!newLimitSet)

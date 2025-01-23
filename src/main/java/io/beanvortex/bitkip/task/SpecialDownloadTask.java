@@ -1,12 +1,12 @@
 package io.beanvortex.bitkip.task;
 
-import io.beanvortex.bitkip.utils.DownloadOpUtils;
-import io.beanvortex.bitkip.utils.DownloadUtils;
-import io.beanvortex.bitkip.utils.IOUtils;
 import io.beanvortex.bitkip.controllers.DetailsController;
 import io.beanvortex.bitkip.models.DownloadModel;
 import io.beanvortex.bitkip.models.DownloadStatus;
 import io.beanvortex.bitkip.repo.DownloadsRepo;
+import io.beanvortex.bitkip.utils.DownloadOpUtils;
+import io.beanvortex.bitkip.utils.DownloadUtils;
+import io.beanvortex.bitkip.utils.IOUtils;
 import javafx.application.Platform;
 import org.controlsfx.control.Notifications;
 
@@ -75,6 +75,7 @@ public class SpecialDownloadTask extends DownloadTask {
             var con = DownloadUtils.connect(url);
             var con2 = DownloadUtils.connect(url);
             lastModified = con2.getLastModified();
+            con2.disconnect();
             con.setRequestProperty("User-Agent", userAgent);
             i = con.getInputStream();
             rbc = Channels.newChannel(i);
@@ -172,6 +173,13 @@ public class SpecialDownloadTask extends DownloadTask {
                                     });
                     if (download.isOpenAfterComplete())
                         DownloadOpUtils.openFile(downloadModel);
+                    if (lastModified == 0) {
+                        var con2 = DownloadUtils.connect(url);
+                        lastModified = con2.getLastModified();
+                        con2.disconnect();
+                        if (lastModified == 0)
+                            lastModified = System.currentTimeMillis();
+                    }
                     var fileTime = FileTime.fromMillis(lastModified);
                     Files.setLastModifiedTime(Path.of(download.getFilePath()), fileTime);
                 } else openDownloadings.stream().filter(dc -> dc.getDownloadModel().equals(download))

@@ -1,14 +1,14 @@
 package io.beanvortex.bitkip.task;
 
 
+import io.beanvortex.bitkip.models.DownloadModel;
+import io.beanvortex.bitkip.models.DownloadStatus;
+import io.beanvortex.bitkip.models.TurnOffMode;
 import io.beanvortex.bitkip.repo.DatabaseHelper;
 import io.beanvortex.bitkip.utils.FxUtils;
 import io.beanvortex.bitkip.utils.IOUtils;
 import io.beanvortex.bitkip.utils.MainTableUtils;
 import io.beanvortex.bitkip.utils.PowerUtils;
-import io.beanvortex.bitkip.models.DownloadModel;
-import io.beanvortex.bitkip.models.DownloadStatus;
-import io.beanvortex.bitkip.models.TurnOffMode;
 import javafx.application.Platform;
 import javafx.concurrent.Task;
 
@@ -16,7 +16,8 @@ import java.io.File;
 import java.time.LocalDateTime;
 import java.util.concurrent.ExecutorService;
 
-import static io.beanvortex.bitkip.config.AppConfigs.*;
+import static io.beanvortex.bitkip.config.AppConfigs.currentDownloadings;
+import static io.beanvortex.bitkip.config.AppConfigs.log;
 import static io.beanvortex.bitkip.repo.DownloadsRepo.*;
 
 /**
