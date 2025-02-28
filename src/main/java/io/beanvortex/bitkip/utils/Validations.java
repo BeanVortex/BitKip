@@ -33,7 +33,7 @@ public class Validations {
                 if (newValue.isBlank() || (fileSize > 0 && Long.parseLong(newValue) > fileSize)) {
                     bytesField.setText(String.valueOf(fileSize));
                 } else
-                     return;
+                    return;
                 long newV;
                 if (newValue.length() > 1) {
                     var stripped = StringUtils.stripStart(newValue, "0");
@@ -138,7 +138,8 @@ public class Validations {
     public static boolean validateUri(String uri) {
         return uri.startsWith("http") || uri.startsWith("https") || uri.startsWith("ftp");
     }
-    public static String fixURIChars(String uri){
+
+    public static String fixURIChars(String uri) {
         uri = uri.replace("{", "%7b");
         uri = uri.replace("}", "%7d");
         uri = uri.replace("[", "%5b");
@@ -156,7 +157,7 @@ public class Validations {
             return;
 
         // when download added and size not fetched
-        var connection = DownloadUtils.connectWithInternetCheck(dm.getUri(), true);
+        var connection = DownloadUtils.connectWithInternetCheck(dm.getUri(), dm.getCredential(), true);
         var canResume = DownloadUtils.canResume(connection);
         var fileSize = DownloadUtils.getFileSize(connection);
         dm.setSize(fileSize);

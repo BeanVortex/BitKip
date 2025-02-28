@@ -108,11 +108,13 @@ public class LinkTableUtils {
                 var links = table.getSelectionModel().getSelectedItems();
                 if (!row.isEmpty() && event.getButton().equals(MouseButton.SECONDARY)) {
                     var cMenu = new ContextMenu();
+                    var refreshLbl = new Label("refresh");
                     var deleteLbl = new Label("delete");
-                    var lbls = List.of(deleteLbl);
-                    var keyCodes = List.of(DEL);
+                    var lbls = List.of(refreshLbl, deleteLbl);
+                    var keyCodes = List.of(new KeyCodeCombination(KeyCode.F5), DEL);
                     var menuItems = MenuUtils.createMapMenuItems(lbls, keyCodes);
                     cMenu.getItems().addAll(menuItems.values());
+                    menuItems.get(refreshLbl).setOnAction(e -> links.forEach(this::updateLink));
                     menuItems.get(deleteLbl).setOnAction(e -> links.forEach(ln -> table.getItems().remove(ln)));
                     row.setContextMenu(cMenu);
                     cMenu.show(row, event.getX(), event.getY());

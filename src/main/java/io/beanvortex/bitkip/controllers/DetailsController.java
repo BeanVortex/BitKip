@@ -2,6 +2,7 @@ package io.beanvortex.bitkip.controllers;
 
 import io.beanvortex.bitkip.config.AppConfigs;
 import io.beanvortex.bitkip.controllers.interfaces.FXMLController;
+import io.beanvortex.bitkip.models.Credential;
 import io.beanvortex.bitkip.models.DownloadModel;
 import io.beanvortex.bitkip.models.DownloadStatus;
 import io.beanvortex.bitkip.models.TurnOffMode;
@@ -40,13 +41,17 @@ import java.util.ResourceBundle;
 public class DetailsController implements FXMLController {
 
     @FXML
+    private CheckBox authorizedCheck;
+    @FXML
+    private PasswordField passwordField;
+    @FXML
     private Button speedApplyBtn, allBytesBtn;
     @FXML
     private ComboBox<TurnOffMode> turnOffCombo;
     @FXML
     private Hyperlink link;
     @FXML
-    private TextField bytesField, speedField;
+    private TextField bytesField, speedField, usernameField;
     @FXML
     private ToggleSwitch openSwitch, showSwitch;
     @FXML
@@ -127,6 +132,13 @@ public class DetailsController implements FXMLController {
             resumableLbl.getStyleClass().add("no");
             resumableLbl.getStyleClass().remove("yes");
             resumableLbl.setText("Not Resumable");
+        }
+        if (dm.getCredential() != null) {
+            authorizedCheck.setSelected(true);
+            usernameField.getParent().setVisible(true);
+            passwordField.getParent().setVisible(true);
+            usernameField.setText("***");
+            passwordField.setText("***");
         }
         controlBtn.setText(isPaused.get() ? (resumable ? "Resume" : "Restart") : "Pause");
         openSwitch.setSelected(dm.isOpenAfterComplete());
@@ -233,6 +245,8 @@ public class DetailsController implements FXMLController {
         allBytesBtn.setDisable(true);
         bytesField.textProperty().addListener(o -> onBytesChanged());
         speedField.textProperty().addListener(o -> onSpeedChanged());
+        usernameField.getParent().setVisible(false);
+        passwordField.getParent().setVisible(false);
     }
 
     private void updatePause(Boolean paused) {
@@ -272,6 +286,11 @@ public class DetailsController implements FXMLController {
         if (isPaused.get()) {
             statusLbl.setText("Status: " + DownloadStatus.Trying);
             controlBtn.setDisable(true);
+            if (dm.getCredential() == null || (!usernameField.getText().equals(dm.getCredential().username())
+                    && !passwordField.getText().equals(dm.getCredential().password()))){
+                dm.setCredential(new Credential(usernameField.getText(), passwordField.getText()));
+                DownloadsRepo.updateDownloadCredential(dm);
+            }
             DownloadOpUtils.resumeDownloads(List.of(dm),
                     IOUtils.getBytesFromString(speedField.getText()), Long.parseLong(bytesField.getText()));
             controlBtn.setDisable(false);
@@ -398,6 +417,14 @@ public class DetailsController implements FXMLController {
         bytesField.setText(String.valueOf(dm.getSize()));
         allBytesBtn.setVisible(false);
         allBytesBtn.setDisable(true);
+    }
+
+    @FXML
+    private void onAuthorizedCheck() {
+        usernameField.getParent().setVisible(authorizedCheck.isSelected());
+        passwordField.getParent().setVisible(authorizedCheck.isSelected());
+        usernameField.setText(null);
+        passwordField.setText(null);
     }
 
     private void onBytesChanged() {

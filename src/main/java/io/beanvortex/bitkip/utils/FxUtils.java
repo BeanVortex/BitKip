@@ -261,7 +261,7 @@ public class FxUtils {
         stage.setAlwaysOnTop(false);
     }
 
-    public static void newBatchListStage(List<LinkModel> links) {
+    public static void newBatchListStage(List<LinkModel> links, Credential credential) {
         FXMLLoader loader;
         Stage stage = new Stage();
         VBox root;
@@ -282,6 +282,7 @@ public class FxUtils {
         getQueueSubject().addObserver(controller);
         controller.setStage(stage);
         controller.setData(links);
+        controller.setCredential(credential);
         stage.setOnCloseRequest(e -> {
             getThemeSubject().removeObserver(controller);
             getQueueSubject().removeObserver(controller);

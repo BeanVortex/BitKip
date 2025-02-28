@@ -71,6 +71,22 @@
         </HBox>
     </HBox>
 
+    <VBox spacing="10">
+        <CheckBox text="Authorized" fx:id="authorizedCheck" onAction="#onAuthorizedCheck"/>
+
+        <VBox spacing="10">
+            <HBox spacing="15" alignment="CENTER_LEFT">
+                <Label text="Username :" styleClass="bold"/>
+                <TextField fx:id="usernameField" prefWidth="200"/>
+            </HBox>
+            <HBox spacing="15" alignment="CENTER_LEFT">
+                <Label text="Password :" styleClass="bold"/>
+                <PasswordField fx:id="passwordField" prefWidth="200"/>
+            </HBox>
+        </VBox>
+
+    </VBox>
+
     <HBox alignment="BASELINE_LEFT">
         <HBox spacing="20" alignment="CENTER">
             <Label fx:id="errorLabel" styleClass="bold"/>

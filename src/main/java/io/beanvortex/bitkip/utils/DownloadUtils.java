@@ -2,6 +2,7 @@ package io.beanvortex.bitkip.utils;
 
 import io.beanvortex.bitkip.config.AppConfigs;
 import io.beanvortex.bitkip.exceptions.DeniedException;
+import io.beanvortex.bitkip.models.Credential;
 import io.beanvortex.bitkip.models.DownloadModel;
 import io.beanvortex.bitkip.models.QueueModel;
 import io.beanvortex.bitkip.repo.DownloadsRepo;
@@ -31,12 +32,14 @@ import static io.beanvortex.bitkip.utils.Validations.maxChunks;
 public class DownloadUtils {
 
 
-    public static HttpURLConnection connect(String uri) throws IOException {
+    public static HttpURLConnection connect(String uri, Credential credential) throws IOException {
         if (uri.isBlank())
             throw new IllegalArgumentException("URL is blank");
         uri = Validations.fixURIChars(uri);
         var url = URI.create(uri).toURL();
         var conn = (HttpURLConnection) url.openConnection();
+        if (credential != null && credential.isOk())
+            conn.setRequestProperty("Authorization", "Basic " + credential.base64Encoded());
         conn.setConnectTimeout(connectionTimeout);
         conn.setReadTimeout(readTimeout);
         if (userAgentEnabled)
@@ -45,7 +48,7 @@ public class DownloadUtils {
     }
 
 
-    public static HttpURLConnection connectWithInternetCheck(String uri, boolean showErrors) throws IOException {
+    public static HttpURLConnection connectWithInternetCheck(String uri, Credential credential, boolean showErrors) throws IOException {
         try {
             if (uri.isBlank())
                 throw new IllegalArgumentException("URL is blank");
@@ -54,7 +57,7 @@ public class DownloadUtils {
             var testCon = (HttpURLConnection) url.openConnection();
             testCon.setConnectTimeout(2000);
             testCon.connect();
-            return connect(uri);
+            return connect(uri, credential);
         } catch (IOException e) {
             var msg = "Connection or read timeout. Connect to the internet or check the url: " + e.getMessage();
             if (showErrors)
@@ -120,7 +123,7 @@ public class DownloadUtils {
         return CompletableFuture.supplyAsync(() -> {
             if (finalConnection[0] == null) {
                 try {
-                    finalConnection[0] = connect(urlField.getText());
+                    finalConnection[0] = connect(urlField.getText(), dm.getCredential());
                 } catch (IOException e) {
                     log.error(e.getMessage());
                 }
@@ -180,7 +183,7 @@ public class DownloadUtils {
         return CompletableFuture.supplyAsync(() -> {
             if (finalConnection[0] == null) {
                 try {
-                    finalConnection[0] = connect(link);
+                    finalConnection[0] = connect(link, dm.getCredential());
                 } catch (IOException e) {
                     log.error(e.getMessage());
                 }
@@ -263,26 +266,18 @@ public class DownloadUtils {
     }
 
     public static void checkIfFileIsOKToSave(String location, String name, Button downloadBtn,
-                                             Button addBtn, Button refreshBtn, CheckBox lastLocationCheck) throws DeniedException {
+                                             Button addBtn, CheckBox lastLocationCheck) throws DeniedException {
         var file = new File(location + name);
         var chunkFile = new File(location + name + "#0");
         if (file.exists() || chunkFile.exists()) {
             if (downloadBtn != null)
                 downloadBtn.setDisable(!addSameDownload);
             addBtn.setDisable(!addSameDownload);
-            if (refreshBtn != null && !addSameDownload) {
-                refreshBtn.setDisable(false);
-                refreshBtn.setVisible(true);
-            }
             if (!addSameDownload)
                 throw new DeniedException("At least one file with this name exists in this location");
         } else {
             if (downloadBtn != null)
                 downloadBtn.setDisable(false);
-            if (refreshBtn != null) {
-                refreshBtn.setDisable(true);
-                refreshBtn.setVisible(false);
-            }
             lastLocationCheck.setDisable(false);
             if (AppConfigs.lastSavedDir == null)
                 lastLocationCheck.setDisable(true);
@@ -312,7 +307,7 @@ public class DownloadUtils {
 
     public static void onOfflineFieldsChanged(TextField locationField, String filename, DownloadModel dm,
                                               ComboBox<QueueModel> queueCombo, Button downloadBtn, Button addBtn,
-                                              Button openLocation, Button refreshBtn, CheckBox lastLocationCheck) throws DeniedException {
+                                              Button openLocation, CheckBox lastLocationCheck) throws DeniedException {
         // when saving outside BitKip folder
         var selectedQueue = queueCombo.getSelectionModel().getSelectedItem();
         if (!locationField.getText().contains("BitKip")
@@ -335,17 +330,12 @@ public class DownloadUtils {
             setLocationAndQueue(locationField, filename, dm);
             openLocation.setDisable(false);
         }
-        checkIfFileIsOKToSave(locationField.getText(), filename, downloadBtn, addBtn, refreshBtn, lastLocationCheck);
+        checkIfFileIsOKToSave(locationField.getText(), filename, downloadBtn, addBtn, lastLocationCheck);
     }
 
-    public static void disableControlsAndShowError(String error, Label errorLbl,
-                                                   Button btn1, Button btn2, Button refreshBtn) {
+    public static void disableControlsAndShowError(String error, Label errorLbl, Button btn1, Button btn2) {
         errorLbl.setVisible(true);
         btn1.setDisable(true);
-        if (refreshBtn != null) {
-            refreshBtn.setDisable(false);
-            refreshBtn.setVisible(true);
-        }
         if (btn2 != null)
             btn2.setDisable(true);
         errorLbl.setText(error);

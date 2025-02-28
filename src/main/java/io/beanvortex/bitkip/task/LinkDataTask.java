@@ -1,6 +1,7 @@
 package io.beanvortex.bitkip.task;
 
 import io.beanvortex.bitkip.controllers.BatchDownload;
+import io.beanvortex.bitkip.models.Credential;
 import io.beanvortex.bitkip.utils.DownloadUtils;
 import io.beanvortex.bitkip.models.LinkModel;
 import javafx.concurrent.Task;
@@ -15,10 +16,12 @@ import static io.beanvortex.bitkip.config.AppConfigs.log;
 public class LinkDataTask extends Task<Flux<LinkModel>> {
 
     private final List<LinkModel> links;
+    private final Credential credential;
     private boolean cancel;
 
-    public LinkDataTask(List<LinkModel> links) {
+    public LinkDataTask(List<LinkModel> links, Credential credential) {
         this.links = links;
+        this.credential = credential;
     }
 
     @Override
@@ -29,7 +32,7 @@ public class LinkDataTask extends Task<Flux<LinkModel>> {
                     break;
                 HttpURLConnection connection;
                 try {
-                    connection = DownloadUtils.connect(lm.getUri());
+                    connection = DownloadUtils.connect(lm.getUri(), credential);
                 } catch (IOException e) {
                     log.error(e.getMessage());
                     break;

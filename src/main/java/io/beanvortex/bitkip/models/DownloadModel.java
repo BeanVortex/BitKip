@@ -1,12 +1,20 @@
 package io.beanvortex.bitkip.models;
 
+import io.beanvortex.bitkip.repo.DatabaseHelper;
+import io.beanvortex.bitkip.repo.QueuesRepo;
+import io.beanvortex.bitkip.repo.ScheduleRepo;
 import io.beanvortex.bitkip.task.DownloadTask;
 import io.beanvortex.bitkip.utils.IOUtils;
 import io.beanvortex.bitkip.utils.MainTableUtils;
 import lombok.*;
 
+import static io.beanvortex.bitkip.repo.DownloadsRepo.*;
+
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Collections;
 import java.util.Objects;
 import java.util.concurrent.CopyOnWriteArrayList;
 
@@ -38,6 +46,7 @@ public class DownloadModel {
     private boolean showCompleteDialog;
     private boolean resumable;
     private TurnOffMode turnOffMode;
+    private Credential credential;
 
     private long speedLimit;
     private long byteLimit;
@@ -130,5 +139,49 @@ public class DownloadModel {
                 ", showCompleteDialog=" + showCompleteDialog +
                 ", resumable=" + resumable +
                 '}';
+    }
+
+    public static DownloadModel createDownload(ResultSet rs, boolean fetchQueue) throws SQLException {
+        var id = rs.getInt(COL_ID);
+        var name = rs.getString(COL_NAME);
+        var progress = rs.getFloat(COL_PROGRESS);
+        var downloaded = rs.getLong(COL_DOWNLOADED);
+        var size = rs.getLong(COL_SIZE);
+        var url = rs.getString(COL_URL);
+        var filePath = rs.getString(COL_PATH);
+        var chunks = rs.getInt(COL_CHUNKS);
+        var showCompleteDialog = rs.getBoolean(COL_SHOW_COMPLETE_DIALOG);
+        var openAfterComplete = rs.getBoolean(COL_OPEN_AFTER_COMPLETE);
+        var resumable = rs.getBoolean(COL_RESUMABLE);
+        var turnOffMode = TurnOffMode.valueOf(rs.getString(COL_TURNOFF_MODE));
+        var addDate = rs.getString(COL_ADD_DATE);
+        var addDateStr = LocalDateTime.parse(addDate);
+        var addToQueueDate = rs.getString(COL_ADD_TO_QUEUE_DATE);
+        var addToQueueDateStr = LocalDateTime.parse(addToQueueDate);
+        var lastTryDate = rs.getString(COL_LAST_TRY_DATE);
+        var lastTryDateStr = lastTryDate == null ? null : LocalDateTime.parse(lastTryDate);
+        var completeDate = rs.getString(COL_COMPLETE_DATE);
+        var completeDateStr = completeDate == null ? null : LocalDateTime.parse(completeDate);
+        var downloadStatus = progress != 100 ? DownloadStatus.Paused : DownloadStatus.Completed;
+        var credential = Credential.decrypt(rs.getString(COL_CREDENTIAL));
+
+        var build = DownloadModel.builder()
+                .id(id).name(name).progress(progress).downloaded(downloaded).size(size).uri(url).filePath(filePath)
+                .chunks(chunks).addDate(addDateStr).addToQueueDate(addToQueueDateStr).turnOffMode(turnOffMode)
+                .lastTryDate(lastTryDateStr).completeDate(completeDateStr).openAfterComplete(openAfterComplete)
+                .showCompleteDialog(showCompleteDialog).downloadStatus(downloadStatus).resumable(resumable)
+                .credential(credential)
+                .build();
+
+        if (fetchQueue) {
+            var queueId = rs.getInt(DatabaseHelper.COL_QUEUE_ID);
+            var queueName = rs.getString(DatabaseHelper.COL_QUEUE_NAME);
+            var scheduleId = rs.getInt(QueuesRepo.COL_SCHEDULE_ID);
+            var schedule = ScheduleRepo.createScheduleModel(rs, scheduleId);
+            var queue = QueueModel.createQueueModel(rs, queueId, queueName, schedule);
+            var queues = new CopyOnWriteArrayList<>(Collections.singletonList(queue));
+            build.setQueues(queues);
+        }
+        return build;
     }
 }

@@ -1,21 +1,17 @@
 package io.beanvortex.bitkip.repo;
 
 import io.beanvortex.bitkip.models.DownloadModel;
-import io.beanvortex.bitkip.models.DownloadStatus;
 import io.beanvortex.bitkip.models.QueueModel;
-import io.beanvortex.bitkip.models.TurnOffMode;
 import io.beanvortex.bitkip.utils.Defaults;
 
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
 
 import static io.beanvortex.bitkip.config.AppConfigs.log;
+import static io.beanvortex.bitkip.models.DownloadModel.createDownload;
 
 public class DownloadsRepo {
 
@@ -35,7 +31,8 @@ public class DownloadsRepo {
             COL_COMPLETE_DATE = "complete_date",
             COL_RESUMABLE = "resumable",
             COL_TURNOFF_MODE = "turnoff_mode",
-            COL_PATH = "path";
+            COL_PATH = "path",
+            COL_CREDENTIAL = "credential";
 
     public static void createTable() {
         var sql = "CREATE TABLE IF NOT EXISTS " + DatabaseHelper.DOWNLOADS_TABLE_NAME + "("
@@ -55,6 +52,7 @@ public class DownloadsRepo {
                 + COL_ADD_TO_QUEUE_DATE + " VARCHAR,"
                 + COL_LAST_TRY_DATE + " VARCHAR,"
                 + COL_COMPLETE_DATE + " VARCHAR"
+                + COL_CREDENTIAL + " VARCHAR"
                 + ");";
         DatabaseHelper.runSQL(sql, false);
         alters();
@@ -64,6 +62,7 @@ public class DownloadsRepo {
 
     private static void alters() {
         var addAlters = """
+                ALTER TABLE %s ADD COLUMN %s VARCHAR DEFAULT "";
                 ALTER TABLE %s ADD COLUMN %s VARCHAR DEFAULT "NOTHING";
                 ALTER TABLE %s ADD COLUMN %s INTEGER DEFAULT 1;
                 ALTER TABLE %s ADD COLUMN %s INTEGER DEFAULT 0;
@@ -71,11 +70,13 @@ public class DownloadsRepo {
                 ALTER TABLE %s ADD COLUMN %s INTEGER DEFAULT 1;
                 """
                 .formatted(
+                        DatabaseHelper.DOWNLOADS_TABLE_NAME, COL_CREDENTIAL,
                         DatabaseHelper.DOWNLOADS_TABLE_NAME, COL_TURNOFF_MODE,
                         DatabaseHelper.DOWNLOADS_TABLE_NAME, COL_SHOW_COMPLETE_DIALOG,
                         DatabaseHelper.DOWNLOADS_TABLE_NAME, COL_OPEN_AFTER_COMPLETE,
                         DatabaseHelper.DOWNLOADS_TABLE_NAME, COL_ADD_TO_QUEUE_DATE, LocalDateTime.now().toString(),
-                        DatabaseHelper.DOWNLOADS_TABLE_NAME, COL_RESUMABLE);
+                        DatabaseHelper.DOWNLOADS_TABLE_NAME, COL_RESUMABLE
+                );
         DatabaseHelper.runSQL(addAlters, true);
     }
 
@@ -90,12 +91,12 @@ public class DownloadsRepo {
         var resumable = dm.isResumable() ? 1 : 0;
 
         var downloadSql = """
-                INSERT INTO %s (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
-                VALUES ("%s", %f, %d, %d, "%s", "%s", %d, "%s", "%s", "%s", %s, %d, %d, %d)
+                INSERT INTO %s (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                VALUES ("%s", %f, %d, %d, "%s", "%s", %d, "%s", "%s", "%s", %s, %d, %d, %d, "%s")
                 """.formatted(
                 DatabaseHelper.DOWNLOADS_TABLE_NAME,
                 COL_NAME, COL_PROGRESS, COL_DOWNLOADED, COL_SIZE, COL_URL, COL_PATH, COL_CHUNKS, COL_ADD_DATE, COL_TURNOFF_MODE,
-                COL_ADD_TO_QUEUE_DATE, COL_LAST_TRY_DATE, COL_SHOW_COMPLETE_DIALOG, COL_OPEN_AFTER_COMPLETE, COL_RESUMABLE,
+                COL_ADD_TO_QUEUE_DATE, COL_LAST_TRY_DATE, COL_SHOW_COMPLETE_DIALOG, COL_OPEN_AFTER_COMPLETE, COL_RESUMABLE, COL_CREDENTIAL,
                 dm.getName(),
                 dm.getProgress(),
                 dm.getDownloaded(),
@@ -109,7 +110,8 @@ public class DownloadsRepo {
                 lastTryDate,
                 showDialog,
                 openFile,
-                resumable);
+                resumable,
+                dm.getCredential().encrypt());
 
         try (var con = DatabaseHelper.openConnection();
              var stmt = con.createStatement()) {
@@ -269,48 +271,6 @@ public class DownloadsRepo {
         DatabaseHelper.runSQL(sql, false);
     }
 
-    private static DownloadModel createDownload(ResultSet rs, boolean fetchQueue) throws SQLException {
-        var id = rs.getInt(COL_ID);
-        var name = rs.getString(COL_NAME);
-        var progress = rs.getFloat(COL_PROGRESS);
-        var downloaded = rs.getLong(COL_DOWNLOADED);
-        var size = rs.getLong(COL_SIZE);
-        var url = rs.getString(COL_URL);
-        var filePath = rs.getString(COL_PATH);
-        var chunks = rs.getInt(COL_CHUNKS);
-        var showCompleteDialog = rs.getBoolean(COL_SHOW_COMPLETE_DIALOG);
-        var openAfterComplete = rs.getBoolean(COL_OPEN_AFTER_COMPLETE);
-        var resumable = rs.getBoolean(COL_RESUMABLE);
-        var turnOffMode = TurnOffMode.valueOf(rs.getString(COL_TURNOFF_MODE));
-        var addDate = rs.getString(COL_ADD_DATE);
-        var addDateStr = LocalDateTime.parse(addDate);
-        var addToQueueDate = rs.getString(COL_ADD_TO_QUEUE_DATE);
-        var addToQueueDateStr = LocalDateTime.parse(addToQueueDate);
-        var lastTryDate = rs.getString(COL_LAST_TRY_DATE);
-        var lastTryDateStr = lastTryDate == null ? null : LocalDateTime.parse(lastTryDate);
-        var completeDate = rs.getString(COL_COMPLETE_DATE);
-        var completeDateStr = completeDate == null ? null : LocalDateTime.parse(completeDate);
-        var downloadStatus = progress != 100 ? DownloadStatus.Paused : DownloadStatus.Completed;
-
-        var build = DownloadModel.builder()
-                .id(id).name(name).progress(progress).downloaded(downloaded).size(size).uri(url).filePath(filePath)
-                .chunks(chunks).addDate(addDateStr).addToQueueDate(addToQueueDateStr).turnOffMode(turnOffMode)
-                .lastTryDate(lastTryDateStr).completeDate(completeDateStr).openAfterComplete(openAfterComplete)
-                .showCompleteDialog(showCompleteDialog).downloadStatus(downloadStatus).resumable(resumable)
-                .build();
-
-        if (fetchQueue) {
-            var queueId = rs.getInt(DatabaseHelper.COL_QUEUE_ID);
-            var queueName = rs.getString(DatabaseHelper.COL_QUEUE_NAME);
-            var scheduleId = rs.getInt(QueuesRepo.COL_SCHEDULE_ID);
-            var schedule = ScheduleRepo.createScheduleModel(rs, scheduleId);
-            var queue = QueuesRepo.createQueueModel(rs, queueId, queueName, schedule);
-            var queues = new CopyOnWriteArrayList<>(Collections.singletonList(queue));
-            build.setQueues(queues);
-        }
-        return build;
-    }
-
 
     public static void updateDownloadProgress(DownloadModel dm) {
         var sql = """
@@ -454,4 +414,13 @@ public class DownloadsRepo {
         return list;
     }
 
+    public static void updateDownloadCredential(DownloadModel dm) {
+        var sql = """
+                UPDATE %s SET %s = "%s" WHERE %s = %d;
+                """
+                .formatted(DatabaseHelper.DOWNLOADS_TABLE_NAME,
+                        COL_CREDENTIAL, dm.getCredential().encrypt(),
+                        COL_ID, dm.getId());
+        DatabaseHelper.runSQL(sql, false);
+    }
 }

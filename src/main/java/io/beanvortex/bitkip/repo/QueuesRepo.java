@@ -132,7 +132,7 @@ public class QueuesRepo {
             if (rs.next())
                 return createQueueModel(rs, fetchDownloads, true);
         } catch (SQLException e) {
-            log.error(e.getLocalizedMessage());
+            log.error(e.getMessage());
         }
         throw new IllegalArgumentException("Queue does not exist");
     }
@@ -216,17 +216,5 @@ public class QueuesRepo {
             schedule = ScheduleRepo.getSchedule(id);
         return new QueueModel(id, name, editable, canAddDownload, hasFolder, downloadFromTop,
                 speedLimit, simulDownloads, schedule, downloads);
-    }
-
-    static QueueModel createQueueModel(ResultSet rs, int queueId, String queueName,
-                                       ScheduleModel schedule) throws SQLException {
-        var editable = rs.getBoolean(COL_EDITABLE);
-        var canAddDownload = rs.getBoolean(COL_CAN_ADD_DOWN);
-        var hasFolder = rs.getBoolean(COL_HAS_FOLDER);
-        var speedLimit = rs.getString(COL_SPEED_LIMIT);
-        var simulDownloads = rs.getInt(COL_SIMUL_DOWNLOAD);
-        var downloadFromTop = rs.getBoolean(COL_DOWN_TOP);
-        return new QueueModel(queueId, queueName, editable, canAddDownload, hasFolder, downloadFromTop,
-                speedLimit, simulDownloads, schedule, null);
     }
 }
