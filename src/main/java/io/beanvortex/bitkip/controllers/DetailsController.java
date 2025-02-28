@@ -2,7 +2,7 @@ package io.beanvortex.bitkip.controllers;
 
 import io.beanvortex.bitkip.config.AppConfigs;
 import io.beanvortex.bitkip.controllers.interfaces.FXMLController;
-import io.beanvortex.bitkip.models.Credential;
+import io.beanvortex.bitkip.models.Credentials;
 import io.beanvortex.bitkip.models.DownloadModel;
 import io.beanvortex.bitkip.models.DownloadStatus;
 import io.beanvortex.bitkip.models.TurnOffMode;
@@ -133,7 +133,7 @@ public class DetailsController implements FXMLController {
             resumableLbl.getStyleClass().remove("yes");
             resumableLbl.setText("Not Resumable");
         }
-        if (dm.getCredential() != null) {
+        if (dm.getCredentials() != null) {
             authorizedCheck.setSelected(true);
             usernameField.getParent().setVisible(true);
             passwordField.getParent().setVisible(true);
@@ -286,9 +286,9 @@ public class DetailsController implements FXMLController {
         if (isPaused.get()) {
             statusLbl.setText("Status: " + DownloadStatus.Trying);
             controlBtn.setDisable(true);
-            if (dm.getCredential() == null || (!usernameField.getText().equals(dm.getCredential().username())
-                    && !passwordField.getText().equals(dm.getCredential().password()))){
-                dm.setCredential(new Credential(usernameField.getText(), passwordField.getText()));
+            if (dm.getCredentials() == null || (!usernameField.getText().equals(dm.getCredentials().username())
+                    && !passwordField.getText().equals(dm.getCredentials().password()))){
+                dm.setCredentials(new Credentials(usernameField.getText(), passwordField.getText()));
                 DownloadsRepo.updateDownloadCredential(dm);
             }
             DownloadOpUtils.resumeDownloads(List.of(dm),

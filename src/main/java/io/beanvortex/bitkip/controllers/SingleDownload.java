@@ -127,7 +127,7 @@ public class SingleDownload implements QueueObserver {
             // firing select event
             queueCombo.getSelectionModel().select(queueCombo.getSelectionModel().getSelectedIndex());
             var url = urlField.getText();
-            var credential = new Credential(usernameField.getText(), passwordField.getText());
+            var credential = new Credentials(usernameField.getText(), passwordField.getText());
             var connection = DownloadUtils.connect(url, credential);
             var executor = Executors.newVirtualThreadPerTaskExecutor();
             var fileNameLocationFuture =
@@ -275,7 +275,7 @@ public class SingleDownload implements QueueObserver {
         if (selectedQueue.getId() != allDownloadsQueue.getId())
             dm.getQueues().add(selectedQueue);
         dm.setDownloadStatus(DownloadStatus.Paused);
-        dm.setCredential(new Credential(usernameField.getText(), passwordField.getText()));
+        dm.setCredentials(new Credentials(usernameField.getText(), passwordField.getText()));
         return true;
     }
 

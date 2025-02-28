@@ -46,7 +46,7 @@ public class DownloadModel {
     private boolean showCompleteDialog;
     private boolean resumable;
     private TurnOffMode turnOffMode;
-    private Credential credential;
+    private Credentials credentials;
 
     private long speedLimit;
     private long byteLimit;
@@ -163,14 +163,14 @@ public class DownloadModel {
         var completeDate = rs.getString(COL_COMPLETE_DATE);
         var completeDateStr = completeDate == null ? null : LocalDateTime.parse(completeDate);
         var downloadStatus = progress != 100 ? DownloadStatus.Paused : DownloadStatus.Completed;
-        var credential = Credential.decrypt(rs.getString(COL_CREDENTIAL));
+        var credential = Credentials.decrypt(rs.getString(COL_CREDENTIAL));
 
         var build = DownloadModel.builder()
                 .id(id).name(name).progress(progress).downloaded(downloaded).size(size).uri(url).filePath(filePath)
                 .chunks(chunks).addDate(addDateStr).addToQueueDate(addToQueueDateStr).turnOffMode(turnOffMode)
                 .lastTryDate(lastTryDateStr).completeDate(completeDateStr).openAfterComplete(openAfterComplete)
                 .showCompleteDialog(showCompleteDialog).downloadStatus(downloadStatus).resumable(resumable)
-                .credential(credential)
+                .credentials(credential)
                 .build();
 
         if (fetchQueue) {

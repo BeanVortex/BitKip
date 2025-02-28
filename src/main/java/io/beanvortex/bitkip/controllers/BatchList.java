@@ -57,7 +57,7 @@ public class BatchList implements QueueObserver {
     private LinkTableUtils linkTableUtils;
     private List<LinkModel> links;
     private static final QueueModel customQueue = new QueueModel("CUSTOM", false);
-    private Credential credential;
+    private Credentials credentials;
 
     @FXML
     private void onAuthorizedCheck() {
@@ -66,9 +66,9 @@ public class BatchList implements QueueObserver {
         passwordField.setText(null);
     }
 
-    public void setCredential(Credential credential) {
-        this.credential = credential;
-        if (credential != null){
+    public void setCredential(Credentials credentials) {
+        this.credentials = credentials;
+        if (credentials != null){
             authorizedCheck.setSelected(true);
             authorizedCheck.setDisable(true);
             usernameField.setText("***");
@@ -143,9 +143,9 @@ public class BatchList implements QueueObserver {
     private void fetchLinksData(List<LinkModel> links) {
         fetchingStopped = false;
         var executor = Executors.newCachedThreadPool();
-        if (credential == null) 
-            credential = new Credential(usernameField.getText(), passwordField.getText());
-        var linkTask = new LinkDataTask(links, credential);
+        if (credentials == null)
+            credentials = new Credentials(usernameField.getText(), passwordField.getText());
+        var linkTask = new LinkDataTask(links, credentials);
         linkTask.valueProperty().addListener((o, ol, linkFlux) ->
                 executor.submit(() -> {
                     Platform.runLater(() -> {

@@ -4,7 +4,7 @@ import io.beanvortex.bitkip.utils.CredentialEncryptor;
 
 import java.util.Base64;
 
-public record Credential(String username, String password) {
+public record Credentials(String username, String password) {
 
     public boolean isOk() {
         return username != null && password != null && !username.isBlank() && !password.isBlank();
@@ -18,10 +18,10 @@ public record Credential(String username, String password) {
         return CredentialEncryptor.encrypt(username + ":" + password);
     }
 
-    public static Credential decrypt(String encryptedStr) {
+    public static Credentials decrypt(String encryptedStr) {
         try {
             var decrypt = CredentialEncryptor.decrypt(encryptedStr).split(":");
-            return new Credential(decrypt[0], decrypt[1]);
+            return new Credentials(decrypt[0], decrypt[1]);
         } catch (Exception e) {
             return null;
         }

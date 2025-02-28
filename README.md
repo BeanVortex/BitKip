@@ -5,6 +5,8 @@
 
 - [x] Download any file based on http/https protocol
 - [x] Extremely fast download in chunk mode
+- [x] Authenticated downloads (providing username and password)
+- [x] User's credentials are encrypted (not usable after terminating the application session)
 - [x] Change download speed while download is in progress
 - [x] Ability to turn off/sleep pc after a single download is done
 - [x] Ability to limit download speed

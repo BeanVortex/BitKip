@@ -3,12 +3,14 @@ package io.beanvortex.bitkip.repo;
 import io.beanvortex.bitkip.models.DownloadModel;
 import io.beanvortex.bitkip.models.QueueModel;
 import io.beanvortex.bitkip.utils.Defaults;
+import javafx.collections.ObservableList;
 
 import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static io.beanvortex.bitkip.config.AppConfigs.log;
 import static io.beanvortex.bitkip.models.DownloadModel.createDownload;
@@ -111,7 +113,7 @@ public class DownloadsRepo {
                 showDialog,
                 openFile,
                 resumable,
-                dm.getCredential().encrypt());
+                dm.getCredentials().encrypt());
 
         try (var con = DatabaseHelper.openConnection();
              var stmt = con.createStatement()) {
@@ -419,8 +421,25 @@ public class DownloadsRepo {
                 UPDATE %s SET %s = "%s" WHERE %s = %d;
                 """
                 .formatted(DatabaseHelper.DOWNLOADS_TABLE_NAME,
-                        COL_CREDENTIAL, dm.getCredential().encrypt(),
+                        COL_CREDENTIAL, dm.getCredentials().encrypt(),
                         COL_ID, dm.getId());
+        DatabaseHelper.runSQL(sql, false);
+    }
+
+    public static void updateDownloadsCredential(ObservableList<DownloadModel> dms) {
+        String idsList = dms.stream()
+                .map(DownloadModel::getId)
+                .map(String::valueOf)
+                .collect(Collectors.joining(","));
+
+        String sql = """
+                UPDATE %s SET %s = "%s" WHERE %s IN (%s);
+                """
+                .formatted(
+                        DatabaseHelper.DOWNLOADS_TABLE_NAME,
+                        COL_CREDENTIAL, dms.get(0).getCredentials().encrypt(),
+                        COL_ID, idsList
+                );
         DatabaseHelper.runSQL(sql, false);
     }
 }

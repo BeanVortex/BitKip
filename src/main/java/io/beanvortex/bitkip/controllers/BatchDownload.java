@@ -1,7 +1,7 @@
 package io.beanvortex.bitkip.controllers;
 
 import io.beanvortex.bitkip.config.AppConfigs;
-import io.beanvortex.bitkip.models.Credential;
+import io.beanvortex.bitkip.models.Credentials;
 import io.beanvortex.bitkip.utils.FxUtils;
 import io.beanvortex.bitkip.config.observers.QueueObserver;
 import io.beanvortex.bitkip.config.observers.QueueSubject;
@@ -129,7 +129,7 @@ public class BatchDownload implements QueueObserver {
             var links = generateLinks(url, start, end, Integer.parseInt(chunksField.getText()), true);
             var link = links.get(0);
             tempLink = link;
-            var credential = new Credential(usernameField.getText(), passwordField.getText());
+            var credential = new Credentials(usernameField.getText(), passwordField.getText());
             var connection = DownloadUtils.connect(link.getUri(), credential);
             var fileNameLocationFuture = CompletableFuture.supplyAsync(() -> DownloadUtils.extractFileName(link.getUri(), connection))
                     .thenAccept(this::setLocation);
@@ -294,7 +294,7 @@ public class BatchDownload implements QueueObserver {
                 lm.setPath(finalPath);
                 lm.setSelectedPath(finalPath);
             });
-            var credential = new Credential(usernameField.getText(), passwordField.getText());
+            var credential = new Credentials(usernameField.getText(), passwordField.getText());
             FxUtils.newBatchListStage(links, credential);
             getQueueSubject().removeObserver(this);
             stage.close();

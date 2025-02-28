@@ -2,7 +2,7 @@ package io.beanvortex.bitkip.utils;
 
 import io.beanvortex.bitkip.config.AppConfigs;
 import io.beanvortex.bitkip.exceptions.DeniedException;
-import io.beanvortex.bitkip.models.Credential;
+import io.beanvortex.bitkip.models.Credentials;
 import io.beanvortex.bitkip.models.DownloadModel;
 import io.beanvortex.bitkip.models.QueueModel;
 import io.beanvortex.bitkip.repo.DownloadsRepo;
@@ -32,14 +32,14 @@ import static io.beanvortex.bitkip.utils.Validations.maxChunks;
 public class DownloadUtils {
 
 
-    public static HttpURLConnection connect(String uri, Credential credential) throws IOException {
+    public static HttpURLConnection connect(String uri, Credentials credentials) throws IOException {
         if (uri.isBlank())
             throw new IllegalArgumentException("URL is blank");
         uri = Validations.fixURIChars(uri);
         var url = URI.create(uri).toURL();
         var conn = (HttpURLConnection) url.openConnection();
-        if (credential != null && credential.isOk())
-            conn.setRequestProperty("Authorization", "Basic " + credential.base64Encoded());
+        if (credentials != null && credentials.isOk())
+            conn.setRequestProperty("Authorization", "Basic " + credentials.base64Encoded());
         conn.setConnectTimeout(connectionTimeout);
         conn.setReadTimeout(readTimeout);
         if (userAgentEnabled)
@@ -48,7 +48,7 @@ public class DownloadUtils {
     }
 
 
-    public static HttpURLConnection connectWithInternetCheck(String uri, Credential credential, boolean showErrors) throws IOException {
+    public static HttpURLConnection connectWithInternetCheck(String uri, Credentials credentials, boolean showErrors) throws IOException {
         try {
             if (uri.isBlank())
                 throw new IllegalArgumentException("URL is blank");
@@ -57,7 +57,7 @@ public class DownloadUtils {
             var testCon = (HttpURLConnection) url.openConnection();
             testCon.setConnectTimeout(2000);
             testCon.connect();
-            return connect(uri, credential);
+            return connect(uri, credentials);
         } catch (IOException e) {
             var msg = "Connection or read timeout. Connect to the internet or check the url: " + e.getMessage();
             if (showErrors)
@@ -123,7 +123,7 @@ public class DownloadUtils {
         return CompletableFuture.supplyAsync(() -> {
             if (finalConnection[0] == null) {
                 try {
-                    finalConnection[0] = connect(urlField.getText(), dm.getCredential());
+                    finalConnection[0] = connect(urlField.getText(), dm.getCredentials());
                 } catch (IOException e) {
                     log.error(e.getMessage());
                 }
@@ -183,7 +183,7 @@ public class DownloadUtils {
         return CompletableFuture.supplyAsync(() -> {
             if (finalConnection[0] == null) {
                 try {
-                    finalConnection[0] = connect(link, dm.getCredential());
+                    finalConnection[0] = connect(link, dm.getCredentials());
                 } catch (IOException e) {
                     log.error(e.getMessage());
                 }
