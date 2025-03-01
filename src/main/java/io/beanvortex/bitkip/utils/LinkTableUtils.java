@@ -18,6 +18,7 @@ import javafx.util.Callback;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
 
 import static io.beanvortex.bitkip.config.AppConfigs.queuesPath;
 import static io.beanvortex.bitkip.config.observers.QueueSubject.getQueues;
@@ -32,12 +33,16 @@ public class LinkTableUtils {
 
     private final Stage stage;
     private final ComboBox<QueueModel> comboQueue;
+    private final Consumer<List<LinkModel>> linksConsumer;
     private TableColumn<LinkModel, QueueModel> queuesCol;
 
-    public LinkTableUtils(TableView<LinkModel> table, List<LinkModel> links, ComboBox<QueueModel> comboQueue, Stage stage) {
+
+    public LinkTableUtils(TableView<LinkModel> table, List<LinkModel> links, Consumer<List<LinkModel>> linksConsumer,
+                          ComboBox<QueueModel> comboQueue, Stage stage) {
         this.table = table;
         this.stage = stage;
         this.comboQueue = comboQueue;
+        this.linksConsumer = linksConsumer;
         data.addAll(links);
     }
 
@@ -114,7 +119,7 @@ public class LinkTableUtils {
                     var keyCodes = List.of(new KeyCodeCombination(KeyCode.F5), DEL);
                     var menuItems = MenuUtils.createMapMenuItems(lbls, keyCodes);
                     cMenu.getItems().addAll(menuItems.values());
-                    menuItems.get(refreshLbl).setOnAction(e -> links.forEach(this::updateLink));
+                    menuItems.get(refreshLbl).setOnAction(e -> linksConsumer.accept(links));
                     menuItems.get(deleteLbl).setOnAction(e -> links.forEach(ln -> table.getItems().remove(ln)));
                     row.setContextMenu(cMenu);
                     cMenu.show(row, event.getX(), event.getY());

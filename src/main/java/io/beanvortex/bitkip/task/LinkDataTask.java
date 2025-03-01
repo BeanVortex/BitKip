@@ -45,7 +45,8 @@ public class LinkDataTask extends Task<Flux<LinkModel>> {
                 lm.setName(DownloadUtils.getNewFileNameIfExists(fileName, lm.getPath()));
                 lm.setSize(fileSize);
                 lm.setPath(path);
-                lm.getQueues().add(secondaryQueue);
+                if (!lm.getQueues().contains(secondaryQueue))
+                    lm.getQueues().add(secondaryQueue);
                 lm.setResumable(DownloadUtils.canResume(connection));
                 fluxSink.next(lm);
             }

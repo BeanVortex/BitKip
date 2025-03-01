@@ -423,8 +423,8 @@ public class DetailsController implements FXMLController {
     private void onAuthorizedCheck() {
         usernameField.getParent().setVisible(authorizedCheck.isSelected());
         passwordField.getParent().setVisible(authorizedCheck.isSelected());
-        usernameField.setText(null);
-        passwordField.setText(null);
+        usernameField.setText("");
+        passwordField.setText("");
     }
 
     private void onBytesChanged() {

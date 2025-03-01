@@ -5,7 +5,7 @@
 <?import javafx.scene.layout.*?>
 <?import java.net.URL?>
 
-<VBox minHeight="400" prefHeight="400" minWidth="800" prefWidth="800"
+<VBox minHeight="450" prefHeight="450" minWidth="800" prefWidth="800"
       xmlns="http://javafx.com/javafx/16"
       spacing="10"
       xmlns:fx="http://javafx.com/fxml/1" fx:controller="io.beanvortex.bitkip.controllers.BatchList">
@@ -39,7 +39,7 @@
     </VBox>
 
 
-    <VBox spacing="10">
+    <VBox styleClass="padding_5"  spacing="10">
         <CheckBox text="Authorized" fx:id="authorizedCheck" onAction="#onAuthorizedCheck"/>
 
         <VBox spacing="10">

@@ -113,7 +113,7 @@ public class DownloadsRepo {
                 showDialog,
                 openFile,
                 resumable,
-                dm.getCredentials().encrypt());
+                dm.getCredentials() == null ? "": dm.getCredentials().encrypt());
 
         try (var con = DatabaseHelper.openConnection();
              var stmt = con.createStatement()) {

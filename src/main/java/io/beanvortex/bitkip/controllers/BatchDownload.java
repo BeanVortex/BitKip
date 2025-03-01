@@ -294,8 +294,10 @@ public class BatchDownload implements QueueObserver {
                 lm.setPath(finalPath);
                 lm.setSelectedPath(finalPath);
             });
-            var credential = new Credentials(usernameField.getText(), passwordField.getText());
-            FxUtils.newBatchListStage(links, credential);
+            Credentials credentials = null;
+            if (!usernameField.getText().isBlank() && !passwordField.getText().isBlank())
+                credentials = new Credentials(usernameField.getText(), passwordField.getText());
+            FxUtils.newBatchListStage(links, credentials);
             getQueueSubject().removeObserver(this);
             stage.close();
         } catch (IllegalArgumentException e) {
@@ -367,8 +369,8 @@ public class BatchDownload implements QueueObserver {
         usernameField.getParent().setVisible(authorizedCheck.isSelected());
         passwordField.getParent().setManaged(authorizedCheck.isSelected());
         passwordField.getParent().setVisible(authorizedCheck.isSelected());
-        usernameField.setText(null);
-        passwordField.setText(null);
+        usernameField.setText("");
+        passwordField.setText("");
     }
 }
 

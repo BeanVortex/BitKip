@@ -30,7 +30,7 @@ public class SingleDownload implements QueueObserver {
     private Label sizeLabel, resumableLabel, errorLabel;
     @FXML
     private Button questionBtnSpeed, openLocation, questionBtnChunks,
-    questionBtnBytes, downloadBtn, refreshBtn, addBtn, newQueue;
+            questionBtnBytes, downloadBtn, refreshBtn, addBtn, newQueue;
     @FXML
     private TextField usernameField, urlField, chunksField, nameField, locationField, speedField, bytesField;
     @FXML
@@ -275,7 +275,8 @@ public class SingleDownload implements QueueObserver {
         if (selectedQueue.getId() != allDownloadsQueue.getId())
             dm.getQueues().add(selectedQueue);
         dm.setDownloadStatus(DownloadStatus.Paused);
-        dm.setCredentials(new Credentials(usernameField.getText(), passwordField.getText()));
+        if (!usernameField.getText().isBlank() && !passwordField.getText().isBlank())
+            dm.setCredentials(new Credentials(usernameField.getText(), passwordField.getText()));
         return true;
     }
 
@@ -296,8 +297,8 @@ public class SingleDownload implements QueueObserver {
         usernameField.getParent().setVisible(authorizedCheck.isSelected());
         passwordField.getParent().setManaged(authorizedCheck.isSelected());
         passwordField.getParent().setVisible(authorizedCheck.isSelected());
-        usernameField.setText(null);
-        passwordField.setText(null);
+        usernameField.setText("");
+        passwordField.setText("");
     }
 
     private void onOfflineFieldsChanged() {
