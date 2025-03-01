@@ -3,8 +3,8 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 <?import java.net.URL?>
-<VBox minHeight="600" prefHeight="600" minWidth="600" prefWidth="600.0"
-      maxHeight="650"
+<VBox minHeight="650" prefHeight="650" minWidth="600" prefWidth="600.0"
+      maxHeight="700"
       xmlns="http://javafx.com/javafx/16"
       xmlns:fx="http://javafx.com/fxml/1" fx:controller="io.beanvortex.bitkip.controllers.NewDownloadController">
     <stylesheets>

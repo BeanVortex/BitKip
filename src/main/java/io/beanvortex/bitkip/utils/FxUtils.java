@@ -7,6 +7,7 @@ import io.beanvortex.bitkip.controllers.interfaces.FXMLController;
 import io.beanvortex.bitkip.models.*;
 import io.beanvortex.bitkip.task.FileMoveTask;
 import javafx.application.Platform;
+import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Pos;
@@ -40,6 +41,33 @@ public class FxUtils {
     private static final String LOGS_STAGE = "Log";
     private static final String SETTINGS_STAGE = "Settings";
     private static final Map<String, StageAndController> openStages = new LinkedHashMap<>();
+
+    public static void newChangeCredentialsStage(ObservableList<DownloadModel> dms) {
+        FXMLLoader loader;
+        Stage stage = new Stage();
+        VBox root;
+        try {
+            loader = new FXMLLoader(getResource("fxml/changeCredentials.fxml"));
+            root = loader.load();
+        } catch (IOException e) {
+            log.error(e.getMessage());
+            throw new RuntimeException(e);
+        }
+        var scene = new Scene(root);
+        stage.setScene(scene);
+        stage.setMinWidth(root.getPrefWidth());
+        stage.setMinHeight(root.getPrefHeight());
+        stage.setTitle("Changing credentials for " + dms.size() + " downloads");
+        var logoPath = getResource("icons/logo.png");
+        if (logoPath != null)
+            stage.getIcons().add(new Image(logoPath.toExternalForm()));
+        ChangeCredentialsController controller = loader.getController();
+        controller.setStage(stage);
+        getThemeSubject().addObserver(controller, scene);
+        stage.setOnCloseRequest(e -> getThemeSubject().removeObserver(controller));
+        controller.setDownloads(dms);
+        stage.showAndWait();
+    }
 
     record StageAndController(Stage stage, FXMLController controller) {
 
@@ -261,7 +289,7 @@ public class FxUtils {
         stage.setAlwaysOnTop(false);
     }
 
-    public static void newBatchListStage(List<LinkModel> links) {
+    public static void newBatchListStage(List<LinkModel> links, Credentials credentials) {
         FXMLLoader loader;
         Stage stage = new Stage();
         VBox root;
@@ -282,6 +310,7 @@ public class FxUtils {
         getQueueSubject().addObserver(controller);
         controller.setStage(stage);
         controller.setData(links);
+        controller.setCredential(credentials);
         stage.setOnCloseRequest(e -> {
             getThemeSubject().removeObserver(controller);
             getQueueSubject().removeObserver(controller);

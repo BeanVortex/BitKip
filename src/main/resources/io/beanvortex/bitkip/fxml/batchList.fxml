@@ -5,7 +5,7 @@
 <?import javafx.scene.layout.*?>
 <?import java.net.URL?>
 
-<VBox minHeight="400" prefHeight="400" minWidth="800" prefWidth="800"
+<VBox minHeight="450" prefHeight="450" minWidth="800" prefWidth="800"
       xmlns="http://javafx.com/javafx/16"
       spacing="10"
       xmlns:fx="http://javafx.com/fxml/1" fx:controller="io.beanvortex.bitkip.controllers.BatchList">
@@ -37,6 +37,30 @@
             <CheckBox text="Use the last selected location" fx:id="lastLocationCheck" onAction="#onLastLocationCheck"/>
         </VBox>
     </VBox>
+
+
+    <VBox styleClass="padding_5"  spacing="10">
+        <CheckBox text="Authorized" fx:id="authorizedCheck" onAction="#onAuthorizedCheck"/>
+
+        <VBox spacing="10">
+            <HBox spacing="15" alignment="CENTER_LEFT">
+                <Label text="Username :" styleClass="bold"/>
+                <TextField fx:id="usernameField" prefWidth="200"/>
+            </HBox>
+            <HBox spacing="15" alignment="CENTER_LEFT">
+                <Label text="Password :" styleClass="bold"/>
+                <PasswordField fx:id="passwordField" prefWidth="200"/>
+            </HBox>
+        </VBox>
+
+    </VBox>
+
+    <HBox alignment="BASELINE_LEFT">
+        <HBox alignment="CENTER" spacing="10">
+            <Button fx:id="refreshBtn" minWidth="50"/>
+            <Button fx:id="stopBtn" minWidth="50"/>
+        </HBox>
+    </HBox>
 
     <HBox alignment="BOTTOM_CENTER" style="-fx-padding: 15 0 15 0">
         <HBox spacing="20" alignment="CENTER">

@@ -18,7 +18,7 @@ public class DatabaseHelper {
     public static final String QUEUES_TABLE_NAME = "queues";
     static final String SCHEDULE_TABLE_NAME = "schedules";
 
-    static String COL_DOWNLOAD_ID = "download_id",
+    public static String COL_DOWNLOAD_ID = "download_id",
             COL_QUEUE_ID = "queue_id", COL_QUEUE_NAME = "queue_name";
 
     private static final HikariDataSource dataSource;

@@ -24,7 +24,11 @@
 
 #refreshBtn .ikonli-font-icon {
     -fx-icon-code: "fas-undo";
-    -fx-icon-color: #009688;
+    -fx-icon-size: 20;
+}
+
+#stopBtn .ikonli-font-icon {
+    -fx-icon-code: "far-stop-circle";
     -fx-icon-size: 20;
 }
 
@@ -54,6 +58,7 @@
 
 #questionBtnSpeed,
 #refreshBtn,
+#stopBtn,
 #questionBtnChunks,
 #questionBtnUri,
 #questionBtnBytes {

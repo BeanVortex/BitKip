@@ -72,8 +72,8 @@ public class SpecialDownloadTask extends DownloadTask {
         FileOutputStream fos = null;
         var notResumableOnly = fileSize > 0;
         try {
-            var con = DownloadUtils.connect(url);
-            var con2 = DownloadUtils.connect(url);
+            var con = DownloadUtils.connect(url, downloadModel.getCredentials());
+            var con2 = DownloadUtils.connect(url, downloadModel.getCredentials());
             lastModified = con2.getLastModified();
             con2.disconnect();
             con.setRequestProperty("User-Agent", userAgent);
@@ -174,7 +174,7 @@ public class SpecialDownloadTask extends DownloadTask {
                     if (download.isOpenAfterComplete())
                         DownloadOpUtils.openFile(downloadModel);
                     if (lastModified == 0) {
-                        var con2 = DownloadUtils.connect(url);
+                        var con2 = DownloadUtils.connect(url, downloadModel.getCredentials());
                         lastModified = con2.getLastModified();
                         con2.disconnect();
                         if (lastModified == 0)

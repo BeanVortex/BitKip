@@ -33,7 +33,7 @@ public class MenuUtils {
         var queueSettings = new Label("Queue settings");
         var importLinks = new Label("Import links");
         var exportLinks = new Label("Export links");
-        var exit = new Label("exit");
+        var exit = new Label("Exit");
         var lbls = List.of(addLink, batchDownload, settings, queueSettings, importLinks, exportLinks, exit);
         var keyCodes = Arrays.asList(NEW_DOWNLOAD_KEY, NEW_BATCH_KEY, SETTINGS_KEY, null, null, null, QUIT_KEY);
         var menuItems = createMapMenuItems(lbls, keyCodes);

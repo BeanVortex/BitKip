@@ -420,7 +420,7 @@ public class IOUtils {
             var chunks = Validations.maxChunks(Long.MAX_VALUE);
             var allDownloadsQueue = QueuesRepo.findByName(ALL_DOWNLOADS_QUEUE, false);
             var firstUrl = lines.get(0);
-            var connection = DownloadUtils.connect(firstUrl);
+            var connection = DownloadUtils.connect(firstUrl, null);
             var firstFileName = DownloadUtils.extractFileName(firstUrl, connection);
             var secondaryQueue = BatchDownload.getSecondaryQueueByFileName(firstFileName);
             var path = DownloadUtils.determineLocation(firstFileName);

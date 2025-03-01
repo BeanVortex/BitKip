@@ -2,10 +2,7 @@ package io.beanvortex.bitkip.utils;
 
 import io.beanvortex.bitkip.controllers.DetailsController;
 import io.beanvortex.bitkip.exceptions.DeniedException;
-import io.beanvortex.bitkip.models.DownloadModel;
-import io.beanvortex.bitkip.models.DownloadStatus;
-import io.beanvortex.bitkip.models.SingleURLModel;
-import io.beanvortex.bitkip.models.TurnOffMode;
+import io.beanvortex.bitkip.models.*;
 import io.beanvortex.bitkip.repo.DatabaseHelper;
 import io.beanvortex.bitkip.repo.DownloadsRepo;
 import io.beanvortex.bitkip.repo.QueuesRepo;
@@ -311,7 +308,7 @@ public class DownloadOpUtils {
                     .showWarning();
             return;
         }
-        FxUtils.newBatchListStage(links);
+        FxUtils.newBatchListStage(links, null);
     }
 
     public static void exportLinks(String queue) {
@@ -358,7 +355,7 @@ public class DownloadOpUtils {
         var fileSize = urlModel.fileSize();
         dm.setUri(url);
         try {
-            var conn = DownloadUtils.connect(url);
+            var conn = DownloadUtils.connect(url, null);
             var canResume = DownloadUtils.canResume(conn);
             dm.setResumable(canResume);
             dm.setChunks(canResume ? maxChunks(fileSize) : 0);

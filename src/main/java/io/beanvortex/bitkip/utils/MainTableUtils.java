@@ -109,16 +109,17 @@ public class MainTableUtils {
         var copyLbl = new Label("Copy URL");
         var restartLbl = new Label("Restart");
         var detailsLbl = new Label("Details");
+        var credentialsLbl = new Label("Change credentials");
         var locationLbl = new Label("Change location");
         var exportLinkLbl = new Label("Export selected");
         var deleteFromQueueLbl = new Label("Delete from this queue");
         var deleteLbl = new Label("Delete");
         var deleteWithFileLbl = new Label("Delete with file");
         var lbls = List.of(openLbl, openFolderLbl, resumeLbl, pauseLbl, pauseAllLbl,
-                refreshLbl, copyLbl, restartLbl, detailsLbl, locationLbl, exportLinkLbl, deleteFromQueueLbl,
+                refreshLbl, copyLbl, restartLbl, detailsLbl, credentialsLbl, locationLbl, exportLinkLbl, deleteFromQueueLbl,
                 deleteLbl, deleteWithFileLbl);
         var keyCodes = Arrays.asList(OPEN_KEY, OPEN_FOLDER_KEY, RESUME_KEY,
-                PAUSE_KEY, PAUSE_ALL_KEY, REFRESH_KEY, COPY_KEY, RESTART_KEY, DETAILS_KEY,
+                PAUSE_KEY, PAUSE_ALL_KEY, REFRESH_KEY, COPY_KEY, RESTART_KEY, DETAILS_KEY, null,
                 LOCATION_KEY, null, null, DELETE_KEY, DELETE_FILE_KEY);
         var menuItems = MenuUtils.createMapMenuItems(lbls, keyCodes);
 
@@ -146,6 +147,7 @@ public class MainTableUtils {
         menuItems.get(copyLbl).setOnAction(e -> FxUtils.setClipboard(getSelected().get(0).getUri()));
         menuItems.get(restartLbl).setOnAction(e -> DownloadOpUtils.restartDownloads(getSelected()));
         menuItems.get(detailsLbl).setOnAction(e -> getSelected().forEach(FxUtils::newDetailsStage));
+        menuItems.get(credentialsLbl).setOnAction(e -> FxUtils.newChangeCredentialsStage(getSelected()));
         menuItems.get(locationLbl).setOnAction(e -> DownloadOpUtils.changeLocation(getSelected(), e));
         menuItems.get(exportLinkLbl).setOnAction(e -> DownloadOpUtils.exportLinks(getSelectedUrls()));
         menuItems.get(deleteFromQueueLbl).setOnAction(e -> MenuUtils.deleteFromQueue());

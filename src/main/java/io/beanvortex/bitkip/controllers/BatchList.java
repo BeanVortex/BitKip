@@ -10,6 +10,7 @@ import io.beanvortex.bitkip.utils.DownloadUtils;
 import io.beanvortex.bitkip.utils.FxUtils;
 import io.beanvortex.bitkip.utils.LinkTableUtils;
 import io.beanvortex.bitkip.config.observers.QueueObserver;
+import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -30,6 +31,7 @@ import java.util.List;
 import java.util.ResourceBundle;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.Executors;
+import java.util.function.Consumer;
 
 import static io.beanvortex.bitkip.config.AppConfigs.log;
 import static io.beanvortex.bitkip.config.AppConfigs.mainTableUtils;
@@ -38,20 +40,43 @@ import static io.beanvortex.bitkip.config.observers.QueueSubject.getQueues;
 public class BatchList implements QueueObserver {
 
     @FXML
-    private TextField locationField;
+    private PasswordField passwordField;
     @FXML
-    private CheckBox lastLocationCheck;
+    private TextField locationField, usernameField;
+    @FXML
+    private CheckBox lastLocationCheck, authorizedCheck;
     @FXML
     private ComboBox<QueueModel> comboQueue;
     @FXML
-    private Button addBtn, newQueue, openLocation;
+    private Button addBtn, newQueue, openLocation, refreshBtn, stopBtn;
     @FXML
     private TableView<LinkModel> linkTable;
+
+    private volatile boolean fetchingStopped;
 
     private Stage stage;
     private LinkTableUtils linkTableUtils;
     private List<LinkModel> links;
     private static final QueueModel customQueue = new QueueModel("CUSTOM", false);
+    private Credentials credentials;
+
+    @FXML
+    private void onAuthorizedCheck() {
+        toggleViewOfAuthorizeFields(authorizedCheck.isSelected());
+        usernameField.setText("");
+        passwordField.setText("");
+    }
+
+    public void setCredential(Credentials credentials) {
+        this.credentials = credentials;
+        if (credentials != null) {
+            authorizedCheck.setSelected(true);
+            authorizedCheck.setDisable(true);
+            usernameField.setText("***");
+            passwordField.setText("***");
+            toggleViewOfAuthorizeFields(false);
+        }
+    }
 
 
     @AllArgsConstructor
@@ -75,7 +100,21 @@ public class BatchList implements QueueObserver {
         addBtn.setDisable(true);
         comboQueue.setDisable(true);
         newQueue.setGraphic(new FontIcon());
+        refreshBtn.setGraphic(new FontIcon());
+        stopBtn.setGraphic(new FontIcon());
+        stopBtn.setVisible(false);
+        stopBtn.setDisable(true);
+        stopBtn.setOnAction(e -> fetchingStopped = true);
+        refreshBtn.setOnAction(e -> fetchLinksData(this.links));
+        toggleViewOfAuthorizeFields(false);
         location = new LocationData(locationField, null, true);
+    }
+
+    private void toggleViewOfAuthorizeFields(boolean visible) {
+        usernameField.getParent().setManaged(visible);
+        usernameField.getParent().setVisible(visible);
+        passwordField.getParent().setManaged(visible);
+        passwordField.getParent().setVisible(visible);
     }
 
 
@@ -87,7 +126,13 @@ public class BatchList implements QueueObserver {
 
     public void setData(List<LinkModel> links) {
         this.links = links;
-        linkTableUtils = new LinkTableUtils(linkTable, links, comboQueue, stage);
+        var refreshLinks = new Consumer<List<LinkModel>>() {
+            @Override
+            public void accept(List<LinkModel> links) {
+                fetchLinksData(links);
+            }
+        };
+        linkTableUtils = new LinkTableUtils(linkTable, links, refreshLinks, comboQueue, stage);
         linkTableUtils.tableInits();
         location.setFirstPath(links.get(0).getPath());
         locationField.setText(location.getFirstPath());
@@ -103,24 +148,39 @@ public class BatchList implements QueueObserver {
 
 
     private void fetchLinksData(List<LinkModel> links) {
+        fetchingStopped = false;
         var executor = Executors.newCachedThreadPool();
-        var linkTask = new LinkDataTask(links);
+        if (credentials == null || credentials.username().isBlank() || credentials.password().isBlank())
+            credentials = new Credentials(usernameField.getText(), passwordField.getText());
+        var linkTask = new LinkDataTask(links, credentials);
         linkTask.valueProperty().addListener((o, ol, linkFlux) ->
                 executor.submit(() -> {
-                    linkFlux.subscribe(
-                            lm -> {
-                                linkTableUtils.updateLink(lm);
-                                if (!stage.isShowing())
-                                    linkTask.setCancel(true);
-
-                            },
-                            this::errorLog,
-                            () -> {
-                                addBtn.setDisable(false);
-                                comboQueue.setDisable(false);
-                                executor.shutdown();
-                            }
-                    );
+                    Platform.runLater(() -> {
+                        refreshBtn.setDisable(true);
+                        refreshBtn.setVisible(false);
+                        stopBtn.setDisable(false);
+                        stopBtn.setVisible(true);
+                    });
+                    linkFlux.takeUntil(lm -> fetchingStopped)
+                            .subscribe(
+                                    lm -> {
+                                        linkTableUtils.updateLink(lm);
+                                        if (!stage.isShowing())
+                                            linkTask.setCancel(true);
+                                    },
+                                    this::errorLog,
+                                    () -> {
+                                        addBtn.setDisable(false);
+                                        comboQueue.setDisable(false);
+                                        Platform.runLater(() -> {
+                                            refreshBtn.setDisable(false);
+                                            refreshBtn.setVisible(true);
+                                            stopBtn.setDisable(true);
+                                            stopBtn.setVisible(false);
+                                        });
+                                        executor.shutdown();
+                                    }
+                            );
                 }));
         executor.submit(linkTask);
     }

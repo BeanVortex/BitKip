@@ -25,14 +25,16 @@ import java.util.concurrent.Executors;
 public class SingleDownload implements QueueObserver {
 
     @FXML
-    private CheckBox lastLocationCheck;
+    private CheckBox authorizedCheck, lastLocationCheck;
     @FXML
     private Label sizeLabel, resumableLabel, errorLabel;
     @FXML
     private Button questionBtnSpeed, openLocation, questionBtnChunks,
             questionBtnBytes, downloadBtn, refreshBtn, addBtn, newQueue;
     @FXML
-    private TextField urlField, chunksField, nameField, locationField, speedField, bytesField;
+    private TextField usernameField, urlField, chunksField, nameField, locationField, speedField, bytesField;
+    @FXML
+    private PasswordField passwordField;
     @FXML
     private ComboBox<QueueModel> queueCombo;
 
@@ -72,16 +74,14 @@ public class SingleDownload implements QueueObserver {
         newQueue.setGraphic(new FontIcon());
         downloadBtn.setDisable(true);
         addBtn.setDisable(true);
-        refreshBtn.setGraphic(new FontIcon());
-        refreshBtn.setDisable(true);
-        refreshBtn.setVisible(false);
+        usernameField.getParent().setManaged(false);
+        usernameField.getParent().setVisible(false);
+        passwordField.getParent().setManaged(false);
+        passwordField.getParent().setVisible(false);
         if (AppConfigs.lastSavedDir == null)
             lastLocationCheck.setDisable(true);
-        refreshBtn.setOnAction(e -> {
-            refreshBtn.setDisable(true);
-            refreshBtn.setVisible(false);
-            autoFillLocationAndSizeAndName();
-        });
+        refreshBtn.setGraphic(new FontIcon());
+        refreshBtn.setOnAction(e -> autoFillLocationAndSizeAndName());
         var questionBtns = new Button[]{questionBtnSpeed, questionBtnBytes, questionBtnChunks};
         var contents = new String[]{
                 "You can limit downloading speed. calculated in MB. (0.8 means 838KB)",
@@ -103,17 +103,17 @@ public class SingleDownload implements QueueObserver {
         queueCombo.getSelectionModel().selectedIndexProperty().addListener(observable -> onQueueChanged());
         urlField.textProperty().addListener((o, ol, n) -> {
             if (n.isBlank())
-                DownloadUtils.disableControlsAndShowError("URL is blank", errorLabel, downloadBtn, addBtn, refreshBtn);
+                DownloadUtils.disableControlsAndShowError("URL is blank", errorLabel, downloadBtn, addBtn);
             else autoFillLocationAndSizeAndName();
         });
         nameField.textProperty().addListener((o, ol, n) -> {
             if (n.isBlank())
-                DownloadUtils.disableControlsAndShowError("Name is blank", errorLabel, downloadBtn, addBtn, refreshBtn);
+                DownloadUtils.disableControlsAndShowError("Name is blank", errorLabel, downloadBtn, addBtn);
             else onOfflineFieldsChanged();
         });
         locationField.textProperty().addListener((o, ol, n) -> {
             if (n.isBlank())
-                DownloadUtils.disableControlsAndShowError("Location is blank", errorLabel, downloadBtn, addBtn, refreshBtn);
+                DownloadUtils.disableControlsAndShowError("Location is blank", errorLabel, downloadBtn, addBtn);
             else onOfflineFieldsChanged();
         });
         autoFillLocationAndSizeAndName();
@@ -127,7 +127,8 @@ public class SingleDownload implements QueueObserver {
             // firing select event
             queueCombo.getSelectionModel().select(queueCombo.getSelectionModel().getSelectedIndex());
             var url = urlField.getText();
-            var connection = DownloadUtils.connect(url);
+            var credential = new Credentials(usernameField.getText(), passwordField.getText());
+            var connection = DownloadUtils.connect(url, credential);
             var executor = Executors.newVirtualThreadPerTaskExecutor();
             var fileNameLocationFuture =
                     DownloadUtils.prepareFileNameAndFieldsAsync(connection, url, nameField, dm, executor)
@@ -137,7 +138,7 @@ public class SingleDownload implements QueueObserver {
             CompletableFuture.allOf(fileNameLocationFuture, sizeFuture)
                     .whenComplete((unused, throwable) -> {
                         DownloadUtils.handleError(() -> DownloadUtils.checkIfFileIsOKToSave(locationField.getText(),
-                                nameField.getText(), downloadBtn, addBtn, refreshBtn, lastLocationCheck), errorLabel);
+                                nameField.getText(), downloadBtn, addBtn, lastLocationCheck), errorLabel);
                         executor.shutdown();
                     })
                     .exceptionally(throwable -> {
@@ -145,11 +146,11 @@ public class SingleDownload implements QueueObserver {
                             executor.shutdown();
                         var errMsg = throwable.getCause().getLocalizedMessage();
                         Platform.runLater(() ->
-                                DownloadUtils.disableControlsAndShowError(errMsg, errorLabel, downloadBtn, addBtn, refreshBtn));
+                                DownloadUtils.disableControlsAndShowError(errMsg, errorLabel, downloadBtn, addBtn));
                         return null;
                     });
         } catch (Exception e) {
-            DownloadUtils.disableControlsAndShowError(e.getLocalizedMessage(), errorLabel, downloadBtn, addBtn, refreshBtn);
+            DownloadUtils.disableControlsAndShowError(e.getLocalizedMessage(), errorLabel, downloadBtn, addBtn);
         }
     }
 
@@ -163,7 +164,7 @@ public class SingleDownload implements QueueObserver {
         if (path != null)
             locationField.setText(path);
         DownloadUtils.handleError(() -> DownloadUtils.checkIfFileIsOKToSave(locationField.getText(),
-                nameField.getText(), downloadBtn, addBtn, refreshBtn, lastLocationCheck), errorLabel);
+                nameField.getText(), downloadBtn, addBtn, lastLocationCheck), errorLabel);
     }
 
     @FXML
@@ -229,17 +230,17 @@ public class SingleDownload implements QueueObserver {
         var path = locationField.getText();
         if (url.isBlank()) {
             AppConfigs.log.warn("URL is blank");
-            DownloadUtils.disableControlsAndShowError("URL is blank", errorLabel, downloadBtn, addBtn, refreshBtn);
+            DownloadUtils.disableControlsAndShowError("URL is blank", errorLabel, downloadBtn, addBtn);
             return false;
         }
         if (fileName.isBlank()) {
             AppConfigs.log.warn("Name is blank");
-            DownloadUtils.disableControlsAndShowError("Name is blank", errorLabel, downloadBtn, addBtn, refreshBtn);
+            DownloadUtils.disableControlsAndShowError("Name is blank", errorLabel, downloadBtn, addBtn);
             return false;
         }
         if (path.isBlank()) {
             AppConfigs.log.warn("Location is blank");
-            DownloadUtils.disableControlsAndShowError("Location is blank", errorLabel, downloadBtn, addBtn, refreshBtn);
+            DownloadUtils.disableControlsAndShowError("Location is blank", errorLabel, downloadBtn, addBtn);
             return false;
         }
 
@@ -248,7 +249,7 @@ public class SingleDownload implements QueueObserver {
         if (!newFileName.equals(fileName)) {
             var msg = "This url and name exists for this location. Change location or name";
             AppConfigs.log.error(msg);
-            DownloadUtils.disableControlsAndShowError(msg, errorLabel, downloadBtn, addBtn, refreshBtn);
+            DownloadUtils.disableControlsAndShowError(msg, errorLabel, downloadBtn, addBtn);
             return false;
         }
 
@@ -274,6 +275,8 @@ public class SingleDownload implements QueueObserver {
         if (selectedQueue.getId() != allDownloadsQueue.getId())
             dm.getQueues().add(selectedQueue);
         dm.setDownloadStatus(DownloadStatus.Paused);
+        if (!usernameField.getText().isBlank() && !passwordField.getText().isBlank())
+            dm.setCredentials(new Credentials(usernameField.getText(), passwordField.getText()));
         return true;
     }
 
@@ -288,9 +291,19 @@ public class SingleDownload implements QueueObserver {
         onOfflineFieldsChanged();
     }
 
+    @FXML
+    private void onAuthorizedCheck() {
+        usernameField.getParent().setManaged(authorizedCheck.isSelected());
+        usernameField.getParent().setVisible(authorizedCheck.isSelected());
+        passwordField.getParent().setManaged(authorizedCheck.isSelected());
+        passwordField.getParent().setVisible(authorizedCheck.isSelected());
+        usernameField.setText("");
+        passwordField.setText("");
+    }
+
     private void onOfflineFieldsChanged() {
         DownloadUtils.handleError(() -> DownloadUtils.onOfflineFieldsChanged(locationField, nameField.getText(), dm, queueCombo,
-                downloadBtn, addBtn, openLocation, refreshBtn, lastLocationCheck), errorLabel);
+                downloadBtn, addBtn, openLocation, lastLocationCheck), errorLabel);
     }
 
 
@@ -298,6 +311,5 @@ public class SingleDownload implements QueueObserver {
         this.urlModel = urlModel;
         initAfterUrlModel();
     }
-
 
 }

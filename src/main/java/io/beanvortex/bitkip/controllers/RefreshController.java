@@ -43,9 +43,9 @@ public class RefreshController implements FXMLController {
             saveBtn.setDisable(false);
             resumeBtn.setDisable(false);
             if (n.equals(dm.getUri()))
-                DownloadUtils.disableControlsAndShowError("Same URL", errorLabel, saveBtn, resumeBtn, null);
+                DownloadUtils.disableControlsAndShowError("Same URL", errorLabel, saveBtn, resumeBtn);
             if (n.isBlank())
-                DownloadUtils.disableControlsAndShowError("URL is blank", errorLabel, saveBtn, resumeBtn, null);
+                DownloadUtils.disableControlsAndShowError("URL is blank", errorLabel, saveBtn, resumeBtn);
         });
     }
 

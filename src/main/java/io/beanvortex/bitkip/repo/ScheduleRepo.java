@@ -113,7 +113,7 @@ public class ScheduleRepo {
         return null;
     }
 
-    static ScheduleModel createScheduleModel(ResultSet rs, int id) throws SQLException {
+    public static ScheduleModel createScheduleModel(ResultSet rs, int id) throws SQLException {
         if (id == -1)
             id = rs.getInt(COL_ID);
         var startTimeString = rs.getString(COL_START_TIME);

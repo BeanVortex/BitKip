@@ -2,8 +2,12 @@ package io.beanvortex.bitkip.models;
 
 import lombok.*;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.Objects;
 import java.util.concurrent.CopyOnWriteArrayList;
+
+import static io.beanvortex.bitkip.repo.QueuesRepo.*;
 
 @Getter
 @Setter
@@ -61,5 +65,17 @@ public class QueueModel {
                 ", simultaneouslyDownload=" + simultaneouslyDownload +
                 ", schedule=" + schedule +
                 '}';
+    }
+
+    public static QueueModel createQueueModel(ResultSet rs, int queueId, String queueName,
+                                       ScheduleModel schedule) throws SQLException {
+        var editable = rs.getBoolean(COL_EDITABLE);
+        var canAddDownload = rs.getBoolean(COL_CAN_ADD_DOWN);
+        var hasFolder = rs.getBoolean(COL_HAS_FOLDER);
+        var speedLimit = rs.getString(COL_SPEED_LIMIT);
+        var simulDownloads = rs.getInt(COL_SIMUL_DOWNLOAD);
+        var downloadFromTop = rs.getBoolean(COL_DOWN_TOP);
+        return new QueueModel(queueId, queueName, editable, canAddDownload, hasFolder, downloadFromTop,
+                speedLimit, simulDownloads, schedule, null);
     }
 }

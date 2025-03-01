@@ -37,7 +37,7 @@ public class BatchService implements Service {
                     res.status(400).send("Empty data sent by extension");
                     return;
                 }
-                Platform.runLater(() -> FxUtils.newBatchListStage(links));
+                Platform.runLater(() -> FxUtils.newBatchListStage(links, null));
                 res.status(200).send();
             });
     }
