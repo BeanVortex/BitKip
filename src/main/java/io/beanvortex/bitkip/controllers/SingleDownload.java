@@ -22,10 +22,12 @@ import java.util.ResourceBundle;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executors;
 
+import static io.beanvortex.bitkip.config.AppConfigs.log;
+
 public class SingleDownload implements QueueObserver {
 
     @FXML
-    private CheckBox authorizedCheck, lastLocationCheck;
+    private CheckBox authenticatedCheck, lastLocationCheck;
     @FXML
     private Label sizeLabel, resumableLabel, errorLabel;
     @FXML
@@ -144,13 +146,14 @@ public class SingleDownload implements QueueObserver {
                     .exceptionally(throwable -> {
                         if (!executor.isShutdown())
                             executor.shutdown();
-                        var errMsg = throwable.getCause().getLocalizedMessage();
+                        var errMsg = throwable.toString();
+                        log.error(throwable.toString());
                         Platform.runLater(() ->
                                 DownloadUtils.disableControlsAndShowError(errMsg, errorLabel, downloadBtn, addBtn));
                         return null;
                     });
         } catch (Exception e) {
-            DownloadUtils.disableControlsAndShowError(e.getLocalizedMessage(), errorLabel, downloadBtn, addBtn);
+            DownloadUtils.disableControlsAndShowError(e.toString(), errorLabel, downloadBtn, addBtn);
         }
     }
 
@@ -229,17 +232,17 @@ public class SingleDownload implements QueueObserver {
         var fileName = nameField.getText();
         var path = locationField.getText();
         if (url.isBlank()) {
-            AppConfigs.log.warn("URL is blank");
+            log.warn("URL is blank");
             DownloadUtils.disableControlsAndShowError("URL is blank", errorLabel, downloadBtn, addBtn);
             return false;
         }
         if (fileName.isBlank()) {
-            AppConfigs.log.warn("Name is blank");
+            log.warn("Name is blank");
             DownloadUtils.disableControlsAndShowError("Name is blank", errorLabel, downloadBtn, addBtn);
             return false;
         }
         if (path.isBlank()) {
-            AppConfigs.log.warn("Location is blank");
+            log.warn("Location is blank");
             DownloadUtils.disableControlsAndShowError("Location is blank", errorLabel, downloadBtn, addBtn);
             return false;
         }
@@ -248,7 +251,7 @@ public class SingleDownload implements QueueObserver {
         fileName = AppConfigs.addSameDownload ? newFileName : fileName;
         if (!newFileName.equals(fileName)) {
             var msg = "This url and name exists for this location. Change location or name";
-            AppConfigs.log.error(msg);
+            log.error(msg);
             DownloadUtils.disableControlsAndShowError(msg, errorLabel, downloadBtn, addBtn);
             return false;
         }
@@ -292,11 +295,11 @@ public class SingleDownload implements QueueObserver {
     }
 
     @FXML
-    private void onAuthorizedCheck() {
-        usernameField.getParent().setManaged(authorizedCheck.isSelected());
-        usernameField.getParent().setVisible(authorizedCheck.isSelected());
-        passwordField.getParent().setManaged(authorizedCheck.isSelected());
-        passwordField.getParent().setVisible(authorizedCheck.isSelected());
+    private void onAuthenticatedCheck() {
+        usernameField.getParent().setManaged(authenticatedCheck.isSelected());
+        usernameField.getParent().setVisible(authenticatedCheck.isSelected());
+        passwordField.getParent().setManaged(authenticatedCheck.isSelected());
+        passwordField.getParent().setVisible(authenticatedCheck.isSelected());
         usernameField.setText("");
         passwordField.setText("");
     }

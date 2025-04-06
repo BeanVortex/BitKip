@@ -40,7 +40,7 @@
 
 
     <VBox styleClass="padding_5"  spacing="10">
-        <CheckBox text="Authorized" fx:id="authorizedCheck" onAction="#onAuthorizedCheck"/>
+        <CheckBox text="Authenticated" fx:id="authenticatedCheck" onAction="#onAuthenticatedCheck"/>
 
         <VBox spacing="10">
             <HBox spacing="15" alignment="CENTER_LEFT">

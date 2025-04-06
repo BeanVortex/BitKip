@@ -130,7 +130,7 @@ public class DownloadsRepo {
             queueDownloadSql.deleteCharAt(queueDownloadSql.length() - 1);
             stmt.executeUpdate(queueDownloadSql.toString());
         } catch (SQLException e) {
-            log.error(e.getLocalizedMessage());
+            log.error(e.toString());
         }
     }
 
@@ -168,7 +168,7 @@ public class DownloadsRepo {
                 list.add(createDownload(rs, fetchQueue));
             return list;
         } catch (SQLException e) {
-            log.error(e.getMessage());
+            log.error(e.toString());
         }
         return list;
     }
@@ -253,7 +253,7 @@ public class DownloadsRepo {
             else throw new Exception("queue count for the download is not correct");
             stmt.executeUpdate(updateAddToQueueDateSql);
         } catch (Exception e) {
-            log.error(e.getMessage());
+            log.error(e.toString());
         }
     }
 
@@ -411,7 +411,7 @@ public class DownloadsRepo {
                 list.add(download);
             }
         } catch (SQLException e) {
-            log.error(e.getMessage());
+            log.error(e.toString());
         }
         return list;
     }

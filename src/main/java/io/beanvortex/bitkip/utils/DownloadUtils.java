@@ -60,6 +60,7 @@ public class DownloadUtils {
             return connect(uri, credentials);
         } catch (IOException e) {
             var msg = "Connection or read timeout. Connect to the internet or check the url: " + e.getMessage();
+            log.error(e.toString());
             if (showErrors)
                 Platform.runLater(() -> Notifications.create()
                         .title("Bad Connection")
@@ -245,7 +246,7 @@ public class DownloadUtils {
 
     public static String selectLocation(Stage stage) {
         var dirChooser = new DirectoryChooser();
-        dirChooser.setTitle("Select download save location");
+        dirChooser.setTitle("Select file's save location");
         dirChooser.setInitialDirectory(new File(lastSavedDir == null ? System.getProperty("user.home") : lastSavedDir));
         var selectedDir = dirChooser.showDialog(stage);
         if (selectedDir != null) {

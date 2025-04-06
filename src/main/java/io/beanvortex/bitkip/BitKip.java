@@ -98,7 +98,7 @@ public class BitKip extends Application {
             try {
                 tray.add(trayIcon);
             } catch (AWTException e) {
-                log.error(e.getLocalizedMessage());
+                log.error(e.toString());
             }
 
         }
@@ -123,7 +123,7 @@ public class BitKip extends Application {
             if (server != null)
                 server.shutdown();
         } catch (Exception e) {
-            log.error(e.getMessage());
+            log.error(e.toString());
         }
         System.exit(0);
     }
@@ -158,7 +158,7 @@ public class BitKip extends Application {
                 var header = "Failed to start server. Is there another instance running?\nIf not you may need to change application server port and restart";
                 log.error(header);
                 Platform.runLater(() -> {
-                    if (FxUtils.showFailedToStart(header, throwable.getCause().getLocalizedMessage()))
+                    if (FxUtils.showFailedToStart(header, throwable.toString()))
                         Platform.exit();
                 });
                 return null;

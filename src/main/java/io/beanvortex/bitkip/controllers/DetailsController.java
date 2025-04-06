@@ -41,7 +41,7 @@ import java.util.ResourceBundle;
 public class DetailsController implements FXMLController {
 
     @FXML
-    private CheckBox authorizedCheck;
+    private CheckBox authenticatedCheck;
     @FXML
     private PasswordField passwordField;
     @FXML
@@ -134,7 +134,7 @@ public class DetailsController implements FXMLController {
             resumableLbl.setText("Not Resumable");
         }
         if (dm.getCredentials() != null) {
-            authorizedCheck.setSelected(true);
+            authenticatedCheck.setSelected(true);
             usernameField.getParent().setVisible(true);
             passwordField.getParent().setVisible(true);
             usernameField.setText("***");
@@ -286,8 +286,7 @@ public class DetailsController implements FXMLController {
         if (isPaused.get()) {
             statusLbl.setText("Status: " + DownloadStatus.Trying);
             controlBtn.setDisable(true);
-            if (dm.getCredentials() == null || (!usernameField.getText().equals(dm.getCredentials().username())
-                    && !passwordField.getText().equals(dm.getCredentials().password()))){
+            if (!usernameField.getText().equals("***") && !passwordField.getText().equals("***")) {
                 dm.setCredentials(new Credentials(usernameField.getText(), passwordField.getText()));
                 DownloadsRepo.updateDownloadCredential(dm);
             }
@@ -362,6 +361,7 @@ public class DetailsController implements FXMLController {
             filesToCopyClipboard.clear();
             dragFiles.clear();
             me.consume();
+            stage.close();
         });
     }
 
@@ -420,9 +420,9 @@ public class DetailsController implements FXMLController {
     }
 
     @FXML
-    private void onAuthorizedCheck() {
-        usernameField.getParent().setVisible(authorizedCheck.isSelected());
-        passwordField.getParent().setVisible(authorizedCheck.isSelected());
+    private void onAuthenticatedCheck() {
+        usernameField.getParent().setVisible(authenticatedCheck.isSelected());
+        passwordField.getParent().setVisible(authenticatedCheck.isSelected());
         usernameField.setText("");
         passwordField.setText("");
     }

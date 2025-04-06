@@ -75,7 +75,7 @@ public class ChunksDownloadTask extends DownloadTask {
                 parentFolder.mkdir();
             downloadInChunks(fileSize);
         } catch (Exception e) {
-            log.error(e.getMessage());
+            log.error(e.toString());
         }
         return 0L;
     }
@@ -143,7 +143,7 @@ public class ChunksDownloadTask extends DownloadTask {
                     performSpeedLimitedDownload(fromContinue, from, to,
                             partFile, fileSize, 0, 0);
                 } catch (IOException e) {
-                    log.error(e.getMessage());
+                    log.error(e.toString());
                     this.pause();
                 }
             });
@@ -152,7 +152,7 @@ public class ChunksDownloadTask extends DownloadTask {
                 try {
                     performDownload(fromContinue, from, to, partFile, fileSize, 0, 0);
                 } catch (IOException e) {
-                    log.error(e.getMessage());
+                    log.error(e.toString());
                     this.pause();
                 }
             });
@@ -288,7 +288,7 @@ public class ChunksDownloadTask extends DownloadTask {
                 if (channel != null)
                     channel.close();
         } catch (IOException e) {
-            log.error(e.getMessage());
+            log.error(e.toString());
         }
     }
 
@@ -354,7 +354,7 @@ public class ChunksDownloadTask extends DownloadTask {
             }
         } catch (IOException e) {
             e.printStackTrace();
-            log.error(e.getMessage());
+            log.error(e.toString());
         } finally {
             currentDownloadings.remove(downloadModel);
             mainTableUtils.refreshTable();
@@ -386,7 +386,7 @@ public class ChunksDownloadTask extends DownloadTask {
         try {
             call();
         } catch (Exception e) {
-            log.error(e.getMessage());
+            log.error(e.toString());
             failed();
             return;
         }
@@ -403,7 +403,7 @@ public class ChunksDownloadTask extends DownloadTask {
             try {
                 DownloadOpUtils.triggerDownload(downloadModel, speedLimit, downloadModel.getSize(), true, false);
             } catch (ExecutionException | InterruptedException e) {
-                log.error(e.getMessage());
+                log.error(e.toString());
             }
         }
         this.isSpeedLimited = true;

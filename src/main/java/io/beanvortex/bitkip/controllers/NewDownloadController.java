@@ -143,7 +143,7 @@ public class NewDownloadController implements FXMLController {
             getQueueSubject().addObserver(controller);
             prevController = controller;
         } catch (IOException e) {
-            log.error(e.getLocalizedMessage());
+            log.error(e.toString());
             throw new RuntimeException(e);
         }
     }
