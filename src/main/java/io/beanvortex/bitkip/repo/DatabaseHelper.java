@@ -49,7 +49,7 @@ public class DatabaseHelper {
             stmt.execute(sql);
         } catch (SQLException e) {
             if (!ignoreStackTrace)
-                log.error(e.getLocalizedMessage());
+                log.error(e.toString());
         }
     }
 

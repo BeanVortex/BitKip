@@ -34,7 +34,7 @@ public class LinkDataTask extends Task<Flux<LinkModel>> {
                 try {
                     connection = DownloadUtils.connect(lm.getUri(), credentials);
                 } catch (IOException e) {
-                    log.error(e.getMessage());
+                    log.error(e.toString());
                     break;
                 }
                 var uri = lm.getUri();

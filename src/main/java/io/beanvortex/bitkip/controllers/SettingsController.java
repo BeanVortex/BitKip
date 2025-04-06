@@ -132,7 +132,7 @@ public class SettingsController implements FXMLController {
             queueContainer.getChildren().add(queueRoot);
             QueueSubject.getQueueSubject().addObserver(queueController);
         } catch (Exception e) {
-            AppConfigs.log.error(e.getMessage());
+            AppConfigs.log.error(e.toString());
             throw new RuntimeException(e);
         }
     }
@@ -173,7 +173,7 @@ public class SettingsController implements FXMLController {
                     executor.submit(fileMoveTask);
                     FxUtils.fileTransferDialog(fileMoveTask);
                 } catch (IOException ex) {
-                    AppConfigs.log.error("Failed to move files and folders: " + ex.getMessage());
+                    AppConfigs.log.error("Failed to move files and folders: " + ex);
                     Notifications.create()
                             .title("Failed to move")
                             .text("Failed to move files and folders")

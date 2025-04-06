@@ -44,7 +44,7 @@ public class BatchList implements QueueObserver {
     @FXML
     private TextField locationField, usernameField;
     @FXML
-    private CheckBox lastLocationCheck, authorizedCheck;
+    private CheckBox lastLocationCheck, authenticatedCheck;
     @FXML
     private ComboBox<QueueModel> comboQueue;
     @FXML
@@ -61,8 +61,8 @@ public class BatchList implements QueueObserver {
     private Credentials credentials;
 
     @FXML
-    private void onAuthorizedCheck() {
-        toggleViewOfAuthorizeFields(authorizedCheck.isSelected());
+    private void onAuthenticatedCheck() {
+        toggleViewOfAuthorizeFields(authenticatedCheck.isSelected());
         usernameField.setText("");
         passwordField.setText("");
     }
@@ -70,8 +70,8 @@ public class BatchList implements QueueObserver {
     public void setCredential(Credentials credentials) {
         this.credentials = credentials;
         if (credentials != null) {
-            authorizedCheck.setSelected(true);
-            authorizedCheck.setDisable(true);
+            authenticatedCheck.setSelected(true);
+            authenticatedCheck.setDisable(true);
             usernameField.setText("***");
             passwordField.setText("***");
             toggleViewOfAuthorizeFields(false);
@@ -84,12 +84,7 @@ public class BatchList implements QueueObserver {
     @Setter
     public static class LocationData {
         private TextField locationField;
-        private String firstPath;
         private boolean change;
-
-        public void revertPath() {
-            locationField.setText(firstPath);
-        }
     }
 
     private LocationData location;
@@ -107,7 +102,7 @@ public class BatchList implements QueueObserver {
         stopBtn.setOnAction(e -> fetchingStopped = true);
         refreshBtn.setOnAction(e -> fetchLinksData(this.links));
         toggleViewOfAuthorizeFields(false);
-        location = new LocationData(locationField, null, true);
+        location = new LocationData(locationField, true);
     }
 
     private void toggleViewOfAuthorizeFields(boolean visible) {
@@ -134,8 +129,6 @@ public class BatchList implements QueueObserver {
         };
         linkTableUtils = new LinkTableUtils(linkTable, links, refreshLinks, comboQueue, stage);
         linkTableUtils.tableInits();
-        location.setFirstPath(links.get(0).getPath());
-        locationField.setText(location.getFirstPath());
         locationField.textProperty().addListener((o, ol, n) -> {
             if (location.isChange()) {
                 links.forEach(l -> l.setPath(n));
@@ -161,6 +154,8 @@ public class BatchList implements QueueObserver {
                         stopBtn.setDisable(false);
                         stopBtn.setVisible(true);
                     });
+                    locationField.setDisable(true);
+                    openLocation.setDisable(true);
                     linkFlux.takeUntil(lm -> fetchingStopped)
                             .subscribe(
                                     lm -> {
@@ -178,6 +173,9 @@ public class BatchList implements QueueObserver {
                                             stopBtn.setDisable(true);
                                             stopBtn.setVisible(false);
                                         });
+                                        locationField.setDisable(false);
+                                        openLocation.setDisable(false);
+                                        locationField.setText(links.getFirst().getPath());
                                         executor.shutdown();
                                     }
                             );
@@ -206,7 +204,7 @@ public class BatchList implements QueueObserver {
 
 
     private void errorLog(Throwable err) {
-        log.error(err.getMessage());
+        log.error(err.toString());
     }
 
     @Override
@@ -247,6 +245,9 @@ public class BatchList implements QueueObserver {
         for (int i = 0; i < links.size(); i++) {
             var lm = links.get(i);
             var dm = new DownloadModel();
+            if (credentials == null)
+                credentials = new Credentials(usernameField.getText(), passwordField.getText());
+            dm.setCredentials(credentials);
             dm.setUri(lm.getUri());
             var fileName = lm.getName();
             var path = lm.getPath();
@@ -280,7 +281,6 @@ public class BatchList implements QueueObserver {
 
     public void onNewQueue() {
         FxUtils.newQueueStage();
-
     }
 
     @FXML
@@ -297,7 +297,8 @@ public class BatchList implements QueueObserver {
         if (lastLocationCheck.isSelected())
             locationField.setText(AppConfigs.lastSavedDir);
         else
-            locationField.setText(location.getFirstPath());
+            locationField.setText(DownloadUtils.determineLocation(links.getFirst().getName()));
+
     }
 
 }

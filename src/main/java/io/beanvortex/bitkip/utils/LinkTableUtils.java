@@ -194,8 +194,8 @@ public class LinkTableUtils {
             if (location != null)
                 location.getLocationField().setText(path);
         } else if (location != null) {
-            location.revertPath();
-            lm.setPath(location.getFirstPath());
+            String path = DownloadUtils.determineLocation(lm.getName());
+            lm.setPath(path);
         }
     }
 }

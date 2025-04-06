@@ -45,7 +45,7 @@ public class BatchDownload implements QueueObserver {
     @FXML
     private TextField chunksField, urlField, usernameField, startField, locationField, endField;
     @FXML
-    private CheckBox lastLocationCheck, authorizedCheck;
+    private CheckBox lastLocationCheck, authenticatedCheck;
 
     private LinkModel tempLink;
     private Stage stage;
@@ -138,7 +138,7 @@ public class BatchDownload implements QueueObserver {
                             handleError(() -> DownloadUtils.checkIfFileIsOKToSave(locationField.getText(),
                                     tempLink.getName(), null, checkBtn, lastLocationCheck), errorLabel))
                     .exceptionally(throwable -> {
-                        var errorMsg = throwable.getCause().getLocalizedMessage();
+                        var errorMsg = throwable.toString();
                         Platform.runLater(() ->
                                 DownloadUtils.disableControlsAndShowError(errorMsg, errorLabel,
                                         checkBtn, null));
@@ -146,7 +146,7 @@ public class BatchDownload implements QueueObserver {
                     });
         } catch (NumberFormatException ignore) {
         } catch (Exception e) {
-            var errorMsg = e.getLocalizedMessage();
+            var errorMsg = e.toString();
             if (e instanceof IndexOutOfBoundsException)
                 errorMsg = "No URLs found";
             DownloadUtils.disableControlsAndShowError(errorMsg, errorLabel, checkBtn, null);
@@ -303,8 +303,8 @@ public class BatchDownload implements QueueObserver {
         } catch (IllegalArgumentException e) {
             if (e instanceof NumberFormatException)
                 return;
-            log.error(e.getLocalizedMessage());
-            DownloadUtils.disableControlsAndShowError(e.getLocalizedMessage(), errorLabel, checkBtn, null);
+            log.error(e.toString());
+            DownloadUtils.disableControlsAndShowError(e.toString(), errorLabel, checkBtn, null);
         }
     }
 
@@ -364,11 +364,11 @@ public class BatchDownload implements QueueObserver {
     }
 
     @FXML
-    private void onAuthorizedCheck() {
-        usernameField.getParent().setManaged(authorizedCheck.isSelected());
-        usernameField.getParent().setVisible(authorizedCheck.isSelected());
-        passwordField.getParent().setManaged(authorizedCheck.isSelected());
-        passwordField.getParent().setVisible(authorizedCheck.isSelected());
+    private void onAuthenticatedCheck() {
+        usernameField.getParent().setManaged(authenticatedCheck.isSelected());
+        usernameField.getParent().setVisible(authenticatedCheck.isSelected());
+        passwordField.getParent().setManaged(authenticatedCheck.isSelected());
+        passwordField.getParent().setVisible(authenticatedCheck.isSelected());
         usernameField.setText("");
         passwordField.setText("");
     }

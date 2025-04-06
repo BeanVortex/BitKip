@@ -88,10 +88,10 @@ public class LogsController implements FXMLController {
                     .reduce((s1, s2) -> String.join("\n", s1, s2));
             text.setText(logs.orElse("No Logs"));
         } catch (IOException e) {
-            log.error(e.getMessage());
+            log.error(e.toString());
             Notifications.create()
                     .title("Failed to read log file")
-                    .text(e.getMessage())
+                    .text(e.toString())
                     .showError();
         }
     }

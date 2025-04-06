@@ -60,7 +60,7 @@ public class SpecialDownloadTask extends DownloadTask {
             fileSize = downloadModel.getSize();
             performDownloadInStream();
         } catch (IOException e) {
-            log.error(e.getMessage());
+            log.error(e.toString());
             this.pause();
         }
         return IOUtils.getFileSize(file);
@@ -104,10 +104,10 @@ public class SpecialDownloadTask extends DownloadTask {
 
 
         } catch (IOException e) {
-            log.error(e.getMessage());
+            log.error(e.toString());
             Platform.runLater(() -> Notifications.create()
                     .title("Couldn't download file")
-                    .text(e.getMessage())
+                    .text(e.toString())
                     .showError());
         } finally {
             if (fileChannel != null)
@@ -138,7 +138,7 @@ public class SpecialDownloadTask extends DownloadTask {
 
             } catch (InterruptedException ignore) {
             } catch (IOException e) {
-                log.error(e.getMessage());
+                log.error(e.toString());
             }
         });
     }
@@ -191,7 +191,7 @@ public class SpecialDownloadTask extends DownloadTask {
                 DownloadsRepo.updateDownloadLastTryDate(download);
             }
         } catch (IOException e) {
-            log.error(e.getMessage());
+            log.error(e.toString());
         } finally {
             currentDownloadings.remove(downloadModel);
             mainTableUtils.refreshTable();
@@ -237,7 +237,7 @@ public class SpecialDownloadTask extends DownloadTask {
         try {
             call();
         } catch (Exception e) {
-            log.error(e.getMessage());
+            log.error(e.toString());
             failed();
             return;
         }

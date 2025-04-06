@@ -117,7 +117,7 @@ public class QueuesRepo {
             genKeys.next();
             queue.setId(genKeys.getInt(1));
         } catch (SQLException e) {
-            log.error(e.getLocalizedMessage());
+            log.error(e.toString());
         }
     }
 
@@ -132,7 +132,7 @@ public class QueuesRepo {
             if (rs.next())
                 return createQueueModel(rs, fetchDownloads, true);
         } catch (SQLException e) {
-            log.error(e.getMessage());
+            log.error(e.toString());
         }
         throw new IllegalArgumentException("Queue does not exist");
     }
@@ -152,7 +152,7 @@ public class QueuesRepo {
                 list.add(createQueueModel(rs, fetchDownloads, fetchSchedule));
             return list;
         } catch (SQLException e) {
-            log.error(e.getLocalizedMessage());
+            log.error(e.toString());
         }
         return list;
     }
