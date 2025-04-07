@@ -245,7 +245,8 @@ public class BatchList implements QueueObserver {
         for (int i = 0; i < links.size(); i++) {
             var lm = links.get(i);
             var dm = new DownloadModel();
-            if (credentials == null)
+            if (credentials == null && authenticatedCheck.isSelected()
+                    && !usernameField.getText().isBlank() && !passwordField.getText().isBlank())
                 credentials = new Credentials(usernameField.getText(), passwordField.getText());
             dm.setCredentials(credentials);
             dm.setUri(lm.getUri());
