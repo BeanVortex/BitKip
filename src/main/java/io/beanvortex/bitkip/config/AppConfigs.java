@@ -60,8 +60,10 @@ public class AppConfigs {
     public static final boolean defaultAddSameDownload = true;
     public static boolean addSameDownload  = defaultAddSameDownload;
     public static final boolean defaultLessCpuIntensive = false;
-    public static boolean lessCpuIntensive = defaultLessCpuIntensive;
     public static String lastSavedDir = null;
+    public static boolean lessCpuIntensive = defaultLessCpuIntensive;
+    public static final boolean defaultShowErrorNotifications = true;
+    public static boolean showErrorNotifications = defaultShowErrorNotifications;
 
 
 

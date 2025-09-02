@@ -1,9 +1,12 @@
 package io.beanvortex.bitkip.exceptions;
 
+import org.controlsfx.control.Notifications;
+
 import java.util.Arrays;
 import java.util.stream.Collectors;
 
 import static io.beanvortex.bitkip.config.AppConfigs.log;
+import static io.beanvortex.bitkip.config.AppConfigs.showErrorNotifications;
 
 public class GlobalExceptionHandler {
 
@@ -12,7 +15,7 @@ public class GlobalExceptionHandler {
 
     public static void setup() {
         Thread.setDefaultUncaughtExceptionHandler((thread, throwable) ->
-            logException("Uncaught exception in thread: " + thread.getName(), throwable)
+                logException("Uncaught exception in thread: " + thread.getName(), throwable)
         );
     }
 
@@ -51,6 +54,11 @@ public class GlobalExceptionHandler {
             causeLevel++;
         }
 
+        if (showErrorNotifications)
+            Notifications.create()
+                    .title("An error occurred")
+                    .text(rootCause + "\nsee Logs")
+                    .showError();
         log.error(sb.toString());
     }
 

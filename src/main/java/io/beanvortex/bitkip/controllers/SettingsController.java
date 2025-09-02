@@ -42,7 +42,7 @@ public class SettingsController implements FXMLController {
 
     @FXML
     private CheckBox immediateCheck, startupCheck, triggerOffCheck, agentCheck, addDownCheck,
-            continueCheck, completeDialogCheck, serverCheck, lessCpuCheck;
+            continueCheck, completeDialogCheck, errorNotificationCheck, serverCheck, lessCpuCheck;
     @FXML
     private VBox root, actionArea, queueContainer;
     @FXML
@@ -113,6 +113,7 @@ public class SettingsController implements FXMLController {
         retryField.setText(String.valueOf(AppConfigs.downloadRetryCount));
         rateLimitField.setText(String.valueOf(AppConfigs.downloadRateLimitCount));
         completeDialogCheck.setSelected(AppConfigs.showCompleteDialog);
+        errorNotificationCheck.setSelected(AppConfigs.showErrorNotifications);
         continueCheck.setSelected(AppConfigs.continueOnLostConnectionLost);
         retryField.setDisable(AppConfigs.continueOnLostConnectionLost);
         rateLimitField.setDisable(AppConfigs.continueOnLostConnectionLost);
@@ -206,6 +207,12 @@ public class SettingsController implements FXMLController {
     }
 
     @FXML
+    private void onErrorNotificationCheck() {
+        AppConfigs.showErrorNotifications = errorNotificationCheck.isSelected();
+        IOUtils.saveConfigs();
+    }
+
+    @FXML
     public void onSave() {
         AppConfigs.serverPort = Integer.parseInt(portField.getText());
         AppConfigs.downloadRetryCount = Integer.parseInt(retryField.getText());
@@ -247,6 +254,7 @@ public class SettingsController implements FXMLController {
         AppConfigs.serverEnabled = AppConfigs.defaultServerEnabled;
         AppConfigs.serverPort = AppConfigs.defaultServerPort;
         AppConfigs.showCompleteDialog = AppConfigs.defaultShowCompleteDialog;
+        AppConfigs.showErrorNotifications = AppConfigs.defaultShowErrorNotifications;
         AppConfigs.triggerTurnOffOnEmptyQueue = AppConfigs.defaultTriggerTurnOffOnEmptyQueue;
         AppConfigs.continueOnLostConnectionLost = AppConfigs.defaultContinueOnLostConnectionLost;
         AppConfigs.downloadRetryCount = AppConfigs.defaultDownloadRetryCount;

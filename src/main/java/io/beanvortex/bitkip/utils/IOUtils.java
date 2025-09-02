@@ -280,6 +280,7 @@ public class IOUtils {
                     .append("port=").append(String.valueOf(serverPort)).append("\n")
                     .append("trigger_turn_off_on_empty_queue=").append(String.valueOf(triggerTurnOffOnEmptyQueue)).append("\n")
                     .append("show_complete_dialog=").append(String.valueOf(showCompleteDialog)).append("\n")
+                    .append("show_error_notifications=").append(String.valueOf(showErrorNotifications)).append("\n")
                     .append("continue_on_connection_lost=").append(String.valueOf(continueOnLostConnectionLost)).append("\n")
                     .append("retry_count=").append(String.valueOf(downloadRetryCount)).append("\n")
                     .append("rate_limit_count=").append(String.valueOf(downloadRateLimitCount)).append("\n")
@@ -318,6 +319,7 @@ public class IOUtils {
                         case "port" -> serverPort = Integer.parseInt(value);
                         case "trigger_turn_off_on_empty_queue" -> triggerTurnOffOnEmptyQueue = value.equals("true");
                         case "show_complete_dialog" -> showCompleteDialog = value.equals("true");
+                        case "show_error_notifications" -> showErrorNotifications = value.equals("true");
                         case "continue_on_connection_lost" -> continueOnLostConnectionLost = value.equals("true");
                         case "retry_count" -> downloadRetryCount = Integer.parseInt(value);
                         case "rate_limit_count" -> downloadRateLimitCount = Integer.parseInt(value);

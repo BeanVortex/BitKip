@@ -72,6 +72,7 @@
             <ScrollPane hbarPolicy="NEVER">
                 <VBox styleClass="padding_10" alignment="BASELINE_LEFT" spacing="15">
                     <CheckBox text="Show complete dialog" fx:id="completeDialogCheck" onAction="#onCompleteDialogCheck"/>
+                    <CheckBox text="Show error notifications" fx:id="errorNotificationCheck" onAction="#onErrorNotificationCheck"/>
                     <CheckBox text="Continue on failure" fx:id="continueCheck" onAction="#onContinueCheck"/>
                     <Label styleClass="settingDescription, opacity_7"
                            text="If the connection drops or there is a rate limit, continue trying to download the file"/>
