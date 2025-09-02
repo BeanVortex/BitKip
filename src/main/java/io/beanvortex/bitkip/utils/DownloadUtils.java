@@ -160,10 +160,13 @@ public class DownloadUtils {
 
     public static String extractFileName(String link, HttpURLConnection connection) {
         var raw = connection.getHeaderField("Content-Disposition");
-        if (raw != null && raw.contains("=")) {
-            try {
-                return raw.split("=")[1].replaceAll("\"", "");
-            } catch (IndexOutOfBoundsException ignore) {
+        if (raw != null) {
+            int start = raw.indexOf("filename=");
+            if (start != -1) {
+                start += 9;
+                var afterEquals = raw.substring(start);
+                var firstPart = afterEquals.split(";")[0].trim();
+                return firstPart.replace("\"", "");
             }
         }
 
