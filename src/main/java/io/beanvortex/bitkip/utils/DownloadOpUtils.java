@@ -143,7 +143,7 @@ public class DownloadOpUtils {
     public static void restartDownloads(List<DownloadModel> dms) {
         var header = "Restarting download(s)";
         var v = "Are you sure you want to restart ";
-        var content = dms.size() == 1 ? v + dms.get(0).getName() + " ?" : v + "selected downloads?";
+        var content = dms.size() == 1 ? v + dms.getFirst().getName() + " ?" : v + "selected downloads?";
         content += "\nIf the files exist, they will be deleted";
         if (FxUtils.askWarning(header, content))
             dms.forEach(DownloadOpUtils::restartDownload);
@@ -182,11 +182,11 @@ public class DownloadOpUtils {
     }
 
     public static void deleteDownloads(ObservableList<DownloadModel> dms, boolean withFiles) {
-        if (dms.size() == 0)
+        if (dms.isEmpty())
             return;
         var header = "Delete selected downloads?";
         if (dms.size() == 1)
-            header = "Delete " + dms.get(0).getName();
+            header = "Delete " + dms.getFirst().getName();
         var content = "Are you sure you want to delete selected download(s)?";
         if (withFiles)
             content += "\nFiles are deleted";
@@ -196,11 +196,11 @@ public class DownloadOpUtils {
                         .findFirst()
                         .ifPresent(dm2 -> dm2.getDownloadTask().pause());
                 var logMsg = "download deleted: ";
-                DownloadsRepo.deleteDownload(dm);
                 if (withFiles) {
                     IOUtils.deleteDownload(dm);
                     logMsg = "download deleted with file: ";
                 }
+                DownloadsRepo.deleteDownload(dm);
                 log.info(logMsg + dm);
                 var openDownloadingsCopy = new ArrayList<>(openDownloadings);
                 openDownloadingsCopy.stream().filter(dc -> dc.getDownloadModel().equals(dm))
@@ -295,7 +295,7 @@ public class DownloadOpUtils {
     public static void refreshDownload(ObservableList<DownloadModel> selected) {
         if (selected.size() != 1)
             return;
-        FxUtils.newRefreshStage(selected.get(0));
+        FxUtils.newRefreshStage(selected.getFirst());
     }
 
     public static void importLinks(ActionEvent e) {

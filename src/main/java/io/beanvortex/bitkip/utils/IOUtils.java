@@ -168,14 +168,14 @@ public class IOUtils {
                 var parentPath = Path.of(dm.getFilePath()).getParent() + File.separator;
                 var tempPath = Path.of(parentPath + ".temp");
                 for (int i = 0; i < dm.getChunks(); i++) {
-                    if (Files.exists(tempPath))
+                    if (Files.exists(tempPath ))
                         Files.deleteIfExists(Path.of(tempPath + File.separator + dm.getName() + "#" + i));
                     else Files.deleteIfExists(Path.of(dm.getFilePath() + "#" + i));
                 }
                 Files.deleteIfExists(Path.of(dm.getFilePath()));
             }
         } catch (IOException e) {
-            log.error(e.getLocalizedMessage());
+            throw new RuntimeException(e);
         }
     }
 
