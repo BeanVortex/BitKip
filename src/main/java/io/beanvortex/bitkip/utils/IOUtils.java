@@ -89,8 +89,8 @@ public class IOUtils {
         for (int i = 0; i < chunks; i++)
             currentFileSize += Files.size(filePaths.get(i));
 
-        var neededFileSize = currentFileSize + Files.size(filePaths.get(filePaths.size() - 1));
-        checkAvailableSpace(filePaths.get(0), neededFileSize);
+        var neededFileSize = currentFileSize + Files.size(filePaths.getLast());
+        checkAvailableSpace(filePaths.getFirst(), neededFileSize);
 
         if (dm.getDownloaded() == 0)
             dm.setDownloaded(currentFileSize);
@@ -119,7 +119,7 @@ public class IOUtils {
             dm.setDownloadStatus(DownloadStatus.Merging);
             mainTableUtils.refreshTable();
 
-            var firstFile = filePaths.get(0).toFile();
+            var firstFile = filePaths.getFirst().toFile();
             var bufferSize = currentFileSize > 524_288_000 ?
                     (
                             currentFileSize > 1_048_576_000 ? 2097152 : 1048576
@@ -154,7 +154,7 @@ public class IOUtils {
                 if (nextFile.exists())
                     nextFile.delete();
             }
-            var pathToMove = filePaths.get(0).getParent().getParent() + File.separator + dm.getName();
+            var pathToMove = filePaths.getFirst().getParent().getParent() + File.separator + dm.getName();
             return firstFile.renameTo(new File(pathToMove));
         }
         return false;
@@ -326,7 +326,7 @@ public class IOUtils {
                         case "immediate_download" -> downloadImmediately = value.equals("true");
                         case "add_same_download" -> addSameDownload = value.equals("true");
                         case "less_cpu_intensive" -> lessCpuIntensive = value.equals("true");
-                        case "last_saved_dir" -> lastSavedDir = value;
+                        case "last_saved_dir" -> lastSavedDir = Files.exists(Paths.get(value)) ? value : System.getProperty("user.home");
                         case "user_agent" -> userAgent = value;
                         case "user_agent_enabled" -> userAgentEnabled = value.equals("true");
                     }
@@ -419,7 +419,7 @@ public class IOUtils {
 
             var chunks = Validations.maxChunks(Long.MAX_VALUE);
             var allDownloadsQueue = QueuesRepo.findByName(ALL_DOWNLOADS_QUEUE, false);
-            var firstUrl = lines.get(0);
+            var firstUrl = lines.getFirst();
             var connection = DownloadUtils.connect(firstUrl, null);
             var firstFileName = DownloadUtils.extractFileName(firstUrl, connection);
             var secondaryQueue = BatchDownload.getSecondaryQueueByFileName(firstFileName);

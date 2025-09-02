@@ -20,6 +20,8 @@ import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
@@ -247,7 +249,11 @@ public class DownloadUtils {
     public static String selectLocation(Stage stage) {
         var dirChooser = new DirectoryChooser();
         dirChooser.setTitle("Select file's save location");
-        dirChooser.setInitialDirectory(new File(lastSavedDir == null ? System.getProperty("user.home") : lastSavedDir));
+        String folderPath = lastSavedDir == null
+                ? System.getProperty("user.home")
+                : (Files.exists(Paths.get(lastSavedDir))
+                    ? lastSavedDir : System.getProperty("user.home"));
+        dirChooser.setInitialDirectory(new File(folderPath));
         var selectedDir = dirChooser.showDialog(stage);
         if (selectedDir != null) {
             var path = selectedDir.getPath();

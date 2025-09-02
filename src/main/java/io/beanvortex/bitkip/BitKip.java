@@ -3,6 +3,7 @@ package io.beanvortex.bitkip;
 import io.beanvortex.bitkip.api.BatchService;
 import io.beanvortex.bitkip.api.SingleService;
 import io.beanvortex.bitkip.api.SyncService;
+import io.beanvortex.bitkip.exceptions.GlobalExceptionHandler;
 import io.beanvortex.bitkip.repo.QueuesRepo;
 import io.beanvortex.bitkip.repo.ScheduleRepo;
 import io.beanvortex.bitkip.task.ScheduleTask;
@@ -131,6 +132,7 @@ public class BitKip extends Application {
 
     public static void main(String[] args) {
         initLogger();
+        GlobalExceptionHandler.setup();
         launch();
     }
 
