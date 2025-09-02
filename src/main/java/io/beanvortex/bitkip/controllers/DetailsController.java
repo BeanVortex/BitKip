@@ -378,7 +378,7 @@ public class DetailsController implements FXMLController {
 
     @FXML
     private void onFolderOpen() {
-        DownloadOpUtils.openContainingFolder(dm);
+        DownloadOpUtils.openContainingFolder(dm.getFilePath());
         stage.close();
     }
 

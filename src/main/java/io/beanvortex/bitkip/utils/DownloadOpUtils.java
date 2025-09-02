@@ -266,10 +266,10 @@ public class DownloadOpUtils {
         return processBuilder;
     }
 
-    public static void openContainingFolder(DownloadModel dm) {
+    public static void openContainingFolder(String path) {
         try {
             var desktop = Desktop.getDesktop();
-            File file = new File(dm.getFilePath());
+            File file = new File(path);
             if (desktop.isSupported(Desktop.Action.OPEN)) {
                 log.info("Opening containing folder");
                 if (isWindows())
@@ -287,11 +287,7 @@ public class DownloadOpUtils {
                         .showError();
             }
         } catch (IOException e) {
-            log.error(e.getLocalizedMessage());
-            Notifications.create()
-                    .title("Error opening containing folder")
-                    .text(e.getMessage())
-                    .showError();
+            throw new RuntimeException(e);
         }
     }
 

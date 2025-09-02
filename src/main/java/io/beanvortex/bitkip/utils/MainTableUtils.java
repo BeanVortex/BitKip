@@ -139,7 +139,7 @@ public class MainTableUtils {
                 deleteWithFileLbl, menuItems, selectedItems);
 
         menuItems.get(openLbl).setOnAction(e -> DownloadOpUtils.openFiles(getSelected()));
-        menuItems.get(openFolderLbl).setOnAction(e -> DownloadOpUtils.openContainingFolder(getSelected().getFirst()));
+        menuItems.get(openFolderLbl).setOnAction(e -> DownloadOpUtils.openContainingFolder(getSelected().getFirst().getFilePath()));
         menuItems.get(resumeLbl).setOnAction(e -> DownloadOpUtils.resumeDownloads(getSelected(), 0, 0));
         menuItems.get(pauseLbl).setOnAction(e -> DownloadOpUtils.pauseDownloads(getSelected()));
         menuItems.get(pauseAllLbl).setOnAction(e -> DownloadOpUtils.pauseAllDownloads());
