@@ -6,7 +6,7 @@ import javax.crypto.SecretKey;
 import java.util.Base64;
 
 public class CredentialEncryptor {
-    private static SecretKey secretKey;
+    private static final SecretKey secretKey;
 
     static {
         try {
@@ -14,7 +14,7 @@ public class CredentialEncryptor {
             keyGen.init(256);
             secretKey = keyGen.generateKey();
         } catch (Exception e) {
-            e.printStackTrace();
+            throw new RuntimeException(e);
         }
     }
 

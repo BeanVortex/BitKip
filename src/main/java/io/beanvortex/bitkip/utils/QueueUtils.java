@@ -53,12 +53,12 @@ public class QueueUtils {
             qm.setDownloads(new CopyOnWriteArrayList<>(downloadsByQueue));
             startedQueues.add(startedQueue);
             start(startedQueue, canTurnOff, executor);
-            log.info("Queue has been started: " + qm);
+            log.info("Queue has been started: {}", qm);
         } else if (schedule.isEnabled() && schedule.isOnceDownload()) {
             // in case when user starts the queue manually which adds the queue to startedQueues and
-            // when start scheduler runs, it shutdowns the start scheduler
+            // when start scheduler runs, it shut-downs the start scheduler
             currentSchedules.get(schedule.getId()).getStartScheduler().shutdownNow();
-            log.info("Start scheduler has been disabled for: " + qm.getName());
+            log.info("Start scheduler has been disabled for: {}", qm.getName());
         }
 
     }
@@ -193,7 +193,7 @@ public class QueueUtils {
         shutdownSchedulersOnOnceDownload(qm);
         if (executor != null)
             executor.shutdownNow();
-        log.info("Queue stopped automatically: " + qm.toStringModel());
+        log.info("Queue stopped automatically: {}", qm.toStringModel());
     }
 
 
@@ -210,7 +210,7 @@ public class QueueUtils {
             });
 
             startedQueues.remove(startedQueue);
-            log.info("Queue has been stopped: " + startedQueue.queue());
+            log.info("Queue has been stopped: {}", startedQueue.queue());
             whenQueueDone(startedQueue, canTurnOff, null);
         }
     }
@@ -230,7 +230,7 @@ public class QueueUtils {
 
             Platform.runLater(() -> addAllQueues(updatedQueues));
             ScheduleRepo.updateScheduleEnabled(schedule.getId(), schedule.isEnabled());
-            log.info("Schedulers has been disabled for: " + qm);
+            log.info("Schedulers has been disabled for: {}", qm);
         }
     }
 

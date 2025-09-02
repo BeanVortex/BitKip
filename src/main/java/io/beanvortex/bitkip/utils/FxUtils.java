@@ -521,7 +521,7 @@ public class FxUtils {
         var content = new ClipboardContent();
         content.putString(value);
         clip.setContent(content);
-        log.info("Clipboard set : " + content);
+        log.info("Clipboard set : {}", content);
     }
 
     public static void fileTransferDialog(FileMoveTask fileMoveTask) {
@@ -591,7 +591,7 @@ public class FxUtils {
             var port = result.get();
             serverPort = Integer.parseInt(port);
             IOUtils.saveConfigs();
-            log.info("Port set to: " + port);
+            log.info("Port set to: {}", port);
         }
         return true;
     }

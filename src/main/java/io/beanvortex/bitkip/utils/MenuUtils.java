@@ -117,13 +117,13 @@ public class MenuUtils {
         });
 
         menuItems.get(openLbl).setOnAction(e -> DownloadOpUtils.openFiles(mainTableUtils.getSelected()));
-        menuItems.get(openFolderLbl).setOnAction(e -> DownloadOpUtils.openContainingFolder(mainTableUtils.getSelected().get(0)));
+        menuItems.get(openFolderLbl).setOnAction(e -> DownloadOpUtils.openContainingFolder(mainTableUtils.getSelected().getFirst()));
         menuItems.get(resumeLbl).setOnAction(e -> DownloadOpUtils.resumeDownloads(mainTableUtils.getSelected(), 0, 0));
         menuItems.get(pauseLbl).setOnAction(e -> DownloadOpUtils.pauseDownloads(mainTableUtils.getSelected()));
         menuItems.get(pauseAllLbl).setOnAction(e -> DownloadOpUtils.pauseAllDownloads());
         menuItems.get(exportLinkLbl).setOnAction(e -> DownloadOpUtils.exportLinks(mainTableUtils.getSelectedUrls()));
         menuItems.get(refreshLbl).setOnAction(e -> DownloadOpUtils.refreshDownload(mainTableUtils.getSelected()));
-        menuItems.get(copyLbl).setOnAction(e -> FxUtils.setClipboard(mainTableUtils.getSelected().get(0).getUri()));
+        menuItems.get(copyLbl).setOnAction(e -> FxUtils.setClipboard(mainTableUtils.getSelected().getFirst().getUri()));
         menuItems.get(restartLbl).setOnAction(e -> DownloadOpUtils.restartDownloads(mainTableUtils.getSelected()));
         menuItems.get(locationLbl).setOnAction(e -> DownloadOpUtils.changeLocation(mainTableUtils.getSelected(), e));
         menuItems.get(deleteLbl).setOnAction(e -> DownloadOpUtils.deleteDownloads(mainTableUtils.getSelected(), false));
@@ -173,7 +173,7 @@ public class MenuUtils {
         menuItems.get(deleteFromQueueLbl).setDisable(selectedItems.isEmpty());
 
         selectedItems.filtered(dm -> staticQueueNames.stream()
-                        .anyMatch(s -> dm.getQueues().get(0).getName().equals(s)))
+                        .anyMatch(s -> dm.getQueues().getFirst().getName().equals(s)))
                 .stream()
                 .findFirst()
                 .ifPresentOrElse(dm -> menuItems.get(deleteFromQueueLbl).setDisable(true),
@@ -322,7 +322,7 @@ public class MenuUtils {
                         var dm = notObserved.get(i);
                         if (dm.getQueues().contains(qm))
                             return;
-                        if (staticQueueNames.stream().noneMatch(s -> dm.getQueues().get(0).getName().equals(s)))
+                        if (staticQueueNames.stream().noneMatch(s -> dm.getQueues().getFirst().getName().equals(s)))
                             mainTableUtils.remove(dm);
                         var startedQueue = new StartedQueue(qm);
                         if (startedQueues.contains(startedQueue))

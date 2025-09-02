@@ -20,7 +20,7 @@ public class MoreUtils {
         updateChecker.valueProperty().addListener((obs, old, newVal) -> {
             var version = newVal.version();
             if (!AppConfigs.VERSION.equals(version)) {
-                log.info("New update available: " + version);
+                log.info("New update available: {}", version);
                 IOUtils.writeUpdateDescription(newVal.description());
                 FxUtils.showUpdateDialog(newVal);
             }

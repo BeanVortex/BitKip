@@ -131,7 +131,7 @@ public class DownloadOpUtils {
                     DownloadsRepo.updateDownloadLastTryDate(dm);
                     mainTableUtils.refreshTable();
                     if (dm.isResumable()) {
-                        log.info("Resuming download : " + dm);
+                        log.info("Resuming download : {}", dm);
                         startDownload(dm, speedLimit, byteLimit, true, false);
                     } else
                         restartDownload(dm);
@@ -150,7 +150,7 @@ public class DownloadOpUtils {
     }
 
     private static void restartDownload(DownloadModel dm) {
-        log.info("Restarting download : " + dm);
+        log.info("Restarting download : {}", dm);
         IOUtils.deleteDownload(dm);
         var lastTryDate = LocalDateTime.now();
         var dmId = dm.getId();
@@ -229,13 +229,13 @@ public class DownloadOpUtils {
     }
 
     public static void openFile(DownloadModel dm) {
-        log.info("Opening file : " + dm.getFilePath());
+        log.info("Opening file : {}", dm.getFilePath());
         if (!new File(dm.getFilePath()).exists()) {
             Platform.runLater(() -> Notifications.create()
                     .title("File not found")
                     .text("%s has been moved or removed".formatted(dm.getName()))
                     .showError());
-            log.error("File does not exists : " + dm.getFilePath());
+            log.error("File does not exists : {}", dm.getFilePath());
             return;
         }
         try {
@@ -245,22 +245,25 @@ public class DownloadOpUtils {
             var isLinux = os.contains("nix") || os.contains("nux") || os.contains("bsd");
             if (Desktop.isDesktopSupported() && !isLinux)
                 desktop.open(new File(filePath));
-            else {
-                ProcessBuilder processBuilder;
-                if (os.contains("win"))
-                    // For Windows
-                    processBuilder = new ProcessBuilder("cmd.exe", "/c", "start", filePath);
-                else if (os.contains("mac"))
-                    processBuilder = new ProcessBuilder("open", filePath);
-                else if (isLinux)
-                    processBuilder = new ProcessBuilder("xdg-open", filePath);
-                else
-                    throw new UnsupportedOperationException("Unsupported operating system: " + os);
-                processBuilder.start();
-            }
+            else
+                getProcessBuilder(os, filePath, isLinux).start();
         } catch (IOException e) {
-            log.error(e.getLocalizedMessage());
+            throw new RuntimeException(e);
         }
+    }
+
+    private static ProcessBuilder getProcessBuilder(String os, String filePath, boolean isLinux) {
+        ProcessBuilder processBuilder;
+        if (os.contains("win"))
+            // For Windows
+            processBuilder = new ProcessBuilder("cmd.exe", "/c", "start", filePath);
+        else if (os.contains("mac"))
+            processBuilder = new ProcessBuilder("open", filePath);
+        else if (isLinux)
+            processBuilder = new ProcessBuilder("xdg-open", filePath);
+        else
+            throw new UnsupportedOperationException("Unsupported operating system: " + os);
+        return processBuilder;
     }
 
     public static void openContainingFolder(DownloadModel dm) {

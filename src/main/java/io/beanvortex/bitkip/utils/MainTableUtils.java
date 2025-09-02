@@ -139,12 +139,12 @@ public class MainTableUtils {
                 deleteWithFileLbl, menuItems, selectedItems);
 
         menuItems.get(openLbl).setOnAction(e -> DownloadOpUtils.openFiles(getSelected()));
-        menuItems.get(openFolderLbl).setOnAction(e -> DownloadOpUtils.openContainingFolder(getSelected().get(0)));
+        menuItems.get(openFolderLbl).setOnAction(e -> DownloadOpUtils.openContainingFolder(getSelected().getFirst()));
         menuItems.get(resumeLbl).setOnAction(e -> DownloadOpUtils.resumeDownloads(getSelected(), 0, 0));
         menuItems.get(pauseLbl).setOnAction(e -> DownloadOpUtils.pauseDownloads(getSelected()));
         menuItems.get(pauseAllLbl).setOnAction(e -> DownloadOpUtils.pauseAllDownloads());
         menuItems.get(refreshLbl).setOnAction(e -> DownloadOpUtils.refreshDownload(getSelected()));
-        menuItems.get(copyLbl).setOnAction(e -> FxUtils.setClipboard(getSelected().get(0).getUri()));
+        menuItems.get(copyLbl).setOnAction(e -> FxUtils.setClipboard(getSelected().getFirst().getUri()));
         menuItems.get(restartLbl).setOnAction(e -> DownloadOpUtils.restartDownloads(getSelected()));
         menuItems.get(detailsLbl).setOnAction(e -> getSelected().forEach(FxUtils::newDetailsStage));
         menuItems.get(credentialsLbl).setOnAction(e -> FxUtils.newChangeCredentialsStage(getSelected()));
@@ -176,8 +176,8 @@ public class MainTableUtils {
         return event -> {
             if (event.getButton().equals(MouseButton.PRIMARY) && event.getClickCount() == 2) {
                 var selected = getSelected();
-                if (selected.size() > 0) {
-                    var dm = getSelected().get(0);
+                if (!selected.isEmpty()) {
+                    var dm = getSelected().getFirst();
                     DownloadOpUtils.openDetailsStage(dm);
                 }
             }
@@ -186,8 +186,8 @@ public class MainTableUtils {
 
     public void addRow(DownloadModel download) {
         var items = contentTable.getItems();
-        if (items.size() != 0) {
-            var queue = items.get(0).getQueues().get(0);
+        if (!items.isEmpty()) {
+            var queue = items.getFirst().getQueues().getFirst();
             var dQueues = download.getQueues();
             if (dQueues.contains(queue)) {
                 items.add(download);
