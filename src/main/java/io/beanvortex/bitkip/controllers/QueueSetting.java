@@ -171,7 +171,7 @@ public class QueueSetting implements FXMLController, QueueObserver {
             horLine2.setPrefWidth(width);
             rightContainer.setPrefWidth(width - queueList.getPrefWidth());
         });
-        selectedQueue.set(QueueSubject.getQueues().get(0));
+        selectedQueue.set(QueueSubject.getQueues().getFirst());
         stage.heightProperty().addListener((o, o2, n) -> {
             var height = n.longValue();
             queueList.setPrefHeight(height);
@@ -235,7 +235,7 @@ public class QueueSetting implements FXMLController, QueueObserver {
         });
 
         var startDate = schedule.getStartDate();
-        if (startDate != null)
+        if (startDate != null && datePicker.getValue().isBefore(startDate))
             datePicker.setValue(startDate);
 
         stopAtCheck.setSelected(schedule.isStopTimeEnabled());
@@ -392,7 +392,7 @@ public class QueueSetting implements FXMLController, QueueObserver {
 
             ScheduleTask.schedule(queue);
             showResultMessage("Successfully Saved", SaveStatus.SUCCESS);
-            log.info("Updated queue : " + queue.toStringModel());
+            log.info("Updated queue : {}", queue.toStringModel());
         } catch (IllegalArgumentException e) {
             showResultMessage(e.getMessage(), SaveStatus.ERROR);
             log.error(e.getMessage());
