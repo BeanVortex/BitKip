@@ -2,6 +2,7 @@ package io.beanvortex.bitkip.controllers;
 
 import io.beanvortex.bitkip.BitKip;
 import io.beanvortex.bitkip.controllers.interfaces.FXMLController;
+import io.beanvortex.bitkip.repo.DownloadsRepo;
 import io.beanvortex.bitkip.utils.IOUtils;
 import io.beanvortex.bitkip.utils.MoreUtils;
 import io.beanvortex.bitkip.config.AppConfigs;
@@ -25,7 +26,7 @@ public class AboutController implements FXMLController, ThemeObserver {
     @FXML
     private ImageView logoImg;
     @FXML
-    private Label versionLbl;
+    private Label versionLbl, downloadedLbl;
 
     private Stage stage;
 
@@ -34,6 +35,7 @@ public class AboutController implements FXMLController, ThemeObserver {
         var image = new Image(BitKip.getResource("icons/logo.png").toExternalForm());
         logoImg.setImage(image);
         versionLbl.setText("v" + AppConfigs.VERSION);
+        downloadedLbl.setText("Downloaded: " + IOUtils.formatBytes(DownloadsRepo.sumDownloaded()));
         initPatchNote();
     }
 

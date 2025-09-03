@@ -101,7 +101,7 @@ public class MainTableUtils {
                 dragContent.putFiles(dragFiles);
                 dragboard.setContent(dragContent);
 
-                Text dragView = new Text("📋 " + selected.size() + (selected.size() > 1 ? " items" : "item"));
+                Text dragView = new Text("📋 " + selected.size() + (selected.size() > 1 ? " items" : " item"));
                 dragboard.setDragView(dragView.snapshot(null, null));
 
                 dragboard.setDragViewOffsetX(-15);

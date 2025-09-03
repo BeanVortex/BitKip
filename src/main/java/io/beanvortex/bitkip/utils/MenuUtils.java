@@ -114,7 +114,10 @@ public class MenuUtils {
             disableMenuItems(resumeLbl, pauseLbl, pauseAllLbl, openLbl, openFolderLbl, deleteFromQueueLbl, refreshLbl,
                     copyLbl, restartLbl, locationLbl, exportLinkLbl, addToQueueLbl, deleteLbl, deleteWithFileLbl, menuItems, selectedItems);
             disableEnableStartStopQueue(startQueueMenu, stopQueueMenu);
-            deleteLbl.setText("Delete selected (" + selectedItems.size() + ")");
+            long sumSize = selectedItems.stream()
+                    .map(DownloadModel::getSize)
+                    .reduce(0L, Long::sum);
+            deleteLbl.setText("Delete selected (" + selectedItems.size() + ") " + IOUtils.formatBytes(sumSize));
             c.show(operationMenu, Side.BOTTOM, 0, 0);
         });
 
@@ -376,7 +379,7 @@ public class MenuUtils {
     public static LinkedHashMap<Label, MenuItem> createMapMenuItems(List<Label> lbls, List<KeyCodeCombination> keyCodes) {
         var menuItems = new LinkedHashMap<Label, MenuItem>();
         for (int i = 0; i < lbls.size(); i++) {
-            lbls.get(i).setPrefWidth(150);
+            lbls.get(i).setPrefWidth(180);
             var menuItem = new MenuItem();
             menuItem.setGraphic(lbls.get(i));
             if (keyCodes != null && keyCodes.get(i) != null)

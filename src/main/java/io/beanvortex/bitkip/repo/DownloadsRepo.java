@@ -444,4 +444,17 @@ public class DownloadsRepo {
                 );
         DatabaseHelper.runSQL(sql, false);
     }
+
+    public static long sumDownloaded() {
+        var sql = "SELECT sum(downloaded) AS sum FROM downloads;";
+        try (var con = DatabaseHelper.openConnection();
+             var stmt = con.createStatement();
+             var rs = stmt.executeQuery(sql)) {
+            if (rs.next())
+                return rs.getLong("sum");
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        return 0;
+    }
 }
