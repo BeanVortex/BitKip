@@ -362,6 +362,8 @@ public class FxUtils {
                     return false;
             } else return false;
         }
+        if (desQueue != null && !desQueue.hasFolder())
+            return false;
 
         var yes = new ButtonType("Yes", ButtonBar.ButtonData.YES);
         var no = new ButtonType("No", ButtonBar.ButtonData.NO);

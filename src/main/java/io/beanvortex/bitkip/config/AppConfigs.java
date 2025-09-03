@@ -113,4 +113,6 @@ public class AppConfigs {
     public static String userPassword;
     public static HostServices hostServices;
 
+    public static String currentSelectedQueue = "All Downloads";
+
 }

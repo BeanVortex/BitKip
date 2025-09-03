@@ -1,8 +1,6 @@
 package io.beanvortex.bitkip.models;
 
-import io.beanvortex.bitkip.repo.DatabaseHelper;
 import io.beanvortex.bitkip.repo.QueuesRepo;
-import io.beanvortex.bitkip.repo.ScheduleRepo;
 import io.beanvortex.bitkip.task.DownloadTask;
 import io.beanvortex.bitkip.utils.IOUtils;
 import io.beanvortex.bitkip.utils.MainTableUtils;
@@ -14,7 +12,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Collections;
+import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.CopyOnWriteArrayList;
 
@@ -64,6 +62,10 @@ public class DownloadModel {
     public static final String DATE_FORMAT = "yyyy/MM/dd - HH:mm:ss";
     public static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern(DATE_FORMAT);
 
+
+    public DownloadModel(int id) {
+        this.id = id;
+    }
 
     @Override
     public boolean equals(Object o) {
@@ -174,13 +176,8 @@ public class DownloadModel {
                 .build();
 
         if (fetchQueue) {
-            var queueId = rs.getInt(DatabaseHelper.COL_QUEUE_ID);
-            var queueName = rs.getString(DatabaseHelper.COL_QUEUE_NAME);
-            var scheduleId = rs.getInt(QueuesRepo.COL_SCHEDULE_ID);
-            var schedule = ScheduleRepo.createScheduleModel(rs, scheduleId);
-            var queue = QueueModel.createQueueModel(rs, queueId, queueName, schedule);
-            var queues = new CopyOnWriteArrayList<>(Collections.singletonList(queue));
-            build.setQueues(queues);
+            List<QueueModel> queuesOfADownload = QueuesRepo.findQueuesOfADownload(id, false, true);
+            build.setQueues(new CopyOnWriteArrayList<>(queuesOfADownload));
         }
         return build;
     }

@@ -165,7 +165,7 @@ public class QueuesRepo {
         DatabaseHelper.runSQL(sql, false);
     }
 
-    public static List<QueueModel> findQueuesOfADownload(int downloadId) {
+    public static List<QueueModel> findQueuesOfADownload(int downloadId, boolean fetchDownloads, boolean fetchSchedule) {
         var sql = """
                 SELECT q.*
                 FROM %s q
@@ -177,7 +177,7 @@ public class QueuesRepo {
                         QUEUE_DOWNLOAD_TABLE_NAME, COL_ID, COL_QUEUE_ID,
                         DOWNLOADS_TABLE_NAME, COL_ID, COL_DOWNLOAD_ID,
                         COL_ID, downloadId);
-        return getQueues(false, false, sql);
+        return getQueues(fetchDownloads, fetchSchedule, sql);
     }
 
     private static void alters() {
@@ -210,7 +210,7 @@ public class QueuesRepo {
         var simulDownloads = rs.getInt(COL_SIMUL_DOWNLOAD);
         CopyOnWriteArrayList<DownloadModel> downloads = null;
         if (fetchDownloads)
-            downloads = new CopyOnWriteArrayList<>(DownloadsRepo.getDownloadsByQueueName(name));
+            downloads = new CopyOnWriteArrayList<>(DownloadsRepo.getDownloadsByQueueName(name, false));
         ScheduleModel schedule = null;
         if (fetchSchedule)
             schedule = ScheduleRepo.getSchedule(id);

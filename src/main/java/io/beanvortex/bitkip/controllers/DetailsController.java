@@ -113,7 +113,7 @@ public class DetailsController implements FXMLController {
             end = 60;
         stage.setTitle(dm.getName().substring(0, end));
         nameLbl.setText("Name: " + dm.getName());
-        var queues = QueuesRepo.findQueuesOfADownload(dm.getId()).toString();
+        var queues = QueuesRepo.findQueuesOfADownload(dm.getId(), false, false).toString();
         queueLbl.setText("Queues: " + queues.substring(1, queues.length() - 1));
         statusLbl.setText("Status: " + dm.getDownloadStatus().name());
         var downloadOf = "%s / %s"

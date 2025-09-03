@@ -39,10 +39,8 @@ class DownloadsRepoTest {
         DownloadsRepo.updateDownloadLocation(newPath, dmId);
         var byId = DownloadsRepo.findById(dmId);
 
-        assert byId.size() == 1;
-        var fetchedDm = byId.get(0);
 
-        assertEquals(newPath + name, fetchedDm.getFilePath());
+        assertEquals(newPath + name, byId.getFilePath());
 
         DownloadsRepo.deleteDownload(dm);
     }

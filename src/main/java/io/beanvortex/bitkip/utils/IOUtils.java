@@ -216,7 +216,7 @@ public class IOUtils {
     }
 
     public static void moveFilesAndDeleteQueueFolder(String queueName) {
-        var downloadsByQueueName = DownloadsRepo.getDownloadsByQueueName(queueName);
+        var downloadsByQueueName = DownloadsRepo.getDownloadsByQueueName(queueName, true);
         downloadsByQueueName.stream()
                 .filter(dm -> dm.getFilePath().contains(downloadPath))
                 .peek(dm -> {
@@ -258,7 +258,7 @@ public class IOUtils {
         if (queue.hasFolder()) {
             var res = createFolderInSaveLocation("Queues" + File.separator + queue.getName());
             if (res) {
-                var downloadsByQueueName = DownloadsRepo.getDownloadsByQueueName(queue.getName());
+                var downloadsByQueueName = DownloadsRepo.getDownloadsByQueueName(queue.getName(), true);
                 var newFilePath = queuesPath + queue.getName() + File.separator;
                 if (FxUtils.askToMoveFilesForQueues(downloadsByQueueName, queue, newFilePath))
                     downloadsByQueueName.forEach(dm -> moveDownloadFiles(dm, newFilePath + dm.getName()));

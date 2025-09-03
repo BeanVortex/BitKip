@@ -1,18 +1,12 @@
 package io.beanvortex.bitkip.utils;
 
-import io.beanvortex.bitkip.models.DownloadModel;
-import io.beanvortex.bitkip.models.DownloadStatus;
-import io.beanvortex.bitkip.models.QueueModel;
-import io.beanvortex.bitkip.models.StartedQueue;
+import io.beanvortex.bitkip.models.*;
 import io.beanvortex.bitkip.repo.DownloadsRepo;
 import io.beanvortex.bitkip.repo.QueuesRepo;
 import javafx.event.EventHandler;
 import javafx.geometry.Side;
 import javafx.scene.control.*;
-import javafx.scene.input.KeyCode;
-import javafx.scene.input.KeyCodeCombination;
-import javafx.scene.input.MouseButton;
-import javafx.scene.input.MouseEvent;
+import javafx.scene.input.*;
 import javafx.scene.paint.Paint;
 import org.kordamp.ikonli.javafx.FontIcon;
 
@@ -23,6 +17,7 @@ import java.util.function.Predicate;
 import static io.beanvortex.bitkip.config.AppConfigs.*;
 import static io.beanvortex.bitkip.utils.Defaults.*;
 import static io.beanvortex.bitkip.utils.Defaults.OTHERS_QUEUE;
+import static io.beanvortex.bitkip.utils.MenuUtils.moveDownloadsToQueue;
 import static io.beanvortex.bitkip.utils.ShortcutUtils.DELETE_KEY;
 import static io.beanvortex.bitkip.utils.ShortcutUtils.NEW_QUEUE_KEY;
 
@@ -55,7 +50,7 @@ public class SideUtils {
                 .filter(q -> !staticQueueNames.contains(q.getName()))
                 .map(SideUtils::changeScheduledQueueIcon).toList();
         queuesItem.getChildren().addAll(treeQueueItems);
-
+        enableDragAndDrop(sideTree);
         allItem.getChildren().addAll(List.of(categoryItem, finishedItem, unfinishedItem, queuesItem));
         sideTree.setRoot(allItem);
         sideTree.setShowRoot(true);
@@ -73,6 +68,78 @@ public class SideUtils {
 
     }
 
+    private static void enableDragAndDrop(TreeView<String> treeView) {
+        // Set cell factory to handle drag events
+        treeView.setCellFactory(tv -> {
+            var cell = new TreeCell<String>() {
+                @Override
+                protected void updateItem(String item, boolean empty) {
+                    super.updateItem(item, empty);
+                    if (empty || item == null) {
+                        setText(null);
+                        setGraphic(null);
+                    } else {
+                        setText(item);
+                        setGraphic(getTreeItem().getGraphic());
+                    }
+                }
+            };
+            cell.updateSelected(cell.getText() != null && cell.getText().equals(currentSelectedQueue));
+
+            cell.setOnDragOver(event -> {
+                if (event.getGestureSource() != cell &&
+                        event.getDragboard().hasString()) {
+
+                    TreeItem<String> targetItem = cell.getTreeItem();
+                    if (allSideTreeStaticNames.contains(targetItem.getValue()))
+                        return;
+                    event.acceptTransferModes(TransferMode.MOVE);
+                }
+                event.consume();
+            });
+
+            cell.setOnDragEntered(event -> {
+                if (event.getGestureSource() != cell &&
+                        event.getDragboard().hasString()) {
+
+                    TreeItem<String> targetItem = cell.getTreeItem();
+                    if (allSideTreeStaticNames.contains(targetItem.getValue()))
+                        return;
+
+                    if (theme.equals("dark"))
+                        cell.setStyle("-fx-background-color: #526D82; -fx-border-color: #3399ff;");
+                    else
+                        cell.setStyle("-fx-background-color: #C4DFDF; -fx-border-color: #3399ff;");
+                }
+                event.consume();
+            });
+
+            cell.setOnDragExited(event -> {
+                cell.setStyle("");
+                event.consume();
+            });
+
+            cell.setOnDragDropped(event -> {
+                Dragboard db = event.getDragboard();
+                boolean success = false;
+
+                if (db.hasString()) {
+                    TreeItem<String> targetItem = cell.getTreeItem();
+                    var qm = QueuesRepo.findByName(targetItem.getValue(), false);
+                    String string = db.getString();
+                    var dms = DownloadsRepo.findAllById(string, true);
+                    moveDownloadsToQueue(dms, qm);
+                    success = true;
+                }
+
+                event.setDropCompleted(success);
+                event.consume();
+            });
+
+            return cell;
+        });
+    }
+
 
     private static EventHandler<? super MouseEvent> onSideClicked(TreeView<String> sideTree) {
         return event -> {
@@ -80,6 +147,7 @@ public class SideUtils {
             if (selectedItem == null)
                 return;
             var itemName = selectedItem.getValue();
+            currentSelectedQueue = itemName;
             sideTree.setContextMenu(null);
             if (itemName.equals("All")) return;
             if (event.getButton().equals(MouseButton.PRIMARY)) {

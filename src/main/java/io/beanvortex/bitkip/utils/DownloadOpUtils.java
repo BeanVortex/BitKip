@@ -312,7 +312,7 @@ public class DownloadOpUtils {
 
     public static void exportLinks(String queue) {
         try {
-            var urls = DownloadsRepo.getDownloadsByQueueName(queue)
+            var urls = DownloadsRepo.getDownloadsByQueueName(queue, false)
                     .stream().map(DownloadModel::getUri)
                     .toList();
             IOUtils.writeLinksToFile(urls, queue);

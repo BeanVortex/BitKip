@@ -9,10 +9,12 @@ import javafx.collections.ObservableList;
 import javafx.geometry.Side;
 import javafx.scene.control.*;
 import javafx.scene.input.KeyCodeCombination;
+import org.controlsfx.control.Notifications;
 
 import java.io.File;
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import static io.beanvortex.bitkip.config.AppConfigs.*;
 import static io.beanvortex.bitkip.utils.Defaults.ALL_DOWNLOADS_QUEUE;
@@ -173,7 +175,7 @@ public class MenuUtils {
         menuItems.get(deleteFromQueueLbl).setDisable(selectedItems.isEmpty());
 
         selectedItems.filtered(dm -> staticQueueNames.stream()
-                        .anyMatch(s -> dm.getQueues().getFirst().getName().equals(s)))
+                        .anyMatch(s -> currentSelectedQueue.equals(s)))
                 .stream()
                 .findFirst()
                 .ifPresentOrElse(dm -> menuItems.get(deleteFromQueueLbl).setDisable(true),
@@ -295,6 +297,8 @@ public class MenuUtils {
         var moveFiles = FxUtils.askToMoveFilesForQueues(notObserved, null, downloadPath);
         for (var dm : notObserved) {
             mainTableUtils.remove(dm);
+            if (dm.getQueues().isEmpty())
+                dm.setQueues(new CopyOnWriteArrayList<>(QueuesRepo.findQueuesOfADownload(dm.getId(), false, false)));
             dm.getQueues()
                     .stream()
                     .filter(qm -> !staticQueueNames.contains(qm.getName()))
@@ -316,32 +320,45 @@ public class MenuUtils {
         addToQueueMenu.getItems().forEach(menuItem -> menuItem.setOnAction(e -> {
                     var qm = addToQueueItems.get(menuItem);
                     var notObserved = new ArrayList<>(mainTableUtils.getSelected());
-                    var queuePath = queuesPath + qm.getName() + File.separator;
-                    var moveFiles = FxUtils.askToMoveFilesForQueues(notObserved, qm, queuePath);
-                    for (int i = 0; i < notObserved.size(); i++) {
-                        var dm = notObserved.get(i);
-                        if (dm.getQueues().contains(qm))
-                            return;
-                        if (staticQueueNames.stream().noneMatch(s -> dm.getQueues().getFirst().getName().equals(s)))
-                            mainTableUtils.remove(dm);
-                        var startedQueue = new StartedQueue(qm);
-                        if (startedQueues.contains(startedQueue))
-                            startedQueues.get(startedQueues.indexOf(startedQueue)).queue().getDownloads().add(dm);
-                        if (moveFiles) {
-                            var newFilePath = FileType.determineFileType(dm.getName()).getPath() + dm.getName();
-                            if (qm.hasFolder())
-                                newFilePath = queuesPath + qm.getName() + File.separator + dm.getName();
-                            IOUtils.moveDownloadFiles(dm, newFilePath);
-                            dm.setFilePath(newFilePath);
-                            mainTableUtils.refreshTable();
-                        }
-                        var addToQueueDate = LocalDateTime.now();
-                        if (i != 0)
-                            addToQueueDate = notObserved.get(i - 1).getAddToQueueDate().plusSeconds(1);
-                        DownloadsRepo.updateDownloadQueue(dm.getId(), qm.getId(), addToQueueDate.toString());
-                    }
+                    moveDownloadsToQueue(notObserved, qm);
                 })
         );
+    }
+
+    public static void moveDownloadsToQueue(List<DownloadModel> dms, QueueModel qm) {
+        var queuePath = queuesPath + qm.getName() + File.separator;
+        var moveFiles = FxUtils.askToMoveFilesForQueues(dms, qm, queuePath);
+        for (int i = 0; i < dms.size(); i++) {
+            var dm = dms.get(i);
+            if (dm.getQueues().contains(qm)) {
+                Notifications.create()
+                        .title("Error")
+                        .text("Can't move download to the same queue")
+                        .showError();
+                return;
+            }
+            if (staticQueueNames.stream().noneMatch(s -> currentSelectedQueue.equals(s)))
+                mainTableUtils.remove(dm);
+            var startedQueue = new StartedQueue(qm);
+            if (startedQueues.contains(startedQueue))
+                startedQueues.get(startedQueues.indexOf(startedQueue)).queue().getDownloads().add(dm);
+            if (moveFiles) {
+                var newFilePath = FileType.determineFileType(dm.getName()).getPath() + dm.getName();
+                if (qm.hasFolder())
+                    newFilePath = queuesPath + qm.getName() + File.separator + dm.getName();
+                IOUtils.moveDownloadFiles(dm, newFilePath);
+                dm.setFilePath(newFilePath);
+            }
+            var addToQueueDate = LocalDateTime.now();
+            if (i != 0)
+                addToQueueDate = dms.get(i - 1).getAddToQueueDate().plusSeconds(1);
+            DownloadsRepo.updateDownloadQueue(dm.getId(), qm.getId(), addToQueueDate.toString());
+            mainTableUtils.refreshTable();
+        }
+        Notifications.create()
+                .title("Success")
+                .text("Moved downloads to the " + qm.getName() + " queue")
+                .showInformation();
     }
 
 

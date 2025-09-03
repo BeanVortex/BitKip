@@ -9,15 +9,18 @@ import javafx.collections.ObservableList;
 import javafx.event.EventHandler;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
-import javafx.scene.input.MouseButton;
-import javafx.scene.input.MouseEvent;
+import javafx.scene.input.*;
+import javafx.scene.text.Text;
 import javafx.util.Callback;
 import org.apache.commons.lang3.time.DurationFormatUtils;
 
+import java.io.File;
 import java.text.DecimalFormat;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static io.beanvortex.bitkip.config.AppConfigs.currentDownloadings;
 import static io.beanvortex.bitkip.config.AppConfigs.log;
@@ -29,6 +32,8 @@ public class MainTableUtils {
 
     public static final DecimalFormat dFormat = new DecimalFormat("##.#");
 
+    private final ClipboardContent dragContent = new ClipboardContent();
+    private final List<File> dragFiles = new ArrayList<>();
 
     private final TableView<DownloadModel> contentTable;
 
@@ -80,6 +85,38 @@ public class MainTableUtils {
         contentTable.setRowFactory(getTableViewTableRowCallback());
     }
 
+    private void initDragDrop(TableRow<DownloadModel> row) {
+        row.setOnDragDetected(event -> {
+            Dragboard dragboard = row.startDragAndDrop(TransferMode.MOVE);
+            var selected = getSelected();
+            if (!selected.isEmpty()) {
+                // Put the selected items in clipboard
+                String ids = selected.stream()
+                        .map(DownloadModel::getId)
+                        .map(Object::toString)
+                        .collect(Collectors.joining(","));
+                selected.forEach(dm -> dragFiles.add(new File(dm.getFilePath())));
+
+                dragContent.putString(ids);
+                dragContent.putFiles(dragFiles);
+                dragboard.setContent(dragContent);
+
+                Text dragView = new Text("📋 " + selected.size() + (selected.size() > 1 ? " items" : "item"));
+                dragboard.setDragView(dragView.snapshot(null, null));
+
+                dragboard.setDragViewOffsetX(-15);
+                dragboard.setDragViewOffsetY(15);
+
+                event.consume();
+            }
+        });
+        contentTable.setOnDragDone(me -> {
+            dragContent.clear();
+            dragFiles.clear();
+            me.consume();
+        });
+    }
+
 
     private Callback<TableView<DownloadModel>, TableRow<DownloadModel>> getTableViewTableRowCallback() {
 
@@ -94,6 +131,8 @@ public class MainTableUtils {
                     cMenu.show(row, event.getScreenX(), event.getScreenY());
             });
             row.setOnMousePressed(e -> row.setContextMenu(null));
+            initDragDrop(row);
+
             return row;
         };
     }
