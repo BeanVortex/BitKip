@@ -22,8 +22,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static io.beanvortex.bitkip.config.AppConfigs.currentDownloadings;
-import static io.beanvortex.bitkip.config.AppConfigs.log;
+import static io.beanvortex.bitkip.config.AppConfigs.*;
 import static io.beanvortex.bitkip.utils.Defaults.staticQueueNames;
 import static io.beanvortex.bitkip.utils.ShortcutUtils.*;
 
@@ -226,11 +225,13 @@ public class MainTableUtils {
     public void addRow(DownloadModel download) {
         var items = contentTable.getItems();
         if (!items.isEmpty()) {
-            var queue = items.getFirst().getQueues().getFirst();
             var dQueues = download.getQueues();
-            if (dQueues.contains(queue)) {
-                items.add(download);
-                contentTable.sort();
+            for (var q : dQueues) {
+                if (q.getName().equals(currentSelectedQueue)){
+                    items.add(download);
+                    contentTable.sort();
+                    break;
+                }
             }
         } else {
             items.add(download);

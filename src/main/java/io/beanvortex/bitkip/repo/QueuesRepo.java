@@ -3,7 +3,6 @@ package io.beanvortex.bitkip.repo;
 import io.beanvortex.bitkip.models.DownloadModel;
 import io.beanvortex.bitkip.models.QueueModel;
 import io.beanvortex.bitkip.models.ScheduleModel;
-import io.beanvortex.bitkip.utils.Defaults;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -13,6 +12,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 import static io.beanvortex.bitkip.config.AppConfigs.log;
 import static io.beanvortex.bitkip.repo.DatabaseHelper.*;
+import static io.beanvortex.bitkip.utils.Defaults.staticQueueNames;
 
 public class QueuesRepo {
 
@@ -33,7 +33,7 @@ public class QueuesRepo {
     }
 
     public static List<QueueModel> createDefaultRecords() {
-        return Defaults.staticQueueNames.stream().map(name -> {
+        return staticQueueNames.stream().map(name -> {
             var queue = new QueueModel(name, false);
             if (name.equals("All Downloads"))
                 queue.setCanAddDownload(true);

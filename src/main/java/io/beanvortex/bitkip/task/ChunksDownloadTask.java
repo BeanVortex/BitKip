@@ -353,8 +353,7 @@ public class ChunksDownloadTask extends DownloadTask {
 
             }
         } catch (IOException e) {
-            e.printStackTrace();
-            log.error(e.toString());
+            throw new RuntimeException(e);
         } finally {
             currentDownloadings.remove(downloadModel);
             mainTableUtils.refreshTable();
