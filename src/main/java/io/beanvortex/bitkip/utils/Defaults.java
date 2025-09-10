@@ -40,6 +40,6 @@ public class Defaults {
         extensions.put(DOCS_QUEUE, documentEx);
         extensions.put(MUSIC_QUEUE, musicEx);
         extensions.put(OTHERS_QUEUE, new ArrayList<>());
-        allSideTreeStaticNames.addAll(List.of("All", "Categories", "Finished", "Unfinished", "Queues"));
+        allSideTreeStaticNames.addAll(List.of("All", "Categories", "Finished", "Unfinished"));
     }
 }

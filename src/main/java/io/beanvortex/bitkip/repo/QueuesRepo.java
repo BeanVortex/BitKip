@@ -137,6 +137,19 @@ public class QueuesRepo {
         throw new IllegalArgumentException("Queue does not exist");
     }
 
+    public static int getLastFastQueueNumber() {
+        var sql = "SELECT COUNT(*) AS c FROM queues WHERE name LIKE 'fq%';";
+        try (var con = DatabaseHelper.openConnection();
+             var stmt = con.createStatement();
+             var rs = stmt.executeQuery(sql)) {
+            if (rs.next())
+                return rs.getInt("c");
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        return 0;
+    }
+
 
     public static List<QueueModel> getAllQueues(boolean fetchDownloads, boolean fetchSchedule) {
         var sql = "SELECT * FROM " + QUEUES_TABLE_NAME + ";";

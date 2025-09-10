@@ -1,9 +1,13 @@
 package io.beanvortex.bitkip.models;
 
+import io.beanvortex.bitkip.config.observers.QueueSubject;
+import io.beanvortex.bitkip.repo.QueuesRepo;
+import io.beanvortex.bitkip.repo.ScheduleRepo;
 import lombok.*;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.CopyOnWriteArrayList;
 
@@ -77,5 +81,19 @@ public class QueueModel {
         var downloadFromTop = rs.getBoolean(COL_DOWN_TOP);
         return new QueueModel(queueId, queueName, editable, canAddDownload, hasFolder, downloadFromTop,
                 speedLimit, simulDownloads, schedule, null);
+    }
+
+    public static QueueModel createFastQueue(List<DownloadModel> dms) {
+        QueueModel queue;
+        var schedule = new ScheduleModel();
+        ScheduleRepo.insertSchedule(schedule, -1);
+        queue = new QueueModel(-1, "fq" + getLastFastQueueNumber(), true,
+                true, false, false,
+                "0", 1, schedule, new CopyOnWriteArrayList<>(dms));
+        QueuesRepo.insertQueue(queue);
+        schedule.setQueueId(queue.getId());
+        ScheduleRepo.updateScheduleQueueId(schedule.getId(), schedule.getQueueId());
+        QueueSubject.addQueue(queue);
+        return queue;
     }
 }

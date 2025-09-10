@@ -15,9 +15,12 @@ import java.util.List;
 import java.util.function.Predicate;
 
 import static io.beanvortex.bitkip.config.AppConfigs.*;
+import static io.beanvortex.bitkip.models.QueueModel.createFastQueue;
 import static io.beanvortex.bitkip.utils.Defaults.*;
 import static io.beanvortex.bitkip.utils.Defaults.OTHERS_QUEUE;
+import static io.beanvortex.bitkip.utils.FxUtils.newQueueStage;
 import static io.beanvortex.bitkip.utils.MenuUtils.moveDownloadsToQueue;
+import static io.beanvortex.bitkip.utils.QueueUtils.startFastQueue;
 import static io.beanvortex.bitkip.utils.ShortcutUtils.*;
 
 public class SideUtils {
@@ -127,10 +130,17 @@ public class SideUtils {
 
                 if (db.hasString()) {
                     TreeItem<String> targetItem = cell.getTreeItem();
-                    var qm = QueuesRepo.findByName(targetItem.getValue(), false);
                     String string = db.getString();
                     var dms = DownloadsRepo.findAllById(string, true);
-                    moveDownloadsToQueue(dms, qm);
+                    QueueModel queue;
+                    if (targetItem.getValue().equals("Queues"))
+                        queue = createFastQueue(dms);
+                    else
+                        queue = QueuesRepo.findByName(targetItem.getValue(), false);
+
+                    moveDownloadsToQueue(dms, queue);
+                    if (targetItem.getValue().equals("Queues") && startFastQueue)
+                        startFastQueue(queue);
                     success = true;
                 }
 
@@ -216,7 +226,7 @@ public class SideUtils {
         menuItem.setGraphic(newQueueLbl);
         menuItem.setAccelerator(NEW_QUEUE_KEY);
         cMenu.getItems().add(menuItem);
-        menuItem.setOnAction(e -> FxUtils.newQueueStage());
+        menuItem.setOnAction(e -> newQueueStage());
         return cMenu;
     }
 

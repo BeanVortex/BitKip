@@ -19,6 +19,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import static io.beanvortex.bitkip.config.AppConfigs.*;
 import static io.beanvortex.bitkip.utils.Defaults.ALL_DOWNLOADS_QUEUE;
 import static io.beanvortex.bitkip.utils.Defaults.staticQueueNames;
+import static io.beanvortex.bitkip.utils.QueueUtils.startFastQueue;
 import static io.beanvortex.bitkip.utils.ShortcutUtils.*;
 
 public class MenuUtils {
@@ -68,6 +69,7 @@ public class MenuUtils {
         var newQueueLbl = new Label("New queue");
         var deleteFromQueueLbl = new Label("Delete from this queue");
         var addToQueueLbl = new Label("Add to queue");
+        var addToFastQueueLbl = new Label("Add to fast queue");
         var startQueueLbl = new Label("Start queue");
         var stopQueueLbl = new Label("Stop queue");
         var queueSettingLbl = new Label("Queue settings");
@@ -81,8 +83,8 @@ public class MenuUtils {
         var split = new SeparatorMenuItem();
         menuItems.put(new Label("s"), split);
 
-        var lbls2 = List.of(newQueueLbl, deleteFromQueueLbl);
-        var keyCodes2 = Arrays.asList(NEW_QUEUE_KEY, null);
+        var lbls2 = List.of(newQueueLbl, deleteFromQueueLbl, addToFastQueueLbl);
+        var keyCodes2 = Arrays.asList(NEW_QUEUE_KEY, null, null);
         var menuItems2 = createMapMenuItems(lbls2, keyCodes2);
         menuItems.putAll(menuItems2);
 
@@ -111,7 +113,7 @@ public class MenuUtils {
 
         operationMenu.setOnMouseClicked(event -> {
             var selectedItems = mainTableUtils.getSelected();
-            disableMenuItems(resumeLbl, pauseLbl, pauseAllLbl, openLbl, openFolderLbl, deleteFromQueueLbl, refreshLbl,
+            disableMenuItems(resumeLbl, pauseLbl, pauseAllLbl, openLbl, openFolderLbl, deleteFromQueueLbl, addToFastQueueLbl, refreshLbl,
                     copyLbl, restartLbl, locationLbl, exportLinkLbl, addToQueueLbl, deleteLbl, deleteWithFileLbl, menuItems, selectedItems);
             disableEnableStartStopQueue(startQueueMenu, stopQueueMenu);
             long sumSize = selectedItems.stream()
@@ -135,6 +137,12 @@ public class MenuUtils {
         menuItems.get(deleteWithFileLbl).setOnAction(e -> DownloadOpUtils.deleteDownloads(mainTableUtils.getSelected(), true));
         menuItems.get(newQueueLbl).setOnAction(e -> FxUtils.newQueueStage());
         menuItems.get(deleteFromQueueLbl).setOnAction(e -> deleteFromQueue());
+        menuItems.get(addToFastQueueLbl).setOnAction(e -> {
+            var fastQueue = QueueModel.createFastQueue(mainTableUtils.getSelected());
+            moveDownloadsToQueue(mainTableUtils.getSelected(), fastQueue);
+            if (startFastQueue)
+                startFastQueue(fastQueue);
+        });
         menuItems.get(queueSettingLbl).setOnAction(e -> FxUtils.newSettingsStage(true, null));
     }
 
@@ -157,7 +165,7 @@ public class MenuUtils {
     }
 
     public static void disableMenuItems(Label resumeLbl, Label pauseLbl, Label pauseAllLbl, Label openLbl,
-                                        Label openFolderLbl, Label deleteFromQueueLbl, Label refreshLbl,
+                                        Label openFolderLbl, Label deleteFromQueueLbl, Label addToFastQueueLbl, Label refreshLbl,
                                         Label copyLbl, Label restartLbl, Label locationLbl, Label exportLinkLbl,
                                         Label addToQueueLbl, Label deleteLbl, Label deleteWithFileLbl,
                                         LinkedHashMap<Label, MenuItem> menuItems,
@@ -173,6 +181,7 @@ public class MenuUtils {
         menuItems.get(refreshLbl).setDisable(selectedItems.size() != 1);
         menuItems.get(copyLbl).setDisable(selectedItems.size() != 1);
         menuItems.get(addToQueueLbl).setDisable(selectedItems.isEmpty());
+        menuItems.get(addToFastQueueLbl).setDisable(selectedItems.isEmpty());
         menuItems.get(deleteLbl).setDisable(selectedItems.isEmpty());
         menuItems.get(deleteWithFileLbl).setDisable(selectedItems.isEmpty());
         menuItems.get(deleteFromQueueLbl).setDisable(selectedItems.isEmpty());
@@ -194,6 +203,7 @@ public class MenuUtils {
                     menuItems.get(locationLbl).setDisable(false);
                     menuItems.get(refreshLbl).setDisable(false);
                     menuItems.get(addToQueueLbl).setDisable(false);
+                    menuItems.get(addToFastQueueLbl).setDisable(false);
                 });
         selectedItems.stream().filter(dm -> dm.getDownloadStatus() == DownloadStatus.Downloading
                         || dm.getDownloadStatus() == DownloadStatus.Trying)
@@ -207,6 +217,7 @@ public class MenuUtils {
                     menuItems.get(locationLbl).setDisable(true);
                     menuItems.get(refreshLbl).setDisable(true);
                     menuItems.get(addToQueueLbl).setDisable(true);
+                    menuItems.get(addToFastQueueLbl).setDisable(true);
                 });
         selectedItems.stream().filter(dm -> dm.getDownloadStatus() == DownloadStatus.Completed)
                 .findFirst().ifPresent(dm -> {
@@ -219,6 +230,7 @@ public class MenuUtils {
                     menuItems.get(locationLbl).setDisable(false);
                     menuItems.get(refreshLbl).setDisable(false);
                     menuItems.get(addToQueueLbl).setDisable(false);
+                    menuItems.get(addToFastQueueLbl).setDisable(false);
                 });
         selectedItems.stream().filter(dm -> dm.getDownloadStatus() == DownloadStatus.Merging)
                 .findFirst().ifPresent(dm -> menuItems.values().forEach(menuItem -> menuItem.setDisable(true)));

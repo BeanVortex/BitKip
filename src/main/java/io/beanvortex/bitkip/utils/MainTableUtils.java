@@ -24,6 +24,8 @@ import java.util.stream.Collectors;
 
 import static io.beanvortex.bitkip.config.AppConfigs.*;
 import static io.beanvortex.bitkip.utils.Defaults.staticQueueNames;
+import static io.beanvortex.bitkip.utils.MenuUtils.moveDownloadsToQueue;
+import static io.beanvortex.bitkip.utils.QueueUtils.startFastQueue;
 import static io.beanvortex.bitkip.utils.ShortcutUtils.*;
 
 
@@ -151,14 +153,15 @@ public class MainTableUtils {
         var locationLbl = new Label("Change location");
         var exportLinkLbl = new Label("Export selected");
         var deleteFromQueueLbl = new Label("Delete from this queue");
+        var addToFastQueueLbl = new Label("Add to fast queue");
         var deleteLbl = new Label("Delete");
         var deleteWithFileLbl = new Label("Delete with file");
         var lbls = List.of(openLbl, openFolderLbl, resumeLbl, pauseLbl, pauseAllLbl,
-                refreshLbl, copyLbl, restartLbl, detailsLbl, credentialsLbl, locationLbl, exportLinkLbl, deleteFromQueueLbl,
+                refreshLbl, copyLbl, restartLbl, detailsLbl, credentialsLbl, locationLbl, exportLinkLbl, addToFastQueueLbl, deleteFromQueueLbl,
                 deleteLbl, deleteWithFileLbl);
         var keyCodes = Arrays.asList(OPEN_KEY, OPEN_FOLDER_KEY, RESUME_KEY,
                 PAUSE_KEY, PAUSE_ALL_KEY, REFRESH_KEY, COPY_KEY, RESTART_KEY, DETAILS_KEY, null,
-                LOCATION_KEY, null, null, DELETE_KEY, DELETE_FILE_KEY);
+                LOCATION_KEY, null, null, null, DELETE_KEY, DELETE_FILE_KEY);
         var menuItems = MenuUtils.createMapMenuItems(lbls, keyCodes);
 
         var addToQueueMenu = new Menu();
@@ -172,7 +175,7 @@ public class MainTableUtils {
         }
 
         menuItems.put(addToQueueLbl, addToQueueMenu);
-        MenuUtils.disableMenuItems(resumeLbl, pauseLbl, pauseAllLbl, openLbl, openFolderLbl, deleteFromQueueLbl,
+        MenuUtils.disableMenuItems(resumeLbl, pauseLbl, pauseAllLbl, openLbl, openFolderLbl, deleteFromQueueLbl, addToFastQueueLbl,
                 refreshLbl, copyLbl, restartLbl, locationLbl, exportLinkLbl, addToQueueLbl, deleteLbl,
                 deleteWithFileLbl, menuItems, selectedItems);
 
@@ -188,6 +191,12 @@ public class MainTableUtils {
         menuItems.get(credentialsLbl).setOnAction(e -> FxUtils.newChangeCredentialsStage(getSelected()));
         menuItems.get(locationLbl).setOnAction(e -> DownloadOpUtils.changeLocation(getSelected(), e));
         menuItems.get(exportLinkLbl).setOnAction(e -> DownloadOpUtils.exportLinks(getSelectedUrls()));
+        menuItems.get(addToFastQueueLbl).setOnAction(e -> {
+            var fastQueue = QueueModel.createFastQueue(mainTableUtils.getSelected());
+            moveDownloadsToQueue(mainTableUtils.getSelected(), fastQueue);
+            if (startFastQueue)
+                startFastQueue(fastQueue);
+        });
         menuItems.get(deleteFromQueueLbl).setOnAction(e -> MenuUtils.deleteFromQueue());
         menuItems.get(deleteLbl).setOnAction(e -> DownloadOpUtils.deleteDownloads(getSelected(), false));
         menuItems.get(deleteWithFileLbl).setOnAction(ev -> DownloadOpUtils.deleteDownloads(getSelected(), true));

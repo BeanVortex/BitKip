@@ -45,8 +45,10 @@ public class QueueUtils {
                 }
                 return;
             }
-            startItem.setDisable(true);
-            stopItem.setDisable(false);
+            if (startItem != null)
+                startItem.setDisable(true);
+            if (stopItem != null)
+                stopItem.setDisable(false);
             if (qm.isDownloadFromTop())
                 Collections.reverse(downloadsByQueue);
             downloadsByQueue = new ArrayList<>(downloadsByQueue.stream().map(mainTableUtils::getObservedDownload).toList());
@@ -254,12 +256,18 @@ public class QueueUtils {
 
 
     public static void deleteQueue(String name) {
-        var content = "Are you sure you want to delete '" + name + "' queue?\nFiles are not deleted";
+        var content = "Are you sure you want to delete '" + name + "' queue?\nFiles will not be deleted";
         var header = "Delete '" + name + "' ?";
         if (FxUtils.askWarning(header, content)) {
             IOUtils.moveFilesAndDeleteQueueFolder(name);
             QueuesRepo.deleteQueue(name);
             QueueSubject.deleteQueue(name);
         }
+    }
+
+    public static boolean startFastQueue(QueueModel q) {
+        var startedQueue = new StartedQueue(q);
+        QueueUtils.startQueue(startedQueue, true);
+        return true;
     }
 }

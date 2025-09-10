@@ -43,6 +43,8 @@ public class FxUtils {
     private static final Map<String, StageAndController> openStages = new LinkedHashMap<>();
 
     public static void newChangeCredentialsStage(ObservableList<DownloadModel> dms) {
+        if (dms.isEmpty())
+            return;
         FXMLLoader loader;
         Stage stage = new Stage();
         VBox root;

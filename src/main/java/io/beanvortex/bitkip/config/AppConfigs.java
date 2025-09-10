@@ -64,6 +64,8 @@ public class AppConfigs {
     public static boolean lessCpuIntensive = defaultLessCpuIntensive;
     public static final boolean defaultShowErrorNotifications = true;
     public static boolean showErrorNotifications = defaultShowErrorNotifications;
+    public static final boolean defaultStartFastQueue = true;
+    public static boolean startFastQueue = defaultStartFastQueue;
 
 
 

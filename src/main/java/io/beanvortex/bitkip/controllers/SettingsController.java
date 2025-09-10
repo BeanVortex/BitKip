@@ -42,7 +42,7 @@ public class SettingsController implements FXMLController {
 
     @FXML
     private CheckBox immediateCheck, startupCheck, triggerOffCheck, agentCheck, addDownCheck,
-            continueCheck, completeDialogCheck, errorNotificationCheck, serverCheck, lessCpuCheck;
+            continueCheck, completeDialogCheck, errorNotificationCheck, startFastQueueCheck, serverCheck, lessCpuCheck;
     @FXML
     private VBox root, actionArea, queueContainer;
     @FXML
@@ -114,6 +114,7 @@ public class SettingsController implements FXMLController {
         rateLimitField.setText(String.valueOf(AppConfigs.downloadRateLimitCount));
         completeDialogCheck.setSelected(AppConfigs.showCompleteDialog);
         errorNotificationCheck.setSelected(AppConfigs.showErrorNotifications);
+        startFastQueueCheck.setSelected(AppConfigs.startFastQueue);
         continueCheck.setSelected(AppConfigs.continueOnLostConnectionLost);
         retryField.setDisable(AppConfigs.continueOnLostConnectionLost);
         rateLimitField.setDisable(AppConfigs.continueOnLostConnectionLost);
@@ -209,6 +210,12 @@ public class SettingsController implements FXMLController {
     @FXML
     private void onErrorNotificationCheck() {
         AppConfigs.showErrorNotifications = errorNotificationCheck.isSelected();
+        IOUtils.saveConfigs();
+    }
+
+    @FXML
+    private void onStartFastQueueCheck() {
+        AppConfigs.startFastQueue = startFastQueueCheck.isSelected();
         IOUtils.saveConfigs();
     }
 
