@@ -272,13 +272,15 @@ public class DownloadOpUtils {
             File file = new File(path);
             if (desktop.isSupported(Desktop.Action.OPEN)) {
                 log.info("Opening containing folder");
-                if (isWindows())
-                    Runtime.getRuntime().exec(new String[]{"explorer", "/select,", file.getAbsolutePath()});
-                else if (isLinux() || isSolaris() || isFreeBSD() || isOpenBSD())
+                if (isWindows()) {
+                    if (!file.isDirectory())
+                        Runtime.getRuntime().exec(new String[]{"explorer", "/select,", file.getAbsolutePath()});
+                    else
+                        Runtime.getRuntime().exec(new String[]{"explorer", file.getAbsolutePath()});
+                } else if (isLinux() || isSolaris() || isFreeBSD() || isOpenBSD())
                     Runtime.getRuntime().exec(new String[]{"xdg-open", file.getParentFile().getAbsolutePath()});
                 else if (isMac())
-                    Runtime.getRuntime().exec(new String[]{"osascript", "-e",
-                            "tell app \"Finder\" to reveal POSIX file \"" + file.getAbsolutePath() + "\""});
+                    Runtime.getRuntime().exec(new String[]{"open", file.getAbsolutePath()});
             } else {
                 log.warn("Desktop is not supported to open containing folder");
                 Notifications.create()

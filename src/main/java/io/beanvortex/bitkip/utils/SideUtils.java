@@ -247,16 +247,17 @@ public class SideUtils {
         var startQueueLbl = new Label("Start queue");
         var stopQueueLbl = new Label("Stop queue");
         var queueSettingLbl = new Label("Settings");
+        var openFolderLbl = new Label("Open folder");
         var exportLbl = new Label("Export this queue");
         var deleteLbl = new Label("Delete");
 
         List<Label> lbls;
         List<KeyCodeCombination> keys = null;
         if (Defaults.staticQueueNames.stream().anyMatch(itemName::equals))
-            lbls = List.of(startQueueLbl, stopQueueLbl, queueSettingLbl, exportLbl);
+            lbls = List.of(startQueueLbl, stopQueueLbl, queueSettingLbl, openFolderLbl, exportLbl);
         else {
-            lbls = List.of(startQueueLbl, stopQueueLbl, queueSettingLbl, exportLbl, deleteLbl);
-            keys = Arrays.asList(null, null, null, null, DELETE_KEY);
+            lbls = List.of(startQueueLbl, stopQueueLbl, queueSettingLbl, openFolderLbl, exportLbl, deleteLbl);
+            keys = Arrays.asList(null, null, null, OPEN_FOLDER_KEY, null, DELETE_KEY);
         }
         var menuItems = MenuUtils.createMapMenuItems(lbls, keys);
         cMenu.getItems().addAll(menuItems.values());
@@ -265,13 +266,22 @@ public class SideUtils {
 
         menuItems.get(startQueueLbl).setDisable(startedQueues.contains(startedQueue));
         menuItems.get(stopQueueLbl).setDisable(!startedQueues.contains(startedQueue));
+        menuItems.get(openFolderLbl).setDisable(qm.getName().equals(ALL_DOWNLOADS_QUEUE) || !qm.hasFolder());
         menuItems.get(startQueueLbl).setOnAction(e -> QueueUtils.startQueue(startedQueue, true));
         menuItems.get(stopQueueLbl).setOnAction(e -> QueueUtils.stopQueue(startedQueue));
         menuItems.get(queueSettingLbl).setOnAction(e -> FxUtils.newSettingsStage(true, qm));
+        menuItems.get(openFolderLbl).setOnAction(e -> openQueueFolder(qm));
         menuItems.get(exportLbl).setOnAction(e -> DownloadOpUtils.exportLinks(qm.getName()));
         if (menuItems.containsKey(deleteLbl))
             menuItems.get(deleteLbl).setOnAction(e -> QueueUtils.deleteQueue(itemName));
         return cMenu;
+    }
+
+    private static void openQueueFolder(QueueModel qm) {
+        if (staticQueueNames.contains(qm.getName()))
+            DownloadOpUtils.openContainingFolder(downloadPath + (qm.getName().equals(DOCS_QUEUE) ? "Documents" : qm.getName()));
+        else
+            DownloadOpUtils.openContainingFolder(queuesPath + qm.getName());
     }
 
     private static List<DownloadModel> fetchDownloadsOfQueue(String queueName, Predicate<? super DownloadModel> condition) {
