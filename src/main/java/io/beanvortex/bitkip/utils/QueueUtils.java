@@ -92,7 +92,9 @@ public class QueueUtils {
                                     sDownloads - simulDownloads.get(),
                                     simulDownloads,
                                     dm, speedLimit);
-                    } else DownloadOpUtils.startDownload(dm, IOUtils.getBytesFromString(speedLimit), 0, true, true);
+                    } else {
+                        DownloadOpUtils.startDownload(dm, IOUtils.getBytesFromString(speedLimit), 0, true, true, null);
+                    }
 
                 }
                 if (!startedQueues.contains(startedQueue))
@@ -119,7 +121,7 @@ public class QueueUtils {
                                                               int i, DownloadModel dm, String speedLimit, int sDownloads) {
         if (simulDownloads.get() < sDownloads) {
             DownloadOpUtils.startDownload(dm, IOUtils.getBytesFromString(speedLimit),
-                    0, true, false);
+                    0, true, false, null);
             simulDownloads.getAndIncrement();
         } else {
             while (true) {
@@ -147,7 +149,7 @@ public class QueueUtils {
     private static void performSimultaneousDownloadDontWaitForPrev(int remainingSimul, AtomicInteger simulDownloads,
                                                                    DownloadModel dm, String speedLimit) {
         if (remainingSimul != 0) {
-            DownloadOpUtils.startDownload(dm, IOUtils.getBytesFromString(speedLimit), 0, true, false);
+            DownloadOpUtils.startDownload(dm, IOUtils.getBytesFromString(speedLimit), 0, true, false, null);
             simulDownloads.getAndIncrement();
         }
     }

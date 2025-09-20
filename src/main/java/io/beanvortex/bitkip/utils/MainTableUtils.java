@@ -181,12 +181,12 @@ public class MainTableUtils {
 
         menuItems.get(openLbl).setOnAction(e -> DownloadOpUtils.openFiles(getSelected()));
         menuItems.get(openFolderLbl).setOnAction(e -> DownloadOpUtils.openContainingFolder(getSelected().getFirst().getFilePath()));
-        menuItems.get(resumeLbl).setOnAction(e -> DownloadOpUtils.resumeDownloads(getSelected(), 0, 0));
+        menuItems.get(resumeLbl).setOnAction(e -> DownloadOpUtils.resumeDownloads(getSelected(), 0, 0, null));
         menuItems.get(pauseLbl).setOnAction(e -> DownloadOpUtils.pauseDownloads(getSelected()));
         menuItems.get(pauseAllLbl).setOnAction(e -> DownloadOpUtils.pauseAllDownloads());
         menuItems.get(refreshLbl).setOnAction(e -> DownloadOpUtils.refreshDownload(getSelected()));
         menuItems.get(copyLbl).setOnAction(e -> FxUtils.setClipboard(getSelected().getFirst().getUri()));
-        menuItems.get(restartLbl).setOnAction(e -> DownloadOpUtils.restartDownloads(getSelected()));
+        menuItems.get(restartLbl).setOnAction(e -> DownloadOpUtils.restartDownloads(getSelected(), null));
         menuItems.get(detailsLbl).setOnAction(e -> getSelected().forEach(FxUtils::newDetailsStage));
         menuItems.get(credentialsLbl).setOnAction(e -> FxUtils.newChangeCredentialsStage(getSelected()));
         menuItems.get(locationLbl).setOnAction(e -> DownloadOpUtils.changeLocation(getSelected(), e));

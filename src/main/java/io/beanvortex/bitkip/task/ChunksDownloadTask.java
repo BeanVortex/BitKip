@@ -47,8 +47,9 @@ public class ChunksDownloadTask extends DownloadTask {
     private long bytesToDownloadEachInCycleLimited;
     private boolean newLimitSet;
     private long lastModified;
+    private final Runnable graphicalPause;
 
-    public ChunksDownloadTask(DownloadModel downloadModel, long speedLimit, long byteLimit) throws DeniedException {
+    public ChunksDownloadTask(DownloadModel downloadModel, long speedLimit, long byteLimit, Runnable graphicalPause) throws DeniedException {
         super(downloadModel);
         if (downloadModel.getChunks() == 0)
             throw new IllegalArgumentException("To download file in chunks, chunks must not be 0");
@@ -57,6 +58,7 @@ public class ChunksDownloadTask extends DownloadTask {
         this.chunks = downloadModel.getChunks();
         this.speedLimit = speedLimit;
         this.byteLimit = byteLimit;
+        this.graphicalPause = graphicalPause == null ? () -> {} :  graphicalPause;
         isByteLimited = true;
         isSpeedLimited = speedLimit != 0;
     }
@@ -144,7 +146,7 @@ public class ChunksDownloadTask extends DownloadTask {
                             partFile, fileSize, 0, 0);
                 } catch (IOException e) {
                     log.error(e.toString());
-                    this.pause();
+                    this.pause(graphicalPause);
                 }
             });
         } else {
@@ -153,7 +155,7 @@ public class ChunksDownloadTask extends DownloadTask {
                     performDownload(fromContinue, from, to, partFile, fileSize, 0, 0);
                 } catch (IOException e) {
                     log.error(e.toString());
-                    this.pause();
+                    this.pause(graphicalPause);
                 }
             });
         }
@@ -165,7 +167,7 @@ public class ChunksDownloadTask extends DownloadTask {
                                  long existingFileSize, int rateLimitCount, int retries)
             throws IOException {
         try {
-            var con = DownloadUtils.connect(url,downloadModel.getCredentials());
+            var con = DownloadUtils.connect(url, downloadModel.getCredentials());
             var con2 = DownloadUtils.connect(url, downloadModel.getCredentials());
             lastModified = con2.getLastModified();
             con.addRequestProperty("Range", "bytes=" + fromContinue + "-" + to);
@@ -264,7 +266,7 @@ public class ChunksDownloadTask extends DownloadTask {
                     updateProgress(currentFileSize, fileSize);
                     updateValue(currentFileSize);
                     if (isByteLimited && currentFileSize >= byteLimit)
-                        pause();
+                        pause(graphicalPause);
                     Thread.sleep(ONE_SEC);
                 }
             } catch (InterruptedException | NoSuchFileException ignore) {
@@ -279,14 +281,16 @@ public class ChunksDownloadTask extends DownloadTask {
     }
 
     @Override
-    public void pause() {
+    public void pause(Runnable graphicalPause) {
         paused = true;
         log.info("Paused download: " + downloadModel);
         try {
+            graphicalPause.run();
             //this will cause execution get out of transferFrom
             for (var channel : new ArrayList<>(fileChannels))
                 if (channel != null)
                     channel.close();
+            graphicalPause.run();
         } catch (IOException e) {
             log.error(e.toString());
         }
@@ -295,7 +299,7 @@ public class ChunksDownloadTask extends DownloadTask {
     @Override
     protected void failed() {
         log.info("Failed download: " + downloadModel);
-        pause();
+        pause(graphicalPause);
     }
 
     @Override
@@ -398,9 +402,9 @@ public class ChunksDownloadTask extends DownloadTask {
             bytesToDownloadEachInCycleLimited = speedLimit / chunks;
         else {
             newLimitSet = true;
-            pause();
+            pause(graphicalPause);
             try {
-                DownloadOpUtils.triggerDownload(downloadModel, speedLimit, downloadModel.getSize(), true, false);
+                DownloadOpUtils.triggerDownload(downloadModel, speedLimit, downloadModel.getSize(), true, false, graphicalPause);
             } catch (ExecutionException | InterruptedException e) {
                 log.error(e.toString());
             }

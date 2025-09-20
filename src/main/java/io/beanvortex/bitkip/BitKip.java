@@ -140,7 +140,7 @@ public class BitKip extends Application {
     @Override
     public void stop() {
         var notObservedDms = new ArrayList<>(currentDownloadings);
-        notObservedDms.forEach(dm -> dm.getDownloadTask().pause());
+        notObservedDms.forEach(dm -> dm.getDownloadTask().pause(()->{}));
         startedQueues.clear();
         currentSchedules.values().forEach(sm -> {
             var startScheduler = sm.getStartScheduler();

@@ -37,13 +37,15 @@ public class SpecialDownloadTask extends DownloadTask {
     private String url;
     private boolean isCalculating;
     private long lastModified;
+    private final Runnable graphicalPause;
 
 
     /**
      * if not isSpeedLimited, then valueLimit
      **/
-    public SpecialDownloadTask(DownloadModel downloadModel) {
+    public SpecialDownloadTask(DownloadModel downloadModel, Runnable graphicalPause) {
         super(downloadModel);
+        this.graphicalPause = graphicalPause == null ? () -> {}:  graphicalPause;
     }
 
 
@@ -61,7 +63,7 @@ public class SpecialDownloadTask extends DownloadTask {
             performDownloadInStream();
         } catch (IOException e) {
             log.error(e.toString());
-            this.pause();
+            this.pause(graphicalPause);
         }
         return IOUtils.getFileSize(file);
     }
@@ -211,8 +213,9 @@ public class SpecialDownloadTask extends DownloadTask {
     }
 
     @Override
-    public void pause() {
+    public void pause(Runnable graphicalPause) {
         paused = true;
+        graphicalPause.run();
         log.info("Paused download: " + downloadModel);
         succeeded();
     }

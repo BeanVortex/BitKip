@@ -38,7 +38,7 @@ public class DownloadOpUtils {
      * @param blocking of course, it should be done in concurrent environment otherwise it will block the main thread.
      *                 mostly using for queue downloading
      */
-    public static void triggerDownload(DownloadModel dm, long speed, long bytes, boolean resume, boolean blocking) throws ExecutionException, InterruptedException {
+    public static void triggerDownload(DownloadModel dm, long speed, long bytes, boolean resume, boolean blocking, Runnable graphicalPause) throws ExecutionException, InterruptedException {
 
         try {
             Validations.fillNotFetchedData(dm);
@@ -55,12 +55,10 @@ public class DownloadOpUtils {
 
         DownloadTask downloadTask;
         if (dm.getChunks() == 0)
-            downloadTask = new SpecialDownloadTask(dm);
+            downloadTask = new SpecialDownloadTask(dm, graphicalPause);
         else {
             try {
-                if (dm.getSize() > 0)
-                    bytes = dm.getSize();
-                downloadTask = new ChunksDownloadTask(dm, speed, bytes);
+                downloadTask = new ChunksDownloadTask(dm, speed, bytes, graphicalPause);
             } catch (DeniedException e) {
                 log.error(e.getMessage());
                 return;
@@ -101,7 +99,7 @@ public class DownloadOpUtils {
 
     }
 
-    public static void startDownload(DownloadModel dm, long speedLimit, long byteLimit, boolean resume, boolean blocking) {
+    public static void startDownload(DownloadModel dm, long speedLimit, long byteLimit, boolean resume, boolean blocking, Runnable graphicalPause) {
         if (!currentDownloadings.contains(dm)) {
             dm.setLastTryDate(LocalDateTime.now());
             dm.setDownloadStatus(DownloadStatus.Trying);
@@ -110,7 +108,9 @@ public class DownloadOpUtils {
             DownloadsRepo.updateDownloadLastTryDate(dm);
             mainTableUtils.refreshTable();
             try {
-                triggerDownload(dm, speedLimit, byteLimit, resume, blocking);
+                if (byteLimit <= 0)
+                    byteLimit = dm.getSize();
+                triggerDownload(dm, speedLimit, byteLimit, resume, blocking, graphicalPause);
             } catch (ExecutionException | InterruptedException e) {
                 log.error(e.getMessage());
             }
@@ -120,7 +120,7 @@ public class DownloadOpUtils {
     /**
      * Resumes downloads non-blocking
      */
-    public static void resumeDownloads(List<DownloadModel> dms, long speedLimit, long byteLimit) {
+    public static void resumeDownloads(List<DownloadModel> dms, long speedLimit, long byteLimit, Runnable graphicalPause) {
         dms.stream().filter(dm -> !currentDownloadings.contains(dm))
                 .forEach(dm -> {
                     dm.setLastTryDate(LocalDateTime.now());
@@ -132,24 +132,24 @@ public class DownloadOpUtils {
                     mainTableUtils.refreshTable();
                     if (dm.isResumable()) {
                         log.info("Resuming download : {}", dm);
-                        startDownload(dm, speedLimit, byteLimit, true, false);
+                        startDownload(dm, speedLimit, byteLimit, true, false, graphicalPause);
                     } else
-                        restartDownload(dm);
+                        restartDownload(dm, graphicalPause);
                     openDownloadings.stream().filter(dc -> dc.getDownloadModel().equals(dm))
                             .forEach(DetailsController::initDownloadListeners);
                 });
     }
 
-    public static void restartDownloads(List<DownloadModel> dms) {
+    public static void restartDownloads(List<DownloadModel> dms, Runnable graphicalPause) {
         var header = "Restarting download(s)";
         var v = "Are you sure you want to restart ";
         var content = dms.size() == 1 ? v + dms.getFirst().getName() + " ?" : v + "selected downloads?";
         content += "\nIf the files exist, they will be deleted";
         if (FxUtils.askWarning(header, content))
-            dms.forEach(DownloadOpUtils::restartDownload);
+            dms.forEach(dm -> restartDownload(dm, graphicalPause));
     }
 
-    private static void restartDownload(DownloadModel dm) {
+    private static void restartDownload(DownloadModel dm, Runnable graphicalPause) {
         log.info("Restarting download : {}", dm);
         IOUtils.deleteDownload(dm);
         var lastTryDate = LocalDateTime.now();
@@ -165,7 +165,7 @@ public class DownloadOpUtils {
         String[] values = {"0", "0", "NULL", lastTryDate.toString(), dm.getTurnOffMode().name()};
         DatabaseHelper.updateCols(cols, values, DatabaseHelper.DOWNLOADS_TABLE_NAME, dmId);
         try {
-            triggerDownload(dm, 0, dm.getSize(), true, false);
+            triggerDownload(dm, 0, dm.getSize(), true, false, graphicalPause);
         } catch (ExecutionException | InterruptedException e) {
             log.error(e.getMessage());
         }
@@ -178,7 +178,7 @@ public class DownloadOpUtils {
     public static void pauseDownload(DownloadModel dm) {
         currentDownloadings.stream()
                 .filter(c -> c.equals(dm))
-                .findFirst().ifPresent(dm2 -> dm2.getDownloadTask().pause());
+                .findFirst().ifPresent(dm2 -> dm2.getDownloadTask().pause(() -> mainTableUtils.refreshTable()));
     }
 
     public static void deleteDownloads(ObservableList<DownloadModel> dms, boolean withFiles) {
@@ -194,7 +194,7 @@ public class DownloadOpUtils {
             dms.forEach(dm -> {
                 currentDownloadings.stream().filter(c -> c.equals(dm))
                         .findFirst()
-                        .ifPresent(dm2 -> dm2.getDownloadTask().pause());
+                        .ifPresent(dm2 -> dm2.getDownloadTask().pause(() -> mainTableUtils.refreshTable()));
                 var logMsg = "download deleted: ";
                 if (withFiles) {
                     IOUtils.deleteDownload(dm);
@@ -349,7 +349,7 @@ public class DownloadOpUtils {
                 .showInformation();
     }
 
-    public static void downloadImmediately(SingleURLModel urlModel) {
+    public static void downloadImmediately(SingleURLModel urlModel, Runnable graphicalPause) {
         var dm = new DownloadModel();
         var url = urlModel.url();
         var fileName = urlModel.filename();
@@ -382,7 +382,7 @@ public class DownloadOpUtils {
             dm.getQueues().add(allDownloadsQueue);
             dm.getQueues().add(queue);
             dm.setDownloadStatus(DownloadStatus.Trying);
-            DownloadOpUtils.startDownload(dm, 0, dm.getSize(), false, false);
+            DownloadOpUtils.startDownload(dm, 0, dm.getSize(), false, false, graphicalPause);
             Notifications.create()
                     .title("Downloading now ...")
                     .text(dm.getName())
