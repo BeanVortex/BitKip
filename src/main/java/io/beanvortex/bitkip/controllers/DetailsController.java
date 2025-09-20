@@ -133,7 +133,7 @@ public class DetailsController implements FXMLController {
             resumableLbl.getStyleClass().remove("yes");
             resumableLbl.setText("Not Resumable");
         }
-        if (dm.getCredentials() != null) {
+        if (dm.getCredentials() != null && dm.getCredentials().isOk()) {
             authenticatedCheck.setSelected(true);
             usernameField.getParent().setVisible(true);
             passwordField.getParent().setVisible(true);
