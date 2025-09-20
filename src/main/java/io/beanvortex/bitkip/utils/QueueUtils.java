@@ -177,9 +177,10 @@ public class QueueUtils {
         var startItem = startedQueue.startItem();
         var stopItem = startedQueue.stopItem();
         var qm = startedQueue.queue();
-
-        startItem.setDisable(false);
-        stopItem.setDisable(true);
+        if (startItem != null)
+            startItem.setDisable(false);
+        if (stopItem != null)
+            stopItem.setDisable(true);
         queueDoneNotification(qm);
         startedQueues.remove(startedQueue);
         var schedule = qm.getSchedule();
@@ -207,6 +208,8 @@ public class QueueUtils {
         if (startedQueues.contains(startedQueue)) {
             var downloadsByQueue = startedQueues.get(startedQueues.indexOf(startedQueue)).queue().getDownloads();
             downloadsByQueue.forEach(dm -> {
+                if (dm == null)
+                    return;
                 dm = mainTableUtils.getObservedDownload(dm);
                 DownloadOpUtils.pauseDownload(dm);
             });
