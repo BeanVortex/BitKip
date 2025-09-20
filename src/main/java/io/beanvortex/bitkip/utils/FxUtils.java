@@ -480,8 +480,10 @@ public class FxUtils {
         dialog.getDialogPane().setContent(container);
 
         var logoPath = getResource("icons/logo.png");
+        var stage = (Stage) dialog.getDialogPane().getScene().getWindow();
         if (logoPath != null)
-            ((Stage) dialog.getDialogPane().getScene().getWindow()).getIcons().add(new Image(logoPath.toExternalForm()));
+            stage.getIcons().add(new Image(logoPath.toExternalForm()));
+        stage.setAlwaysOnTop(true);
         var result = dialog.showAndWait();
         return result.isPresent() && result.get() == ButtonType.APPLY;
     }

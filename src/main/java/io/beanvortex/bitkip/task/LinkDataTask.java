@@ -41,10 +41,12 @@ public class LinkDataTask extends Task<Flux<LinkModel>> {
                 var fileSize = DownloadUtils.getFileSize(connection);
                 var fileName = DownloadUtils.extractFileName(uri, connection);
                 var secondaryQueue = BatchDownload.getSecondaryQueueByFileName(fileName);
-                var path = DownloadUtils.determineLocation(fileName);
+                if (lm.getPath() == null || lm.getPath().isEmpty()) {
+                    var path = DownloadUtils.determineLocation(fileName);
+                    lm.setPath(path);
+                }
                 lm.setName(DownloadUtils.getNewFileNameIfExists(fileName, lm.getPath()));
                 lm.setSize(fileSize);
-                lm.setPath(path);
                 if (!lm.getQueues().contains(secondaryQueue))
                     lm.getQueues().add(secondaryQueue);
                 lm.setResumable(DownloadUtils.canResume(connection));
