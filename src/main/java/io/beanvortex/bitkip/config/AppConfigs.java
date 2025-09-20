@@ -66,6 +66,8 @@ public class AppConfigs {
     public static boolean showErrorNotifications = defaultShowErrorNotifications;
     public static final boolean defaultStartFastQueue = true;
     public static boolean startFastQueue = defaultStartFastQueue;
+    public static final boolean defaultTrustAllServers = false;
+    public static boolean trustAllServers = defaultTrustAllServers;
 
 
 

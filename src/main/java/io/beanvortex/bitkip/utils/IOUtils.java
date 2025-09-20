@@ -282,6 +282,7 @@ public class IOUtils {
                     .append("show_complete_dialog=").append(String.valueOf(showCompleteDialog)).append("\n")
                     .append("show_error_notifications=").append(String.valueOf(showErrorNotifications)).append("\n")
                     .append("start_fast_queue=").append(String.valueOf(startFastQueue)).append("\n")
+                    .append("trust_all_servers=").append(String.valueOf(trustAllServers)).append("\n")
                     .append("continue_on_connection_lost=").append(String.valueOf(continueOnLostConnectionLost)).append("\n")
                     .append("retry_count=").append(String.valueOf(downloadRetryCount)).append("\n")
                     .append("rate_limit_count=").append(String.valueOf(downloadRateLimitCount)).append("\n")
@@ -322,6 +323,7 @@ public class IOUtils {
                         case "show_complete_dialog" -> showCompleteDialog = value.equals("true");
                         case "show_error_notifications" -> showErrorNotifications = value.equals("true");
                         case "start_fast_queue" -> startFastQueue = value.equals("true");
+                        case "trust_all_servers" -> trustAllServers = value.equals("true");
                         case "continue_on_connection_lost" -> continueOnLostConnectionLost = value.equals("true");
                         case "retry_count" -> downloadRetryCount = Integer.parseInt(value);
                         case "rate_limit_count" -> downloadRateLimitCount = Integer.parseInt(value);
