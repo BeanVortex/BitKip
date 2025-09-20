@@ -120,39 +120,48 @@ public class IOUtils {
             mainTableUtils.refreshTable();
 
             var firstFile = filePaths.getFirst().toFile();
-            var bufferSize = currentFileSize > 524_288_000 ?
-                    (
-                            currentFileSize > 1_048_576_000 ? 2097152 : 1048576
-                    )
-                    : 8192;
+            int bufferSize;
+            if (currentFileSize < 100 * 1024 * 1024)          // <100 MB
+                bufferSize = 64 * 1024;             // 64 KB
+            else if (currentFileSize < 1024 * 1024 * 1024)  // <1 GB
+                bufferSize = 512 * 1024;            // 512 KB
+            else
+                bufferSize = 2 * 1024 * 1024;       // 2 MB
+
+            long lastUpdateTime = System.currentTimeMillis();
             var buffer = ByteBuffer.allocateDirect(bufferSize);
-            for (int i = 1; i < chunks; i++) {
-                var nextFile = filePaths.get(i).toFile();
-                try (
-                        var in = new FileInputStream(nextFile);
-                        var out = new FileOutputStream(firstFile, firstFile.exists());
-                        var inputChannel = in.getChannel();
-                        var outputChannel = out.getChannel()
-                ) {
-                    while (inputChannel.read(buffer) != -1) {
-                        buffer.flip();
-                        var bytes = outputChannel.write(buffer);
-                        if (details.isPresent()) {
-                            var finalCurrentFileSize = currentFileSize;
-                            var position = outputChannel.position();
-                            Platform.runLater(() -> {
-                                progressBar.setProgress((double) position / finalCurrentFileSize);
-                                speedLbl.setText(formatBytes(bytes));
-                                var downloadOf = "%s / %s"
-                                        .formatted(formatBytes(position), formatBytes(finalCurrentFileSize));
-                                downloadedLbl.setText(downloadOf);
-                            });
+            try (var out = new FileOutputStream(firstFile, firstFile.exists());
+                 var outputChannel = out.getChannel()) {
+                for (int i = 1; i < chunks; i++) {
+                    var nextFile = filePaths.get(i).toFile();
+                    try (
+                            var in = new FileInputStream(nextFile);
+                            var inputChannel = in.getChannel()
+                    ) {
+                        while (inputChannel.read(buffer) != -1) {
+                            buffer.flip();
+                            var bytes = outputChannel.write(buffer);
+                            if (details.isPresent()) {
+                                long now = System.currentTimeMillis();
+                                var finalCurrentFileSize = currentFileSize;
+                                var position = outputChannel.position();
+                                if (now - lastUpdateTime >= 3000 || position == finalCurrentFileSize) { // update every 3 seconds
+                                    lastUpdateTime = now;
+                                    Platform.runLater(() -> {
+                                        progressBar.setProgress((double) position / finalCurrentFileSize);
+                                        speedLbl.setText(formatBytes(bytes));
+                                        var downloadOf = "%s / %s"
+                                                .formatted(formatBytes(position), formatBytes(finalCurrentFileSize));
+                                        downloadedLbl.setText(downloadOf);
+                                    });
+                                }
+                            }
+                            buffer.clear();
                         }
-                        buffer.clear();
                     }
+                    if (nextFile.exists())
+                        nextFile.delete();
                 }
-                if (nextFile.exists())
-                    nextFile.delete();
             }
             var pathToMove = filePaths.getFirst().getParent().getParent() + File.separator + dm.getName();
             return firstFile.renameTo(new File(pathToMove));
@@ -168,7 +177,7 @@ public class IOUtils {
                 var parentPath = Path.of(dm.getFilePath()).getParent() + File.separator;
                 var tempPath = Path.of(parentPath + ".temp");
                 for (int i = 0; i < dm.getChunks(); i++) {
-                    if (Files.exists(tempPath ))
+                    if (Files.exists(tempPath))
                         Files.deleteIfExists(Path.of(tempPath + File.separator + dm.getName() + "#" + i));
                     else Files.deleteIfExists(Path.of(dm.getFilePath() + "#" + i));
                 }
@@ -332,7 +341,8 @@ public class IOUtils {
                         case "immediate_download" -> downloadImmediately = value.equals("true");
                         case "add_same_download" -> addSameDownload = value.equals("true");
                         case "less_cpu_intensive" -> lessCpuIntensive = value.equals("true");
-                        case "last_saved_dir" -> lastSavedDir = Files.exists(Paths.get(value)) ? value : System.getProperty("user.home");
+                        case "last_saved_dir" ->
+                                lastSavedDir = Files.exists(Paths.get(value)) ? value : System.getProperty("user.home");
                         case "user_agent" -> userAgent = value;
                         case "user_agent_enabled" -> userAgentEnabled = value.equals("true");
                     }

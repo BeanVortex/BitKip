@@ -301,9 +301,9 @@ public class DetailsController implements FXMLController {
             isPaused.set(false);
         } else {
             var dt = getDownloadTask();
+            controlBtn.setDisable(true);
             if (dt != null)
                 dt.pause(graphicalPause);
-
         }
 
     }
