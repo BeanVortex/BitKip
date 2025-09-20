@@ -325,7 +325,7 @@ public class DownloadUtils {
             openLocation.setDisable(false);
             return;
         }
-
+        checkIfFileIsOKToSave(locationField.getText(), filename, downloadBtn, addBtn, lastLocationCheck);
         if (selectedQueue != null && selectedQueue.hasFolder()) {
             var folder = new File(queuesPath + selectedQueue.getName());
             if (!folder.exists())
@@ -336,11 +336,13 @@ public class DownloadUtils {
             if (!locationField.getText().equals(path))
                 locationField.setText(path);
             openLocation.setDisable(true);
+            lastLocationCheck.setDisable(true);
+            lastLocationCheck.setSelected(false);
         } else {
             setLocationAndQueue(locationField, filename, dm);
             openLocation.setDisable(false);
+            lastLocationCheck.setDisable(false);
         }
-        checkIfFileIsOKToSave(locationField.getText(), filename, downloadBtn, addBtn, lastLocationCheck);
     }
 
     public static void disableControlsAndShowError(String error, Label errorLbl, Button btn1, Button btn2) {

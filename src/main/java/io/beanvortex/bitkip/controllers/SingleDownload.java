@@ -68,7 +68,7 @@ public class SingleDownload implements QueueObserver {
             queues = QueuesRepo.getAllQueues(false, false);
         queues = queues.stream().filter(QueueModel::isCanAddDownload).toList();
         queueCombo.getItems().addAll(queues);
-        queueCombo.setValue(queues.get(0));
+        queueCombo.setValue(queues.getFirst());
         openLocation.setGraphic(new FontIcon());
         questionBtnSpeed.setGraphic(new FontIcon());
         questionBtnChunks.setGraphic(new FontIcon());
