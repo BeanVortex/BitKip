@@ -213,6 +213,7 @@
 }
 
 #newQueue,
+#clearSearchBtn,
 #openLocation,
 .text-field {
     -fx-border-color: -fx-dark-primary-color;
@@ -226,6 +227,7 @@
 #refreshBtn .ikonli-font-icon,
 #stopBtn .ikonli-font-icon,
 #openLocation .ikonli-font-icon,
+#clearSearchBtn .ikonli-font-icon,
 #newQueue .ikonli-font-icon {
     -fx-icon-color: -fx-dark-primary-color;
 }

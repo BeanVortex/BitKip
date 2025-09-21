@@ -26,7 +26,7 @@ import static io.beanvortex.bitkip.utils.ShortcutUtils.*;
 public class SideUtils {
 
 
-    public static void prepareSideTree(TreeView<String> sideTree, List<QueueModel> queues) {
+    public static void prepareSideTree(TreeView<String> sideTree, List<QueueModel> queues, TextField searchField) {
 
         var finishedIcon = createIcon("fas-check-square", "#81C784");
         var downloadingIcon = createIcon("fas-download", "#FAA381");
@@ -60,7 +60,7 @@ public class SideUtils {
         sideTree.setRoot(allItem);
         sideTree.setShowRoot(true);
         sideTree.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
-        sideTree.setOnMouseClicked(SideUtils.onSideClicked(sideTree));
+        sideTree.setOnMouseClicked(SideUtils.onSideClicked(sideTree, searchField));
         sideTree.setOnKeyPressed(e -> {
             var selectedItem = sideTree.getSelectionModel().getSelectedItem();
             if (selectedItem != null) {
@@ -153,7 +153,7 @@ public class SideUtils {
     }
 
 
-    private static EventHandler<? super MouseEvent> onSideClicked(TreeView<String> sideTree) {
+    private static EventHandler<? super MouseEvent> onSideClicked(TreeView<String> sideTree, TextField searchField) {
         return event -> {
             TreeItem<String> selectedItem = sideTree.getSelectionModel().getSelectedItem();
             if (selectedItem == null)
@@ -161,6 +161,7 @@ public class SideUtils {
             var itemName = selectedItem.getValue();
             currentSelectedQueue = itemName;
             sideTree.setContextMenu(null);
+            searchField.setText("");
             if (itemName.equals("All")) return;
             var addDateSort = allSideTreeStaticNames.contains(itemName);
             if (event.getButton().equals(MouseButton.PRIMARY)) {

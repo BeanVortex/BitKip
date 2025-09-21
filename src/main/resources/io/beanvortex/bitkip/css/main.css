@@ -74,6 +74,26 @@
     -fx-icon-color: #FAFAFA;
 }
 
+#clearSearchBtn .ikonli-font-icon {
+    -fx-icon-code: "far-times-circle";
+    -fx-icon-color: #FAFAFA;
+    -fx-icon-size: 20;
+}
+
+#clearSearchBtn:hover {
+    -fx-background-color: #546E7A;
+    -fx-border-color: #546E7A;
+}
+
+#clearSearchBtn:hover .ikonli-font-icon {
+    -fx-icon-color: #FAFAFA;
+}
+
+#clearSearchBtn:pressed{
+    -fx-background-color: #37474F;
+    -fx-border-color: #37474F;
+}
+
 .bold {
     -fx-font-weight: bold;
 }
