@@ -10,7 +10,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-import static io.beanvortex.bitkip.config.AppConfigs.log;
 import static io.beanvortex.bitkip.repo.DatabaseHelper.*;
 import static io.beanvortex.bitkip.utils.Defaults.staticQueueNames;
 
@@ -117,7 +116,7 @@ public class QueuesRepo {
             genKeys.next();
             queue.setId(genKeys.getInt(1));
         } catch (SQLException e) {
-            log.error(e.toString());
+            throw new RuntimeException(e);
         }
     }
 
@@ -132,7 +131,7 @@ public class QueuesRepo {
             if (rs.next())
                 return createQueueModel(rs, fetchDownloads, true);
         } catch (SQLException e) {
-            log.error(e.toString());
+            throw new RuntimeException(e);
         }
         throw new IllegalArgumentException("Queue does not exist");
     }
@@ -165,9 +164,8 @@ public class QueuesRepo {
                 list.add(createQueueModel(rs, fetchDownloads, fetchSchedule));
             return list;
         } catch (SQLException e) {
-            log.error(e.toString());
+            throw new RuntimeException(e);
         }
-        return list;
     }
 
     public static void deleteQueue(String name) {

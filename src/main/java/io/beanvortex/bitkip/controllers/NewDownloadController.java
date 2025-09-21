@@ -16,7 +16,6 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.ResourceBundle;
 
-import static io.beanvortex.bitkip.config.AppConfigs.log;
 import static io.beanvortex.bitkip.config.observers.QueueSubject.getQueueSubject;
 import static io.beanvortex.bitkip.config.observers.ThemeSubject.getThemeSubject;
 
@@ -143,7 +142,6 @@ public class NewDownloadController implements FXMLController {
             getQueueSubject().addObserver(controller);
             prevController = controller;
         } catch (IOException e) {
-            log.error(e.toString());
             throw new RuntimeException(e);
         }
     }

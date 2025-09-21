@@ -22,7 +22,6 @@ import io.beanvortex.bitkip.repo.DownloadsRepo;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.stage.Stage;
-import org.controlsfx.control.Notifications;
 
 
 import javax.net.ssl.HttpsURLConnection;
@@ -98,10 +97,7 @@ public class BitKip extends Application {
             if (startup && !existsOnStartup())
                 addToStartup();
         } catch (DeniedException e) {
-            Notifications.create()
-                    .title("Failed")
-                    .text(e.getMessage())
-                    .showError();
+            throw new RuntimeException(e);
         }
     }
 
@@ -154,7 +150,7 @@ public class BitKip extends Application {
             if (server != null)
                 server.shutdown();
         } catch (Exception e) {
-            log.error(e.toString());
+            throw new RuntimeException(e);
         }
         System.exit(0);
     }

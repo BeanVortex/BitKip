@@ -157,7 +157,7 @@ public class Validations {
             return;
 
         // when download added and size not fetched
-        var connection = DownloadUtils.connectWithInternetCheck(dm.getUri(), dm.getCredentials(), true);
+        var connection = DownloadUtils.connectWithInternetCheck(dm.getUri(), dm.getCredentials());
         var canResume = DownloadUtils.canResume(connection);
         var fileSize = DownloadUtils.getFileSize(connection);
         dm.setSize(fileSize);

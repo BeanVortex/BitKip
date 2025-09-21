@@ -203,7 +203,7 @@ public class IOUtils {
             if (file.exists())
                 Files.move(Paths.get(oldFilePath), Paths.get(newFilePath), StandardCopyOption.REPLACE_EXISTING);
         } catch (IOException e) {
-            log.error(e.getLocalizedMessage());
+            throw new RuntimeException(e);
         }
     }
 
@@ -309,7 +309,7 @@ public class IOUtils {
             log.info("Saved config");
 
         } catch (IOException e) {
-            log.error(e.getLocalizedMessage());
+            throw new RuntimeException(e);
         }
     }
 
@@ -350,7 +350,7 @@ public class IOUtils {
                 log.info("Read config");
             }
         } catch (IOException e) {
-            log.error(e.getLocalizedMessage());
+            throw new RuntimeException(e);
         }
     }
 
@@ -453,9 +453,8 @@ public class IOUtils {
                     .filter(Objects::nonNull)
                     .toList();
         } catch (IOException e) {
-            log.error(e.getLocalizedMessage());
+            throw new RuntimeException(e);
         }
-        return null;
     }
 
 
@@ -506,7 +505,7 @@ public class IOUtils {
             writer.close();
             log.info("Saved patch note");
         } catch (IOException e) {
-            log.error(e.getMessage());
+            throw new RuntimeException(e);
         }
     }
 
@@ -533,8 +532,7 @@ public class IOUtils {
             log.info("Read patch note");
             return str.toString();
         } catch (IOException e) {
-            log.error(e.getMessage());
+            throw new RuntimeException(e);
         }
-        return "No recent patch notes";
     }
 }

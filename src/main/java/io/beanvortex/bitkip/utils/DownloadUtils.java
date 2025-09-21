@@ -50,7 +50,7 @@ public class DownloadUtils {
     }
 
 
-    public static HttpURLConnection connectWithInternetCheck(String uri, Credentials credentials, boolean showErrors) throws IOException {
+    public static HttpURLConnection connectWithInternetCheck(String uri, Credentials credentials) {
         try {
             if (uri.isBlank())
                 throw new IllegalArgumentException("URL is blank");
@@ -62,13 +62,7 @@ public class DownloadUtils {
             return connect(uri, credentials);
         } catch (IOException e) {
             var msg = "Connection or read timeout. Connect to the internet or check the url: " + e.getMessage();
-            log.error(e.toString());
-            if (showErrors)
-                Platform.runLater(() -> Notifications.create()
-                        .title("Bad Connection")
-                        .text(msg)
-                        .showError());
-            throw new IOException(msg);
+            throw new RuntimeException(msg);
         }
 
     }
@@ -128,7 +122,7 @@ public class DownloadUtils {
                 try {
                     finalConnection[0] = connect(urlField.getText(), dm.getCredentials());
                 } catch (IOException e) {
-                    log.error(e.getMessage());
+                    throw new RuntimeException(e);
                 }
             }
             var fileSize = getFileSize(finalConnection[0]);
@@ -191,7 +185,7 @@ public class DownloadUtils {
                 try {
                     finalConnection[0] = connect(link, dm.getCredentials());
                 } catch (IOException e) {
-                    log.error(e.getMessage());
+                    throw new RuntimeException(e);
                 }
             }
             var fileName = extractFileName(link, finalConnection[0]);

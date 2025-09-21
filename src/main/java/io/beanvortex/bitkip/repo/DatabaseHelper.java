@@ -7,7 +7,6 @@ import io.beanvortex.bitkip.config.AppConfigs;
 import java.sql.Connection;
 import java.sql.SQLException;
 
-import static io.beanvortex.bitkip.config.AppConfigs.log;
 import static io.beanvortex.bitkip.repo.DownloadsRepo.COL_ID;
 
 public class DatabaseHelper {
@@ -49,7 +48,7 @@ public class DatabaseHelper {
             stmt.execute(sql);
         } catch (SQLException e) {
             if (!ignoreStackTrace)
-                log.error(e.toString());
+                throw new RuntimeException(e);
         }
     }
 

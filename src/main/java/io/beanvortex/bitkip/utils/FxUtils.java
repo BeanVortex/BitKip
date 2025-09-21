@@ -52,7 +52,6 @@ public class FxUtils {
             loader = new FXMLLoader(getResource("fxml/changeCredentials.fxml"));
             root = loader.load();
         } catch (IOException e) {
-            log.error(e.getMessage());
             throw new RuntimeException(e);
         }
         var scene = new Scene(root);
@@ -91,7 +90,7 @@ public class FxUtils {
             stage.setTitle("BitKip");
             stage.show();
         } catch (IOException e) {
-            log.error(e.getMessage());
+            throw new RuntimeException(e);
         }
     }
 
@@ -112,7 +111,6 @@ public class FxUtils {
             loader = new FXMLLoader(getResource("fxml/newDownload.fxml"));
             root = loader.load();
         } catch (IOException e) {
-            log.error(e.getMessage());
             throw new RuntimeException(e);
         }
         var scene = new Scene(root);
@@ -141,7 +139,6 @@ public class FxUtils {
             loader = new FXMLLoader(getResource("fxml/newQueue.fxml"));
             root = loader.load();
         } catch (IOException e) {
-            log.error(e.getMessage());
             throw new RuntimeException(e);
         }
         var logoPath = getResource("icons/logo.png");
@@ -176,7 +173,6 @@ public class FxUtils {
             loader = new FXMLLoader(getResource(resource));
             root = loader.load();
         } catch (IOException e) {
-            log.error(e.getMessage());
             throw new RuntimeException(e);
         }
         var scene = new Scene(root);
@@ -212,7 +208,6 @@ public class FxUtils {
             loader = new FXMLLoader(getResource("fxml/settings.fxml"));
             root = loader.load();
         } catch (IOException e) {
-            log.error(e.getMessage());
             throw new RuntimeException(e);
         }
         var scene = new Scene(root);
@@ -256,7 +251,6 @@ public class FxUtils {
             loader = new FXMLLoader(getResource("fxml/details.fxml"));
             root = loader.load();
         } catch (IOException e) {
-            log.error(e.getMessage());
             throw new RuntimeException(e);
         }
         var scene = new Scene(root);
@@ -299,7 +293,6 @@ public class FxUtils {
             loader = new FXMLLoader(getResource("fxml/batchList.fxml"));
             root = loader.load();
         } catch (IOException e) {
-            log.error(e.getMessage());
             throw new RuntimeException(e);
         }
         var scene = new Scene(root);
@@ -331,7 +324,6 @@ public class FxUtils {
             loader = new FXMLLoader(getResource("fxml/refreshLink.fxml"));
             root = loader.load();
         } catch (IOException e) {
-            log.error(e.getMessage());
             throw new RuntimeException(e);
         }
         var scene = new Scene(root);

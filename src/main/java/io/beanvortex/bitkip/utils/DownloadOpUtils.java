@@ -44,13 +44,11 @@ public class DownloadOpUtils {
             Validations.fillNotFetchedData(dm);
             IOUtils.checkAvailableSpace(dm.getFilePath(), dm.getSize());
         } catch (IOException e) {
-            log.error(e.getMessage());
             var observedDownload = mainTableUtils.getObservedDownload(dm);
             dm.setDownloadStatus(DownloadStatus.Paused);
             if (observedDownload != null)
                 observedDownload.setDownloadStatus(dm.getDownloadStatus());
-
-            return;
+            throw new RuntimeException(e);
         }
 
         DownloadTask downloadTask;
@@ -60,8 +58,7 @@ public class DownloadOpUtils {
             try {
                 downloadTask = new ChunksDownloadTask(dm, speed, bytes, graphicalPause);
             } catch (DeniedException e) {
-                log.error(e.getMessage());
-                return;
+                throw new RuntimeException(e);
             }
         }
 
@@ -112,7 +109,7 @@ public class DownloadOpUtils {
                     byteLimit = dm.getSize();
                 triggerDownload(dm, speedLimit, byteLimit, resume, blocking, graphicalPause);
             } catch (ExecutionException | InterruptedException e) {
-                log.error(e.getMessage());
+                throw new RuntimeException(e);
             }
         }
     }
@@ -167,7 +164,7 @@ public class DownloadOpUtils {
         try {
             triggerDownload(dm, 0, dm.getSize(), true, false, graphicalPause);
         } catch (ExecutionException | InterruptedException e) {
-            log.error(e.getMessage());
+            throw new RuntimeException(e);
         }
     }
 
@@ -319,12 +316,7 @@ public class DownloadOpUtils {
                     .toList();
             IOUtils.writeLinksToFile(urls, queue);
         } catch (IOException e) {
-            log.error(e.getLocalizedMessage());
-            Notifications.create()
-                    .title("Some unexpected thing happened")
-                    .text(e.getLocalizedMessage())
-                    .showError();
-            return;
+            throw new RuntimeException(e);
         }
         Notifications.create()
                 .title("Export successful")
@@ -336,12 +328,7 @@ public class DownloadOpUtils {
         try {
             IOUtils.writeLinksToFile(urls, "selected");
         } catch (IOException e) {
-            log.error(e.getLocalizedMessage());
-            Notifications.create()
-                    .title("Some unexpected thing happened")
-                    .text(e.getLocalizedMessage())
-                    .showError();
-            return;
+            throw new RuntimeException(e);
         }
         Notifications.create()
                 .title("Export successful")
@@ -388,11 +375,7 @@ public class DownloadOpUtils {
                     .text(dm.getName())
                     .showInformation();
         } catch (IOException | DeniedException e) {
-            log.error(e.getMessage());
-            Notifications.create()
-                    .title("Failed to download : " + dm.getName())
-                    .text(e.getMessage())
-                    .showWarning();
+            throw new RuntimeException(e);
         }
 
     }

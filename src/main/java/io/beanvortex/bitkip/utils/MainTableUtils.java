@@ -281,7 +281,7 @@ public class MainTableUtils {
                         var remaining = DurationFormatUtils.formatDuration((delta / speed) * 1000, "dd:HH:mm:ss");
                         i.setRemainingTime(remaining);
                     } catch (IllegalArgumentException e) {
-                        log.warn(e.getMessage());
+                        throw new RuntimeException(e);
                     }
                 }
                 refreshTable();

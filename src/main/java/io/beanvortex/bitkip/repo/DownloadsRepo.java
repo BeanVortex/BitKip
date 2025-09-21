@@ -12,7 +12,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static io.beanvortex.bitkip.config.AppConfigs.log;
 import static io.beanvortex.bitkip.models.DownloadModel.createDownload;
 import static io.beanvortex.bitkip.repo.DatabaseHelper.*;
 
@@ -131,7 +130,7 @@ public class DownloadsRepo {
             queueDownloadSql.deleteCharAt(queueDownloadSql.length() - 1);
             stmt.executeUpdate(queueDownloadSql.toString());
         } catch (SQLException e) {
-            log.error(e.toString());
+            throw new RuntimeException(e);
         }
     }
 
@@ -255,7 +254,7 @@ public class DownloadsRepo {
             else throw new Exception("queue count for the download is not correct");
             stmt.executeUpdate(updateAddToQueueDateSql);
         } catch (Exception e) {
-            log.error(e.toString());
+            throw new RuntimeException(e);
         }
     }
 
@@ -391,7 +390,7 @@ public class DownloadsRepo {
 
         var whereClause = new StringBuilder();
         for (var token : tokens) {
-            if (whereClause.length() > 0)
+            if (!whereClause.isEmpty())
                 whereClause.append(" AND ");
             whereClause.append(COL_NAME).append(" LIKE '%").append(token).append("%'");
         }
@@ -413,7 +412,7 @@ public class DownloadsRepo {
                 list.add(download);
             }
         } catch (SQLException e) {
-            log.error(e.toString());
+            throw new RuntimeException(e);
         }
         return list;
     }
@@ -439,7 +438,7 @@ public class DownloadsRepo {
                 """
                 .formatted(
                         DOWNLOADS_TABLE_NAME,
-                        COL_CREDENTIAL, dms.get(0).getCredentials().encrypt(),
+                        COL_CREDENTIAL, dms.getFirst().getCredentials().encrypt(),
                         COL_ID, idsList
                 );
         DatabaseHelper.runSQL(sql, false);

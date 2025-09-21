@@ -12,7 +12,6 @@ import java.time.LocalTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static io.beanvortex.bitkip.config.AppConfigs.log;
 import static io.beanvortex.bitkip.repo.DatabaseHelper.*;
 import static io.beanvortex.bitkip.repo.QueuesRepo.COL_SCHEDULE_ID;
 import static java.time.DayOfWeek.*;
@@ -93,7 +92,7 @@ public class ScheduleRepo {
             var scheduleId = genKeys.getInt(1);
             schedule.setId(scheduleId);
         } catch (SQLException e) {
-            log.error(e.toString());
+            throw new RuntimeException(e);
         }
     }
 
@@ -108,7 +107,7 @@ public class ScheduleRepo {
             if (rs.next())
                 return createScheduleModel(rs, -1);
         } catch (SQLException e) {
-            log.error(e.toString());
+            throw new RuntimeException(e);
         }
         return null;
     }

@@ -78,7 +78,7 @@ public class ChunksDownloadTask extends DownloadTask {
                 parentFolder.mkdir();
             downloadInChunks(fileSize);
         } catch (Exception e) {
-            log.error(e.toString());
+            throw new RuntimeException(e);
         }
         return 0L;
     }
@@ -146,8 +146,8 @@ public class ChunksDownloadTask extends DownloadTask {
                     performSpeedLimitedDownload(fromContinue, from, to,
                             partFile, fileSize, 0, 0);
                 } catch (IOException e) {
-                    log.error(e.toString());
                     this.pause(graphicalPause);
+                    throw new RuntimeException(e);
                 }
             });
         } else {
@@ -155,8 +155,8 @@ public class ChunksDownloadTask extends DownloadTask {
                 try {
                     performDownload(fromContinue, from, to, partFile, fileSize, 0, 0);
                 } catch (IOException e) {
-                    log.error(e.toString());
                     this.pause(graphicalPause);
+                    throw new RuntimeException(e);
                 }
             });
         }
@@ -272,7 +272,7 @@ public class ChunksDownloadTask extends DownloadTask {
                 }
             } catch (InterruptedException | NoSuchFileException ignore) {
             } catch (IOException e) {
-                log.error(e.getLocalizedMessage());
+                throw new RuntimeException(e);
             }
         };
         if (lessCpuIntensive)
@@ -293,7 +293,7 @@ public class ChunksDownloadTask extends DownloadTask {
                     channel.close();
             graphicalPause.run();
         } catch (IOException e) {
-            log.error(e.toString());
+            throw new RuntimeException(e);
         }
     }
 
@@ -390,9 +390,8 @@ public class ChunksDownloadTask extends DownloadTask {
         try {
             call();
         } catch (Exception e) {
-            log.error(e.toString());
             failed();
-            return;
+            throw new RuntimeException(e);
         }
         succeeded();
     }
@@ -407,7 +406,7 @@ public class ChunksDownloadTask extends DownloadTask {
             try {
                 DownloadOpUtils.triggerDownload(downloadModel, speedLimit, downloadModel.getSize(), true, false, graphicalPause);
             } catch (ExecutionException | InterruptedException e) {
-                log.error(e.toString());
+                throw new RuntimeException(e);
             }
         }
         this.isSpeedLimited = true;

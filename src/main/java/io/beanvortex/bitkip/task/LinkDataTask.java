@@ -11,7 +11,6 @@ import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.util.List;
 
-import static io.beanvortex.bitkip.config.AppConfigs.log;
 
 public class LinkDataTask extends Task<Flux<LinkModel>> {
 
@@ -34,8 +33,8 @@ public class LinkDataTask extends Task<Flux<LinkModel>> {
                 try {
                     connection = DownloadUtils.connect(lm.getUri(), credentials);
                 } catch (IOException e) {
-                    log.error(e.toString());
-                    break;
+                    fluxSink.error(new RuntimeException(e));
+                    return;
                 }
                 var uri = lm.getUri();
                 var fileSize = DownloadUtils.getFileSize(connection);

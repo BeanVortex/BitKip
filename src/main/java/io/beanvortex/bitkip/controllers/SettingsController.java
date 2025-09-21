@@ -27,7 +27,6 @@ import javafx.scene.layout.VBox;
 import javafx.scene.paint.Paint;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.Stage;
-import org.controlsfx.control.Notifications;
 
 import java.io.File;
 import java.io.IOException;
@@ -135,7 +134,6 @@ public class SettingsController implements FXMLController {
             queueContainer.getChildren().add(queueRoot);
             QueueSubject.getQueueSubject().addObserver(queueController);
         } catch (Exception e) {
-            AppConfigs.log.error(e.toString());
             throw new RuntimeException(e);
         }
     }
@@ -176,11 +174,7 @@ public class SettingsController implements FXMLController {
                     executor.submit(fileMoveTask);
                     FxUtils.fileTransferDialog(fileMoveTask);
                 } catch (IOException ex) {
-                    AppConfigs.log.error("Failed to move files and folders: " + ex);
-                    Notifications.create()
-                            .title("Failed to move")
-                            .text("Failed to move files and folders")
-                            .showError();
+                    throw new RuntimeException(ex);
                 }
             }
 
@@ -328,10 +322,7 @@ public class SettingsController implements FXMLController {
                 removeFromStartup();
             IOUtils.saveConfigs();
         } catch (DeniedException e) {
-            Notifications.create()
-                    .title("Failed")
-                    .text(e.getMessage())
-                    .showError();
+            throw new RuntimeException(e);
         }
     }
 
