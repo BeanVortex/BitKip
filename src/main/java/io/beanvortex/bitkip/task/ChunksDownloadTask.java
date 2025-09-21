@@ -58,7 +58,8 @@ public class ChunksDownloadTask extends DownloadTask {
         this.chunks = downloadModel.getChunks();
         this.speedLimit = speedLimit;
         this.byteLimit = byteLimit;
-        this.graphicalPause = graphicalPause == null ? () -> {} :  graphicalPause;
+        this.graphicalPause = graphicalPause == null ? () -> {
+        } : graphicalPause;
         isByteLimited = true;
         isSpeedLimited = speedLimit != 0;
     }
@@ -304,8 +305,8 @@ public class ChunksDownloadTask extends DownloadTask {
 
     @Override
     protected void succeeded() {
-
-        if (!Platform.isFxApplicationThread())
+        // !blocking skips merging in queue and downloads the next file
+        if (!Platform.isFxApplicationThread() && !blocking)
             runFinalization();
         else executor.submit(this::runFinalization);
     }

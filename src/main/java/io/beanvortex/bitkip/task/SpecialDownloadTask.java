@@ -148,6 +148,13 @@ public class SpecialDownloadTask extends DownloadTask {
 
     @Override
     protected void succeeded() {
+        // !blocking skips merging in queue and downloads the next file
+        if (!Platform.isFxApplicationThread() && !blocking)
+            runFinalization();
+        else executor.submit(this::runFinalization);
+    }
+
+    private void runFinalization() {
         try {
             if (fileChannel != null)
                 fileChannel.close();
@@ -202,7 +209,6 @@ public class SpecialDownloadTask extends DownloadTask {
             System.gc();
             whenDone();
         }
-
     }
 
     @Override
