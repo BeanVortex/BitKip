@@ -10,9 +10,9 @@
 - [x] Change download speed while download is in progress
 - [x] Ability to turn off/sleep pc after a single download is done
 - [x] Ability to limit download speed
-- [x] Ability to change startup
+- [x] Ability to change startup settings
 - [x] Ability to limit download bytes. let's say you want to download 2GB of a 4GB file
-- [x] Ability to break links to chunks and download each chunk in a thread for maximum download speed
+- [x] Ability to break links into chunks and download each chunk in single thread for maximum download speed
 - [x] Track and control download progress and state
 - [x] Search downloads
 - [x] Move downloads to another path 
@@ -21,10 +21,11 @@
 - [x] Ability to refresh expired or damaged links
 - [x] Create/Delete new queues with ability to create dedicated folder for each to organize better
 - [x] Start and stop queues
+- [x] Fast Queue: drag and drop the selected download on Queues to download them in an automatically created queue
 - [x] Limit speed of downloads in a queue
 - [x] Determine how many simultaneous downloads to start in a queue
 - [x] Queue Scheduler including start date or daily schedules, stop time schedule and turn off/sleep schedule for when a queue is done/finished
-- [x] Mechanisms to move and delete files 
+- [x] Mechanisms to move and delete files across queues and settings
 - [x] Import links from a file
 - [x] Export links to a file
 - [x] Viewing logs of the application
