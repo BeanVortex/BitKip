@@ -2,7 +2,7 @@
 
 let port = 9563;
 let enabled = true;
-
+let isAppRunning = true;
 
 const updatePort = () => {
     chrome.storage.sync.get(["port"])
@@ -40,9 +40,8 @@ const postLinks = async (data, isBatch) => {
             iconUrl: '../resources/icons/logo.png',
             type: 'basic'
         });
-        chrome.downloads.onDeterminingFilename.removeListener(triggerDownload)
-        await chrome.downloads.download({ url: data.url })
-        chrome.downloads.onDeterminingFilename.addListener(triggerDownload)
+        isAppRunning = false;
+        chrome.downloads.download({ url: data.url })
     });
 }
 
@@ -78,24 +77,30 @@ chrome.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
 // Prevent the download from starting
 // get download link from Chrome Api
 const triggerDownload = (downloadItem, suggest) => {
-    // final url is used when url itself is a redirecting link
-    updateEnable();
-    if (!enabled || (downloadItem.mime && downloadItem.mime.includes("image")))
-        return;
-    let url = downloadItem.finalUrl || downloadItem.url;
-    if (isSupportedProtocol(url)) {
-        suggest({ cancel: true, filename: downloadItem.filename });
-        chrome.downloads.cancel(downloadItem.id, () =>
-            chrome.downloads.erase({ id: downloadItem.id })
-        );
-        let data = {
-            url,
-            filename: downloadItem.filename,
-            fileSize: downloadItem.fileSize,
-            agent: navigator.userAgent
-        };
-        postLinks(data, false);
+    if (isAppRunning){
+        // final url is used when url itself is a redirecting link
+        updateEnable();
+        if (!enabled || (downloadItem.mime && downloadItem.mime.includes("image")))
+            return;
+        let url = downloadItem.finalUrl || downloadItem.url;
+        if (isSupportedProtocol(url)) {
+            suggest({ cancel: true, filename: downloadItem.filename });
+            chrome.downloads.cancel(downloadItem.id, () =>
+                chrome.downloads.erase({ id: downloadItem.id })
+            );
+            let data = {
+                url,
+                filename: downloadItem.filename,
+                fileSize: downloadItem.fileSize,
+                agent: navigator.userAgent
+            };
+            postLinks(data, false);
+        }
+    } else {
+        suggest({filename: downloadItem.filename });
+        isAppRunning = true;
     }
+    
 }
 
 //Main code to maintain download link and start doing job
@@ -142,29 +147,42 @@ const isObjectEmpty = (objectName) => {
     return JSON.stringify(objectName) === "{}";
 };
 
-let isScriptInjected = false;
-
-
-chrome.action.onClicked.addListener(async (tab) => {
-    if (!isScriptInjected) {
-        chrome.scripting.executeScript({
-            target: { tabId: tab.id },
-            files: ['scripts/uSelect_statemachine.js']
-        }).then(() => {
-            return chrome.scripting.executeScript({
-                target: { tabId: tab.id },
-                files: ['scripts/uSelect_overlay.js'],
-            });
-        }).then(async () => {
-            const tabs = await chrome.tabs.query({ active: true, currentWindow: true, lastFocusedWindow: true });
-            chrome.tabs.sendMessage(tabs[0].id, { type: 'toggleOverlay' });
-        }).catch((error) => {
-            console.error('Failed to inject scripts:', error);
-        });
-        isScriptInjected = true;
-    } else {
-        const tabs = await chrome.tabs.query({ active: true, currentWindow: true, lastFocusedWindow: true });
-        chrome.tabs.sendMessage(tabs[0].id, { type: 'toggleOverlay' });
-    }
+chrome.action.onClicked.addListener(() => {
+    sendMessage({ type: 'toggleOverlay' });
 });
 
+const sendMessage = async (message) => {
+    const tabs = await chrome.tabs.query({active: true, currentWindow: true});
+    const success = await safeInject(tabs[0].id);
+    
+    if (success) {
+        // Add a small delay to ensure content script is ready
+        await new Promise(resolve => setTimeout(resolve, 100));
+        await chrome.tabs.sendMessage(tabs[0].id, message);
+    } else {
+        chrome.notifications.create('', {
+            title: 'BitKip Extension',
+            message: "Can't open link selector. see logs",
+            iconUrl: '../resources/icons/logo.png',
+            type: 'basic'
+        });
+    }
+}
+const safeInject = async (tabId) => {
+    // First check if already injected
+    try {
+        await chrome.tabs.sendMessage(tabId, {type: 'ping'});
+        return true;
+    } catch (e) {
+        try {
+            await chrome.scripting.executeScript({
+                target: {tabId: tabId},
+                files: ['./scripts/uSelect_overlay.js', './scripts/uSelect_statemachine.js']
+            });
+            return true;
+        } catch (error) {
+            console.error(error);
+        }
+    }
+    return false;
+}

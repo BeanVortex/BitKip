@@ -22,8 +22,8 @@ public record Credentials(String username, String password) {
         try {
             var decrypt = CredentialEncryptor.decrypt(encryptedStr).split(":");
             return new Credentials(decrypt[0], decrypt[1]);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
+        } catch (Exception ignore) {
         }
+        return new Credentials(null, null);
     }
 }

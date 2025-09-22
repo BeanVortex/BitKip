@@ -27,7 +27,13 @@
     {
       "all_frames": true,
       "matches": ["<all_urls>"],
-      "js": ["./scripts/content.js"],
+      "js": ["./scripts/uSelect_overlay.js"],
+      "css": ["resources/overlay.css"]
+    },
+    {
+      "all_frames": true,
+      "matches": ["<all_urls>"],
+      "js": ["./scripts/uSelect_statemachine.js"],
       "css": ["resources/overlay.css"]
     }
   ],
