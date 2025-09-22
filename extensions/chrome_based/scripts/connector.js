@@ -41,7 +41,12 @@ const postLinks = async (data, isBatch) => {
             type: 'basic'
         });
         isAppRunning = false;
-        chrome.downloads.download({ url: data.url })
+        if (data.url)
+            chrome.downloads.download({ url: data.url });
+        if (data.links)
+            data.links.forEach( async link => {
+                await chrome.downloads.download({ url: link });
+            });
     });
 }
 

@@ -25,13 +25,13 @@
   },
   "content_scripts": [
     {
-      "all_frames": true,
+      "all_frames": false,
       "matches": ["<all_urls>"],
       "js": ["./scripts/uSelect_overlay.js"],
       "css": ["resources/overlay.css"]
     },
     {
-      "all_frames": true,
+      "all_frames": false,
       "matches": ["<all_urls>"],
       "js": ["./scripts/uSelect_statemachine.js"],
       "css": ["resources/overlay.css"]

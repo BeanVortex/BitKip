@@ -41,7 +41,12 @@ const postLinks = async (data, isBatch) => {
             type: 'basic'
         });
         isAppRunning = false;
-        browser.downloads.download({ url: data.url });
+        if (data.url)
+            browser.downloads.download({ url: data.url });
+        if (data.links)
+            data.links.forEach( async link => {
+                await browser.downloads.download({ url: link });
+            });
     });
 }
 
