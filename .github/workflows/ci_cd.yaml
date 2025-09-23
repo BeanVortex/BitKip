@@ -20,9 +20,7 @@ jobs:
           gpg-private-key: ${{ secrets.GPG_KEY }}
           gpg-passphrase: PASSPHRASE
       - name: Create nsis installer
-        uses: repolevedavaj/install-nsis@v1.0.1
-        with:
-          nsis-version: '3.10'
+        uses: negrutiu/nsis-install@v1
       - name: Print NSIS version
         run: makensis -VERSION
       - name: Build using script
