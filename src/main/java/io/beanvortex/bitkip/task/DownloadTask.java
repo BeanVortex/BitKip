@@ -28,7 +28,7 @@ public abstract class DownloadTask extends Task<Long> {
     protected static final long ONE_SEC = 1000;
     protected DownloadModel downloadModel;
 
-    public abstract void pause();
+    public abstract void pause(Runnable graphicalPause);
 
     public DownloadTask(DownloadModel downloadModel) {
         this.downloadModel = downloadModel;
@@ -60,7 +60,7 @@ public abstract class DownloadTask extends Task<Long> {
                 return true;
             }
         } catch (Exception e) {
-            log.error(e.toString());
+            throw new RuntimeException(e);
         }
         return false;
     }

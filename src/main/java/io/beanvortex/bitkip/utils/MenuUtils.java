@@ -9,14 +9,17 @@ import javafx.collections.ObservableList;
 import javafx.geometry.Side;
 import javafx.scene.control.*;
 import javafx.scene.input.KeyCodeCombination;
+import org.controlsfx.control.Notifications;
 
 import java.io.File;
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import static io.beanvortex.bitkip.config.AppConfigs.*;
 import static io.beanvortex.bitkip.utils.Defaults.ALL_DOWNLOADS_QUEUE;
 import static io.beanvortex.bitkip.utils.Defaults.staticQueueNames;
+import static io.beanvortex.bitkip.utils.QueueUtils.startFastQueue;
 import static io.beanvortex.bitkip.utils.ShortcutUtils.*;
 
 public class MenuUtils {
@@ -66,6 +69,7 @@ public class MenuUtils {
         var newQueueLbl = new Label("New queue");
         var deleteFromQueueLbl = new Label("Delete from this queue");
         var addToQueueLbl = new Label("Add to queue");
+        var addToFastQueueLbl = new Label("Add to fast queue");
         var startQueueLbl = new Label("Start queue");
         var stopQueueLbl = new Label("Stop queue");
         var queueSettingLbl = new Label("Queue settings");
@@ -79,8 +83,8 @@ public class MenuUtils {
         var split = new SeparatorMenuItem();
         menuItems.put(new Label("s"), split);
 
-        var lbls2 = List.of(newQueueLbl, deleteFromQueueLbl);
-        var keyCodes2 = Arrays.asList(NEW_QUEUE_KEY, null);
+        var lbls2 = List.of(newQueueLbl, deleteFromQueueLbl, addToFastQueueLbl);
+        var keyCodes2 = Arrays.asList(NEW_QUEUE_KEY, null, null);
         var menuItems2 = createMapMenuItems(lbls2, keyCodes2);
         menuItems.putAll(menuItems2);
 
@@ -109,27 +113,36 @@ public class MenuUtils {
 
         operationMenu.setOnMouseClicked(event -> {
             var selectedItems = mainTableUtils.getSelected();
-            disableMenuItems(resumeLbl, pauseLbl, pauseAllLbl, openLbl, openFolderLbl, deleteFromQueueLbl, refreshLbl,
+            disableMenuItems(resumeLbl, pauseLbl, pauseAllLbl, openLbl, openFolderLbl, deleteFromQueueLbl, addToFastQueueLbl, refreshLbl,
                     copyLbl, restartLbl, locationLbl, exportLinkLbl, addToQueueLbl, deleteLbl, deleteWithFileLbl, menuItems, selectedItems);
             disableEnableStartStopQueue(startQueueMenu, stopQueueMenu);
-            deleteLbl.setText("Delete selected (" + selectedItems.size() + ")");
+            long sumSize = selectedItems.stream()
+                    .map(DownloadModel::getSize)
+                    .reduce(0L, Long::sum);
+            deleteLbl.setText("Delete selected (" + selectedItems.size() + ") " + IOUtils.formatBytes(sumSize));
             c.show(operationMenu, Side.BOTTOM, 0, 0);
         });
 
         menuItems.get(openLbl).setOnAction(e -> DownloadOpUtils.openFiles(mainTableUtils.getSelected()));
-        menuItems.get(openFolderLbl).setOnAction(e -> DownloadOpUtils.openContainingFolder(mainTableUtils.getSelected().get(0)));
-        menuItems.get(resumeLbl).setOnAction(e -> DownloadOpUtils.resumeDownloads(mainTableUtils.getSelected(), 0, 0));
+        menuItems.get(openFolderLbl).setOnAction(e -> DownloadOpUtils.openContainingFolder(mainTableUtils.getSelected().getFirst().getFilePath()));
+        menuItems.get(resumeLbl).setOnAction(e -> DownloadOpUtils.resumeDownloads(mainTableUtils.getSelected(), 0, 0, null));
         menuItems.get(pauseLbl).setOnAction(e -> DownloadOpUtils.pauseDownloads(mainTableUtils.getSelected()));
         menuItems.get(pauseAllLbl).setOnAction(e -> DownloadOpUtils.pauseAllDownloads());
         menuItems.get(exportLinkLbl).setOnAction(e -> DownloadOpUtils.exportLinks(mainTableUtils.getSelectedUrls()));
         menuItems.get(refreshLbl).setOnAction(e -> DownloadOpUtils.refreshDownload(mainTableUtils.getSelected()));
-        menuItems.get(copyLbl).setOnAction(e -> FxUtils.setClipboard(mainTableUtils.getSelected().get(0).getUri()));
-        menuItems.get(restartLbl).setOnAction(e -> DownloadOpUtils.restartDownloads(mainTableUtils.getSelected()));
+        menuItems.get(copyLbl).setOnAction(e -> FxUtils.setClipboard(mainTableUtils.getSelected().getFirst().getUri()));
+        menuItems.get(restartLbl).setOnAction(e -> DownloadOpUtils.restartDownloads(mainTableUtils.getSelected(), null));
         menuItems.get(locationLbl).setOnAction(e -> DownloadOpUtils.changeLocation(mainTableUtils.getSelected(), e));
         menuItems.get(deleteLbl).setOnAction(e -> DownloadOpUtils.deleteDownloads(mainTableUtils.getSelected(), false));
         menuItems.get(deleteWithFileLbl).setOnAction(e -> DownloadOpUtils.deleteDownloads(mainTableUtils.getSelected(), true));
         menuItems.get(newQueueLbl).setOnAction(e -> FxUtils.newQueueStage());
         menuItems.get(deleteFromQueueLbl).setOnAction(e -> deleteFromQueue());
+        menuItems.get(addToFastQueueLbl).setOnAction(e -> {
+            var fastQueue = QueueModel.createFastQueue(mainTableUtils.getSelected());
+            moveDownloadsToQueue(mainTableUtils.getSelected(), fastQueue);
+            if (startFastQueue)
+                startFastQueue(fastQueue);
+        });
         menuItems.get(queueSettingLbl).setOnAction(e -> FxUtils.newSettingsStage(true, null));
     }
 
@@ -152,7 +165,7 @@ public class MenuUtils {
     }
 
     public static void disableMenuItems(Label resumeLbl, Label pauseLbl, Label pauseAllLbl, Label openLbl,
-                                        Label openFolderLbl, Label deleteFromQueueLbl, Label refreshLbl,
+                                        Label openFolderLbl, Label deleteFromQueueLbl, Label addToFastQueueLbl, Label refreshLbl,
                                         Label copyLbl, Label restartLbl, Label locationLbl, Label exportLinkLbl,
                                         Label addToQueueLbl, Label deleteLbl, Label deleteWithFileLbl,
                                         LinkedHashMap<Label, MenuItem> menuItems,
@@ -168,12 +181,13 @@ public class MenuUtils {
         menuItems.get(refreshLbl).setDisable(selectedItems.size() != 1);
         menuItems.get(copyLbl).setDisable(selectedItems.size() != 1);
         menuItems.get(addToQueueLbl).setDisable(selectedItems.isEmpty());
+        menuItems.get(addToFastQueueLbl).setDisable(selectedItems.isEmpty());
         menuItems.get(deleteLbl).setDisable(selectedItems.isEmpty());
         menuItems.get(deleteWithFileLbl).setDisable(selectedItems.isEmpty());
         menuItems.get(deleteFromQueueLbl).setDisable(selectedItems.isEmpty());
 
         selectedItems.filtered(dm -> staticQueueNames.stream()
-                        .anyMatch(s -> dm.getQueues().get(0).getName().equals(s)))
+                        .anyMatch(s -> currentSelectedQueue.equals(s)))
                 .stream()
                 .findFirst()
                 .ifPresentOrElse(dm -> menuItems.get(deleteFromQueueLbl).setDisable(true),
@@ -189,6 +203,7 @@ public class MenuUtils {
                     menuItems.get(locationLbl).setDisable(false);
                     menuItems.get(refreshLbl).setDisable(false);
                     menuItems.get(addToQueueLbl).setDisable(false);
+                    menuItems.get(addToFastQueueLbl).setDisable(false);
                 });
         selectedItems.stream().filter(dm -> dm.getDownloadStatus() == DownloadStatus.Downloading
                         || dm.getDownloadStatus() == DownloadStatus.Trying)
@@ -202,6 +217,7 @@ public class MenuUtils {
                     menuItems.get(locationLbl).setDisable(true);
                     menuItems.get(refreshLbl).setDisable(true);
                     menuItems.get(addToQueueLbl).setDisable(true);
+                    menuItems.get(addToFastQueueLbl).setDisable(true);
                 });
         selectedItems.stream().filter(dm -> dm.getDownloadStatus() == DownloadStatus.Completed)
                 .findFirst().ifPresent(dm -> {
@@ -214,6 +230,7 @@ public class MenuUtils {
                     menuItems.get(locationLbl).setDisable(false);
                     menuItems.get(refreshLbl).setDisable(false);
                     menuItems.get(addToQueueLbl).setDisable(false);
+                    menuItems.get(addToFastQueueLbl).setDisable(false);
                 });
         selectedItems.stream().filter(dm -> dm.getDownloadStatus() == DownloadStatus.Merging)
                 .findFirst().ifPresent(dm -> menuItems.values().forEach(menuItem -> menuItem.setDisable(true)));
@@ -295,6 +312,8 @@ public class MenuUtils {
         var moveFiles = FxUtils.askToMoveFilesForQueues(notObserved, null, downloadPath);
         for (var dm : notObserved) {
             mainTableUtils.remove(dm);
+            if (dm.getQueues().isEmpty())
+                dm.setQueues(new CopyOnWriteArrayList<>(QueuesRepo.findQueuesOfADownload(dm.getId(), false, false)));
             dm.getQueues()
                     .stream()
                     .filter(qm -> !staticQueueNames.contains(qm.getName()))
@@ -316,32 +335,45 @@ public class MenuUtils {
         addToQueueMenu.getItems().forEach(menuItem -> menuItem.setOnAction(e -> {
                     var qm = addToQueueItems.get(menuItem);
                     var notObserved = new ArrayList<>(mainTableUtils.getSelected());
-                    var queuePath = queuesPath + qm.getName() + File.separator;
-                    var moveFiles = FxUtils.askToMoveFilesForQueues(notObserved, qm, queuePath);
-                    for (int i = 0; i < notObserved.size(); i++) {
-                        var dm = notObserved.get(i);
-                        if (dm.getQueues().contains(qm))
-                            return;
-                        if (staticQueueNames.stream().noneMatch(s -> dm.getQueues().get(0).getName().equals(s)))
-                            mainTableUtils.remove(dm);
-                        var startedQueue = new StartedQueue(qm);
-                        if (startedQueues.contains(startedQueue))
-                            startedQueues.get(startedQueues.indexOf(startedQueue)).queue().getDownloads().add(dm);
-                        if (moveFiles) {
-                            var newFilePath = FileType.determineFileType(dm.getName()).getPath() + dm.getName();
-                            if (qm.hasFolder())
-                                newFilePath = queuesPath + qm.getName() + File.separator + dm.getName();
-                            IOUtils.moveDownloadFiles(dm, newFilePath);
-                            dm.setFilePath(newFilePath);
-                            mainTableUtils.refreshTable();
-                        }
-                        var addToQueueDate = LocalDateTime.now();
-                        if (i != 0)
-                            addToQueueDate = notObserved.get(i - 1).getAddToQueueDate().plusSeconds(1);
-                        DownloadsRepo.updateDownloadQueue(dm.getId(), qm.getId(), addToQueueDate.toString());
-                    }
+                    moveDownloadsToQueue(notObserved, qm);
                 })
         );
+    }
+
+    public static void moveDownloadsToQueue(List<DownloadModel> dms, QueueModel qm) {
+        var queuePath = queuesPath + qm.getName() + File.separator;
+        var moveFiles = FxUtils.askToMoveFilesForQueues(dms, qm, queuePath);
+        for (int i = 0; i < dms.size(); i++) {
+            var dm = dms.get(i);
+            if (dm.getQueues().contains(qm)) {
+                Notifications.create()
+                        .title("Error")
+                        .text("Can't move download to the same queue")
+                        .showError();
+                return;
+            }
+            if (staticQueueNames.stream().noneMatch(s -> currentSelectedQueue.equals(s)))
+                mainTableUtils.remove(dm);
+            var startedQueue = new StartedQueue(qm);
+            if (startedQueues.contains(startedQueue))
+                startedQueues.get(startedQueues.indexOf(startedQueue)).queue().getDownloads().add(dm);
+            if (moveFiles) {
+                var newFilePath = FileType.determineFileType(dm.getName()).getPath() + dm.getName();
+                if (qm.hasFolder())
+                    newFilePath = queuesPath + qm.getName() + File.separator + dm.getName();
+                IOUtils.moveDownloadFiles(dm, newFilePath);
+                dm.setFilePath(newFilePath);
+            }
+            var addToQueueDate = LocalDateTime.now();
+            if (i != 0)
+                addToQueueDate = dms.get(i - 1).getAddToQueueDate().plusSeconds(1);
+            DownloadsRepo.updateDownloadQueue(dm.getId(), qm.getId(), addToQueueDate.toString());
+            mainTableUtils.refreshTable();
+        }
+        Notifications.create()
+                .title("Success")
+                .text("Moved downloads to the " + qm.getName() + " queue")
+                .showInformation();
     }
 
 
@@ -359,7 +391,7 @@ public class MenuUtils {
     public static LinkedHashMap<Label, MenuItem> createMapMenuItems(List<Label> lbls, List<KeyCodeCombination> keyCodes) {
         var menuItems = new LinkedHashMap<Label, MenuItem>();
         for (int i = 0; i < lbls.size(); i++) {
-            lbls.get(i).setPrefWidth(150);
+            lbls.get(i).setPrefWidth(180);
             var menuItem = new MenuItem();
             menuItem.setGraphic(lbls.get(i));
             if (keyCodes != null && keyCodes.get(i) != null)

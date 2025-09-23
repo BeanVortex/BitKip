@@ -4,6 +4,7 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.text.Text?>
+<?import java.net.URL?>
 <VBox minHeight="400.0" minWidth="500.0" spacing="20"
       maxWidth="500"
       maxHeight="600"
@@ -12,9 +13,15 @@
       xmlns="http://javafx.com/javafx/16" xmlns:fx="http://javafx.com/fxml/1"
       fx:controller="io.beanvortex.bitkip.controllers.LogsController"
       alignment="TOP_CENTER">
+    <stylesheets>
+        <URL value="@../css/main.css"/>
+        <URL value="@../css/newDownload.css"/>
+        <URL value="@../css/light_mode.css"/>
+    </stylesheets>
     <HBox spacing="10" alignment="CENTER_LEFT">
         <Label text="Logs on date : "/>
         <ComboBox fx:id="comboSelectFile" onAction="#fileSelected"/>
+        <Button onAction="#onFolderOpen" styleClass="add_btn" text="Open Folder" />
     </HBox>
     <ScrollPane fx:id="scrollPane">
         <Text text="No Logs" fx:id="text" styleClass="text-logs"/>

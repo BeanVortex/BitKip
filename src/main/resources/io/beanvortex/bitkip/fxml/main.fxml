@@ -33,6 +33,7 @@
                     <HBox spacing="8" alignment="CENTER_LEFT" style="-fx-padding: 5 10">
                         <Label text="Search"/>
                         <TextField fx:id="searchField" HBox.hgrow="ALWAYS" maxHeight="60"/>
+                        <Button fx:id="clearSearchBtn" styleClass="min-btn" onAction="#onClearSearchBtn"/>
                     </HBox>
                     <TableView minWidth="750" prefWidth="Infinity" fx:id="contentTable" VBox.vgrow="ALWAYS"/>
                 </VBox>

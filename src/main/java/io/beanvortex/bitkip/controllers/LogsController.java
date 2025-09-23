@@ -1,6 +1,7 @@
 package io.beanvortex.bitkip.controllers;
 
 import io.beanvortex.bitkip.controllers.interfaces.FXMLController;
+import io.beanvortex.bitkip.utils.DownloadOpUtils;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -8,7 +9,6 @@ import javafx.scene.control.ComboBox;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
-import org.controlsfx.control.Notifications;
 
 import java.io.File;
 import java.io.IOException;
@@ -29,6 +29,7 @@ public class LogsController implements FXMLController {
     private Text text;
 
     private Stage stage;
+    private String path;
 
     @Override
     public void setStage(Stage stage) {
@@ -41,6 +42,14 @@ public class LogsController implements FXMLController {
         updateTheme(stage.getScene());
         stage.widthProperty().addListener((o, ol, n) -> scrollPane.setPrefWidth(n.doubleValue() - 50));
         stage.heightProperty().addListener((o, ol, n) -> scrollPane.setPrefHeight(n.doubleValue() - 50));
+    }
+
+    @FXML
+    public void onFolderOpen() {
+        if (path == null)
+            throw new NullPointerException("no log file found");
+        DownloadOpUtils.openContainingFolder(path);
+        stage.close();
     }
 
     record FileWrapper(String path) {
@@ -82,17 +91,13 @@ public class LogsController implements FXMLController {
     @FXML
     private void fileSelected() {
         try {
-            var path = comboSelectFile.getSelectionModel().getSelectedItem().path();
+            path = comboSelectFile.getSelectionModel().getSelectedItem().path();
             var logs = Files.readAllLines(Path.of(path))
                     .stream()
                     .reduce((s1, s2) -> String.join("\n", s1, s2));
             text.setText(logs.orElse("No Logs"));
         } catch (IOException e) {
-            log.error(e.toString());
-            Notifications.create()
-                    .title("Failed to read log file")
-                    .text(e.toString())
-                    .showError();
+            throw new RuntimeException(e);
         }
     }
 }

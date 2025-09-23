@@ -29,7 +29,7 @@ public class FileMoveTask extends Task<Long> {
     protected Long call() {
         calculateSpeedAndProgress();
         IOUtils.moveAndDeletePreviousData(prevPath, nextPath);
-        DownloadsRepo.getDownloadsByQueueName(ALL_DOWNLOADS_QUEUE).forEach(dm -> {
+        DownloadsRepo.getDownloadsByQueueName(ALL_DOWNLOADS_QUEUE, false).forEach(dm -> {
             if (dm.getFilePath().contains("BitKip")) {
                 var downloadPath = DownloadUtils.determineLocation(dm.getName());
                 var id = dm.getId();
@@ -54,7 +54,7 @@ public class FileMoveTask extends Task<Long> {
                         updateValue(currentFileSize);
                     }
                 } catch (IOException e) {
-                    e.printStackTrace();
+                    throw new RuntimeException(e);
                 }
             });
     }

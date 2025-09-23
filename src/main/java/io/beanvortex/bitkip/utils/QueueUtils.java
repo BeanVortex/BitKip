@@ -45,20 +45,22 @@ public class QueueUtils {
                 }
                 return;
             }
-            startItem.setDisable(true);
-            stopItem.setDisable(false);
+            if (startItem != null)
+                startItem.setDisable(true);
+            if (stopItem != null)
+                stopItem.setDisable(false);
             if (qm.isDownloadFromTop())
                 Collections.reverse(downloadsByQueue);
             downloadsByQueue = new ArrayList<>(downloadsByQueue.stream().map(mainTableUtils::getObservedDownload).toList());
             qm.setDownloads(new CopyOnWriteArrayList<>(downloadsByQueue));
             startedQueues.add(startedQueue);
             start(startedQueue, canTurnOff, executor);
-            log.info("Queue has been started: " + qm);
+            log.info("Queue has been started: {}", qm);
         } else if (schedule.isEnabled() && schedule.isOnceDownload()) {
             // in case when user starts the queue manually which adds the queue to startedQueues and
-            // when start scheduler runs, it shutdowns the start scheduler
+            // when start scheduler runs, it shut-downs the start scheduler
             currentSchedules.get(schedule.getId()).getStartScheduler().shutdownNow();
-            log.info("Start scheduler has been disabled for: " + qm.getName());
+            log.info("Start scheduler has been disabled for: {}", qm.getName());
         }
 
     }
@@ -90,7 +92,9 @@ public class QueueUtils {
                                     sDownloads - simulDownloads.get(),
                                     simulDownloads,
                                     dm, speedLimit);
-                    } else DownloadOpUtils.startDownload(dm, IOUtils.getBytesFromString(speedLimit), 0, true, true);
+                    } else {
+                        DownloadOpUtils.startDownload(dm, IOUtils.getBytesFromString(speedLimit), 0, true, true, null);
+                    }
 
                 }
                 if (!startedQueues.contains(startedQueue))
@@ -117,7 +121,7 @@ public class QueueUtils {
                                                               int i, DownloadModel dm, String speedLimit, int sDownloads) {
         if (simulDownloads.get() < sDownloads) {
             DownloadOpUtils.startDownload(dm, IOUtils.getBytesFromString(speedLimit),
-                    0, true, false);
+                    0, true, false, null);
             simulDownloads.getAndIncrement();
         } else {
             while (true) {
@@ -145,7 +149,7 @@ public class QueueUtils {
     private static void performSimultaneousDownloadDontWaitForPrev(int remainingSimul, AtomicInteger simulDownloads,
                                                                    DownloadModel dm, String speedLimit) {
         if (remainingSimul != 0) {
-            DownloadOpUtils.startDownload(dm, IOUtils.getBytesFromString(speedLimit), 0, true, false);
+            DownloadOpUtils.startDownload(dm, IOUtils.getBytesFromString(speedLimit), 0, true, false, null);
             simulDownloads.getAndIncrement();
         }
     }
@@ -175,9 +179,10 @@ public class QueueUtils {
         var startItem = startedQueue.startItem();
         var stopItem = startedQueue.stopItem();
         var qm = startedQueue.queue();
-
-        startItem.setDisable(false);
-        stopItem.setDisable(true);
+        if (startItem != null)
+            startItem.setDisable(false);
+        if (stopItem != null)
+            stopItem.setDisable(true);
         queueDoneNotification(qm);
         startedQueues.remove(startedQueue);
         var schedule = qm.getSchedule();
@@ -193,7 +198,7 @@ public class QueueUtils {
         shutdownSchedulersOnOnceDownload(qm);
         if (executor != null)
             executor.shutdownNow();
-        log.info("Queue stopped automatically: " + qm.toStringModel());
+        log.info("Queue stopped automatically: {}", qm.toStringModel());
     }
 
 
@@ -205,12 +210,14 @@ public class QueueUtils {
         if (startedQueues.contains(startedQueue)) {
             var downloadsByQueue = startedQueues.get(startedQueues.indexOf(startedQueue)).queue().getDownloads();
             downloadsByQueue.forEach(dm -> {
+                if (dm == null)
+                    return;
                 dm = mainTableUtils.getObservedDownload(dm);
                 DownloadOpUtils.pauseDownload(dm);
             });
 
             startedQueues.remove(startedQueue);
-            log.info("Queue has been stopped: " + startedQueue.queue());
+            log.info("Queue has been stopped: {}", startedQueue.queue());
             whenQueueDone(startedQueue, canTurnOff, null);
         }
     }
@@ -230,7 +237,7 @@ public class QueueUtils {
 
             Platform.runLater(() -> addAllQueues(updatedQueues));
             ScheduleRepo.updateScheduleEnabled(schedule.getId(), schedule.isEnabled());
-            log.info("Schedulers has been disabled for: " + qm);
+            log.info("Schedulers has been disabled for: {}", qm);
         }
     }
 
@@ -254,12 +261,18 @@ public class QueueUtils {
 
 
     public static void deleteQueue(String name) {
-        var content = "Are you sure you want to delete '" + name + "' queue?\nFiles are not deleted";
+        var content = "Are you sure you want to delete '" + name + "' queue?\nFiles will not be deleted";
         var header = "Delete '" + name + "' ?";
         if (FxUtils.askWarning(header, content)) {
             IOUtils.moveFilesAndDeleteQueueFolder(name);
             QueuesRepo.deleteQueue(name);
             QueueSubject.deleteQueue(name);
         }
+    }
+
+    public static boolean startFastQueue(QueueModel q) {
+        var startedQueue = new StartedQueue(q);
+        QueueUtils.startQueue(startedQueue, true);
+        return true;
     }
 }

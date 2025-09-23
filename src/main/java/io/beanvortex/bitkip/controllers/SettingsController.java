@@ -27,7 +27,6 @@ import javafx.scene.layout.VBox;
 import javafx.scene.paint.Paint;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.Stage;
-import org.controlsfx.control.Notifications;
 
 import java.io.File;
 import java.io.IOException;
@@ -42,7 +41,7 @@ public class SettingsController implements FXMLController {
 
     @FXML
     private CheckBox immediateCheck, startupCheck, triggerOffCheck, agentCheck, addDownCheck,
-            continueCheck, completeDialogCheck, serverCheck, lessCpuCheck;
+            continueCheck, completeDialogCheck, errorNotificationCheck, startFastQueueCheck, trustAllServersCheck, serverCheck, lessCpuCheck;
     @FXML
     private VBox root, actionArea, queueContainer;
     @FXML
@@ -113,6 +112,9 @@ public class SettingsController implements FXMLController {
         retryField.setText(String.valueOf(AppConfigs.downloadRetryCount));
         rateLimitField.setText(String.valueOf(AppConfigs.downloadRateLimitCount));
         completeDialogCheck.setSelected(AppConfigs.showCompleteDialog);
+        errorNotificationCheck.setSelected(AppConfigs.showErrorNotifications);
+        startFastQueueCheck.setSelected(AppConfigs.startFastQueue);
+        trustAllServersCheck.setSelected(AppConfigs.trustAllServers);
         continueCheck.setSelected(AppConfigs.continueOnLostConnectionLost);
         retryField.setDisable(AppConfigs.continueOnLostConnectionLost);
         rateLimitField.setDisable(AppConfigs.continueOnLostConnectionLost);
@@ -132,7 +134,6 @@ public class SettingsController implements FXMLController {
             queueContainer.getChildren().add(queueRoot);
             QueueSubject.getQueueSubject().addObserver(queueController);
         } catch (Exception e) {
-            AppConfigs.log.error(e.toString());
             throw new RuntimeException(e);
         }
     }
@@ -173,11 +174,7 @@ public class SettingsController implements FXMLController {
                     executor.submit(fileMoveTask);
                     FxUtils.fileTransferDialog(fileMoveTask);
                 } catch (IOException ex) {
-                    AppConfigs.log.error("Failed to move files and folders: " + ex);
-                    Notifications.create()
-                            .title("Failed to move")
-                            .text("Failed to move files and folders")
-                            .showError();
+                    throw new RuntimeException(ex);
                 }
             }
 
@@ -202,6 +199,23 @@ public class SettingsController implements FXMLController {
     @FXML
     private void onCompleteDialogCheck() {
         AppConfigs.showCompleteDialog = completeDialogCheck.isSelected();
+        IOUtils.saveConfigs();
+    }
+
+    @FXML
+    private void onErrorNotificationCheck() {
+        AppConfigs.showErrorNotifications = errorNotificationCheck.isSelected();
+        IOUtils.saveConfigs();
+    }
+
+    @FXML
+    private void onStartFastQueueCheck() {
+        AppConfigs.startFastQueue = startFastQueueCheck.isSelected();
+        IOUtils.saveConfigs();
+    }
+    @FXML
+    private void onTrustAllServersCheck() {
+        AppConfigs.trustAllServers = trustAllServersCheck.isSelected();
         IOUtils.saveConfigs();
     }
 
@@ -247,6 +261,7 @@ public class SettingsController implements FXMLController {
         AppConfigs.serverEnabled = AppConfigs.defaultServerEnabled;
         AppConfigs.serverPort = AppConfigs.defaultServerPort;
         AppConfigs.showCompleteDialog = AppConfigs.defaultShowCompleteDialog;
+        AppConfigs.showErrorNotifications = AppConfigs.defaultShowErrorNotifications;
         AppConfigs.triggerTurnOffOnEmptyQueue = AppConfigs.defaultTriggerTurnOffOnEmptyQueue;
         AppConfigs.continueOnLostConnectionLost = AppConfigs.defaultContinueOnLostConnectionLost;
         AppConfigs.downloadRetryCount = AppConfigs.defaultDownloadRetryCount;
@@ -307,10 +322,7 @@ public class SettingsController implements FXMLController {
                 removeFromStartup();
             IOUtils.saveConfigs();
         } catch (DeniedException e) {
-            Notifications.create()
-                    .title("Failed")
-                    .text(e.getMessage())
-                    .showError();
+            throw new RuntimeException(e);
         }
     }
 

@@ -30,7 +30,7 @@ public class SingleService implements Service {
                 IOUtils.saveConfigs();
             }
             Platform.runLater(() -> {
-                if (downloadImmediately) DownloadOpUtils.downloadImmediately(urlModel);
+                if (downloadImmediately) DownloadOpUtils.downloadImmediately(urlModel, null);
                 else FxUtils.newDownloadStage(true, urlModel);
             });
             res.status(200).send();

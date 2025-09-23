@@ -43,6 +43,8 @@ public class FxUtils {
     private static final Map<String, StageAndController> openStages = new LinkedHashMap<>();
 
     public static void newChangeCredentialsStage(ObservableList<DownloadModel> dms) {
+        if (dms.isEmpty())
+            return;
         FXMLLoader loader;
         Stage stage = new Stage();
         VBox root;
@@ -50,7 +52,6 @@ public class FxUtils {
             loader = new FXMLLoader(getResource("fxml/changeCredentials.fxml"));
             root = loader.load();
         } catch (IOException e) {
-            log.error(e.getMessage());
             throw new RuntimeException(e);
         }
         var scene = new Scene(root);
@@ -89,7 +90,7 @@ public class FxUtils {
             stage.setTitle("BitKip");
             stage.show();
         } catch (IOException e) {
-            log.error(e.getMessage());
+            throw new RuntimeException(e);
         }
     }
 
@@ -110,7 +111,6 @@ public class FxUtils {
             loader = new FXMLLoader(getResource("fxml/newDownload.fxml"));
             root = loader.load();
         } catch (IOException e) {
-            log.error(e.getMessage());
             throw new RuntimeException(e);
         }
         var scene = new Scene(root);
@@ -139,7 +139,6 @@ public class FxUtils {
             loader = new FXMLLoader(getResource("fxml/newQueue.fxml"));
             root = loader.load();
         } catch (IOException e) {
-            log.error(e.getMessage());
             throw new RuntimeException(e);
         }
         var logoPath = getResource("icons/logo.png");
@@ -174,7 +173,6 @@ public class FxUtils {
             loader = new FXMLLoader(getResource(resource));
             root = loader.load();
         } catch (IOException e) {
-            log.error(e.getMessage());
             throw new RuntimeException(e);
         }
         var scene = new Scene(root);
@@ -210,7 +208,6 @@ public class FxUtils {
             loader = new FXMLLoader(getResource("fxml/settings.fxml"));
             root = loader.load();
         } catch (IOException e) {
-            log.error(e.getMessage());
             throw new RuntimeException(e);
         }
         var scene = new Scene(root);
@@ -254,7 +251,6 @@ public class FxUtils {
             loader = new FXMLLoader(getResource("fxml/details.fxml"));
             root = loader.load();
         } catch (IOException e) {
-            log.error(e.getMessage());
             throw new RuntimeException(e);
         }
         var scene = new Scene(root);
@@ -297,7 +293,6 @@ public class FxUtils {
             loader = new FXMLLoader(getResource("fxml/batchList.fxml"));
             root = loader.load();
         } catch (IOException e) {
-            log.error(e.getMessage());
             throw new RuntimeException(e);
         }
         var scene = new Scene(root);
@@ -329,7 +324,6 @@ public class FxUtils {
             loader = new FXMLLoader(getResource("fxml/refreshLink.fxml"));
             root = loader.load();
         } catch (IOException e) {
-            log.error(e.getMessage());
             throw new RuntimeException(e);
         }
         var scene = new Scene(root);
@@ -362,6 +356,8 @@ public class FxUtils {
                     return false;
             } else return false;
         }
+        if (desQueue != null && !desQueue.hasFolder())
+            return false;
 
         var yes = new ButtonType("Yes", ButtonBar.ButtonData.YES);
         var no = new ButtonType("No", ButtonBar.ButtonData.NO);
@@ -476,8 +472,10 @@ public class FxUtils {
         dialog.getDialogPane().setContent(container);
 
         var logoPath = getResource("icons/logo.png");
+        var stage = (Stage) dialog.getDialogPane().getScene().getWindow();
         if (logoPath != null)
-            ((Stage) dialog.getDialogPane().getScene().getWindow()).getIcons().add(new Image(logoPath.toExternalForm()));
+            stage.getIcons().add(new Image(logoPath.toExternalForm()));
+        stage.setAlwaysOnTop(true);
         var result = dialog.showAndWait();
         return result.isPresent() && result.get() == ButtonType.APPLY;
     }
@@ -521,7 +519,7 @@ public class FxUtils {
         var content = new ClipboardContent();
         content.putString(value);
         clip.setContent(content);
-        log.info("Clipboard set : " + content);
+        log.info("Clipboard set : {}", content);
     }
 
     public static void fileTransferDialog(FileMoveTask fileMoveTask) {
@@ -591,7 +589,7 @@ public class FxUtils {
             var port = result.get();
             serverPort = Integer.parseInt(port);
             IOUtils.saveConfigs();
-            log.info("Port set to: " + port);
+            log.info("Port set to: {}", port);
         }
         return true;
     }

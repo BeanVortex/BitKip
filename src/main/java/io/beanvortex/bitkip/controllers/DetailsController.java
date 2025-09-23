@@ -38,6 +38,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.ResourceBundle;
 
+import static io.beanvortex.bitkip.config.AppConfigs.mainTableUtils;
+
 public class DetailsController implements FXMLController {
 
     @FXML
@@ -113,7 +115,7 @@ public class DetailsController implements FXMLController {
             end = 60;
         stage.setTitle(dm.getName().substring(0, end));
         nameLbl.setText("Name: " + dm.getName());
-        var queues = QueuesRepo.findQueuesOfADownload(dm.getId()).toString();
+        var queues = QueuesRepo.findQueuesOfADownload(dm.getId(), false, false).toString();
         queueLbl.setText("Queues: " + queues.substring(1, queues.length() - 1));
         statusLbl.setText("Status: " + dm.getDownloadStatus().name());
         var downloadOf = "%s / %s"
@@ -133,7 +135,7 @@ public class DetailsController implements FXMLController {
             resumableLbl.getStyleClass().remove("yes");
             resumableLbl.setText("Not Resumable");
         }
-        if (dm.getCredentials() != null) {
+        if (dm.getCredentials() != null && dm.getCredentials().isOk()) {
             authenticatedCheck.setSelected(true);
             usernameField.getParent().setVisible(true);
             passwordField.getParent().setVisible(true);
@@ -282,7 +284,10 @@ public class DetailsController implements FXMLController {
             stage.close();
             return;
         }
-
+        Runnable graphicalPause = () -> {
+            mainTableUtils.refreshTable();
+            isPaused.set(true);
+        };
         if (isPaused.get()) {
             statusLbl.setText("Status: " + DownloadStatus.Trying);
             controlBtn.setDisable(true);
@@ -291,15 +296,14 @@ public class DetailsController implements FXMLController {
                 DownloadsRepo.updateDownloadCredential(dm);
             }
             DownloadOpUtils.resumeDownloads(List.of(dm),
-                    IOUtils.getBytesFromString(speedField.getText()), Long.parseLong(bytesField.getText()));
+                    IOUtils.getBytesFromString(speedField.getText()), Long.parseLong(bytesField.getText()), graphicalPause);
             controlBtn.setDisable(false);
             isPaused.set(false);
         } else {
             var dt = getDownloadTask();
-            if (dt != null)
-                dt.pause();
             controlBtn.setDisable(true);
-            isPaused.set(true);
+            if (dt != null)
+                dt.pause(graphicalPause);
         }
 
     }
@@ -378,7 +382,7 @@ public class DetailsController implements FXMLController {
 
     @FXML
     private void onFolderOpen() {
-        DownloadOpUtils.openContainingFolder(dm);
+        DownloadOpUtils.openContainingFolder(dm.getFilePath());
         stage.close();
     }
 
@@ -429,16 +433,16 @@ public class DetailsController implements FXMLController {
 
     private void onBytesChanged() {
         var text = bytesField.getText();
-        if (text.isBlank())
-            return;
+        long value = 0;
         if (!text.matches("\\d*"))
             text = text.replaceAll("\\D", "");
-        if (Long.parseLong(text) < dm.getSize()) {
+
+        if (!text.isBlank())
+            value = Long.parseLong(text);
+        if (value < dm.getSize()) {
             allBytesBtn.setVisible(true);
             allBytesBtn.setDisable(false);
         }
-        if (Long.parseLong(text) < dm.getDownloaded())
-            bytesField.setText(String.valueOf(dm.getDownloaded()));
 
     }
 

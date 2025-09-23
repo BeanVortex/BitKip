@@ -3,6 +3,7 @@ package io.beanvortex.bitkip;
 import io.beanvortex.bitkip.api.BatchService;
 import io.beanvortex.bitkip.api.SingleService;
 import io.beanvortex.bitkip.api.SyncService;
+import io.beanvortex.bitkip.exceptions.GlobalExceptionHandler;
 import io.beanvortex.bitkip.repo.QueuesRepo;
 import io.beanvortex.bitkip.repo.ScheduleRepo;
 import io.beanvortex.bitkip.task.ScheduleTask;
@@ -21,12 +22,17 @@ import io.beanvortex.bitkip.repo.DownloadsRepo;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.stage.Stage;
-import org.controlsfx.control.Notifications;
 
 
+import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509TrustManager;
 import java.awt.*;
 import java.awt.event.ActionListener;
 import java.net.URL;
+import java.security.SecureRandom;
+import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 
 import static io.beanvortex.bitkip.config.AppConfigs.*;
@@ -58,6 +64,30 @@ public class BitKip extends Application {
         initStartup();
         initTray(stage);
         startServer();
+        trustAllConnections();
+    }
+
+    private static void trustAllConnections() {
+        if (trustAllServers) {
+            try {
+                TrustManager[] trustAllCerts = new TrustManager[]{
+                        new X509TrustManager() {
+                            public X509Certificate[] getAcceptedIssuers() {
+                                return new X509Certificate[0];
+                            }
+                            public void checkClientTrusted(X509Certificate[] certs, String authType) {}
+                            public void checkServerTrusted(X509Certificate[] certs, String authType) {}
+                        }
+                };
+                SSLContext sc = SSLContext.getInstance("TLS");
+                sc.init(null, trustAllCerts, new SecureRandom());
+                HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
+
+                HttpsURLConnection.setDefaultHostnameVerifier((hostname, session) -> true);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        }
     }
 
     private void initStartup() {
@@ -67,10 +97,7 @@ public class BitKip extends Application {
             if (startup && !existsOnStartup())
                 addToStartup();
         } catch (DeniedException e) {
-            Notifications.create()
-                    .title("Failed")
-                    .text(e.getMessage())
-                    .showError();
+            throw new RuntimeException(e);
         }
     }
 
@@ -109,7 +136,7 @@ public class BitKip extends Application {
     @Override
     public void stop() {
         var notObservedDms = new ArrayList<>(currentDownloadings);
-        notObservedDms.forEach(dm -> dm.getDownloadTask().pause());
+        notObservedDms.forEach(dm -> dm.getDownloadTask().pause(()->{}));
         startedQueues.clear();
         currentSchedules.values().forEach(sm -> {
             var startScheduler = sm.getStartScheduler();
@@ -123,7 +150,7 @@ public class BitKip extends Application {
             if (server != null)
                 server.shutdown();
         } catch (Exception e) {
-            log.error(e.toString());
+            throw new RuntimeException(e);
         }
         System.exit(0);
     }
@@ -131,6 +158,7 @@ public class BitKip extends Application {
 
     public static void main(String[] args) {
         initLogger();
+        GlobalExceptionHandler.setup();
         launch();
     }
 

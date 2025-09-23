@@ -30,7 +30,7 @@ public class Validations {
                 newValue = newValue.replaceAll("\\D", "");
                 bytesField.setText(newValue);
             } else {
-                if (newValue.isBlank() || (fileSize > 0 && Long.parseLong(newValue) > fileSize)) {
+                if (fileSize > 0 && !newValue.isBlank() && Long.parseLong(newValue) > fileSize) {
                     bytesField.setText(String.valueOf(fileSize));
                 } else
                     return;
@@ -157,7 +157,7 @@ public class Validations {
             return;
 
         // when download added and size not fetched
-        var connection = DownloadUtils.connectWithInternetCheck(dm.getUri(), dm.getCredentials(), true);
+        var connection = DownloadUtils.connectWithInternetCheck(dm.getUri(), dm.getCredentials());
         var canResume = DownloadUtils.canResume(connection);
         var fileSize = DownloadUtils.getFileSize(connection);
         dm.setSize(fileSize);

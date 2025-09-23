@@ -16,6 +16,7 @@ public class Defaults {
 
     public static final List<String> staticQueueNames = List.of(ALL_DOWNLOADS_QUEUE, COMPRESSED_QUEUE,
             MUSIC_QUEUE, VIDEOS_QUEUE, PROGRAMS_QUEUE, DOCS_QUEUE, OTHERS_QUEUE);
+    public static final List<String> allSideTreeStaticNames = new ArrayList<>(staticQueueNames);
 
     public static final List<String> compressedEx = List.of("rar", "zip", "7z", "deb", "compressed",
             "pkg", "rpm", "tar", "tar.gz", "z");
@@ -39,5 +40,6 @@ public class Defaults {
         extensions.put(DOCS_QUEUE, documentEx);
         extensions.put(MUSIC_QUEUE, musicEx);
         extensions.put(OTHERS_QUEUE, new ArrayList<>());
+        allSideTreeStaticNames.addAll(List.of("All", "Categories", "Finished", "Unfinished", "Downloading"));
     }
 }

@@ -9,19 +9,23 @@ import javafx.collections.ObservableList;
 import javafx.event.EventHandler;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
-import javafx.scene.input.MouseButton;
-import javafx.scene.input.MouseEvent;
+import javafx.scene.input.*;
+import javafx.scene.text.Text;
 import javafx.util.Callback;
 import org.apache.commons.lang3.time.DurationFormatUtils;
 
+import java.io.File;
 import java.text.DecimalFormat;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.stream.Collectors;
 
-import static io.beanvortex.bitkip.config.AppConfigs.currentDownloadings;
-import static io.beanvortex.bitkip.config.AppConfigs.log;
+import static io.beanvortex.bitkip.config.AppConfigs.*;
 import static io.beanvortex.bitkip.utils.Defaults.staticQueueNames;
+import static io.beanvortex.bitkip.utils.MenuUtils.moveDownloadsToQueue;
+import static io.beanvortex.bitkip.utils.QueueUtils.startFastQueue;
 import static io.beanvortex.bitkip.utils.ShortcutUtils.*;
 
 
@@ -29,6 +33,8 @@ public class MainTableUtils {
 
     public static final DecimalFormat dFormat = new DecimalFormat("##.#");
 
+    private final ClipboardContent dragContent = new ClipboardContent();
+    private final List<File> dragFiles = new ArrayList<>();
 
     private final TableView<DownloadModel> contentTable;
 
@@ -80,6 +86,38 @@ public class MainTableUtils {
         contentTable.setRowFactory(getTableViewTableRowCallback());
     }
 
+    private void initDragDrop(TableRow<DownloadModel> row) {
+        row.setOnDragDetected(event -> {
+            Dragboard dragboard = row.startDragAndDrop(TransferMode.MOVE);
+            var selected = getSelected();
+            if (!selected.isEmpty()) {
+                // Put the selected items in clipboard
+                String ids = selected.stream()
+                        .map(DownloadModel::getId)
+                        .map(Object::toString)
+                        .collect(Collectors.joining(","));
+                selected.forEach(dm -> dragFiles.add(new File(dm.getFilePath())));
+
+                dragContent.putString(ids);
+                dragContent.putFiles(dragFiles);
+                dragboard.setContent(dragContent);
+
+                Text dragView = new Text("📋 " + selected.size() + (selected.size() > 1 ? " items" : " item"));
+                dragboard.setDragView(dragView.snapshot(null, null));
+
+                dragboard.setDragViewOffsetX(-15);
+                dragboard.setDragViewOffsetY(15);
+
+                event.consume();
+            }
+        });
+        contentTable.setOnDragDone(me -> {
+            dragContent.clear();
+            dragFiles.clear();
+            me.consume();
+        });
+    }
+
 
     private Callback<TableView<DownloadModel>, TableRow<DownloadModel>> getTableViewTableRowCallback() {
 
@@ -94,6 +132,8 @@ public class MainTableUtils {
                     cMenu.show(row, event.getScreenX(), event.getScreenY());
             });
             row.setOnMousePressed(e -> row.setContextMenu(null));
+            initDragDrop(row);
+
             return row;
         };
     }
@@ -113,14 +153,15 @@ public class MainTableUtils {
         var locationLbl = new Label("Change location");
         var exportLinkLbl = new Label("Export selected");
         var deleteFromQueueLbl = new Label("Delete from this queue");
+        var addToFastQueueLbl = new Label("Add to fast queue");
         var deleteLbl = new Label("Delete");
         var deleteWithFileLbl = new Label("Delete with file");
         var lbls = List.of(openLbl, openFolderLbl, resumeLbl, pauseLbl, pauseAllLbl,
-                refreshLbl, copyLbl, restartLbl, detailsLbl, credentialsLbl, locationLbl, exportLinkLbl, deleteFromQueueLbl,
+                refreshLbl, copyLbl, restartLbl, detailsLbl, credentialsLbl, locationLbl, exportLinkLbl, addToFastQueueLbl, deleteFromQueueLbl,
                 deleteLbl, deleteWithFileLbl);
         var keyCodes = Arrays.asList(OPEN_KEY, OPEN_FOLDER_KEY, RESUME_KEY,
                 PAUSE_KEY, PAUSE_ALL_KEY, REFRESH_KEY, COPY_KEY, RESTART_KEY, DETAILS_KEY, null,
-                LOCATION_KEY, null, null, DELETE_KEY, DELETE_FILE_KEY);
+                LOCATION_KEY, null, null, null, DELETE_KEY, DELETE_FILE_KEY);
         var menuItems = MenuUtils.createMapMenuItems(lbls, keyCodes);
 
         var addToQueueMenu = new Menu();
@@ -134,22 +175,28 @@ public class MainTableUtils {
         }
 
         menuItems.put(addToQueueLbl, addToQueueMenu);
-        MenuUtils.disableMenuItems(resumeLbl, pauseLbl, pauseAllLbl, openLbl, openFolderLbl, deleteFromQueueLbl,
+        MenuUtils.disableMenuItems(resumeLbl, pauseLbl, pauseAllLbl, openLbl, openFolderLbl, deleteFromQueueLbl, addToFastQueueLbl,
                 refreshLbl, copyLbl, restartLbl, locationLbl, exportLinkLbl, addToQueueLbl, deleteLbl,
                 deleteWithFileLbl, menuItems, selectedItems);
 
         menuItems.get(openLbl).setOnAction(e -> DownloadOpUtils.openFiles(getSelected()));
-        menuItems.get(openFolderLbl).setOnAction(e -> DownloadOpUtils.openContainingFolder(getSelected().get(0)));
-        menuItems.get(resumeLbl).setOnAction(e -> DownloadOpUtils.resumeDownloads(getSelected(), 0, 0));
+        menuItems.get(openFolderLbl).setOnAction(e -> DownloadOpUtils.openContainingFolder(getSelected().getFirst().getFilePath()));
+        menuItems.get(resumeLbl).setOnAction(e -> DownloadOpUtils.resumeDownloads(getSelected(), 0, 0, null));
         menuItems.get(pauseLbl).setOnAction(e -> DownloadOpUtils.pauseDownloads(getSelected()));
         menuItems.get(pauseAllLbl).setOnAction(e -> DownloadOpUtils.pauseAllDownloads());
         menuItems.get(refreshLbl).setOnAction(e -> DownloadOpUtils.refreshDownload(getSelected()));
-        menuItems.get(copyLbl).setOnAction(e -> FxUtils.setClipboard(getSelected().get(0).getUri()));
-        menuItems.get(restartLbl).setOnAction(e -> DownloadOpUtils.restartDownloads(getSelected()));
+        menuItems.get(copyLbl).setOnAction(e -> FxUtils.setClipboard(getSelected().getFirst().getUri()));
+        menuItems.get(restartLbl).setOnAction(e -> DownloadOpUtils.restartDownloads(getSelected(), null));
         menuItems.get(detailsLbl).setOnAction(e -> getSelected().forEach(FxUtils::newDetailsStage));
         menuItems.get(credentialsLbl).setOnAction(e -> FxUtils.newChangeCredentialsStage(getSelected()));
         menuItems.get(locationLbl).setOnAction(e -> DownloadOpUtils.changeLocation(getSelected(), e));
         menuItems.get(exportLinkLbl).setOnAction(e -> DownloadOpUtils.exportLinks(getSelectedUrls()));
+        menuItems.get(addToFastQueueLbl).setOnAction(e -> {
+            var fastQueue = QueueModel.createFastQueue(mainTableUtils.getSelected());
+            moveDownloadsToQueue(mainTableUtils.getSelected(), fastQueue);
+            if (startFastQueue)
+                startFastQueue(fastQueue);
+        });
         menuItems.get(deleteFromQueueLbl).setOnAction(e -> MenuUtils.deleteFromQueue());
         menuItems.get(deleteLbl).setOnAction(e -> DownloadOpUtils.deleteDownloads(getSelected(), false));
         menuItems.get(deleteWithFileLbl).setOnAction(ev -> DownloadOpUtils.deleteDownloads(getSelected(), true));
@@ -176,8 +223,8 @@ public class MainTableUtils {
         return event -> {
             if (event.getButton().equals(MouseButton.PRIMARY) && event.getClickCount() == 2) {
                 var selected = getSelected();
-                if (selected.size() > 0) {
-                    var dm = getSelected().get(0);
+                if (!selected.isEmpty()) {
+                    var dm = getSelected().getFirst();
                     DownloadOpUtils.openDetailsStage(dm);
                 }
             }
@@ -186,12 +233,14 @@ public class MainTableUtils {
 
     public void addRow(DownloadModel download) {
         var items = contentTable.getItems();
-        if (items.size() != 0) {
-            var queue = items.get(0).getQueues().get(0);
+        if (!items.isEmpty()) {
             var dQueues = download.getQueues();
-            if (dQueues.contains(queue)) {
-                items.add(download);
-                contentTable.sort();
+            for (var q : dQueues) {
+                if (q.getName().equals(currentSelectedQueue)){
+                    items.add(download);
+                    contentTable.sort();
+                    break;
+                }
             }
         } else {
             items.add(download);
@@ -232,7 +281,7 @@ public class MainTableUtils {
                         var remaining = DurationFormatUtils.formatDuration((delta / speed) * 1000, "dd:HH:mm:ss");
                         i.setRemainingTime(remaining);
                     } catch (IllegalArgumentException e) {
-                        log.warn(e.getMessage());
+                        throw new RuntimeException(e);
                     }
                 }
                 refreshTable();

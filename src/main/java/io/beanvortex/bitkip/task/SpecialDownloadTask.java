@@ -8,7 +8,6 @@ import io.beanvortex.bitkip.utils.DownloadOpUtils;
 import io.beanvortex.bitkip.utils.DownloadUtils;
 import io.beanvortex.bitkip.utils.IOUtils;
 import javafx.application.Platform;
-import org.controlsfx.control.Notifications;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -37,13 +36,15 @@ public class SpecialDownloadTask extends DownloadTask {
     private String url;
     private boolean isCalculating;
     private long lastModified;
+    private final Runnable graphicalPause;
 
 
     /**
      * if not isSpeedLimited, then valueLimit
      **/
-    public SpecialDownloadTask(DownloadModel downloadModel) {
+    public SpecialDownloadTask(DownloadModel downloadModel, Runnable graphicalPause) {
         super(downloadModel);
+        this.graphicalPause = graphicalPause == null ? () -> {}:  graphicalPause;
     }
 
 
@@ -60,8 +61,8 @@ public class SpecialDownloadTask extends DownloadTask {
             fileSize = downloadModel.getSize();
             performDownloadInStream();
         } catch (IOException e) {
-            log.error(e.toString());
-            this.pause();
+            this.pause(graphicalPause);
+            throw new RuntimeException(e);
         }
         return IOUtils.getFileSize(file);
     }
@@ -104,11 +105,7 @@ public class SpecialDownloadTask extends DownloadTask {
 
 
         } catch (IOException e) {
-            log.error(e.toString());
-            Platform.runLater(() -> Notifications.create()
-                    .title("Couldn't download file")
-                    .text(e.toString())
-                    .showError());
+            throw new RuntimeException(e);
         } finally {
             if (fileChannel != null)
                 fileChannel.close();
@@ -138,7 +135,7 @@ public class SpecialDownloadTask extends DownloadTask {
 
             } catch (InterruptedException ignore) {
             } catch (IOException e) {
-                log.error(e.toString());
+                throw new RuntimeException(e);
             }
         });
     }
@@ -146,6 +143,13 @@ public class SpecialDownloadTask extends DownloadTask {
 
     @Override
     protected void succeeded() {
+        // !blocking skips merging in queue and downloads the next file
+        if (!Platform.isFxApplicationThread() && !blocking)
+            runFinalization();
+        else executor.submit(this::runFinalization);
+    }
+
+    private void runFinalization() {
         try {
             if (fileChannel != null)
                 fileChannel.close();
@@ -191,7 +195,7 @@ public class SpecialDownloadTask extends DownloadTask {
                 DownloadsRepo.updateDownloadLastTryDate(download);
             }
         } catch (IOException e) {
-            log.error(e.toString());
+            throw new RuntimeException(e);
         } finally {
             currentDownloadings.remove(downloadModel);
             mainTableUtils.refreshTable();
@@ -200,7 +204,6 @@ public class SpecialDownloadTask extends DownloadTask {
             System.gc();
             whenDone();
         }
-
     }
 
     @Override
@@ -211,8 +214,9 @@ public class SpecialDownloadTask extends DownloadTask {
     }
 
     @Override
-    public void pause() {
+    public void pause(Runnable graphicalPause) {
         paused = true;
+        graphicalPause.run();
         log.info("Paused download: " + downloadModel);
         succeeded();
     }
@@ -237,9 +241,8 @@ public class SpecialDownloadTask extends DownloadTask {
         try {
             call();
         } catch (Exception e) {
-            log.error(e.toString());
             failed();
-            return;
+            throw new RuntimeException(e);
         }
         succeeded();
     }

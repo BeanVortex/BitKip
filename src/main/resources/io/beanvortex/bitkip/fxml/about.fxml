@@ -25,6 +25,7 @@
     <VBox alignment="CENTER" spacing="5">
         <Label text="BitKip" style="-fx-font-size: 18"/>
         <Label text="version" fx:id="versionLbl" styleClass="settingTile"/>
+        <Label text="Downloaded: " fx:id="downloadedLbl" styleClass="settingTile"/>
         <Button text="check for updates" onAction="#checkForUpdates" styleClass="download_now_btn"/>
     </VBox>
 

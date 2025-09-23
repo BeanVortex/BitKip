@@ -20,6 +20,8 @@ import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
@@ -48,7 +50,7 @@ public class DownloadUtils {
     }
 
 
-    public static HttpURLConnection connectWithInternetCheck(String uri, Credentials credentials, boolean showErrors) throws IOException {
+    public static HttpURLConnection connectWithInternetCheck(String uri, Credentials credentials) {
         try {
             if (uri.isBlank())
                 throw new IllegalArgumentException("URL is blank");
@@ -60,13 +62,7 @@ public class DownloadUtils {
             return connect(uri, credentials);
         } catch (IOException e) {
             var msg = "Connection or read timeout. Connect to the internet or check the url: " + e.getMessage();
-            log.error(e.toString());
-            if (showErrors)
-                Platform.runLater(() -> Notifications.create()
-                        .title("Bad Connection")
-                        .text(msg)
-                        .showError());
-            throw new IOException(msg);
+            throw new RuntimeException(msg);
         }
 
     }
@@ -126,7 +122,7 @@ public class DownloadUtils {
                 try {
                     finalConnection[0] = connect(urlField.getText(), dm.getCredentials());
                 } catch (IOException e) {
-                    log.error(e.getMessage());
+                    throw new RuntimeException(e);
                 }
             }
             var fileSize = getFileSize(finalConnection[0]);
@@ -158,10 +154,13 @@ public class DownloadUtils {
 
     public static String extractFileName(String link, HttpURLConnection connection) {
         var raw = connection.getHeaderField("Content-Disposition");
-        if (raw != null && raw.contains("=")) {
-            try {
-                return raw.split("=")[1].replaceAll("\"", "");
-            } catch (IndexOutOfBoundsException ignore) {
+        if (raw != null) {
+            int start = raw.indexOf("filename=");
+            if (start != -1) {
+                start += 9;
+                var afterEquals = raw.substring(start);
+                var firstPart = afterEquals.split(";")[0].trim();
+                return firstPart.replace("\"", "");
             }
         }
 
@@ -186,7 +185,7 @@ public class DownloadUtils {
                 try {
                     finalConnection[0] = connect(link, dm.getCredentials());
                 } catch (IOException e) {
-                    log.error(e.getMessage());
+                    throw new RuntimeException(e);
                 }
             }
             var fileName = extractFileName(link, finalConnection[0]);
@@ -247,7 +246,11 @@ public class DownloadUtils {
     public static String selectLocation(Stage stage) {
         var dirChooser = new DirectoryChooser();
         dirChooser.setTitle("Select file's save location");
-        dirChooser.setInitialDirectory(new File(lastSavedDir == null ? System.getProperty("user.home") : lastSavedDir));
+        String folderPath = lastSavedDir == null
+                ? System.getProperty("user.home")
+                : (Files.exists(Paths.get(lastSavedDir))
+                    ? lastSavedDir : System.getProperty("user.home"));
+        dirChooser.setInitialDirectory(new File(folderPath));
         var selectedDir = dirChooser.showDialog(stage);
         if (selectedDir != null) {
             var path = selectedDir.getPath();
@@ -316,7 +319,7 @@ public class DownloadUtils {
             openLocation.setDisable(false);
             return;
         }
-
+        checkIfFileIsOKToSave(locationField.getText(), filename, downloadBtn, addBtn, lastLocationCheck);
         if (selectedQueue != null && selectedQueue.hasFolder()) {
             var folder = new File(queuesPath + selectedQueue.getName());
             if (!folder.exists())
@@ -327,11 +330,13 @@ public class DownloadUtils {
             if (!locationField.getText().equals(path))
                 locationField.setText(path);
             openLocation.setDisable(true);
+            lastLocationCheck.setDisable(true);
+            lastLocationCheck.setSelected(false);
         } else {
             setLocationAndQueue(locationField, filename, dm);
             openLocation.setDisable(false);
+            lastLocationCheck.setDisable(false);
         }
-        checkIfFileIsOKToSave(locationField.getText(), filename, downloadBtn, addBtn, lastLocationCheck);
     }
 
     public static void disableControlsAndShowError(String error, Label errorLbl, Button btn1, Button btn2) {

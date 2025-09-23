@@ -47,8 +47,9 @@ public class ChunksDownloadTask extends DownloadTask {
     private long bytesToDownloadEachInCycleLimited;
     private boolean newLimitSet;
     private long lastModified;
+    private final Runnable graphicalPause;
 
-    public ChunksDownloadTask(DownloadModel downloadModel, long speedLimit, long byteLimit) throws DeniedException {
+    public ChunksDownloadTask(DownloadModel downloadModel, long speedLimit, long byteLimit, Runnable graphicalPause) throws DeniedException {
         super(downloadModel);
         if (downloadModel.getChunks() == 0)
             throw new IllegalArgumentException("To download file in chunks, chunks must not be 0");
@@ -57,6 +58,8 @@ public class ChunksDownloadTask extends DownloadTask {
         this.chunks = downloadModel.getChunks();
         this.speedLimit = speedLimit;
         this.byteLimit = byteLimit;
+        this.graphicalPause = graphicalPause == null ? () -> {
+        } : graphicalPause;
         isByteLimited = true;
         isSpeedLimited = speedLimit != 0;
     }
@@ -75,7 +78,7 @@ public class ChunksDownloadTask extends DownloadTask {
                 parentFolder.mkdir();
             downloadInChunks(fileSize);
         } catch (Exception e) {
-            log.error(e.toString());
+            throw new RuntimeException(e);
         }
         return 0L;
     }
@@ -143,8 +146,8 @@ public class ChunksDownloadTask extends DownloadTask {
                     performSpeedLimitedDownload(fromContinue, from, to,
                             partFile, fileSize, 0, 0);
                 } catch (IOException e) {
-                    log.error(e.toString());
-                    this.pause();
+                    this.pause(graphicalPause);
+                    throw new RuntimeException(e);
                 }
             });
         } else {
@@ -152,8 +155,8 @@ public class ChunksDownloadTask extends DownloadTask {
                 try {
                     performDownload(fromContinue, from, to, partFile, fileSize, 0, 0);
                 } catch (IOException e) {
-                    log.error(e.toString());
-                    this.pause();
+                    this.pause(graphicalPause);
+                    throw new RuntimeException(e);
                 }
             });
         }
@@ -165,7 +168,7 @@ public class ChunksDownloadTask extends DownloadTask {
                                  long existingFileSize, int rateLimitCount, int retries)
             throws IOException {
         try {
-            var con = DownloadUtils.connect(url,downloadModel.getCredentials());
+            var con = DownloadUtils.connect(url, downloadModel.getCredentials());
             var con2 = DownloadUtils.connect(url, downloadModel.getCredentials());
             lastModified = con2.getLastModified();
             con.addRequestProperty("Range", "bytes=" + fromContinue + "-" + to);
@@ -264,12 +267,12 @@ public class ChunksDownloadTask extends DownloadTask {
                     updateProgress(currentFileSize, fileSize);
                     updateValue(currentFileSize);
                     if (isByteLimited && currentFileSize >= byteLimit)
-                        pause();
+                        pause(graphicalPause);
                     Thread.sleep(ONE_SEC);
                 }
             } catch (InterruptedException | NoSuchFileException ignore) {
             } catch (IOException e) {
-                log.error(e.getLocalizedMessage());
+                throw new RuntimeException(e);
             }
         };
         if (lessCpuIntensive)
@@ -279,29 +282,31 @@ public class ChunksDownloadTask extends DownloadTask {
     }
 
     @Override
-    public void pause() {
+    public void pause(Runnable graphicalPause) {
         paused = true;
         log.info("Paused download: " + downloadModel);
         try {
+            graphicalPause.run();
             //this will cause execution get out of transferFrom
             for (var channel : new ArrayList<>(fileChannels))
                 if (channel != null)
                     channel.close();
+            graphicalPause.run();
         } catch (IOException e) {
-            log.error(e.toString());
+            throw new RuntimeException(e);
         }
     }
 
     @Override
     protected void failed() {
         log.info("Failed download: " + downloadModel);
-        pause();
+        pause(graphicalPause);
     }
 
     @Override
     protected void succeeded() {
-
-        if (!Platform.isFxApplicationThread())
+        // !blocking skips merging in queue and downloads the next file
+        if (!Platform.isFxApplicationThread() && !blocking)
             runFinalization();
         else executor.submit(this::runFinalization);
     }
@@ -353,8 +358,7 @@ public class ChunksDownloadTask extends DownloadTask {
 
             }
         } catch (IOException e) {
-            e.printStackTrace();
-            log.error(e.toString());
+            throw new RuntimeException(e);
         } finally {
             currentDownloadings.remove(downloadModel);
             mainTableUtils.refreshTable();
@@ -386,9 +390,8 @@ public class ChunksDownloadTask extends DownloadTask {
         try {
             call();
         } catch (Exception e) {
-            log.error(e.toString());
             failed();
-            return;
+            throw new RuntimeException(e);
         }
         succeeded();
     }
@@ -399,11 +402,11 @@ public class ChunksDownloadTask extends DownloadTask {
             bytesToDownloadEachInCycleLimited = speedLimit / chunks;
         else {
             newLimitSet = true;
-            pause();
+            pause(graphicalPause);
             try {
-                DownloadOpUtils.triggerDownload(downloadModel, speedLimit, downloadModel.getSize(), true, false);
+                DownloadOpUtils.triggerDownload(downloadModel, speedLimit, downloadModel.getSize(), true, false, graphicalPause);
             } catch (ExecutionException | InterruptedException e) {
-                log.error(e.toString());
+                throw new RuntimeException(e);
             }
         }
         this.isSpeedLimited = true;

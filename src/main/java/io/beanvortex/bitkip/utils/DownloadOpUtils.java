@@ -38,32 +38,27 @@ public class DownloadOpUtils {
      * @param blocking of course, it should be done in concurrent environment otherwise it will block the main thread.
      *                 mostly using for queue downloading
      */
-    public static void triggerDownload(DownloadModel dm, long speed, long bytes, boolean resume, boolean blocking) throws ExecutionException, InterruptedException {
+    public static void triggerDownload(DownloadModel dm, long speed, long bytes, boolean resume, boolean blocking, Runnable graphicalPause) throws ExecutionException, InterruptedException {
 
         try {
             Validations.fillNotFetchedData(dm);
             IOUtils.checkAvailableSpace(dm.getFilePath(), dm.getSize());
         } catch (IOException e) {
-            log.error(e.getMessage());
             var observedDownload = mainTableUtils.getObservedDownload(dm);
             dm.setDownloadStatus(DownloadStatus.Paused);
             if (observedDownload != null)
                 observedDownload.setDownloadStatus(dm.getDownloadStatus());
-
-            return;
+            throw new RuntimeException(e);
         }
 
         DownloadTask downloadTask;
         if (dm.getChunks() == 0)
-            downloadTask = new SpecialDownloadTask(dm);
+            downloadTask = new SpecialDownloadTask(dm, graphicalPause);
         else {
             try {
-                if (dm.getSize() > 0)
-                    bytes = dm.getSize();
-                downloadTask = new ChunksDownloadTask(dm, speed, bytes);
+                downloadTask = new ChunksDownloadTask(dm, speed, bytes, graphicalPause);
             } catch (DeniedException e) {
-                log.error(e.getMessage());
-                return;
+                throw new RuntimeException(e);
             }
         }
 
@@ -101,7 +96,7 @@ public class DownloadOpUtils {
 
     }
 
-    public static void startDownload(DownloadModel dm, long speedLimit, long byteLimit, boolean resume, boolean blocking) {
+    public static void startDownload(DownloadModel dm, long speedLimit, long byteLimit, boolean resume, boolean blocking, Runnable graphicalPause) {
         if (!currentDownloadings.contains(dm)) {
             dm.setLastTryDate(LocalDateTime.now());
             dm.setDownloadStatus(DownloadStatus.Trying);
@@ -110,9 +105,11 @@ public class DownloadOpUtils {
             DownloadsRepo.updateDownloadLastTryDate(dm);
             mainTableUtils.refreshTable();
             try {
-                triggerDownload(dm, speedLimit, byteLimit, resume, blocking);
+                if (byteLimit <= 0)
+                    byteLimit = dm.getSize();
+                triggerDownload(dm, speedLimit, byteLimit, resume, blocking, graphicalPause);
             } catch (ExecutionException | InterruptedException e) {
-                log.error(e.getMessage());
+                throw new RuntimeException(e);
             }
         }
     }
@@ -120,7 +117,7 @@ public class DownloadOpUtils {
     /**
      * Resumes downloads non-blocking
      */
-    public static void resumeDownloads(List<DownloadModel> dms, long speedLimit, long byteLimit) {
+    public static void resumeDownloads(List<DownloadModel> dms, long speedLimit, long byteLimit, Runnable graphicalPause) {
         dms.stream().filter(dm -> !currentDownloadings.contains(dm))
                 .forEach(dm -> {
                     dm.setLastTryDate(LocalDateTime.now());
@@ -131,26 +128,26 @@ public class DownloadOpUtils {
                     DownloadsRepo.updateDownloadLastTryDate(dm);
                     mainTableUtils.refreshTable();
                     if (dm.isResumable()) {
-                        log.info("Resuming download : " + dm);
-                        startDownload(dm, speedLimit, byteLimit, true, false);
+                        log.info("Resuming download : {}", dm);
+                        startDownload(dm, speedLimit, byteLimit, true, false, graphicalPause);
                     } else
-                        restartDownload(dm);
+                        restartDownload(dm, graphicalPause);
                     openDownloadings.stream().filter(dc -> dc.getDownloadModel().equals(dm))
                             .forEach(DetailsController::initDownloadListeners);
                 });
     }
 
-    public static void restartDownloads(List<DownloadModel> dms) {
+    public static void restartDownloads(List<DownloadModel> dms, Runnable graphicalPause) {
         var header = "Restarting download(s)";
         var v = "Are you sure you want to restart ";
-        var content = dms.size() == 1 ? v + dms.get(0).getName() + " ?" : v + "selected downloads?";
+        var content = dms.size() == 1 ? v + dms.getFirst().getName() + " ?" : v + "selected downloads?";
         content += "\nIf the files exist, they will be deleted";
         if (FxUtils.askWarning(header, content))
-            dms.forEach(DownloadOpUtils::restartDownload);
+            dms.forEach(dm -> restartDownload(dm, graphicalPause));
     }
 
-    private static void restartDownload(DownloadModel dm) {
-        log.info("Restarting download : " + dm);
+    private static void restartDownload(DownloadModel dm, Runnable graphicalPause) {
+        log.info("Restarting download : {}", dm);
         IOUtils.deleteDownload(dm);
         var lastTryDate = LocalDateTime.now();
         var dmId = dm.getId();
@@ -165,9 +162,9 @@ public class DownloadOpUtils {
         String[] values = {"0", "0", "NULL", lastTryDate.toString(), dm.getTurnOffMode().name()};
         DatabaseHelper.updateCols(cols, values, DatabaseHelper.DOWNLOADS_TABLE_NAME, dmId);
         try {
-            triggerDownload(dm, 0, dm.getSize(), true, false);
+            triggerDownload(dm, 0, dm.getSize(), true, false, graphicalPause);
         } catch (ExecutionException | InterruptedException e) {
-            log.error(e.getMessage());
+            throw new RuntimeException(e);
         }
     }
 
@@ -178,15 +175,15 @@ public class DownloadOpUtils {
     public static void pauseDownload(DownloadModel dm) {
         currentDownloadings.stream()
                 .filter(c -> c.equals(dm))
-                .findFirst().ifPresent(dm2 -> dm2.getDownloadTask().pause());
+                .findFirst().ifPresent(dm2 -> dm2.getDownloadTask().pause(() -> mainTableUtils.refreshTable()));
     }
 
     public static void deleteDownloads(ObservableList<DownloadModel> dms, boolean withFiles) {
-        if (dms.size() == 0)
+        if (dms.isEmpty())
             return;
         var header = "Delete selected downloads?";
         if (dms.size() == 1)
-            header = "Delete " + dms.get(0).getName();
+            header = "Delete " + dms.getFirst().getName();
         var content = "Are you sure you want to delete selected download(s)?";
         if (withFiles)
             content += "\nFiles are deleted";
@@ -194,13 +191,13 @@ public class DownloadOpUtils {
             dms.forEach(dm -> {
                 currentDownloadings.stream().filter(c -> c.equals(dm))
                         .findFirst()
-                        .ifPresent(dm2 -> dm2.getDownloadTask().pause());
+                        .ifPresent(dm2 -> dm2.getDownloadTask().pause(() -> mainTableUtils.refreshTable()));
                 var logMsg = "download deleted: ";
-                DownloadsRepo.deleteDownload(dm);
                 if (withFiles) {
                     IOUtils.deleteDownload(dm);
                     logMsg = "download deleted with file: ";
                 }
+                DownloadsRepo.deleteDownload(dm);
                 log.info(logMsg + dm);
                 var openDownloadingsCopy = new ArrayList<>(openDownloadings);
                 openDownloadingsCopy.stream().filter(dc -> dc.getDownloadModel().equals(dm))
@@ -229,13 +226,13 @@ public class DownloadOpUtils {
     }
 
     public static void openFile(DownloadModel dm) {
-        log.info("Opening file : " + dm.getFilePath());
+        log.info("Opening file : {}", dm.getFilePath());
         if (!new File(dm.getFilePath()).exists()) {
             Platform.runLater(() -> Notifications.create()
                     .title("File not found")
                     .text("%s has been moved or removed".formatted(dm.getName()))
                     .showError());
-            log.error("File does not exists : " + dm.getFilePath());
+            log.error("File does not exists : {}", dm.getFilePath());
             return;
         }
         try {
@@ -245,37 +242,42 @@ public class DownloadOpUtils {
             var isLinux = os.contains("nix") || os.contains("nux") || os.contains("bsd");
             if (Desktop.isDesktopSupported() && !isLinux)
                 desktop.open(new File(filePath));
-            else {
-                ProcessBuilder processBuilder;
-                if (os.contains("win"))
-                    // For Windows
-                    processBuilder = new ProcessBuilder("cmd.exe", "/c", "start", filePath);
-                else if (os.contains("mac"))
-                    processBuilder = new ProcessBuilder("open", filePath);
-                else if (isLinux)
-                    processBuilder = new ProcessBuilder("xdg-open", filePath);
-                else
-                    throw new UnsupportedOperationException("Unsupported operating system: " + os);
-                processBuilder.start();
-            }
+            else
+                getProcessBuilder(os, filePath, isLinux).start();
         } catch (IOException e) {
-            log.error(e.getLocalizedMessage());
+            throw new RuntimeException(e);
         }
     }
 
-    public static void openContainingFolder(DownloadModel dm) {
+    private static ProcessBuilder getProcessBuilder(String os, String filePath, boolean isLinux) {
+        ProcessBuilder processBuilder;
+        if (os.contains("win"))
+            // For Windows
+            processBuilder = new ProcessBuilder("cmd.exe", "/c", "start", filePath);
+        else if (os.contains("mac"))
+            processBuilder = new ProcessBuilder("open", filePath);
+        else if (isLinux)
+            processBuilder = new ProcessBuilder("xdg-open", filePath);
+        else
+            throw new UnsupportedOperationException("Unsupported operating system: " + os);
+        return processBuilder;
+    }
+
+    public static void openContainingFolder(String path) {
         try {
             var desktop = Desktop.getDesktop();
-            File file = new File(dm.getFilePath());
+            File file = new File(path);
             if (desktop.isSupported(Desktop.Action.OPEN)) {
                 log.info("Opening containing folder");
-                if (isWindows())
-                    Runtime.getRuntime().exec(new String[]{"explorer", "/select,", file.getAbsolutePath()});
-                else if (isLinux() || isSolaris() || isFreeBSD() || isOpenBSD())
+                if (isWindows()) {
+                    if (!file.isDirectory())
+                        Runtime.getRuntime().exec(new String[]{"explorer", "/select,", file.getAbsolutePath()});
+                    else
+                        Runtime.getRuntime().exec(new String[]{"explorer", file.getAbsolutePath()});
+                } else if (isLinux() || isSolaris() || isFreeBSD() || isOpenBSD())
                     Runtime.getRuntime().exec(new String[]{"xdg-open", file.getParentFile().getAbsolutePath()});
                 else if (isMac())
-                    Runtime.getRuntime().exec(new String[]{"osascript", "-e",
-                            "tell app \"Finder\" to reveal POSIX file \"" + file.getAbsolutePath() + "\""});
+                    Runtime.getRuntime().exec(new String[]{"open", file.getAbsolutePath()});
             } else {
                 log.warn("Desktop is not supported to open containing folder");
                 Notifications.create()
@@ -284,18 +286,14 @@ public class DownloadOpUtils {
                         .showError();
             }
         } catch (IOException e) {
-            log.error(e.getLocalizedMessage());
-            Notifications.create()
-                    .title("Error opening containing folder")
-                    .text(e.getMessage())
-                    .showError();
+            throw new RuntimeException(e);
         }
     }
 
     public static void refreshDownload(ObservableList<DownloadModel> selected) {
         if (selected.size() != 1)
             return;
-        FxUtils.newRefreshStage(selected.get(0));
+        FxUtils.newRefreshStage(selected.getFirst());
     }
 
     public static void importLinks(ActionEvent e) {
@@ -313,17 +311,12 @@ public class DownloadOpUtils {
 
     public static void exportLinks(String queue) {
         try {
-            var urls = DownloadsRepo.getDownloadsByQueueName(queue)
+            var urls = DownloadsRepo.getDownloadsByQueueName(queue, false)
                     .stream().map(DownloadModel::getUri)
                     .toList();
             IOUtils.writeLinksToFile(urls, queue);
         } catch (IOException e) {
-            log.error(e.getLocalizedMessage());
-            Notifications.create()
-                    .title("Some unexpected thing happened")
-                    .text(e.getLocalizedMessage())
-                    .showError();
-            return;
+            throw new RuntimeException(e);
         }
         Notifications.create()
                 .title("Export successful")
@@ -335,12 +328,7 @@ public class DownloadOpUtils {
         try {
             IOUtils.writeLinksToFile(urls, "selected");
         } catch (IOException e) {
-            log.error(e.getLocalizedMessage());
-            Notifications.create()
-                    .title("Some unexpected thing happened")
-                    .text(e.getLocalizedMessage())
-                    .showError();
-            return;
+            throw new RuntimeException(e);
         }
         Notifications.create()
                 .title("Export successful")
@@ -348,7 +336,7 @@ public class DownloadOpUtils {
                 .showInformation();
     }
 
-    public static void downloadImmediately(SingleURLModel urlModel) {
+    public static void downloadImmediately(SingleURLModel urlModel, Runnable graphicalPause) {
         var dm = new DownloadModel();
         var url = urlModel.url();
         var fileName = urlModel.filename();
@@ -381,17 +369,13 @@ public class DownloadOpUtils {
             dm.getQueues().add(allDownloadsQueue);
             dm.getQueues().add(queue);
             dm.setDownloadStatus(DownloadStatus.Trying);
-            DownloadOpUtils.startDownload(dm, 0, dm.getSize(), false, false);
+            DownloadOpUtils.startDownload(dm, 0, dm.getSize(), false, false, graphicalPause);
             Notifications.create()
                     .title("Downloading now ...")
                     .text(dm.getName())
                     .showInformation();
         } catch (IOException | DeniedException e) {
-            log.error(e.getMessage());
-            Notifications.create()
-                    .title("Failed to download : " + dm.getName())
-                    .text(e.getMessage())
-                    .showWarning();
+            throw new RuntimeException(e);
         }
 
     }

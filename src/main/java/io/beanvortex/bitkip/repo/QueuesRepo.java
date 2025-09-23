@@ -3,7 +3,6 @@ package io.beanvortex.bitkip.repo;
 import io.beanvortex.bitkip.models.DownloadModel;
 import io.beanvortex.bitkip.models.QueueModel;
 import io.beanvortex.bitkip.models.ScheduleModel;
-import io.beanvortex.bitkip.utils.Defaults;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -11,8 +10,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-import static io.beanvortex.bitkip.config.AppConfigs.log;
 import static io.beanvortex.bitkip.repo.DatabaseHelper.*;
+import static io.beanvortex.bitkip.utils.Defaults.staticQueueNames;
 
 public class QueuesRepo {
 
@@ -33,7 +32,7 @@ public class QueuesRepo {
     }
 
     public static List<QueueModel> createDefaultRecords() {
-        return Defaults.staticQueueNames.stream().map(name -> {
+        return staticQueueNames.stream().map(name -> {
             var queue = new QueueModel(name, false);
             if (name.equals("All Downloads"))
                 queue.setCanAddDownload(true);
@@ -117,7 +116,7 @@ public class QueuesRepo {
             genKeys.next();
             queue.setId(genKeys.getInt(1));
         } catch (SQLException e) {
-            log.error(e.toString());
+            throw new RuntimeException(e);
         }
     }
 
@@ -132,9 +131,22 @@ public class QueuesRepo {
             if (rs.next())
                 return createQueueModel(rs, fetchDownloads, true);
         } catch (SQLException e) {
-            log.error(e.toString());
+            throw new RuntimeException(e);
         }
         throw new IllegalArgumentException("Queue does not exist");
+    }
+
+    public static int getLastFastQueueNumber() {
+        var sql = "SELECT COUNT(*) AS c FROM queues WHERE name LIKE 'fq%';";
+        try (var con = DatabaseHelper.openConnection();
+             var stmt = con.createStatement();
+             var rs = stmt.executeQuery(sql)) {
+            if (rs.next())
+                return rs.getInt("c");
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        return 0;
     }
 
 
@@ -152,9 +164,8 @@ public class QueuesRepo {
                 list.add(createQueueModel(rs, fetchDownloads, fetchSchedule));
             return list;
         } catch (SQLException e) {
-            log.error(e.toString());
+            throw new RuntimeException(e);
         }
-        return list;
     }
 
     public static void deleteQueue(String name) {
@@ -165,7 +176,7 @@ public class QueuesRepo {
         DatabaseHelper.runSQL(sql, false);
     }
 
-    public static List<QueueModel> findQueuesOfADownload(int downloadId) {
+    public static List<QueueModel> findQueuesOfADownload(int downloadId, boolean fetchDownloads, boolean fetchSchedule) {
         var sql = """
                 SELECT q.*
                 FROM %s q
@@ -177,7 +188,7 @@ public class QueuesRepo {
                         QUEUE_DOWNLOAD_TABLE_NAME, COL_ID, COL_QUEUE_ID,
                         DOWNLOADS_TABLE_NAME, COL_ID, COL_DOWNLOAD_ID,
                         COL_ID, downloadId);
-        return getQueues(false, false, sql);
+        return getQueues(fetchDownloads, fetchSchedule, sql);
     }
 
     private static void alters() {
@@ -210,7 +221,7 @@ public class QueuesRepo {
         var simulDownloads = rs.getInt(COL_SIMUL_DOWNLOAD);
         CopyOnWriteArrayList<DownloadModel> downloads = null;
         if (fetchDownloads)
-            downloads = new CopyOnWriteArrayList<>(DownloadsRepo.getDownloadsByQueueName(name));
+            downloads = new CopyOnWriteArrayList<>(DownloadsRepo.getDownloadsByQueueName(name, false));
         ScheduleModel schedule = null;
         if (fetchSchedule)
             schedule = ScheduleRepo.getSchedule(id);

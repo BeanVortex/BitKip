@@ -11,7 +11,6 @@ import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.util.List;
 
-import static io.beanvortex.bitkip.config.AppConfigs.log;
 
 public class LinkDataTask extends Task<Flux<LinkModel>> {
 
@@ -34,17 +33,19 @@ public class LinkDataTask extends Task<Flux<LinkModel>> {
                 try {
                     connection = DownloadUtils.connect(lm.getUri(), credentials);
                 } catch (IOException e) {
-                    log.error(e.toString());
-                    break;
+                    fluxSink.error(new RuntimeException(e));
+                    return;
                 }
                 var uri = lm.getUri();
                 var fileSize = DownloadUtils.getFileSize(connection);
                 var fileName = DownloadUtils.extractFileName(uri, connection);
                 var secondaryQueue = BatchDownload.getSecondaryQueueByFileName(fileName);
-                var path = DownloadUtils.determineLocation(fileName);
+                if (lm.getPath() == null || lm.getPath().isEmpty()) {
+                    var path = DownloadUtils.determineLocation(fileName);
+                    lm.setPath(path);
+                }
                 lm.setName(DownloadUtils.getNewFileNameIfExists(fileName, lm.getPath()));
                 lm.setSize(fileSize);
-                lm.setPath(path);
                 if (!lm.getQueues().contains(secondaryQueue))
                     lm.getQueues().add(secondaryQueue);
                 lm.setResumable(DownloadUtils.canResume(connection));

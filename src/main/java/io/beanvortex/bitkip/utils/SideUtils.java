@@ -1,18 +1,12 @@
 package io.beanvortex.bitkip.utils;
 
-import io.beanvortex.bitkip.models.DownloadModel;
-import io.beanvortex.bitkip.models.DownloadStatus;
-import io.beanvortex.bitkip.models.QueueModel;
-import io.beanvortex.bitkip.models.StartedQueue;
+import io.beanvortex.bitkip.models.*;
 import io.beanvortex.bitkip.repo.DownloadsRepo;
 import io.beanvortex.bitkip.repo.QueuesRepo;
 import javafx.event.EventHandler;
 import javafx.geometry.Side;
 import javafx.scene.control.*;
-import javafx.scene.input.KeyCode;
-import javafx.scene.input.KeyCodeCombination;
-import javafx.scene.input.MouseButton;
-import javafx.scene.input.MouseEvent;
+import javafx.scene.input.*;
 import javafx.scene.paint.Paint;
 import org.kordamp.ikonli.javafx.FontIcon;
 
@@ -21,17 +15,21 @@ import java.util.List;
 import java.util.function.Predicate;
 
 import static io.beanvortex.bitkip.config.AppConfigs.*;
+import static io.beanvortex.bitkip.models.QueueModel.createFastQueue;
 import static io.beanvortex.bitkip.utils.Defaults.*;
 import static io.beanvortex.bitkip.utils.Defaults.OTHERS_QUEUE;
-import static io.beanvortex.bitkip.utils.ShortcutUtils.DELETE_KEY;
-import static io.beanvortex.bitkip.utils.ShortcutUtils.NEW_QUEUE_KEY;
+import static io.beanvortex.bitkip.utils.FxUtils.newQueueStage;
+import static io.beanvortex.bitkip.utils.MenuUtils.moveDownloadsToQueue;
+import static io.beanvortex.bitkip.utils.QueueUtils.startFastQueue;
+import static io.beanvortex.bitkip.utils.ShortcutUtils.*;
 
 public class SideUtils {
 
 
-    public static void prepareSideTree(TreeView<String> sideTree, List<QueueModel> queues) {
+    public static void prepareSideTree(TreeView<String> sideTree, List<QueueModel> queues, TextField searchField) {
 
         var finishedIcon = createIcon("fas-check-square", "#81C784");
+        var downloadingIcon = createIcon("fas-download", "#FAA381");
         var unFinishedIcon = createIcon("fas-pause-circle", "#FB8C00");
 
         var allItem = new TreeItem<>("All");
@@ -44,6 +42,8 @@ public class SideUtils {
         var finishedItem = new TreeItem<>("Finished");
         finishedItem.setGraphic(finishedIcon);
         finishedItem.getChildren().addAll(createCategoryItemsForTree());
+        var downloadingItem = new TreeItem<>("Downloading");
+        downloadingItem.setGraphic(downloadingIcon);
         var unfinishedItem = new TreeItem<>("Unfinished");
         unfinishedItem.setGraphic(unFinishedIcon);
         unfinishedItem.getChildren().addAll(createCategoryItemsForTree());
@@ -55,12 +55,12 @@ public class SideUtils {
                 .filter(q -> !staticQueueNames.contains(q.getName()))
                 .map(SideUtils::changeScheduledQueueIcon).toList();
         queuesItem.getChildren().addAll(treeQueueItems);
-
-        allItem.getChildren().addAll(List.of(categoryItem, finishedItem, unfinishedItem, queuesItem));
+        enableDragAndDrop(sideTree);
+        allItem.getChildren().addAll(List.of(categoryItem, finishedItem, downloadingItem, unfinishedItem, queuesItem));
         sideTree.setRoot(allItem);
         sideTree.setShowRoot(true);
         sideTree.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
-        sideTree.setOnMouseClicked(SideUtils.onSideClicked(sideTree));
+        sideTree.setOnMouseClicked(SideUtils.onSideClicked(sideTree, searchField));
         sideTree.setOnKeyPressed(e -> {
             var selectedItem = sideTree.getSelectionModel().getSelectedItem();
             if (selectedItem != null) {
@@ -73,15 +73,97 @@ public class SideUtils {
 
     }
 
+    private static void enableDragAndDrop(TreeView<String> treeView) {
+        // Set cell factory to handle drag events
+        treeView.setCellFactory(tv -> {
+            var cell = new TreeCell<String>() {
+                @Override
+                protected void updateItem(String item, boolean empty) {
+                    super.updateItem(item, empty);
+                    if (empty || item == null) {
+                        setText(null);
+                        setGraphic(null);
+                    } else {
+                        setText(item);
+                        setGraphic(getTreeItem().getGraphic());
+                    }
+                }
+            };
+            cell.updateSelected(cell.getText() != null && cell.getText().equals(currentSelectedQueue));
 
-    private static EventHandler<? super MouseEvent> onSideClicked(TreeView<String> sideTree) {
+            cell.setOnDragOver(event -> {
+                if (event.getGestureSource() != cell &&
+                        event.getDragboard().hasString()) {
+
+                    TreeItem<String> targetItem = cell.getTreeItem();
+                    if (allSideTreeStaticNames.contains(targetItem.getValue()))
+                        return;
+                    event.acceptTransferModes(TransferMode.MOVE);
+                }
+                event.consume();
+            });
+
+            cell.setOnDragEntered(event -> {
+                if (event.getGestureSource() != cell &&
+                        event.getDragboard().hasString()) {
+
+                    TreeItem<String> targetItem = cell.getTreeItem();
+                    if (allSideTreeStaticNames.contains(targetItem.getValue()))
+                        return;
+
+                    if (theme.equals("dark"))
+                        cell.setStyle("-fx-background-color: #526D82; -fx-border-color: #3399ff;");
+                    else
+                        cell.setStyle("-fx-background-color: #C4DFDF; -fx-border-color: #3399ff;");
+                }
+                event.consume();
+            });
+
+            cell.setOnDragExited(event -> {
+                cell.setStyle("");
+                event.consume();
+            });
+
+            cell.setOnDragDropped(event -> {
+                Dragboard db = event.getDragboard();
+                boolean success = false;
+
+                if (db.hasString()) {
+                    TreeItem<String> targetItem = cell.getTreeItem();
+                    String string = db.getString();
+                    var dms = DownloadsRepo.findAllById(string, true);
+                    QueueModel queue;
+                    if (targetItem.getValue().equals("Queues"))
+                        queue = createFastQueue(dms);
+                    else
+                        queue = QueuesRepo.findByName(targetItem.getValue(), false);
+
+                    moveDownloadsToQueue(dms, queue);
+                    if (targetItem.getValue().equals("Queues") && startFastQueue)
+                        startFastQueue(queue);
+                    success = true;
+                }
+
+                event.setDropCompleted(success);
+                event.consume();
+            });
+
+            return cell;
+        });
+    }
+
+
+    private static EventHandler<? super MouseEvent> onSideClicked(TreeView<String> sideTree, TextField searchField) {
         return event -> {
             TreeItem<String> selectedItem = sideTree.getSelectionModel().getSelectedItem();
             if (selectedItem == null)
                 return;
             var itemName = selectedItem.getValue();
+            currentSelectedQueue = itemName;
             sideTree.setContextMenu(null);
+            searchField.setText("");
             if (itemName.equals("All")) return;
+            var addDateSort = allSideTreeStaticNames.contains(itemName);
             if (event.getButton().equals(MouseButton.PRIMARY)) {
                 // updates status of current downloading before changing queue
                 if (itemName.equals("Queues")) return;
@@ -93,6 +175,10 @@ public class SideUtils {
                     case "Finished" -> {
                         condition = dm -> dm.getProgress() == 100;
                         queueToFetch = ALL_DOWNLOADS_QUEUE;
+                    }
+                    case "Downloading" -> {
+                        mainTableUtils.setDownloads(currentDownloadings, addDateSort);
+                        return;
                     }
                     case "Unfinished" -> {
                         condition = dm -> dm.getProgress() != 100;
@@ -108,8 +194,6 @@ public class SideUtils {
                     }
                 }
                 var downloadsData = fetchDownloadsOfQueue(queueToFetch, condition);
-                var addDateSort = staticQueueNames.contains(itemName) || itemName.equals("Categories")
-                        || itemName.equals("Finished") || itemName.equals("Unfinished");
                 mainTableUtils.setDownloads(downloadsData, addDateSort);
             } else if (event.getButton().equals(MouseButton.SECONDARY)) {
                 if (itemName.equals("Finished") || itemName.equals("Unfinished") || itemName.equals("Categories"))
@@ -117,14 +201,17 @@ public class SideUtils {
                 ContextMenu cMenu;
                 if (itemName.equals("Queues"))
                     cMenu = createNewQueueMenu();
-                else
-                    cMenu = createTreeMenu(itemName);
+                else {
+                    if (itemName.equals("Downloading")) {
+                        cMenu = createDownloadingMenu();
+                    } else
+                        cMenu = createTreeMenu(itemName);
+                }
                 sideTree.setContextMenu(cMenu);
                 cMenu.show(selectedItem.getGraphic(), Side.BOTTOM, 0, 0);
             }
             if (event.getButton().equals(MouseButton.PRIMARY) && event.getClickCount() == 2) {
-                if (itemName.equals("Finished") || itemName.equals("Unfinished")
-                        || itemName.equals("Categories") || itemName.equals("Queues"))
+                if (allSideTreeStaticNames.contains(itemName))
                     return;
                 var qm = QueuesRepo.findByName(selectedItem.getValue(), false);
                 FxUtils.newSettingsStage(true, qm);
@@ -134,13 +221,25 @@ public class SideUtils {
 
     private static ContextMenu createNewQueueMenu() {
         var cMenu = new ContextMenu();
-        var newQueueLbl = new Label("New queue");
+        var newQueueLbl = new Label("New Queue");
         newQueueLbl.setPrefWidth(150);
         var menuItem = new MenuItem();
         menuItem.setGraphic(newQueueLbl);
         menuItem.setAccelerator(NEW_QUEUE_KEY);
         cMenu.getItems().add(menuItem);
-        menuItem.setOnAction(e -> FxUtils.newQueueStage());
+        menuItem.setOnAction(e -> newQueueStage());
+        return cMenu;
+    }
+
+    private static ContextMenu createDownloadingMenu() {
+        var cMenu = new ContextMenu();
+        var newQueueLbl = new Label("Pause All");
+        newQueueLbl.setPrefWidth(150);
+        var menuItem = new MenuItem();
+        menuItem.setGraphic(newQueueLbl);
+        menuItem.setAccelerator(PAUSE_ALL_KEY);
+        cMenu.getItems().add(menuItem);
+        menuItem.setOnAction(e -> DownloadOpUtils.pauseAllDownloads());
         return cMenu;
     }
 
@@ -149,16 +248,17 @@ public class SideUtils {
         var startQueueLbl = new Label("Start queue");
         var stopQueueLbl = new Label("Stop queue");
         var queueSettingLbl = new Label("Settings");
+        var openFolderLbl = new Label("Open folder");
         var exportLbl = new Label("Export this queue");
         var deleteLbl = new Label("Delete");
 
         List<Label> lbls;
         List<KeyCodeCombination> keys = null;
         if (Defaults.staticQueueNames.stream().anyMatch(itemName::equals))
-            lbls = List.of(startQueueLbl, stopQueueLbl, queueSettingLbl, exportLbl);
+            lbls = List.of(startQueueLbl, stopQueueLbl, queueSettingLbl, openFolderLbl, exportLbl);
         else {
-            lbls = List.of(startQueueLbl, stopQueueLbl, queueSettingLbl, exportLbl, deleteLbl);
-            keys = Arrays.asList(null, null, null, null, DELETE_KEY);
+            lbls = List.of(startQueueLbl, stopQueueLbl, queueSettingLbl, openFolderLbl, exportLbl, deleteLbl);
+            keys = Arrays.asList(null, null, null, OPEN_FOLDER_KEY, null, DELETE_KEY);
         }
         var menuItems = MenuUtils.createMapMenuItems(lbls, keys);
         cMenu.getItems().addAll(menuItems.values());
@@ -167,13 +267,22 @@ public class SideUtils {
 
         menuItems.get(startQueueLbl).setDisable(startedQueues.contains(startedQueue));
         menuItems.get(stopQueueLbl).setDisable(!startedQueues.contains(startedQueue));
+        menuItems.get(openFolderLbl).setDisable(qm.getName().equals(ALL_DOWNLOADS_QUEUE) || !qm.hasFolder());
         menuItems.get(startQueueLbl).setOnAction(e -> QueueUtils.startQueue(startedQueue, true));
         menuItems.get(stopQueueLbl).setOnAction(e -> QueueUtils.stopQueue(startedQueue));
         menuItems.get(queueSettingLbl).setOnAction(e -> FxUtils.newSettingsStage(true, qm));
+        menuItems.get(openFolderLbl).setOnAction(e -> openQueueFolder(qm));
         menuItems.get(exportLbl).setOnAction(e -> DownloadOpUtils.exportLinks(qm.getName()));
         if (menuItems.containsKey(deleteLbl))
             menuItems.get(deleteLbl).setOnAction(e -> QueueUtils.deleteQueue(itemName));
         return cMenu;
+    }
+
+    private static void openQueueFolder(QueueModel qm) {
+        if (staticQueueNames.contains(qm.getName()))
+            DownloadOpUtils.openContainingFolder(downloadPath + (qm.getName().equals(DOCS_QUEUE) ? "Documents" : qm.getName()));
+        else
+            DownloadOpUtils.openContainingFolder(queuesPath + qm.getName());
     }
 
     private static List<DownloadModel> fetchDownloadsOfQueue(String queueName, Predicate<? super DownloadModel> condition) {

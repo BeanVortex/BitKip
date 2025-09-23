@@ -17,7 +17,7 @@ import java.util.*;
 
 public class AppConfigs {
 
-    public static final String VERSION = "1.5.2";
+    public static final String VERSION = "1.6.0";
 
     public static final String dataPath = System.getProperty("user.home")
             + File.separator + "Documents"
@@ -60,8 +60,14 @@ public class AppConfigs {
     public static final boolean defaultAddSameDownload = true;
     public static boolean addSameDownload  = defaultAddSameDownload;
     public static final boolean defaultLessCpuIntensive = false;
-    public static boolean lessCpuIntensive = defaultLessCpuIntensive;
     public static String lastSavedDir = null;
+    public static boolean lessCpuIntensive = defaultLessCpuIntensive;
+    public static final boolean defaultShowErrorNotifications = true;
+    public static boolean showErrorNotifications = defaultShowErrorNotifications;
+    public static final boolean defaultStartFastQueue = true;
+    public static boolean startFastQueue = defaultStartFastQueue;
+    public static final boolean defaultTrustAllServers = false;
+    public static boolean trustAllServers = defaultTrustAllServers;
 
 
 
@@ -110,5 +116,7 @@ public class AppConfigs {
     public static QueueModel selectedQueue;
     public static String userPassword;
     public static HostServices hostServices;
+
+    public static String currentSelectedQueue = "All Downloads";
 
 }

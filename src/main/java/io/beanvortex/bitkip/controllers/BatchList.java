@@ -184,7 +184,7 @@ public class BatchList implements QueueObserver {
     }
 
     private void initQueueCombo() {
-        var queues = links.get(0).getQueues();
+        var queues = links.getFirst().getQueues();
         // get selected queue if not selected any queue in batch download, get All downloads queue
         var selectedQueue = queues.size() == 3 ? queues.get(2) : queues.get(0);
         var queuesToShow = new ArrayList<>(getQueues().stream()

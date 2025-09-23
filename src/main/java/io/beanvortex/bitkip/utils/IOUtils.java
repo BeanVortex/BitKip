@@ -89,8 +89,8 @@ public class IOUtils {
         for (int i = 0; i < chunks; i++)
             currentFileSize += Files.size(filePaths.get(i));
 
-        var neededFileSize = currentFileSize + Files.size(filePaths.get(filePaths.size() - 1));
-        checkAvailableSpace(filePaths.get(0), neededFileSize);
+        var neededFileSize = currentFileSize + Files.size(filePaths.getLast());
+        checkAvailableSpace(filePaths.getFirst(), neededFileSize);
 
         if (dm.getDownloaded() == 0)
             dm.setDownloaded(currentFileSize);
@@ -119,42 +119,51 @@ public class IOUtils {
             dm.setDownloadStatus(DownloadStatus.Merging);
             mainTableUtils.refreshTable();
 
-            var firstFile = filePaths.get(0).toFile();
-            var bufferSize = currentFileSize > 524_288_000 ?
-                    (
-                            currentFileSize > 1_048_576_000 ? 2097152 : 1048576
-                    )
-                    : 8192;
+            var firstFile = filePaths.getFirst().toFile();
+            int bufferSize;
+            if (currentFileSize < 100 * 1024 * 1024)          // <100 MB
+                bufferSize = 64 * 1024;             // 64 KB
+            else if (currentFileSize < 1024 * 1024 * 1024)  // <1 GB
+                bufferSize = 512 * 1024;            // 512 KB
+            else
+                bufferSize = 2 * 1024 * 1024;       // 2 MB
+
+            long lastUpdateTime = System.currentTimeMillis();
             var buffer = ByteBuffer.allocateDirect(bufferSize);
-            for (int i = 1; i < chunks; i++) {
-                var nextFile = filePaths.get(i).toFile();
-                try (
-                        var in = new FileInputStream(nextFile);
-                        var out = new FileOutputStream(firstFile, firstFile.exists());
-                        var inputChannel = in.getChannel();
-                        var outputChannel = out.getChannel()
-                ) {
-                    while (inputChannel.read(buffer) != -1) {
-                        buffer.flip();
-                        var bytes = outputChannel.write(buffer);
-                        if (details.isPresent()) {
-                            var finalCurrentFileSize = currentFileSize;
-                            var position = outputChannel.position();
-                            Platform.runLater(() -> {
-                                progressBar.setProgress((double) position / finalCurrentFileSize);
-                                speedLbl.setText(formatBytes(bytes));
-                                var downloadOf = "%s / %s"
-                                        .formatted(formatBytes(position), formatBytes(finalCurrentFileSize));
-                                downloadedLbl.setText(downloadOf);
-                            });
+            try (var out = new FileOutputStream(firstFile, firstFile.exists());
+                 var outputChannel = out.getChannel()) {
+                for (int i = 1; i < chunks; i++) {
+                    var nextFile = filePaths.get(i).toFile();
+                    try (
+                            var in = new FileInputStream(nextFile);
+                            var inputChannel = in.getChannel()
+                    ) {
+                        while (inputChannel.read(buffer) != -1) {
+                            buffer.flip();
+                            var bytes = outputChannel.write(buffer);
+                            if (details.isPresent()) {
+                                long now = System.currentTimeMillis();
+                                var finalCurrentFileSize = currentFileSize;
+                                var position = outputChannel.position();
+                                if (now - lastUpdateTime >= 3000 || position == finalCurrentFileSize) { // update every 3 seconds
+                                    lastUpdateTime = now;
+                                    Platform.runLater(() -> {
+                                        progressBar.setProgress((double) position / finalCurrentFileSize);
+                                        speedLbl.setText(formatBytes(bytes));
+                                        var downloadOf = "%s / %s"
+                                                .formatted(formatBytes(position), formatBytes(finalCurrentFileSize));
+                                        downloadedLbl.setText(downloadOf);
+                                    });
+                                }
+                            }
+                            buffer.clear();
                         }
-                        buffer.clear();
                     }
+                    if (nextFile.exists())
+                        nextFile.delete();
                 }
-                if (nextFile.exists())
-                    nextFile.delete();
             }
-            var pathToMove = filePaths.get(0).getParent().getParent() + File.separator + dm.getName();
+            var pathToMove = filePaths.getFirst().getParent().getParent() + File.separator + dm.getName();
             return firstFile.renameTo(new File(pathToMove));
         }
         return false;
@@ -175,7 +184,7 @@ public class IOUtils {
                 Files.deleteIfExists(Path.of(dm.getFilePath()));
             }
         } catch (IOException e) {
-            log.error(e.getLocalizedMessage());
+            throw new RuntimeException(e);
         }
     }
 
@@ -194,7 +203,7 @@ public class IOUtils {
             if (file.exists())
                 Files.move(Paths.get(oldFilePath), Paths.get(newFilePath), StandardCopyOption.REPLACE_EXISTING);
         } catch (IOException e) {
-            log.error(e.getLocalizedMessage());
+            throw new RuntimeException(e);
         }
     }
 
@@ -216,7 +225,7 @@ public class IOUtils {
     }
 
     public static void moveFilesAndDeleteQueueFolder(String queueName) {
-        var downloadsByQueueName = DownloadsRepo.getDownloadsByQueueName(queueName);
+        var downloadsByQueueName = DownloadsRepo.getDownloadsByQueueName(queueName, true);
         downloadsByQueueName.stream()
                 .filter(dm -> dm.getFilePath().contains(downloadPath))
                 .peek(dm -> {
@@ -258,7 +267,7 @@ public class IOUtils {
         if (queue.hasFolder()) {
             var res = createFolderInSaveLocation("Queues" + File.separator + queue.getName());
             if (res) {
-                var downloadsByQueueName = DownloadsRepo.getDownloadsByQueueName(queue.getName());
+                var downloadsByQueueName = DownloadsRepo.getDownloadsByQueueName(queue.getName(), true);
                 var newFilePath = queuesPath + queue.getName() + File.separator;
                 if (FxUtils.askToMoveFilesForQueues(downloadsByQueueName, queue, newFilePath))
                     downloadsByQueueName.forEach(dm -> moveDownloadFiles(dm, newFilePath + dm.getName()));
@@ -280,6 +289,9 @@ public class IOUtils {
                     .append("port=").append(String.valueOf(serverPort)).append("\n")
                     .append("trigger_turn_off_on_empty_queue=").append(String.valueOf(triggerTurnOffOnEmptyQueue)).append("\n")
                     .append("show_complete_dialog=").append(String.valueOf(showCompleteDialog)).append("\n")
+                    .append("show_error_notifications=").append(String.valueOf(showErrorNotifications)).append("\n")
+                    .append("start_fast_queue=").append(String.valueOf(startFastQueue)).append("\n")
+                    .append("trust_all_servers=").append(String.valueOf(trustAllServers)).append("\n")
                     .append("continue_on_connection_lost=").append(String.valueOf(continueOnLostConnectionLost)).append("\n")
                     .append("retry_count=").append(String.valueOf(downloadRetryCount)).append("\n")
                     .append("rate_limit_count=").append(String.valueOf(downloadRateLimitCount)).append("\n")
@@ -297,7 +309,7 @@ public class IOUtils {
             log.info("Saved config");
 
         } catch (IOException e) {
-            log.error(e.getLocalizedMessage());
+            throw new RuntimeException(e);
         }
     }
 
@@ -318,6 +330,9 @@ public class IOUtils {
                         case "port" -> serverPort = Integer.parseInt(value);
                         case "trigger_turn_off_on_empty_queue" -> triggerTurnOffOnEmptyQueue = value.equals("true");
                         case "show_complete_dialog" -> showCompleteDialog = value.equals("true");
+                        case "show_error_notifications" -> showErrorNotifications = value.equals("true");
+                        case "start_fast_queue" -> startFastQueue = value.equals("true");
+                        case "trust_all_servers" -> trustAllServers = value.equals("true");
                         case "continue_on_connection_lost" -> continueOnLostConnectionLost = value.equals("true");
                         case "retry_count" -> downloadRetryCount = Integer.parseInt(value);
                         case "rate_limit_count" -> downloadRateLimitCount = Integer.parseInt(value);
@@ -326,7 +341,8 @@ public class IOUtils {
                         case "immediate_download" -> downloadImmediately = value.equals("true");
                         case "add_same_download" -> addSameDownload = value.equals("true");
                         case "less_cpu_intensive" -> lessCpuIntensive = value.equals("true");
-                        case "last_saved_dir" -> lastSavedDir = value;
+                        case "last_saved_dir" ->
+                                lastSavedDir = Files.exists(Paths.get(value)) ? value : System.getProperty("user.home");
                         case "user_agent" -> userAgent = value;
                         case "user_agent_enabled" -> userAgentEnabled = value.equals("true");
                     }
@@ -334,7 +350,7 @@ public class IOUtils {
                 log.info("Read config");
             }
         } catch (IOException e) {
-            log.error(e.getLocalizedMessage());
+            throw new RuntimeException(e);
         }
     }
 
@@ -419,7 +435,7 @@ public class IOUtils {
 
             var chunks = Validations.maxChunks(Long.MAX_VALUE);
             var allDownloadsQueue = QueuesRepo.findByName(ALL_DOWNLOADS_QUEUE, false);
-            var firstUrl = lines.get(0);
+            var firstUrl = lines.getFirst();
             var connection = DownloadUtils.connect(firstUrl, null);
             var firstFileName = DownloadUtils.extractFileName(firstUrl, connection);
             var secondaryQueue = BatchDownload.getSecondaryQueueByFileName(firstFileName);
@@ -437,9 +453,8 @@ public class IOUtils {
                     .filter(Objects::nonNull)
                     .toList();
         } catch (IOException e) {
-            log.error(e.getLocalizedMessage());
+            throw new RuntimeException(e);
         }
-        return null;
     }
 
 
@@ -490,7 +505,7 @@ public class IOUtils {
             writer.close();
             log.info("Saved patch note");
         } catch (IOException e) {
-            log.error(e.getMessage());
+            throw new RuntimeException(e);
         }
     }
 
@@ -517,8 +532,7 @@ public class IOUtils {
             log.info("Read patch note");
             return str.toString();
         } catch (IOException e) {
-            log.error(e.getMessage());
+            throw new RuntimeException(e);
         }
-        return "No recent patch notes";
     }
 }

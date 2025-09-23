@@ -41,7 +41,7 @@ public class MainController implements FXMLController, QueueObserver {
     @FXML
     private TreeView<String> sideTree;
     @FXML
-    private Button newDownloadBtn, menuFile, operationMenu, moreBtn;
+    private Button newDownloadBtn, menuFile, operationMenu, moreBtn, clearSearchBtn;
     @FXML
     private TableView<DownloadModel> contentTable;
     @FXML
@@ -76,6 +76,7 @@ public class MainController implements FXMLController, QueueObserver {
         });
         stage.heightProperty().addListener((ob, o, n) ->
                 sideTree.setPrefHeight(n.doubleValue() - toolbar.getPrefHeight()));
+        hideClearSearchBtn(true);
 
 
         newDownloadBtnInits();
@@ -88,6 +89,7 @@ public class MainController implements FXMLController, QueueObserver {
         MenuUtils.initOperationMenu(operationMenu);
         MenuUtils.initMoreMenu(moreBtn, contentTable);
         searchField.textProperty().addListener((o, ol, n) -> {
+            hideClearSearchBtn(n.isEmpty());
             if (n.length() < 3) {
                 mainTableUtils.setDownloads(normalizeDownloadsList(selectedQueue.getDownloads()), true);
                 return;
@@ -100,6 +102,7 @@ public class MainController implements FXMLController, QueueObserver {
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         newDownloadBtn.setGraphic(new FontIcon());
+        clearSearchBtn.setGraphic(new FontIcon());
         StackPane.setAlignment(newDownloadBtn, Pos.BOTTOM_RIGHT);
     }
 
@@ -111,7 +114,7 @@ public class MainController implements FXMLController, QueueObserver {
             queues = QueuesRepo.getAllQueues(false, true);
 
         sideTree.focusedProperty().addListener(o -> mainTableUtils.clearSelection());
-        SideUtils.prepareSideTree(sideTree, queues);
+        SideUtils.prepareSideTree(sideTree, queues, searchField);
 
     }
 
@@ -157,6 +160,18 @@ public class MainController implements FXMLController, QueueObserver {
         });
     }
 
+    @FXML
+    private void onClearSearchBtn() {
+        searchField.setText("");
+        hideClearSearchBtn(true);
+    }
+
+    private void hideClearSearchBtn(boolean hide) {
+        clearSearchBtn.setVisible(!hide);
+        clearSearchBtn.setManaged(!hide);
+        clearSearchBtn.setDisable(hide);
+    }
+
 
     @FXML
     private void onNewDownload() {
@@ -173,7 +188,7 @@ public class MainController implements FXMLController, QueueObserver {
             initSides();
         else
             // when add happens
-            SideUtils.prepareSideTree(sideTree, queues);
+            SideUtils.prepareSideTree(sideTree, queues, searchField);
         MenuUtils.initOperationMenu(operationMenu);
     }
 
