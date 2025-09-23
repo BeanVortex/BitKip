@@ -28,6 +28,7 @@ module io.beanvortex.bitkip {
     requires io.helidon.media.jackson;
     requires java.prefs;
     requires com.zaxxer.hikari;
+    requires context.propagation;
 
     opens io.beanvortex.bitkip to javafx.fxml, javafx.controls;
     opens io.beanvortex.bitkip.controllers to javafx.fxml, javafx.base;
