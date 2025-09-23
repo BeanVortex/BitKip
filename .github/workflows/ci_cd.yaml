@@ -20,7 +20,7 @@ jobs:
           gpg-private-key: ${{ secrets.GPG_KEY }}
           gpg-passphrase: PASSPHRASE
       - name: Create nsis installer
-        uses: joncloud/makensis-action@publish
+        uses: joncloud/makensis-action@v5.0
         with:
           additional-plugin-paths: ${{ github.workspace }}/NSIS_Plugins/Plugins
       - name: Print NSIS version
