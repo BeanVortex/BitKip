@@ -1,6 +1,7 @@
 package io.beanvortex.bitkip;
 
 import io.beanvortex.bitkip.api.BatchService;
+import io.beanvortex.bitkip.api.NewInstanceService;
 import io.beanvortex.bitkip.api.SingleService;
 import io.beanvortex.bitkip.api.SyncService;
 import io.beanvortex.bitkip.exceptions.GlobalExceptionHandler;
@@ -41,9 +42,10 @@ import static io.beanvortex.bitkip.controllers.SettingsController.*;
 public class BitKip extends Application {
 
     private static WebServer server;
-
+    private static Stage stage;
     @Override
     public void start(Stage stage) {
+        BitKip.stage = stage;
         IOUtils.readConfig();
         AppConfigs.initPaths();
         IOUtils.createSaveLocations();
@@ -75,15 +77,19 @@ public class BitKip extends Application {
                             public X509Certificate[] getAcceptedIssuers() {
                                 return new X509Certificate[0];
                             }
-                            public void checkClientTrusted(X509Certificate[] certs, String authType) {}
-                            public void checkServerTrusted(X509Certificate[] certs, String authType) {}
+
+                            public void checkClientTrusted(X509Certificate[] certs, String authType) {
+                            }
+
+                            public void checkServerTrusted(X509Certificate[] certs, String authType) {
+                            }
                         }
                 };
                 SSLContext sc = SSLContext.getInstance("TLS");
                 sc.init(null, trustAllCerts, new SecureRandom());
                 HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
 
-                HttpsURLConnection.setDefaultHostnameVerifier((hostname, session) -> true);
+                HttpsURLConnection.setDefaultHostnameVerifier((_, _) -> true);
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
@@ -110,13 +116,16 @@ public class BitKip extends Application {
             var popup = new PopupMenu();
             var openItem = new MenuItem("Open App");
             var exitItem = new MenuItem("Exit App");
-            ActionListener openListener = e -> Platform.runLater(() -> {
+            ActionListener openListener = _ -> Platform.runLater(() -> {
                 if (stage.isShowing())
                     stage.toFront();
                 else stage.show();
             });
+            if (hideOnStart)
+                stage.close();
+
             openItem.addActionListener(openListener);
-            exitItem.addActionListener(e -> stop());
+            exitItem.addActionListener(_ -> stop());
             popup.add(openItem);
             popup.add(exitItem);
             var trayIcon = new TrayIcon(image, "BitKip", popup);
@@ -136,7 +145,8 @@ public class BitKip extends Application {
     @Override
     public void stop() {
         var notObservedDms = new ArrayList<>(currentDownloadings);
-        notObservedDms.forEach(dm -> dm.getDownloadTask().pause(()->{}));
+        notObservedDms.forEach(dm -> dm.getDownloadTask().pause(() -> {
+        }));
         startedQueues.clear();
         currentSchedules.values().forEach(sm -> {
             var startScheduler = sm.getStartScheduler();
@@ -174,6 +184,7 @@ public class BitKip extends Application {
                     .register("/single", cors, new SingleService())
                     .register("/batch", cors, new BatchService())
                     .register("/sync", cors, new SyncService())
+                    .register("/new_instance", cors, new NewInstanceService())
                     .build();
             var jacksonSupport = JacksonSupport.create();
             server = WebServer.builder()
@@ -182,7 +193,12 @@ public class BitKip extends Application {
                     .addRouting(routing)
                     .addMediaSupport(jacksonSupport)
                     .build();
+
             server.start().exceptionally(throwable -> {
+                if (InstanceManager.notifyCurrentInstance()){
+                    Platform.exit();
+                    return null;
+                }
                 var header = "Failed to start server. Is there another instance running?\nIf not you may need to change application server port and restart";
                 log.error(header);
                 Platform.runLater(() -> {
@@ -197,5 +213,9 @@ public class BitKip extends Application {
 
     public static URL getResource(String path) {
         return BitKip.class.getResource(path);
+    }
+
+    public static void show(){
+        stage.show();
     }
 }

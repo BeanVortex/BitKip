@@ -8,7 +8,7 @@ plugins {
 }
 
 group 'io.beanvortex'
-version '1.6.0'
+version '1.6.1'
 //sourceCompatibility = '25'
 //targetCompatibility = '25'
 //mainClassName = 'io.beanvortex.bitkip.BitKip'
@@ -52,6 +52,7 @@ dependencies {
     implementation 'org.kordamp.ikonli:ikonli-fontawesome5-pack:12.4.0'
     implementation 'org.kordamp.bootstrapfx:bootstrapfx-core:0.4.0'
     implementation 'io.projectreactor:reactor-core:3.7.9'
+    implementation 'io.micrometer:context-propagation:1.1.1'
     implementation 'net.java.dev.jna:jna:5.17.0'
     implementation 'net.java.dev.jna:jna-platform:5.17.0'
     implementation 'org.apache.commons:commons-lang3:3.18.0'

@@ -17,7 +17,7 @@ import java.util.*;
 
 public class AppConfigs {
 
-    public static final String VERSION = "1.6.0";
+    public static final String VERSION = "1.6.1";
 
     public static final String dataPath = System.getProperty("user.home")
             + File.separator + "Documents"
@@ -68,6 +68,8 @@ public class AppConfigs {
     public static boolean startFastQueue = defaultStartFastQueue;
     public static final boolean defaultTrustAllServers = false;
     public static boolean trustAllServers = defaultTrustAllServers;
+    public static final boolean defaultHideOnStart = false;
+    public static boolean hideOnStart = defaultHideOnStart;
 
 
 

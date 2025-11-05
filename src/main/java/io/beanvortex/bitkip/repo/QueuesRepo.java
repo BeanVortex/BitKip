@@ -9,8 +9,10 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.stream.Collectors;
 
 import static io.beanvortex.bitkip.repo.DatabaseHelper.*;
+import static io.beanvortex.bitkip.utils.Defaults.ALL_DOWNLOADS_QUEUE;
 import static io.beanvortex.bitkip.utils.Defaults.staticQueueNames;
 
 public class QueuesRepo {
@@ -29,6 +31,13 @@ public class QueuesRepo {
     public static void createTable() {
         createQueuesTable();
         createQueueDownloadTable();
+        var updateDefaultQueues = """
+                UPDATE queues SET has_folder = 1 WHERE name IN ("%s")
+                """.formatted(
+                staticQueueNames.stream().filter(n -> !n.equals(ALL_DOWNLOADS_QUEUE))
+                        .collect(Collectors.joining("\",\""))
+        );
+        runSQL(updateDefaultQueues, true);
     }
 
     public static List<QueueModel> createDefaultRecords() {
@@ -36,6 +45,8 @@ public class QueuesRepo {
             var queue = new QueueModel(name, false);
             if (name.equals("All Downloads"))
                 queue.setCanAddDownload(true);
+            else
+                queue.setHasFolder(true);
             var schedule = new ScheduleModel();
             ScheduleRepo.insertSchedule(schedule, -1);
             queue.setSchedule(schedule);
