@@ -75,15 +75,19 @@ public class BitKip extends Application {
                             public X509Certificate[] getAcceptedIssuers() {
                                 return new X509Certificate[0];
                             }
-                            public void checkClientTrusted(X509Certificate[] certs, String authType) {}
-                            public void checkServerTrusted(X509Certificate[] certs, String authType) {}
+
+                            public void checkClientTrusted(X509Certificate[] certs, String authType) {
+                            }
+
+                            public void checkServerTrusted(X509Certificate[] certs, String authType) {
+                            }
                         }
                 };
                 SSLContext sc = SSLContext.getInstance("TLS");
                 sc.init(null, trustAllCerts, new SecureRandom());
                 HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
 
-                HttpsURLConnection.setDefaultHostnameVerifier((hostname, session) -> true);
+                HttpsURLConnection.setDefaultHostnameVerifier((_, _) -> true);
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
@@ -110,13 +114,16 @@ public class BitKip extends Application {
             var popup = new PopupMenu();
             var openItem = new MenuItem("Open App");
             var exitItem = new MenuItem("Exit App");
-            ActionListener openListener = e -> Platform.runLater(() -> {
+            ActionListener openListener = _ -> Platform.runLater(() -> {
                 if (stage.isShowing())
                     stage.toFront();
                 else stage.show();
             });
+            if (hideOnStart)
+                stage.close();
+
             openItem.addActionListener(openListener);
-            exitItem.addActionListener(e -> stop());
+            exitItem.addActionListener(_ -> stop());
             popup.add(openItem);
             popup.add(exitItem);
             var trayIcon = new TrayIcon(image, "BitKip", popup);
@@ -136,7 +143,8 @@ public class BitKip extends Application {
     @Override
     public void stop() {
         var notObservedDms = new ArrayList<>(currentDownloadings);
-        notObservedDms.forEach(dm -> dm.getDownloadTask().pause(()->{}));
+        notObservedDms.forEach(dm -> dm.getDownloadTask().pause(() -> {
+        }));
         startedQueues.clear();
         currentSchedules.values().forEach(sm -> {
             var startScheduler = sm.getStartScheduler();

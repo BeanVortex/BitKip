@@ -68,6 +68,8 @@ public class AppConfigs {
     public static boolean startFastQueue = defaultStartFastQueue;
     public static final boolean defaultTrustAllServers = false;
     public static boolean trustAllServers = defaultTrustAllServers;
+    public static final boolean defaultHideOnStart = false;
+    public static boolean hideOnStart = defaultHideOnStart;
 
 
 

@@ -40,7 +40,7 @@ import java.util.concurrent.Executors;
 public class SettingsController implements FXMLController {
 
     @FXML
-    private CheckBox immediateCheck, startupCheck, triggerOffCheck, agentCheck, addDownCheck,
+    private CheckBox immediateCheck, startupCheck, hideStartCheck, triggerOffCheck, agentCheck, addDownCheck,
             continueCheck, completeDialogCheck, errorNotificationCheck, startFastQueueCheck, trustAllServersCheck, serverCheck, lessCpuCheck;
     @FXML
     private VBox root, actionArea, queueContainer;
@@ -62,13 +62,13 @@ public class SettingsController implements FXMLController {
         initQueues();
         stage.setTitle("Settings");
         stage.setResizable(true);
-        stage.setOnCloseRequest(e -> {
+        stage.setOnCloseRequest(_ -> {
             ThemeSubject.getThemeSubject().removeObserver(this);
             QueueSubject.getQueueSubject().removeObserver(queueController);
         });
         var defaultWidth = stage.getMinWidth() + 50;
         var defaultHeight = stage.getMinHeight() + 50;
-        tabPane.getSelectionModel().selectedIndexProperty().addListener((ob, o, n) -> {
+        tabPane.getSelectionModel().selectedIndexProperty().addListener((_, _, n) -> {
             // if queue tab is selected
             if (n.intValue() == 2) {
                 root.getChildren().remove(actionArea);
@@ -104,6 +104,7 @@ public class SettingsController implements FXMLController {
         lblLocation.setText(AppConfigs.downloadPath);
         serverCheck.setSelected(AppConfigs.serverEnabled);
         startupCheck.setSelected(AppConfigs.startup);
+        hideStartCheck.setSelected(AppConfigs.hideOnStart);
         triggerOffCheck.setSelected(AppConfigs.triggerTurnOffOnEmptyQueue);
         immediateCheck.setSelected(AppConfigs.downloadImmediately);
         addDownCheck.setSelected(AppConfigs.addSameDownload);
@@ -312,6 +313,12 @@ public class SettingsController implements FXMLController {
     private void onStartupCheck() {
         AppConfigs.startup = startupCheck.isSelected();
         initStartup();
+    }
+
+    @FXML
+    private void onHideStartCheck() {
+        AppConfigs.hideOnStart = hideStartCheck.isSelected();
+        IOUtils.saveConfigs();
     }
 
     private void initStartup() {
