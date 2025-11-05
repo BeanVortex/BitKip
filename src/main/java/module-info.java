@@ -29,6 +29,7 @@ module io.beanvortex.bitkip {
     requires java.prefs;
     requires com.zaxxer.hikari;
     requires context.propagation;
+    requires java.net.http;
 
     opens io.beanvortex.bitkip to javafx.fxml, javafx.controls;
     opens io.beanvortex.bitkip.controllers to javafx.fxml, javafx.base;
